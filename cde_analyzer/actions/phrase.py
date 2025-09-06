@@ -89,7 +89,7 @@ def register_subparser(subparser: ArgumentParser):
 
 
 def run_action(args: Namespace):
-    verbosity = get_verbosity()
+    # verbosity = get_verbosity()
     raw = json.load(open(args.input))
     items = [CDEItem.model_validate(obj) for obj in raw]
 
@@ -101,7 +101,7 @@ def run_action(args: Namespace):
         min_words=args.min_words,
         remove_stopwords=args.remove_stopwords,
         min_ids=args.min_ids,
-        verbosity=verbosity,
+        # verbosity=verbosity,
         prune=args.prune,
         lemmatize=args.lemmatize,
         verbatim=args.verbatim,

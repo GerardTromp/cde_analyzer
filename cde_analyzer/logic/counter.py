@@ -8,6 +8,8 @@ from utils.datatype_check import check_number_type, is_string_shorter
 from utils.helpers import (
     safe_nested_increment,
 )
+from utils.analyzer_state import get_verbosity
+from utils.logger import log_if_verbose
 
 IntDict: TypeAlias = Dict[str, int]
 NestedDict: TypeAlias = Dict[str, Union[IntDict, "NestedDict"]]
@@ -30,8 +32,7 @@ def find_group_value(
 ) -> str:
     if group_type == "top":
         value = str(data.get(group_by, "<unknown>"))
-        if verbose:
-            print(f"[GROUP-BY] top-level '{group_by}' = {value}")
+        log_if_verbose(f"[GROUP-BY] top-level '{group_by}' = {value}", 2)
         return value
 
     found = "<unknown>"
@@ -43,9 +44,8 @@ def find_group_value(
         elif group_type == "terminal" and path.split(".")[-1] == group_by:
             found = str(value)
 
-    recursive_descent(data, path="", visitor=visitor)
-    if verbose:
-        print(f"[GROUP-BY] {group_type}-match '{group_by}' = {found}")
+    recursive_descent(data, path="", visitor=visitor)    
+    print(f"[GROUP-BY] {group_type}-match '{group_by}' = {found}", 3)
     return found
 
 
@@ -68,7 +68,6 @@ def count_matching_fields(
     logic_expr: Union[str, None] = None,
     group_by: Union[str, None] = None,
     group_type: str = "top",
-    verbose: bool = False,
     count_type: bool = False,
     char_limit: int = 10,
 ) -> NestedDict:
@@ -102,7 +101,7 @@ def count_matching_fields(
 
         recursive_descent(item.model_dump(), path="", visitor=visitor)
 
-        if verbose:
+        if get_verbosity() > 1:
             logger.debug(f"[DEBUG] flat keys: {flat}")
             logger.debug(f"[DEBUG] logic_expr: {logic_expr}")
 
@@ -113,7 +112,7 @@ def count_matching_fields(
                 else any(flat.values())
             )
         except Exception as e:
-            if verbose:
+            if get_verbosity() > 1:
                 logger.warning(f"[ERROR] Failed logic eval: {e}")
                 logger.debug(f"[DEBUG] flat keys available: {list(flat.keys())}")
             result = False
@@ -121,18 +120,18 @@ def count_matching_fields(
         if result:
             group_value = (
                 find_group_value(
-                    item.model_dump(), group_by, group_type, verbose=verbose
+                    item.model_dump(), group_by, group_type
                 )
                 if group_by
                 else "<global>"
             )
-            if verbose and count_type:
+            if get_verbosity() > 1 and count_type:
                 logger.debug(f"[DEBUG] Typed keys: {flat_types}")
             group_value = str(group_value)  # ensure it's a string key
             for key, count in flat.items():
                 if count_type:
                     val_type = flat_types.get(key, "unknown")
-                    if verbose:
+                    if get_verbosity() > 1:
                         logger.debug(
                             f"[DEBUG] Incrementing {key} -> {val_type} -> {group_value} by {count}"
                         )

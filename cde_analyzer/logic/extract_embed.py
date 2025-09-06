@@ -14,14 +14,9 @@ from utils.path_utils import (
 )
 from utils.designation_parser import extract_name_and_question_from_designations
 from utils.logger import log_if_verbose
-from utils.analyzer_state import get_verbosity, set_verbosity
-from utils.extract_embed import (
-    simplify_permissible_values,
-    normalize_extracted_value,
-    strip_json_list,
-    strip_embedded_nl,
-    sanitize,
-)
+# from utils.analyzer_state import get_verbosity, set_verbosity
+from utils.extract_embed import (normalize_extracted_value, sanitize, sanitize_dictlist,
+    simplify_permissible_values, strip_embedded_nl, strip_json_list)
 # from logic.lemma_fasta import encode_pfasta
 
 # from CDE_Schema.CDE_Item import CDEItem
@@ -56,7 +51,7 @@ def extract_path(
             if exclude:
                 if item.tinyId in tinyids:  # type: ignore
                     log_message = f"[extract_embed logic] Check tinyId: {item.tinyId}"  # type: ignore
-                    log_if_verbose(log_message, 2)
+                    log_if_verbose(log_message, 3)
                     continue
             row: Dict[str, str] = {"tinyId": item.tinyId}  # type: ignore
 
@@ -77,18 +72,19 @@ def extract_path(
                         ]
                     )  # type: ignore
                     # qn += 1
-                    if isinstance(result, dict):
-                        result = {k: sanitize(v) for k, v in result.items()}
-                    elif isinstance(result, list):
-                        result = [
-                            {k: sanitize(v) for k, v in d.items()} for d in result  # type: ignore
-                        ]
+                    # if isinstance(result, dict):
+                    #     result = {k: sanitize(v) for k, v in result.items()}
+                    # elif isinstance(result, list):
+                    #     result = [
+                    #         {k: sanitize(v) for k, v in d.items()} for d in result  # type: ignore
+                    #     ]
+                    result = sanitize_dictlist(result)
 
                     row.update(result)  # type: ignore
                     # continue
 
                 val = get_path_value(item.model_dump(), path_expr)
-                log_if_verbose(f"[extract_embed logic] Check tinyId: {item.tinyId}", 2)  # type: ignore
+                log_if_verbose(f"[extract_embed logic] Check tinyId: {item.tinyId}", 3)  # type: ignore
                 # Here the even more complex simplification of permissibleValueSets.
                 #   The problem is that PVs can have permissibleValue (pv), valueMeaningDefinition (vmd) and
                 #   valueMeanningName (vmn). If values present (non-empty set), pv is defined, but vmd may or may not
@@ -112,13 +108,19 @@ def extract_path(
                     continue
                 else:
                     val = normalize_extracted_value(val, collapse=collapse)
+                    
+                if (
+                    path_expr.endswith("definition")
+                    and model_class.__name__ == "CDEItem"
+                ):
+                    val = sanitize(val)
 
                 row[tag] = val if val is not None else ""  # type: ignore
             rows.append(row)
     else:
         rows = extract_embed_project_fields_by_tinyid(data, tinyids, exclude)
     
-    rows = strip_json_list(rows)
+    # print(rows[1:20:1])
     if format == "pfasta":
         return rows # type: ignore
 

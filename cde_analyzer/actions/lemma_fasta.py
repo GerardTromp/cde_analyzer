@@ -12,7 +12,7 @@ from CDE_Schema import CDEItem, CDEForm
 from utils.helpers import extract_embed_project_fields_by_tinyid
 from utils.tinyid_utils import load_tinyids
 from logic.extract_embed import extract_path
-from logic.lemma_fasta import make_pfasta
+from logic.lemma_fasta import make_pfasta, make_lfasta
 from argparse import ArgumentParser, ArgumentError, BooleanOptionalAction
 
 
@@ -66,12 +66,6 @@ def register_subparser(subparser: ArgumentParser):
         default=str,
         help="File containing list of item IDs (tinyId) to exclude or extract (requires --exclude / --no-exclude).",
     )
-    # subparser.add_argument(
-    #     "--output-format",
-    #     choices=["json", "csv", "tsv", "pfasta"],
-    #     default="json",
-    #     help="Choose output format. (default JSON)\n  - pfasta: pseudo FASTA encoding words in base85",
-    # )
     subparser.add_argument(
         "--id-type", default=str, help="The type of ID (default=tinyId)."
     )
@@ -80,6 +74,12 @@ def register_subparser(subparser: ArgumentParser):
         "--output",
         default=str,
         help="Path, with a prefix/stem name for results. Multiple files will be generated",
+    )
+    subparser.add_argument(
+        "--output-format",
+        choices=["pfasta", "lfasta"],
+        default="pfasta",
+        help="Choose output format (default 'pfasta')",
     )
     subparser.add_argument(
         "-m",
@@ -100,20 +100,25 @@ def register_subparser(subparser: ArgumentParser):
         default=True,
         help="Exclude (--exclude) or include (--no-exclude) IDs in list.",
     )
-    subparser.add_argument(
-        "-c",
-        "--collapse",
+    subparser.add_argument( # Need to add the logic yet 
+        "--remove-spaces",
         action=BooleanOptionalAction,
         default=True,
-        help='Collapse repeated "None;" in list items.',
+        help="Remove spaces, return lemmatized content as string with no spaces (default=True)",
     )
     subparser.add_argument(
-        "-s",
-        "--simplify-permissible",
-        action=BooleanOptionalAction,
-        default=True,
-        help="Process limited set of permissibleValues fields using heuristic.",
+        "--remove-stopwords",
+        action="store_true",
+        help="Remove common English stop words (articles, prepositions, conjunctions)?",
     )
+    subparser.add_argument(
+        "--min-freq",
+        default=1,
+        type=int,
+        help="What is the minimum number of occurrences to encode uint16. Freq <= min-freq will be 0x00"
+    )
+    
+    
     subparser.set_defaults(func=run_action)
 
 
@@ -142,19 +147,37 @@ def run_action(args):
     # ModelType = TypeVar(MODEL_REGISTRY[args.model], bound=BaseModel)
     model_class = MODEL_REGISTRY[args.model]
     
-    format = "pfasta"
-
+    collapse =  True
+    simplify_permissible = True
     ### 
     # Need a wrapper function here that calls extract path and then processes the data
     # for the pseudo fasta
-    make_pfasta(
-        model_class,
-        raw,
-        idlist,
-        args.output,
-        format,
-        args.path_file,
-        args.exclude,
-        args.collapse,
-        args.simplify_permissible,
-    )
+    if args.output_format == "pfasta":
+        make_pfasta(
+            model_class,
+            raw,
+            idlist,
+            args.output,
+            args.output_format,
+            args.path_file,
+            args.exclude,
+            collapse,
+            simplify_permissible,
+            args.remove_stopwords,
+            args.min_freq,
+        )
+    
+    if args.output_format == "lfasta":    
+        make_lfasta(
+            model_class,
+            raw,
+            idlist,
+            args.output,
+            args.output_format,
+            args.path_file,
+            args.exclude,
+            collapse,
+            simplify_permissible,
+            args.remove_stopwords,
+            args.min_freq,
+        )

@@ -1,10 +1,13 @@
 import base64
 import sys
 import struct
+import re
 from typing import Any, Dict, List, Set, Optional, DefaultDict, Tuple, Union, TypeAlias
 from collections import Counter
 from utils.logger import log_if_verbose
-from utils.phrase_extraction import make_lemma, rm_stopwords, word_tokenize
+from utils.phrase_extraction import make_lemma, rm_stopwords, word_tokenize, STOPWORDS, expand_contractions
+from utils.unicode import normalize_unicode
+from utils.html import normalize_string
 
 system_endianness = sys.byteorder
 if system_endianness == "little":
@@ -12,7 +15,9 @@ if system_endianness == "little":
 elif system_endianness == "big":
     byte_order = ">"
 
-def gen_vocab(rows: List[Dict]) -> Dict:
+PUNCTUATION = {",", ".", ":", "(", ")", ";" }
+
+def gen_vocab(rows: List[Dict], min_freq: int) -> Dict:
     '''
     Convert the content fields of each dictionary in a list of dictionaries to
     a counter of tokens (words). Each dict is {tinyID: xxx, content_fields: tokens}
@@ -20,11 +25,11 @@ def gen_vocab(rows: List[Dict]) -> Dict:
     # vocab: List[Tuple[str,int]]
     vocab_list = Counter()
     for obj in rows:
-        for k in obj.keys():
-            if k == "tinyId":
+        for key, value in obj.items():
+            if key == "tinyId":
                 continue
             else:
-                vocab_list.update(Counter(obj[k]))
+                vocab_list.update(Counter(value))
     
     # Sort descending by frequency, then alphabetically.
     vocab_list = sorted(vocab_list.items(), key=lambda item: (-item[1], item[0]))
@@ -35,25 +40,36 @@ def gen_vocab(rows: List[Dict]) -> Dict:
     counter = 0
     for item in vocab_list: # type: ignore  pylance is wrong Counter is iterable
         # 
-        if counter > 32000:
+        key, value = item
+        my_dict = {}
+        if counter > 10500:
             counter = 0
         else:
             counter += 1
-        key, value = item
-        my_dict = {}
         if key not in vocab:
-            my_dict["encode"] = counter
+            if key in PUNCTUATION:
+                my_dict["encode"] = 0
+                if counter > 1:
+                    counter -= 1
+            else:
+                my_dict["encode"] = counter
             my_dict["freq"] = value
             vocab[key] = my_dict
         #     vocab[key] = []  # Initialize an empty list if key is new
         # vocab[key].append(value) 
         else:
             print(f"****************************\n[ERROR] This should not happen: duplicate entry in `vocab`for key: {key}\n*****************************" )
+            
         freq = vocab[key]["freq"]
         log_msg =f"Count of key {key:>35}:\t{freq:6d}"
         log_if_verbose(log_msg, 4)
+    
+    # Trim the complexity of encoding. Singletons, by definition, cannot contribute to 
+    # frequent phrases. Default min_freq is 1
+    for key, val in vocab.items():
+        if val["freq"] <= min_freq:
+            val["encode"] = 0
         
-               
     
     return vocab
 
@@ -88,7 +104,7 @@ def enc_vocab(rows: List[Dict], vocab: Dict):
     
     return ret_rows
     
-    
+   
     
 def lemma_data(rows: List[Dict], remove_stopwords: bool) -> List[Dict]:
     """
@@ -107,20 +123,21 @@ def lemma_data(rows: List[Dict], remove_stopwords: bool) -> List[Dict]:
     """ 
     ret_rows = []   
     for  obj in rows:
-        for key in obj.keys():
+        new_obj= {}
+        for key, value in obj.items():
             if key == "tinyId":
-                my_id =  key
-                continue
+                my_id =  value
+                new_obj[key] = value
             else:
-                value = obj[key]
+                value = expand_contractions(value)
+                value = normalize_string(value)
+                value = value.replace(";; ", " ")
                 tokens = word_tokenize(value.lower())
-                value = make_lemma(tokens, remove_stopwords)
-                if remove_stopwords:
-                    value = rm_stopwords(value)
-            obj[key] = value
-            log_msg = f"[LEMMA DATA] tinyId: {my_id}, key {key:<20}, value: value"
-            log_if_verbose(log_msg, 3)
-        ret_rows.append(obj)
+                value = make_lemma(tokens, remove_stopwords, STOPWORDS)
+                new_obj[key] = value
+                log_msg = f"[LEMMA DATA] tinyId: {my_id}, key {key:<20}, value: {value}"
+                log_if_verbose(log_msg, 2)
+        ret_rows.append(new_obj)
     
     return ret_rows 
 

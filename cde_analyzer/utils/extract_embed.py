@@ -9,7 +9,7 @@ DOS_NL = re.compile(r"\r\n")
 MAC_NL = re.compile(r"\r")
 MULTI_NL = re.compile(r"\n\n*")
 MULTI_SPACE = re.compile(r" {2,}")
-NUM_LIST = re.compile(r"(?:\d+;; )+")
+NUM_LIST = re.compile(r"(?:\d+;;\s*)+\d+")
 
 
 def strip_embedded_nl(text: str) -> Union[str, None]:
@@ -42,6 +42,25 @@ def sanitize(s):
         s = str(s).strip()
         s = strip_embedded_nl(s)
         return s
+    
+
+def sanitize_dictlist(input: Union[Dict,List]) -> Union[Dict,List]:
+    """Sanitized JSON lists of dictionaries. Cleans value components
+
+    Args:
+        input (Union[Dict,List]): _description_
+
+    Returns:
+        Union[Dict,List]: _description_
+    """
+    if isinstance(input, dict):
+            input = {k: sanitize(v) for k, v in input.items()}
+    elif isinstance(input, list):
+        input = [
+            {k: sanitize(v) for k, v in d.items()} for d in input  # type: ignore
+        ]
+    
+    return input
 
 
 def simplify_permissible_values(
@@ -81,16 +100,6 @@ def simplify_permissible_values(
         if pv_str == secondary_str:
             secondary_str = ""
 
-        # Filter out sets that have numerical listing
-        # Heuristic since tabulaton shows only two sets that match the regex contain 
-        # char strings, remainder are all variations of consecutive numbers
-        #  1 - Not at all;; 2;; 3;; 4;; 5 - very well
-        #  0 - absent;; 0.5;; 1 - mild;; 1.5;; 2 - moderate;; 2.5;; 3 - severe
-        if NUM_LIST.search(str(pv_str)):
-            pv_str = ""
-        if NUM_LIST.search(str(secondary_str)):
-           secondary_str = ""
-
         # secondary str sometimes becomes some multiple of double semi-colons
         # ';;;;;;'. Add filter to avoid multiple empty strings in list
         if pv_str and pv_str != "":
@@ -98,10 +107,23 @@ def simplify_permissible_values(
         if secondary_str and secondary_str != "":
             result["secondary"].append(secondary_str)  # type: ignore
 
+    permval = ";; ".join(result["permissibleValue"])
+    secondval = ";; ".join(result["secondary"])
+    
+    # Filter out sets that have numerical listing
+    # Heuristic since tabulaton shows only two sets that match the regex contain 
+    # char strings, remainder are all variations of consecutive numbers
+    #  1 - Not at all;; 2;; 3;; 4;; 5 - very well
+    #  0 - absent;; 0.5;; 1 - mild;; 1.5;; 2 - moderate;; 2.5;; 3 - severe
+    if NUM_LIST.search(permval):
+        permval = ""
+    if NUM_LIST.search(secondval):
+        secondval = ""
+
     if collapse:
         return {
-            "permissibleValue": ";; ".join(result["permissibleValue"]),
-            "secondary": ";; ".join(result["secondary"]),
+            "permissibleValue": permval,
+            "secondary": secondval,
         }
 
     return result

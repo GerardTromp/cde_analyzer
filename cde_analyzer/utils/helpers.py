@@ -140,21 +140,21 @@ def which_r(boolean_list):
     return [i for i, x in enumerate(boolean_list) if x]
 
 
-def create_state_verbosity(initial_state):
-    """
-    Intention was to share the variable across modules, but the
-    assessor functions are seen as variables.
-    """
-    state_variable = initial_state  # The shared state variable
+# def create_state_verbosity(initial_state):
+#     """
+#     Intention was to share the variable across modules, but the
+#     assessor functions are seen as variables.
+#     """
+#     state_variable = initial_state  # The shared state variable
 
-    def modify_state(new_value):  # An "assessor" function
-        nonlocal state_variable  # Declare intent to modify the variable in the enclosing scope
-        state_variable = new_value
+#     def modify_state(new_value):  # An "assessor" function
+#         nonlocal state_variable  # Declare intent to modify the variable in the enclosing scope
+#         state_variable = new_value
 
-    def access_state():  # Another "assessor" function
-        return state_variable
+#     def access_state():  # Another "assessor" function
+#         return state_variable
 
-    return modify_state, access_state  # Return the assessor functions
+#     return modify_state, access_state  # Return the assessor functions
 
 
 # Generalized versions of the create_state_verbosity above.

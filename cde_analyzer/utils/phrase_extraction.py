@@ -1,3 +1,4 @@
+import re
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -8,6 +9,7 @@ from nltk.corpus import wordnet
 from collections import defaultdict
 from typing import Any, Dict, List, Set, Optional, DefaultDict, Tuple, Union, TypeAlias
 from utils.logger import log_if_verbose
+from utils.analyzer_state import get_verbosity
 
 # Download resources quietly
 nltk.download("punkt", quiet=True)
@@ -19,6 +21,74 @@ nltk.download("omw-1.4", quiet=True)
 
 # Global resources
 STOPWORDS = set(stopwords.words("english"))
+
+CONTRACTION_MAP = {
+    "don't": "do not",
+    "can't": "can not",
+    "won't": "will not",
+    "isn't": "is not",
+    "aren't": "are not",
+    "wasn't": "was not",
+    "weren't": "were not",
+    "hasn't": "has not",
+    "haven't": "have not",
+    "hadn't": "had not",
+    "wouldn't": "would not",
+    "shouldn't": "should not",
+    "couldn't": "could not",
+    "mustn't": "must not",
+    "mightn't": "might not",
+    "shan't": "shall not",
+    "doesn't": "does not",
+    "n't": " not",   # catch-all fallback
+
+    "i'm": "i am",
+    "you're": "you are",
+    "he's": "he is",
+    "she's": "she is",
+    "it's": "it is",
+    "we're": "we are",
+    "they're": "they are",
+    "that's": "that is",
+    "there's": "there is",
+    "what's": "what is",
+    "who's": "who is",
+
+    "i've": "i have",
+    "you've": "you have",
+    "we've": "we have",
+    "they've": "they have",
+    "i'll": "i will",
+    "you'll": "you will",
+    "he'll": "he will",
+    "she'll": "she will",
+    "we'll": "we will",
+    "they'll": "they will",
+    "i'd": "i would",
+    "you'd": "you would",
+    "he'd": "he would",
+    "she'd": "she would",
+    "we'd": "we would",
+    "they'd": "they would",
+}
+
+# Regex that allows apostrophes inside contractions
+_contraction_re = re.compile(
+    r"(?<!\w)(" + "|".join(re.escape(k) for k in CONTRACTION_MAP.keys()) + r")(?!\w)",
+    flags=re.IGNORECASE
+)
+
+def expand_contractions(text: str) -> str:
+    """Expand contractions while preserving capitalization of the first letter."""
+    def replace(match):
+        original = match.group(0)
+        expanded = CONTRACTION_MAP[original.lower()]
+        # preserve capitalization of the first letter
+        if original[0].isupper():
+            return expanded[0].upper() + expanded[1:]
+        return expanded
+    return _contraction_re.sub(replace, text)
+
 lemmatizer = WordNetLemmatizer()
 
 # Type alias for clarity
@@ -40,7 +110,7 @@ def get_wordnet_pos(tag: str) -> Union[str, None]:
 
 
 def make_lemma(
-    tokens: list, remove_stopwords: bool
+    tokens: list, remove_stopwords: bool, stoplist: set
 ) -> List[str]:
     
     pos_tags = pos_tag(tokens)
@@ -55,14 +125,17 @@ def make_lemma(
         else:
             lemma = word
         words.append(lemma)
+    
+    if remove_stopwords:
+        words = rm_stopwords(words, stoplist)
 
     log_if_verbose(f"[CLEANED] lemmas: {words}", 3)
     
     return words
 
 
-def rm_stopwords(words: list) -> List:
-    words = [w for w in words if w not in STOPWORDS]
+def rm_stopwords(words: list, stopset: set) -> List:
+    words = [w for w in words if w not in stopset]
     log_if_verbose(f"[CLEANED] without stopwords: {words}", 3)
 
     log_if_verbose(
@@ -93,7 +166,7 @@ def tokenize_text(text:str) -> List[str]:
  
     
 def extract_phrases(
-    text: str, min_words: int, remove_stopwords: bool, lemmatize: bool
+    text: str, min_words: int, remove_stopwords: bool, lemmatize: bool, stopset: set
 ) -> List[str]:
     # log_if_verbose(f"[TOKENIZE] raw: {repr(text)}", 3)
     # tokens = word_tokenize(text.lower())
@@ -107,7 +180,7 @@ def extract_phrases(
     tokens = tokenize_text(text)
 
     if lemmatize:
-        words = make_lemma(tokens=tokens, remove_stopwords=remove_stopwords)
+        words = make_lemma(tokens, remove_stopwords, STOPWORDS)
         
     #     pos_tags = pos_tag(tokens)
     #     log_if_verbose(f"[POS] tokens: {tokens}", 3)
@@ -128,7 +201,7 @@ def extract_phrases(
     log_if_verbose(f"[CLEANED] lemmas: {words}", 3)
 
     if remove_stopwords:
-        words = rm_stopwords(words)
+        words = rm_stopwords(words, STOPWORDS)
     #     words = [w for w in words if w not in STOPWORDS]
     #     log_if_verbose(f"[CLEANED] without stopwords: {words}", 3)
 
@@ -154,7 +227,7 @@ def collect_phrases_from_item(
     verbatim_results: Optional[PhraseMap] = None,
     min_words: int = 2,
     remove_stopwords: bool = True,
-    verbosity: int = 0,
+    # verbosity: int = 0,
     lemmatize: bool = True,
     verbatim: bool = False,
 ) -> Tuple[PhraseMap, PhraseMap]:
@@ -180,7 +253,7 @@ def collect_phrases_from_item(
                 verbatim_results,
                 min_words,
                 remove_stopwords,
-                verbosity,
+                # verbosity,
                 verbatim,
             )
         return results, verbatim_results
@@ -194,12 +267,12 @@ def collect_phrases_from_item(
             log_message = f"[MATCH] {new_path}"
             log_if_verbose(log_message, 2)
             phrases = extract_phrases(
-                value, min_words, remove_stopwords, lemmatize
+                value, min_words, remove_stopwords, lemmatize, STOPWORDS
             )
             # No need to use log_if_verbose here. Want to ONLY execute if logger desired
-            if verbosity >= 3:
-                log_if_verbose(f"         value: {repr(value)}")
-                log_if_verbose(f"[PHRASES] Extracted from {new_path}:")
+            if get_verbosity() >= 3:
+                log_if_verbose(f"         value: {repr(value)}", 3)
+                log_if_verbose(f"[PHRASES] Extracted from {new_path}:", 3)
                 for phrase in phrases:
                     log_if_verbose(f"  - {phrase}")
 
@@ -218,7 +291,7 @@ def collect_phrases_from_item(
                     verbatim_results,
                     min_words,
                     remove_stopwords,
-                    verbosity,
+                    # verbosity,
                 )
 
         elif hasattr(value, "__dict__") or isinstance(value, dict):
@@ -231,7 +304,7 @@ def collect_phrases_from_item(
                 verbatim_results,
                 min_words,
                 remove_stopwords,
-                verbosity,
+                # verbosity,
             )
 
     return results, verbatim_results

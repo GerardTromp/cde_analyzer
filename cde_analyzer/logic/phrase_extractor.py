@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def collect_all_phrase_occurrences(
     items: List[Any],
     field_names: List[str],
-    verbosity: int = 0,
+    # verbosity: int = 0,
     min_words: int = 2,
     remove_stopwords: bool = True,
     min_ids: int = 2,
@@ -48,7 +48,7 @@ def collect_all_phrase_occurrences(
             verbatim_results=verbatim_map,
             min_words=min_words,
             remove_stopwords=remove_stopwords,
-            verbosity=verbosity,
+            # verbosity=verbosity,
             lemmatize=lemmatize,
         )
 

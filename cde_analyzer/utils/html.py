@@ -13,7 +13,7 @@ from utils.logger import log_if_verbose
 from utils.analyzer_state import get_verbosity
 from utils.unicode import normalize_unicode
 
-logger = logging.getLogger("cde_analyzer.strip")
+logger = logging.getLogger(__name__)
 verbosity = get_verbosity()
 
 
