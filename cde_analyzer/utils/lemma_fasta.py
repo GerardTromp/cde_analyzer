@@ -38,14 +38,17 @@ def gen_vocab(rows: List[Dict], min_freq: int) -> Dict:
     #    leaving 0 (0x00) to be the bitbucket for discarded or low-frequency words
     vocab = {}
     counter = 0
+    max_counter = 0
     for item in vocab_list: # type: ignore  pylance is wrong Counter is iterable
         # 
         key, value = item
         my_dict = {}
-        if counter > 10500:
-            counter = 0
-        else:
-            counter += 1
+        if max_counter < 1:
+            if counter > 10500:
+                counter = 0
+                max_counter = 1
+            else:
+                counter += 1
         if key not in vocab:
             if key in PUNCTUATION:
                 my_dict["encode"] = 0
