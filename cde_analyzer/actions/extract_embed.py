@@ -11,17 +11,18 @@ from pydantic import BaseModel
 from CDE_Schema import CDEItem, CDEForm
 from utils.helpers import extract_embed_project_fields_by_tinyid
 from utils.tinyid_utils import load_tinyids
+from utils.constants import MODEL_REGISTRY
 from logic.extract_embed import extract_path
 from argparse import ArgumentParser, ArgumentError, BooleanOptionalAction
 
 # from actions.count import run_action
 logger = logging.getLogger(__name__)
 
-MODEL_REGISTRY = {
-    "CDE": CDEItem,
-    "Form": CDEForm,
-    # Add others here
-}
+# MODEL_REGISTRY = {
+#     "CDE": CDEItem,
+#     "Form": CDEForm,
+#     # Add others here
+# }
 
 help_text = "Extract subset of fields from model for embedding text"
 description_text = """Extract a desired subset of fields and collapse repeated

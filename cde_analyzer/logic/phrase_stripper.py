@@ -1,29 +1,66 @@
 import json
 import csv
 import re
-from typing import Any, List, Tuple, Type
+from typing import Any, List, Tuple, Type, Optional, Set
 from pydantic import BaseModel
 from CDE_Schema import CDEItem, CDEForm
 import logging
 from utils.logger import log_if_verbose
 from utils.analyzer_state import get_verbosity
+from utils.extract_embed import sanitize
 
 logger = logging.getLogger(__name__)
 verbosity = get_verbosity()
 
 
-def load_phrase_map(filepath: str) -> List[Tuple[str, str]]:
+# Modify to always expect replacement even if empty string
+# def load_phrase_map(filepath: str) -> List[Tuple[str, str, str, Optional[Set[str]]]]:  # type: ignore
+#     if filepath.endswith(".json"):
+#         with open(filepath) as f:
+#             data = json.load(f)
+#         return [(item["path"], item["phrase"], item["replace"], set(item["tinyIds"])) for item in data]
+#     else:
+#         with open(filepath, newline="", encoding="utf-8") as f:
+#             reader = csv.DictReader(
+#                 f, delimiter="\t" if filepath.endswith(".tsv") else ","
+#             )
+#             for row in reader:
+#                 # if row["tinyIds"] == "":
+#                 #     return [(row["path"], row["phrase"], row["replace"],None)]
+#                 # else: 
+#                 #  Problem with 
+#                 print(f"{row}")
+#                 return [(row["path"], row["phrase"], row["replace"], row["tinyIds"]) for row in reader]  # type: ignore
+def load_phrase_map(filepath: str) -> List[Tuple[str, str, str, Optional[Set[str]]]]:
     if filepath.endswith(".json"):
-        with open(filepath) as f:
+        with open(filepath, encoding="utf-8") as f:
             data = json.load(f)
-        return [(item["path"], item["phrase"]) for item in data]
+
+        phrase_map = []
+        for item in data:
+            path = item["path"]
+            phrase = item["phrase"]
+            replace = item.get("replace", "")  # force empty string if missing
+            tiny_ids = item.get("tinyIds")
+            tiny_ids_set = set(tiny_ids) if tiny_ids else None
+            phrase_map.append((path, phrase, replace, tiny_ids_set))
+        return phrase_map
+
     else:
         with open(filepath, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(
                 f, delimiter="\t" if filepath.endswith(".tsv") else ","
             )
-            return [(row["path"], row["phrase"]) for row in reader]
-
+            phrase_map = []
+            for row in reader:
+                path = row["path"]
+                phrase = row["phrase"]
+                replace = row.get("replace", "")
+                tiny_ids = row.get("tinyIds")
+                tiny_ids_set = set(tiny_ids.split()) if tiny_ids else None
+                phrase_map.append((path, phrase, replace, tiny_ids_set))
+            return phrase_map
+        
 
 def delete_phrase_at_path(obj: Any, path: str, phrase: str):
     """Delete a phrase from a string at the specified dotted path. Supports wildcards like field[*]."""
@@ -37,6 +74,7 @@ def _navigate_and_strip(current: Any, parts: List[str], phrase: str):
         return
 
     part = parts[0]
+    # This should be re.search, the phrases might be within the text. 
     match = re.match(r"(\w+)(?:\[(\*|\d+)\])?", part)
     if not match:
         return
@@ -126,12 +164,21 @@ def _replace_if_match(
 ):
     try:
         value = container[key_or_index]
+        # print(f"---------------------value:  {value}")
+        # print(f"----type {type(phrase)}------------phrase: x_.{phrase}._x")
+        # print(type(phrase))
         if isinstance(value, str):
             if phrase in value:
-                logger.debug(f"Replacing phrase in path: {key_or_index}")
-                container[key_or_index] = value.replace(phrase, replace_with)
+                log_if_verbose(f"Replacing phrase in path: {key_or_index}", 3)
+                # print(f"Replacing phrase in path: {key_or_index}")
+                # print(f"Replacing original \"{value}\" in path: {key_or_index}")
+                # print(f"Replacing with _\"{replace_with}\"_ in path: {key_or_index}")
+                result = sanitize(value.replace(phrase, replace_with))
+                container[key_or_index] = sanitize(value.replace(phrase, replace_with))
+                # print(f"Replaced value \"{result}\"")
             else:
-                logger.debug(f"Phrase not found at {key_or_index}")
+                # logger.debug(f"Phrase not found at {key_or_index}")
+                log_if_verbose(f"Phrase not found at {key_or_index}", 3)
         else:
             logger.debug(f"Value at {key_or_index} is not a string: {value}")
     except Exception as e:
@@ -170,19 +217,24 @@ def _strip_in_place(container: Any, key_or_index: Any, phrase: str):
 
 
 def strip_phrases(
-    model_list: List[BaseModel], phrase_map: List[Tuple[str, str]]
+    model_list: List[BaseModel], phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]]
 ) -> List[BaseModel]:
     cleaned_models = []
     i = 1
     for model in model_list:
         data = model.model_dump(mode="python", exclude_none=False)
+        tiny_id = data.get("tinyId")
         i += 1
         log_message = f"[strip_phrases] Iterating over models. Model {i}"
         log_if_verbose(log_message, 3)
-        for path, phrase in phrase_map:
+        for path, phrase, replace_with, allowed_ids in phrase_map:
+            if allowed_ids is not None and tiny_id not in allowed_ids:
+                continue
             log_message = f"changing path: {path} phrase {phrase}"
+            # print(f"\n\n____{tiny_id}_____")
+            # print(f"____{allowed_ids}_____")
             log_if_verbose(log_message, 3)
-            traverse_and_replace_phrase(data, path, phrase)
+            traverse_and_replace_phrase(data, path, phrase, replace_with)
             # delete_phrase_at_path(data, path, phrase)
         cleaned = model.__class__.model_validate(data)
         cleaned_models.append(cleaned)

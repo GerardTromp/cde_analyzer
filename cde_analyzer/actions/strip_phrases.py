@@ -10,11 +10,12 @@ from utils.diff_utils import print_json_diff
 
 from CDE_Schema import CDEItem, CDEForm
 from actions.count import register_subparser, run_action
+from utils.constants import MODEL_REGISTRY
 
-MODEL_REGISTRY: dict[str, Type[BaseModel]] = {
-    "CDE": CDEItem,
-    "Form": CDEForm,
-}
+# MODEL_REGISTRY: dict[str, Type[BaseModel]] = {
+#     "CDE": CDEItem,
+#     "Form": CDEForm,
+# }
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "-o", "--output", required=True, help="Path to output JSON file."
     )
+    # subparser.add_argument(
+    #     "-t", "--tids", required=True, help="Path to JSON file with list of tids."
+    # )
     # This should be moved to post-processing. Inefficient and memory hungry
     subparser.add_argument(
         "-d",

@@ -4,7 +4,6 @@ from typing import Union, Dict, Any, List
 from utils.path_utils import permis_values_to_dict_list
 from utils.logger import log_if_verbose
 
-
 DOS_NL = re.compile(r"\r\n")
 MAC_NL = re.compile(r"\r")
 MULTI_NL = re.compile(r"\n\n*")
@@ -122,8 +121,8 @@ def simplify_permissible_values(
 
     if collapse:
         return {
-            "permissibleValue": permval,
-            "secondary": secondval,
+            "permVal": permval,
+            "minor": secondval,
         }
 
     return result

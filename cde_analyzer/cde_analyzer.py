@@ -9,6 +9,7 @@ from actions import (
     strip_html,
     strip_phrases,
     lemma_fasta,
+    phrase_builder,
 )
 from utils.logger import configure_logging
 from utils.helpers import which_r, get_state, set_state
@@ -16,13 +17,14 @@ from utils.analyzer_state import get_verbosity, set_verbosity
 
 
 ACTIONS = {
+    "fix_underscores": fix_underscores,
+    "strip_html": strip_html,
     "phrase": phrase,
     "count": count,
-    "strip_html": strip_html,
     "extract_embed": extract_embed,
-    "fix_underscores": fix_underscores,
     "strip_phrases": strip_phrases,
     "lemma_fasta": lemma_fasta,
+    "phrase_builder": phrase_builder,
     #    "depth": depth.run_action,
     #    "quality": quality.run_action,
 }
@@ -48,6 +50,7 @@ def main():
             name,
             help=getattr(module, "help_text", ""),
             description=getattr(module, "description_text", ""),
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
         module.register_subparser(action_parser)
 

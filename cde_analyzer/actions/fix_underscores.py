@@ -22,12 +22,13 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--prefix",
         required=True,
+        default="x", 
         help="Character to prepend on fields starting with an underscore.",
     )
     subparser.add_argument(
         "--depth",
         type=int,
-        help="Maximum depth (JSON nesting) to process. (type integer)",
+        help="Maximum depth (JSON nesting) to process. (type integer).",
     )
     subparser.set_defaults(func=run_action)
 

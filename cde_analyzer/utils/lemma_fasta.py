@@ -2,6 +2,7 @@ import base64
 import sys
 import struct
 import re
+from nltk.tokenize import RegexpTokenizer
 from typing import Any, Dict, List, Set, Optional, DefaultDict, Tuple, Union, TypeAlias
 from collections import Counter
 from utils.logger import log_if_verbose
@@ -15,7 +16,8 @@ if system_endianness == "little":
 elif system_endianness == "big":
     byte_order = ">"
 
-PUNCTUATION = {",", ".", ":", "(", ")", ";" }
+PUNCTUATION = {",", ".", ":", "(", ")", ";", "`", "{", "}" }
+tokenizer = RegexpTokenizer(r'\w+')
 
 def gen_vocab(rows: List[Dict], min_freq: int) -> Dict:
     '''
@@ -44,7 +46,7 @@ def gen_vocab(rows: List[Dict], min_freq: int) -> Dict:
         key, value = item
         my_dict = {}
         if max_counter < 1:
-            if counter > 10500:
+            if counter >= 10500:
                 counter = 0
                 max_counter = 1
             else:
@@ -135,11 +137,11 @@ def lemma_data(rows: List[Dict], remove_stopwords: bool) -> List[Dict]:
                 value = expand_contractions(value)
                 value = normalize_string(value)
                 value = value.replace(";; ", " ")
-                tokens = word_tokenize(value.lower())
+                tokens = tokenizer.tokenize(value.lower())
                 value = make_lemma(tokens, remove_stopwords, STOPWORDS)
                 new_obj[key] = value
                 log_msg = f"[LEMMA DATA] tinyId: {my_id}, key {key:<20}, value: {value}"
-                log_if_verbose(log_msg, 2)
+                log_if_verbose(log_msg, 3)
         ret_rows.append(new_obj)
     
     return ret_rows 

@@ -15,11 +15,12 @@ from utils.logger import logging
 
 logger = logging.getLogger("cde_analyzer.strip")
 
+from utils.constants import MODEL_REGISTRY
 # === MODEL REGISTRY ===
-MODEL_REGISTRY: dict[str, Type[BaseModel]] = {
-    "CDE": CDEItem,
-    "Form": CDEForm,
-}
+# MODEL_REGISTRY: dict[str, Type[BaseModel]] = {
+#     "CDE": CDEItem,
+#     "Form": CDEForm,
+# }
 
 
 def process_data(

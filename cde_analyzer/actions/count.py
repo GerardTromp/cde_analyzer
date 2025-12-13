@@ -87,7 +87,7 @@ def run_action(args):
         logic_expr=args.logic,
         group_by=args.group_by,
         group_type=args.group_type,
-        verbose=args.verbose,
+        # verbose=args.verbose, # verbosity moved to main script
         count_type=args.count_type,
         char_limit=args.char_limit,
     )

@@ -14,7 +14,7 @@ from utils.logger import log_if_verbose
 IntDict: TypeAlias = Dict[str, int]
 NestedDict: TypeAlias = Dict[str, Union[IntDict, "NestedDict"]]
 
-logger = logging.getLogger("cde_analyzer.count")
+logger = logging.getLogger(__name__)
 
 
 def match_condition(value, match_type, pattern):
