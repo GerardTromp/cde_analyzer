@@ -1,0 +1,82 @@
+#
+# File: actions/extract_embed/cli.py
+#
+from argparse import ArgumentParser, BooleanOptionalAction
+from utils.constants import MODEL_REGISTRY
+
+help_text = "Extract subset of fields from model for embedding text"
+description_text = """Extract a desired subset of fields and collapse repeated
+key:value pairs to key: 'value1;; value2;; value3,...'.
+
+The subset of fields is specified in a file (--path-file) as a set of 
+   key-value pairs. Output "flattens" nested dict to simple dict with
+   new keys.
+   
+"""
+
+def register_subparser(subparser: ArgumentParser):
+    subparser.add_argument("--input", help="Input JSON file.")
+    ids = subparser.add_mutually_exclusive_group()
+    ids.add_argument(
+        "--id-list",
+        nargs="+",
+        # required=True,
+        help="List of item IDs (tinyId) to exclude or extract.",
+    )
+    ids.add_argument(
+        "--id-file",
+        default=str,
+        help="File containing list of item IDs (tinyId) to exclude or extract (requires --exclude / --no-exclude).",
+    )
+    subparser.add_argument(
+        "--output-format",
+        choices=["json", "csv", "tsv"],
+        default="json",
+        help="Choose output format. (default JSON)",
+    )
+    subparser.add_argument(
+        "--id-type", default=str, help="The type of ID (default=tinyId)."
+    )
+    subparser.add_argument(
+        "-o",
+        "--output",
+        default=str,
+        help="Path, including filename, to store results.",
+    )
+    subparser.add_argument(
+        "-m",
+        "--model",
+        default=str,
+        required=True,
+        choices=MODEL_REGISTRY.keys(),
+        help="pydantic model appropriate for input file. ",
+    )
+    subparser.add_argument(
+        "--path-file",
+        default=str,
+        help="File with paths of interest and new name (as name:path) for extracted data.",
+    )
+    subparser.add_argument(
+        "--exclude",
+        action=BooleanOptionalAction,
+        default=True,
+        help="Exclude (--exclude) or include (--no-exclude) IDs in list.",
+    )
+    subparser.add_argument(
+        "-c",
+        "--collapse",
+        action=BooleanOptionalAction,
+        default=True,
+        help='Collapse repeated "None;" in list items.',
+    )
+    subparser.add_argument(
+        "-s",
+        "--simplify-permissible",
+        action=BooleanOptionalAction,
+        default=True,
+        help="Process limited set of permissibleValues fields using heuristic.",
+    )
+    subparser.set_defaults(
+        _runner="actions.phrase_builder.run"
+    )
+    # subparser.set_defaults(func=run_action)
