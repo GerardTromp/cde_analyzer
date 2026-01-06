@@ -1,6 +1,7 @@
 # actions/fix_underscores/cli.py
 
 from argparse import ArgumentParser, BooleanOptionalAction
+from .run import run_action
 
 help_text = "Prepend a character to JSON keys starting with an underscore."
 description_text = "Pydantic reserves keys beginning with an underscore as private. Convert to start with another character."
@@ -14,7 +15,7 @@ def register_subparser(subparser: ArgumentParser):
     )
     subparser.add_argument(
         "--prefix",
-        required=True,
+        required=False,
         default="x", 
         help="Character to prepend on fields starting with an underscore.",
     )
@@ -24,6 +25,6 @@ def register_subparser(subparser: ArgumentParser):
         help="Maximum depth (JSON nesting) to process. (type integer).",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.fix_underscores.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)

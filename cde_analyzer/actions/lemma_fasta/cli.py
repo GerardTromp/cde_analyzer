@@ -3,7 +3,8 @@
 #
 from utils.constants import MODEL_REGISTRY
 from argparse import ArgumentParser, BooleanOptionalAction
-
+from .run import run_action
+  
 help_text = "Extract fields as pseudo FASTA format"
 description_text = """Extract a desired subset of fields as for embedding 
 (extract_embed), but encode the "words" as uint16_t tokens to be used by 
@@ -97,4 +98,4 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.phrase_builder.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)

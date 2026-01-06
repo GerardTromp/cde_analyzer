@@ -2,6 +2,8 @@
 # File: actions/phrase/cli.py
 #
 from argparse import ArgumentParser, BooleanOptionalAction
+from .run import run_action
+
 
 help_text = "Extract common phrases from CDEs (Forms, not implemented yet)"
 description_text = "Extract frequent phrases, verbatim or lemmatized, from designatted fields in CDE model classes"
@@ -62,7 +64,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Include verbatim (non-lemmatized) phrases alongside lemma phrases",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.phrase.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)
 

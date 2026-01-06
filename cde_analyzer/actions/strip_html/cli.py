@@ -3,7 +3,8 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
-
+from .run import run_action
+    
 help_text = "Clean (strip) embedded HTML from JSON structure"
 description_text = "Clean and normalize string fields containing HTML in structured JSON via Pydantic models"
 
@@ -69,6 +70,6 @@ def register_subparser(subparser: ArgumentParser):
         help="Use first row of table as column names (default: false). Only relevant if --tables.",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.strip_html.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)

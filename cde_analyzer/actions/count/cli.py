@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, BooleanOptionalAction
+from .run import run_action
 
 
 help_text = "Count occurrences of fields in JSON pydantic model."
@@ -59,7 +60,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Flatten nested result keys for easier analysis",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.count.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)
 

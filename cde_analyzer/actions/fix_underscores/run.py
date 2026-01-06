@@ -2,7 +2,7 @@
 
 import json
 import logging
-from argparse import ArgumentParser, BooleanOptionalAction, Namespace
+from argparse import Namespace
 
 logger = logging.getLogger(__name__)
 

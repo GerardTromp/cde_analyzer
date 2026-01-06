@@ -3,6 +3,7 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
+from .run import run_action
 
 help_text = "Extract subset of fields from model for embedding text"
 description_text = """Extract a desired subset of fields and collapse repeated
@@ -77,6 +78,6 @@ def register_subparser(subparser: ArgumentParser):
         help="Process limited set of permissibleValues fields using heuristic.",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.extract_embed.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)

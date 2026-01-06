@@ -3,6 +3,8 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
+from .run import run_action
+
 
 help_text = "Extract a subset of records that match some criteria on a pydantic path"
 description_text = """Given a list of models (CDE, Form, ...) filter those that
@@ -15,3 +17,4 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.phrase_builder.run"
     )
+    subparser.set_defaults(func=run_action)
