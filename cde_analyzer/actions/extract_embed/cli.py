@@ -17,26 +17,26 @@ The subset of fields is specified in a file (--path-file) as a set of
 
 def register_subparser(subparser: ArgumentParser):
     subparser.add_argument("--input", help="Input JSON file.")
-    ids = subparser.add_mutually_exclusive_group()
-    ids.add_argument(
+#    ids = subparser.add_mutually_exclusive_group()
+    subparser.add_argument(
         "--id-list",
         nargs="+",
         # required=True,
         help="List of item IDs (tinyId) to exclude or extract.",
     )
-    ids.add_argument(
+    subparser.add_argument(
         "--id-file",
-        default=str,
+        # default=str,
         help="File containing list of item IDs (tinyId) to exclude or extract (requires --exclude / --no-exclude).",
+    )
+    subparser.add_argument(
+        "--id-type", default=None, help="The type of ID, e.g., tinyId (default=None)."
     )
     subparser.add_argument(
         "--output-format",
         choices=["json", "csv", "tsv"],
         default="json",
         help="Choose output format. (default JSON)",
-    )
-    subparser.add_argument(
-        "--id-type", default=str, help="The type of ID (default=tinyId)."
     )
     subparser.add_argument(
         "-o",

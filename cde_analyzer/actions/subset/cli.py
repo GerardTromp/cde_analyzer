@@ -15,6 +15,6 @@ match the search criteria and return a subset of the models
 def register_subparser(subparser: ArgumentParser):
     subparser.add_argument("--input", help="Input JSON file.")
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.subset.run"
     )
     subparser.set_defaults(func=run_action)

@@ -31,8 +31,10 @@ def run_action(args):
     # paths = load_path_schema(args.path_file)
     if args.id_file:
         idlist = load_tinyids(args.id_file)
-    else:
+    elif args.id_list:
         idlist = args.id_list
+    else:
+        idlist = []
 
     raw = json.load(open(args.input))
     # ModelType = TypeVar(MODEL_REGISTRY[args.model], bound=BaseModel)

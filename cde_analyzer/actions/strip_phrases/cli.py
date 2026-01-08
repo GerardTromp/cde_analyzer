@@ -3,6 +3,7 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
+from .run import run_action
 
 def register_subparser(subparser: ArgumentParser):
     # parser = subparsers.add_parser(
@@ -55,6 +56,6 @@ def register_subparser(subparser: ArgumentParser):
         help="Number of context lines before and after changes.",
     )
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.strip_phrases.run"
     )
-    # subparser.set_defaults(func=run_action)
+    subparser.set_defaults(func=run_action)

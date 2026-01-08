@@ -96,6 +96,6 @@ def register_subparser(subparser: ArgumentParser):
     )
     
     subparser.set_defaults(
-        _runner="actions.phrase_builder.run"
+        _runner="actions.lemma_fasta.run"
     )
     subparser.set_defaults(func=run_action)
