@@ -58,7 +58,12 @@ ACTION_REGISTRY = {
         "module": "actions.subset.cli",
         "help": "Extract subset from JSON base on literal, regex, or list of tinyID",
         "description": "Utility to do local searches of JSON files",
-    },    
+    },
+    "phrase_miner": {
+        "module": "actions.phrase_miner.cli",
+        "help": "Iterative k-mer phrase mining with de Bruijn extension",
+        "description": "Detects repeated phrases using descending k-mer mining (k=25 to k=3)",
+    },
     # "depth": {...}
     # "quality": {...}
 }
