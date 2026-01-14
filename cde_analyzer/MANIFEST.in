@@ -1,0 +1,39 @@
+# MANIFEST.in - Specifies non-Python files to include in distribution
+
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CLAUDE.md
+
+# Include requirements files
+include requirements.txt
+include requirements-dev.txt
+include pyproject.toml
+
+# Include checkpoint system documentation
+recursive-include .claude/context *.md
+include .claude/CHECKPOINT_PROMPTS.md
+include .claude/CHECKPOINT_SYSTEM.md
+
+# Exclude checkpoint session data (user-specific)
+global-exclude .claude/sessions/*
+global-exclude .claude/checkpoints/*
+
+# Include documentation
+recursive-include docs *.md *.rst *.txt
+
+# Exclude legacy kmer files from distribution (keep in git for reference)
+# Uncomment if you want to exclude them:
+# global-exclude utils/kmer_*.py
+# global-exclude utils/plot_kmer_counts.py
+
+# Exclude test files from distribution
+recursive-exclude tests *
+exclude tests
+
+# Exclude development/build artifacts
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .DS_Store

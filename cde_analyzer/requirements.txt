@@ -1,0 +1,32 @@
+# CDE Analyzer - Required Dependencies
+# Python 3.9+ required
+
+# Core Data Modeling and Validation
+pydantic>=2.11.0,<3.0.0
+
+# Natural Language Processing
+# Used for lemmatization in phrase extraction and FASTA generation
+spacy>=3.8.0,<4.0.0
+nltk>=3.9.0,<4.0.0
+
+# Data Processing
+# Used in phrase_builder for data manipulation
+pandas>=2.0.0,<3.0.0
+
+# YAML Support
+# Used in html_stripper for YAML output format
+PyYAML>=6.0.0,<7.0.0
+
+# Note: Standard library dependencies (not listed):
+# - argparse (CLI argument parsing)
+# - json (JSON serialization/deserialization)
+# - csv (CSV/TSV output generation)
+# - re (regular expressions)
+# - collections (defaultdict, Counter)
+# - logging (application logging)
+# - pathlib (path handling)
+# - typing (type hints)
+# - importlib (dynamic module loading)
+# - unicodedata (text normalization)
+# - warnings (warning management)
+# - multiprocessing (parallel processing in phrase_builder)

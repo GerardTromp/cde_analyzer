@@ -1,0 +1,193 @@
+[build-system]
+requires = ["setuptools>=69.0.0", "wheel>=0.42.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cde-analyzer"
+version = "0.2.0"
+description = "A Python framework for analyzing and extracting data from the NLM Common Data Elements Repository"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Gerard Tromp", email = "gerard.tromp@example.com"}
+]
+maintainers = [
+    {name = "Gerard Tromp", email = "gerard.tromp@example.com"}
+]
+keywords = [
+    "cde",
+    "nlm",
+    "nih",
+    "common-data-elements",
+    "data-analysis",
+    "pydantic",
+    "nlp",
+    "phrase-extraction"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Text Processing :: Linguistic",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "pydantic>=2.11.0,<3.0.0",
+    "spacy>=3.8.0,<4.0.0",
+    "nltk>=3.9.0,<4.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "PyYAML>=6.0.0,<7.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "black>=24.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+]
+docs = [
+    "sphinx>=7.2.0",
+    "sphinx-rtd-theme>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/gtromp/cde-analyzer"
+Documentation = "https://cde-analyzer.readthedocs.io"
+Repository = "https://github.com/gtromp/cde-analyzer"
+"Bug Tracker" = "https://github.com/gtromp/cde-analyzer/issues"
+
+[project.scripts]
+cde-analyzer = "cde_analyzer:main"
+
+[tool.setuptools]
+packages = ["cde_analyzer", "cde_analyzer.actions", "cde_analyzer.core", "cde_analyzer.logic", "cde_analyzer.utils", "cde_analyzer.CDE_Schema"]
+
+[tool.setuptools.package-data]
+cde_analyzer = ["py.typed"]
+
+# Black configuration
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Exclude legacy kmer files
+  | utils/kmer_.*\.py
+  | utils/plot_kmer_counts\.py
+)/
+'''
+
+# Ruff configuration
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    # Exclude legacy files
+    "utils/kmer_*.py",
+    "utils/plot_kmer_counts.py",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Gradually enable
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "nltk.*",
+    "spacy.*",
+    "pandas.*",
+]
+ignore_missing_imports = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=cde_analyzer",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["cde_analyzer"]
+omit = [
+    "*/tests/*",
+    "*/utils/kmer_*.py",
+    "*/utils/plot_kmer_counts.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
