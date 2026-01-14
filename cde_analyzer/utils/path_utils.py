@@ -2,9 +2,9 @@
 
 import csv
 import json
-import logging
 from typing import Any, Dict, List, Union
 from collections import defaultdict
+from utils.logger import log_if_verbose
 
 
 def load_path_schema(path: str) -> Dict[str, str]:
@@ -24,7 +24,7 @@ def load_path_schema(path: str) -> Dict[str, str]:
             path_expr = row.get("path")
             if tag and path_expr:
                 schema[tag] = path_expr
-    logging.debug(f"The schema dictionary is: {schema}")
+    log_if_verbose(f"The schema dictionary is: {schema}", level=2)
     return schema
 
 

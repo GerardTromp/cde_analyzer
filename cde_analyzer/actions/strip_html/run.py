@@ -4,7 +4,7 @@
 from argparse import Namespace
 from pathlib import Path
 from logic.html_stripper import process_file
-from utils.logger import logging
+from utils.logger import log_if_verbose
 from utils.constants import MODEL_REGISTRY
 
 def run_action(args: Namespace):
@@ -14,7 +14,7 @@ def run_action(args: Namespace):
     for filename in args.input:
         filepath = Path(filename)
         if not filepath.is_file():
-            logging.warning(f"Skipping: {filename} is not a valid file.")
+            log_if_verbose(f"Skipping: {filename} is not a valid file.", level=0)
             continue
         process_file(
             filepath,

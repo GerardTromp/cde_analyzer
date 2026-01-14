@@ -1,7 +1,7 @@
 import csv
 import json
-import logging
 from typing import Any, Dict, List, Union
+from utils.logger import log_if_verbose
 
 
 id_columnname_mapping = {
@@ -41,6 +41,6 @@ def load_tinyids(path: str) -> List[str]:
                 else:
                     new_row[col_orig] = value
             id_list.append(new_row["tinyId"])
-            logging.debug(f"The ID list is now: {id_list}")
+            log_if_verbose(f"The ID list is now: {id_list}", level=2)
 
     return id_list
