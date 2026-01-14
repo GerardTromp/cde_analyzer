@@ -29,7 +29,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Directory for output files (default: current directory)",
     )
     subparser.add_argument(
-        "--format",
+        "--output-format",
         choices=["json", "yaml", "csv"],
         default="json",
         help="Output format (default: json)",

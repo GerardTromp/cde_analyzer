@@ -20,7 +20,7 @@ def run_action(args: Namespace):
             filepath,
             outdir,
             model_class,
-            args.format,
+            args.output_format,
             args.dry_run,
             args.set_keys,
             args.pretty,

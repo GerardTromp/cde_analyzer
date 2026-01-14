@@ -39,9 +39,11 @@ def register_subparser(subparser: ArgumentParser):
     )
     subparser.add_argument("--logic", help="Logical expression (e.g. 'A and not B')")
     subparser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable debug output for group-by resolution",
+        "--verbosity",
+        "-v",
+        action="count",
+        default=0,
+        help="Increase verbosity (-v, -vv, -vvv for more debug output)",
     )
     subparser.add_argument(
         "--count-type",

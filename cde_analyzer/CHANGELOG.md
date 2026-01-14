@@ -16,8 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License
 - This CHANGELOG file
 - Version management via `__version__.py`
+- Shared CLI argument groups in `utils/cli_args.py` for consistent argument handling
 
 ### Changed
+- **BREAKING**: `count` action: `--verbose` changed to `--verbosity, -v` with count action
+- **BREAKING**: `strip_html` action: `--format` changed to `--output-format`
+- Standardized short flag order across all actions (now `--long, -short` consistently)
+- `strip_phrases` action: Reordered arguments to use `--long, -short` pattern
 - Prepared for `pip install cde-analyzer` distribution
 - Documentation updates for installation
 

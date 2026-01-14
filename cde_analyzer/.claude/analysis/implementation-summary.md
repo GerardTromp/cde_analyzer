@@ -2,13 +2,14 @@
 
 **Date**: 2026-01-13
 **Author**: Claude (AI Assistant)
-**Session**: Packaging preparation for cde_analyzer
+**Session**: Packaging preparation and CLI standardization for cde_analyzer
+**Last Updated**: 2026-01-13 (CLI standardization implementation)
 
 ---
 
 ## What Was Accomplished
 
-This session focused on preparing the `cde_analyzer` project for PyPI distribution and standardizing CLI arguments across all actions.
+This session focused on preparing the `cde_analyzer` project for PyPI distribution and standardizing CLI arguments across all actions. **CLI standardization has been implemented.**
 
 ### 1. CLI Argument Analysis ✅
 
@@ -29,6 +30,57 @@ This session focused on preparing the `cde_analyzer` project for PyPI distributi
 - Always use `--long, -short` order
 - Migrate to `BooleanOptionalAction` for new flags
 - Create shared argument groups in `utils/cli_args.py`
+
+### 1b. CLI Argument Standardization Implementation ✅
+
+**Status**: **COMPLETED** (2026-01-13)
+
+**Changes Made**:
+
+1. **`actions/count/cli.py`** - Updated verbosity argument
+   - Changed: `--verbose` (store_true) → `--verbosity, -v` (count, default=0)
+   - Now consistent with main launcher and other actions
+   - Supports `-v`, `-vv`, `-vvv` for increasing verbosity levels
+
+2. **`actions/strip_html/cli.py`** - Standardized output format argument
+   - Changed: `--format` → `--output-format`
+   - Updated `run.py` to use `args.output_format`
+   - Now consistent with other actions (count, phrase, etc.)
+
+3. **`actions/strip_phrases/cli.py`** - Reordered short flags
+   - Changed all arguments from `-short, --long` to `--long, -short` pattern
+   - Affected arguments: `--input, -i`, `--model, -m`, `--phrases, -p`, `--output, -o`, `--diff, -d`, `--color, -c`, `--context, -C`
+   - Now consistent with project-wide standard
+
+4. **`utils/cli_args.py`** - Created shared argument group library
+   - New file with 7 reusable argument group functions:
+     - `add_input_output_args()` - Standard input/output/format arguments
+     - `add_verbosity_args()` - Verbosity and logging arguments
+     - `add_model_arg()` - Pydantic model selection
+     - `add_field_args()` - Field name list arguments
+     - `add_match_args()` - Field matching/filtering arguments
+     - `add_pretty_print_args()` - JSON formatting arguments
+     - `add_dry_run_arg()` - Dry run testing argument
+   - All functions follow consistent naming and help text patterns
+   - Exported via `utils/__init__.py` for easy import
+
+5. **`utils/__init__.py`** - Updated exports
+   - Added all 7 CLI argument group functions to `__all__`
+   - Functions now available for future action refactoring
+
+6. **`CHANGELOG.md`** - Documented breaking changes
+   - Added **BREAKING** tags for `count` and `strip_html` changes
+   - Documented all standardization work in [Unreleased] section
+
+**Migration Notes for Users**:
+- `count` action: Users must change `--verbose` to `--verbosity` or `-v`
+- `strip_html` action: Users must change `--format` to `--output-format`
+- All short flags still work the same, just reordered in `--help` output
+
+**Future Work**:
+- Actions can now be refactored to use shared argument groups from `utils/cli_args.py`
+- Will reduce code duplication and ensure ongoing consistency
+- Recommended for next version (0.3.0)
 
 ### 2. Dependency Analysis ✅
 
@@ -498,14 +550,15 @@ git push origin packaging
 
 ## Conclusion
 
-The `cde_analyzer` project is now **ready for PyPI packaging** with all essential configuration files created. The next critical steps are:
+The `cde_analyzer` project is now **ready for PyPI packaging** with all essential configuration files created AND **CLI arguments standardized**. The next critical steps are:
 
 1. **Test the build locally** to ensure everything works
-2. **Fix pandas dependency** (make optional or required)
-3. **Standardize CLI arguments** for consistency
-4. **Expand test coverage** before publishing
-5. **Publish to Test PyPI** for validation
-6. **Publish to production PyPI** after thorough testing
+2. **Test CLI changes** to verify standardized arguments work correctly
+3. **Fix pandas dependency** (make optional or required)
+4. ~~**Standardize CLI arguments** for consistency~~ ✅ **COMPLETED**
+5. **Expand test coverage** before publishing
+6. **Publish to Test PyPI** for validation
+7. **Publish to production PyPI** after thorough testing
 
 All documentation has been created to guide through each phase of the packaging and deployment process.
 
@@ -524,18 +577,26 @@ All documentation has been created to guide through each phase of the packaging 
 - core/__init__.py
 - logic/__init__.py
 - utils/__init__.py
+- utils/cli_args.py *(NEW - CLI argument groups)*
 
 **Documentation**:
 - LICENSE
 - CHANGELOG.md
+- PACKAGING_QUICKSTART.md
 - .claude/analysis/cli-argument-audit.md
 - .claude/analysis/packaging-plan.md
 - .claude/analysis/implementation-summary.md (this file)
 
-**Updated**:
+**Updated Files**:
 - .gitignore
+- actions/count/cli.py *(standardized --verbosity)*
+- actions/strip_html/cli.py *(standardized --output-format)*
+- actions/strip_html/run.py *(updated to use args.output_format)*
+- actions/strip_phrases/cli.py *(reordered short flags)*
+- utils/__init__.py *(exported CLI argument functions)*
+- CHANGELOG.md *(documented breaking changes)*
 
-**Total**: 14 files created/modified
+**Total**: 16 files created, 8 files modified = **24 files touched**
 
 ---
 
