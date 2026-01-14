@@ -3,8 +3,12 @@ Utils - Utility functions and helper modules.
 
 This package contains lightweight utility functions used across the application.
 
-Note: Files with 'kmer_*' prefix are legacy experimental code for phrase detection
-and are maintained for historical reference only.
+Legacy Kmer Code:
+    - kmer_extend_phrases1.py: ACTIVE - Used by logic/phrase_builder.py
+    - kmer_legacy_algorithms.py: Consolidated archive of all experimental kmer algorithms
+    - legacy_kmer/: Archive directory containing 11 original experimental files
+
+    See utils/legacy_kmer/README.md for detailed algorithm history and evolution.
 """
 
 from .logger import log_if_verbose, logging
