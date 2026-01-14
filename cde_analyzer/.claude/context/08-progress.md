@@ -65,6 +65,13 @@
 
 ## Branches
 
+### Active Branch: feature/phrase-miner-kmer-detection (CURRENT)
+- **Purpose**: Advanced k-mer phrase mining implementation
+- **Status**: Implementation complete (Phase 1-3), ready for testing
+- **Created**: 2026-01-13
+- **Latest Commit**: d543ff2 "Implement phrase_miner action (Phase 1-3: Core k-mer mining)"
+- **Contains**: New phrase_miner action with iterative descending k-mer detection
+
 ### Active Branch: Repeats
 - **Purpose**: Repeated phrase detection work
 - **Status**: Active development
@@ -81,10 +88,13 @@
 ```
 main (2ca729c) ← older, stable
   ↓
-Repeats (4e601c7) ← current, active
+  ├── Repeats (4e601c7) ← previous active work
+  └── feature/phrase-miner-kmer-detection (d543ff2) ← current development
 ```
 
-**Recommendation**: Merge Repeats → main once stabilized
+**Recommendation**:
+- Test feature/phrase-miner-kmer-detection, then merge to main
+- Evaluate merging Repeats → main once stabilized
 
 ## Development Phases (Historical)
 
@@ -213,6 +223,18 @@ Repeats (4e601c7) ← current, active
 
 ## Recently Completed
 
+### ✓ Phrase Miner Implementation (Phase 1-3)
+- Completed: 2026-01-13
+- Commit: d543ff2
+- Branch: feature/phrase-miner-kmer-detection
+- Status: Implementation complete, ready for testing
+- Features:
+  - Iterative descending k-mer detection (k=25 → k=3)
+  - Masking with ownership tracking
+  - Frequency and tinyID filtering
+  - TSV output format (phrases.tsv, occurrences.tsv)
+- Files: 6 new files, 2 modified files, 679 lines added
+
 ### ✓ Lazy Loading Refactoring
 - Completed: December 2024
 - Follow-up fixes: January 2026
@@ -233,6 +255,7 @@ Repeats (4e601c7) ← current, active
 - lemma_fasta
 - phrase_builder
 - subset
+- phrase_miner (NEW)
 
 All functional and updated for lazy loading
 
@@ -356,7 +379,51 @@ All functional and updated for lazy loading
 
 ## Session Notes
 
-**Current Session**: Initial checkpoint system setup (2026-01-13)
+### Session 2026-01-13b: Phrase Miner Implementation (Phase 1-3)
+
+**Branch**: feature/phrase-miner-kmer-detection (NEW)
+
+**Commit**: d543ff2 "Implement phrase_miner action (Phase 1-3: Core k-mer mining)"
+
+**Goals**:
+- Implement core k-mer mining algorithm based on PhraseExtensionConcept_20260113.md
+- Focus on Phase 1-3 (foundation, action setup, core mining)
+- Defer advanced features to future phases
+
+**Accomplishments**:
+- ✅ Created feature branch (feature/phrase-miner-kmer-detection)
+- ✅ Implemented Vocabulary class (utils/phrase_miner_vocab.py)
+- ✅ Implemented core data structures and mining algorithm (logic/phrase_miner.py)
+- ✅ Created action structure (actions/phrase_miner/)
+- ✅ Registered phrase_miner in ACTION_REGISTRY
+- ✅ Fixed pre-existing broken imports in logic/__init__.py
+- ✅ Committed changes with comprehensive commit message
+
+**Files Created** (6):
+- utils/phrase_miner_vocab.py
+- logic/phrase_miner.py
+- logic/phrase_anchor_extend.py (placeholder)
+- actions/phrase_miner/__init__.py
+- actions/phrase_miner/cli.py
+- actions/phrase_miner/run.py
+
+**Files Modified** (2):
+- cde_analyzer.py (added phrase_miner to ACTION_REGISTRY)
+- logic/__init__.py (fixed broken imports)
+
+**Checkpoint**: checkpoint-20260113-phrase-miner-phase1-3.md
+
+**Status**: Implementation complete, ready for testing
+
+**Next Steps**:
+- Test on small dataset (10-100 CDEs)
+- Validate output quality and performance
+- Merge to main after successful testing
+- Future: Implement Phase 4-7 enhancements
+
+---
+
+### Session 2026-01-13a: Initial checkpoint system setup
 
 **Goals**:
 - Establish checkpoint infrastructure
