@@ -37,7 +37,8 @@ Each action follows a consistent 3-file structure:
 Current actions:
 - **fix_underscores** - Fix Pydantic incompatible field names starting with underscore
 - **strip_html** - Remove HTML markup from CDE fields
-- **phrase** - Find repeated phrases across CDE records
+- **phrase** - Find repeated phrases across CDE records (original implementation)
+- **phrase_miner** - Advanced k-mer phrase mining with iterative descending detection (NEW)
 - **count** - Count structural elements and field occurrences
 - **extract_embed** - Extract fields for transformer embedding
 - **strip_phrases** - Remove literal phrases at specified paths
@@ -48,7 +49,9 @@ Current actions:
 ### 3. Business Logic (`logic/`)
 Core processing implementations:
 - **counter.py** - Field counting and type classification
-- **phrase_extractor.py** - Phrase detection and extraction
+- **phrase_extractor.py** - Phrase detection and extraction (original)
+- **phrase_miner.py** - K-mer phrase mining with iterative descending detection (NEW)
+- **phrase_anchor_extend.py** - Anchor extension for phrase_miner (placeholder for Phase 7+)
 - **phrase_stripper.py** - Phrase removal
 - **phrase_builder.py** - Incremental phrase construction
 - **extract_embed.py** - Field extraction for embeddings
@@ -80,7 +83,8 @@ Reusable functions grouped by purpose:
 - **logger.py** - Logging configuration
 - **output_writer.py** - Formatted output generation
 - **path_utils.py** - File path utilities
-- **phrase_extraction.py** - Phrase detection algorithms
+- **phrase_extraction.py** - Phrase detection algorithms (tokenization, lemmatization)
+- **phrase_miner_vocab.py** - Vocabulary class for k-mer phrase mining (token-to-ID mapping)
 - **phrase_pruning.py** - Phrase filtering and pruning
 - **analyzer_state.py** - Global state management (verbosity)
 - **unicode.py** - Unicode handling
@@ -208,6 +212,18 @@ Based on import analysis:
 
 ## Current State
 
-- **Active branch**: Repeats (working on repeated phrase detection)
-- **Main branch**: Stable, up-to-date
-- **Recent focus**: Lazy loading refactoring, launcher performance, phrase analysis
+- **Active branch**: feature/phrase-miner-kmer-detection (advanced k-mer phrase mining)
+- **Previous branch**: Repeats (earlier phrase detection work)
+- **Main branch**: Stable, behind feature branches
+- **Recent focus**:
+  - Lazy loading refactoring (Dec 2024, commit 4400bf7)
+  - Launcher performance optimization (Jan 2026)
+  - Phrase mining implementation (Jan 2026, commit d543ff2)
+  - K-mer-based phrase detection with masking
+
+**Latest Development** (2026-01-13):
+- Implemented new `phrase_miner` action with iterative descending k-mer detection
+- Branch: feature/phrase-miner-kmer-detection
+- Status: Implementation complete (Phase 1-3), ready for testing
+- Commit: d543ff2 "Implement phrase_miner action (Phase 1-3: Core k-mer mining)"
+- Published to GitHub: 2026-01-14

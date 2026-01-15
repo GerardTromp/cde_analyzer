@@ -68,7 +68,8 @@ recursive_descent(cde_item, "", my_visitor, context={'designations': []})
 
 **Used By**:
 - logic/counter.py - Field counting
-- logic/phrase_extractor.py - Phrase detection
+- logic/phrase_extractor.py - Phrase detection (original)
+- logic/phrase_miner.py - K-mer phrase mining (NEW)
 - logic/html_stripper.py - HTML removal
 - Most actions requiring deep traversal
 
@@ -404,7 +405,7 @@ elif output_format == "csv":
 ### 5. Phrase Processing Pipeline
 **Pattern**: Multi-stage text processing
 
-**Stages** (inferred from action names):
+**Original Pipeline** (phrase action):
 1. **Extract** (phrase action)
    - Find repeated n-grams
    - Lemmatize text
@@ -419,6 +420,30 @@ elif output_format == "csv":
    - Remove identified phrases from data
 5. **Export** (lemma_fasta action)
    - Convert to FASTA format for bioinformatics tools
+
+**Advanced K-mer Mining Pipeline** (phrase_miner action - NEW):
+1. **Extract & Tokenize** (logic/phrase_miner.py)
+   - Extract text from CDE fields (designation, definition, etc.)
+   - Tokenize using NLTK
+   - Lemmatize with POS tagging (optional)
+   - Build vocabulary (token-to-ID mapping)
+2. **Iterative K-mer Mining** (k=25 down to k=3)
+   - Count k-mers in unmasked regions only
+   - Filter by frequency threshold (freq_min=3)
+   - Filter by document support (min_tinyids=2)
+3. **Masking with Ownership Tracking**
+   - Mark detected phrases to prevent re-detection
+   - Track phrase_id ownership per token
+   - Naive O(n*m) pattern matching (Phase 3)
+   - Future: Aho-Corasick O(n+m) (Phase 4+)
+4. **Output Generation**
+   - phrases.tsv: phrase metadata (phrase_id, text, k, frequency, n_tinyids, method)
+   - occurrences.tsv: occurrence locations (phrase_id, tinyId, field_path, token_span)
+5. **Future Enhancements** (Phase 4-7):
+   - Phase 4: Aho-Corasick multi-pattern matching
+   - Phase 5: De Bruijn graph phrase extension
+   - Phase 6: Subsumption filtering
+   - Phase 7: Anchor-based boundary extension with bigram model
 
 ### 6. Field Extraction for ML
 **Pattern**: Extract specific fields for downstream processing

@@ -47,6 +47,10 @@ cde_analyzer/
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
+│   ├── phrase_miner/        # Advanced k-mer phrase mining (NEW)
+│   │   ├── __init__.py
+│   │   ├── cli.py
+│   │   └── run.py
 │   ├── strip_html/          # Remove HTML markup
 │   │   ├── __init__.py
 │   │   ├── cli.py
@@ -73,8 +77,10 @@ cde_analyzer/
 │   ├── extract_embed.py     # Embedding extraction logic
 │   ├── html_stripper.py     # HTML removal logic
 │   ├── lemma_fasta.py       # FASTA generation logic
+│   ├── phrase_anchor_extend.py # Anchor extension (placeholder, Phase 7+)
 │   ├── phrase_builder.py    # Phrase construction logic
 │   ├── phrase_extractor.py  # Phrase detection logic
+│   ├── phrase_miner.py      # Core k-mer mining algorithm (334 lines)
 │   └── phrase_stripper.py   # Phrase removal logic
 │
 ├── scripts/                  # Utility scripts
@@ -99,6 +105,7 @@ cde_analyzer/
 │   ├── path_utils.py        # Path utilities (2.6 KB)
 │   ├── phrase_builder.py    # Phrase building (1.4 KB)
 │   ├── phrase_extraction.py # Phrase extraction (9.4 KB)
+│   ├── phrase_miner_vocab.py # Vocabulary for phrase_miner (54 lines)
 │   ├── phrase_pruning.py    # Phrase filtering (3.1 KB)
 │   ├── tinyid_utils.py      # TinyID utilities (1.5 KB)
 │   ├── unicode.py           # Unicode handling (2.2 KB)
@@ -239,7 +246,8 @@ Based on git history (last 90 days):
 ### Core Processing
 - core/recursor.py (traversal engine)
 - logic/counter.py (counting)
-- logic/phrase_extractor.py (phrase detection)
+- logic/phrase_extractor.py (phrase detection - original)
+- logic/phrase_miner.py (phrase detection - k-mer mining)
 - logic/phrase_stripper.py (phrase removal)
 - logic/html_stripper.py (HTML cleaning)
 
@@ -248,6 +256,7 @@ Based on git history (last 90 days):
 - utils/cde_impexport.py (I/O)
 - utils/output_writer.py (formatting)
 - utils/phrase_extraction.py (phrase algorithms)
+- utils/phrase_miner_vocab.py (vocabulary for k-mer mining)
 
 ## Documentation Files
 - README.md - User-facing project overview
@@ -262,9 +271,10 @@ Based on git history (last 90 days):
 ## Special Notes
 
 ### Legacy Code
-The `utils/kmer_*.py` files represent experimental approaches to phrase detection. They are retained for reference but not actively used. The current phrase detection logic is in:
-- logic/phrase_extractor.py
-- utils/phrase_extraction.py
+The `utils/kmer_*.py` files represent experimental approaches to phrase detection. They are retained for reference but not actively used. The current phrase detection implementations are:
+- logic/phrase_extractor.py (original phrase detection)
+- logic/phrase_miner.py (NEW: iterative k-mer mining, Phase 1-3 implementation)
+- utils/phrase_extraction.py (tokenization and lemmatization utilities)
 
 ### Checkpoint System
 The `.claude/` directory contains a structured checkpoint system for maintaining context across sessions. See `.claude/CHECKPOINT_SYSTEM.md` for details.
