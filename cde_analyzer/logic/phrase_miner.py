@@ -21,6 +21,25 @@ from utils.phrase_miner_vocab import Vocabulary
 
 logger = logging.getLogger(__name__)
 
+# Punctuation characters that may trail a phrase and should be included in verbatim text
+# These are printable non-alphanumeric characters commonly found at phrase boundaries
+TRAILING_PUNCTUATION = frozenset([
+    ')', ']', '}',           # Closing brackets
+    '.', ',', ';', ':',      # Sentence/clause punctuation
+    '?', '!',                # Question/exclamation marks
+    "'", '"', '"', '"',      # Quotes (straight and curly)
+    '-', '–', '—',           # Hyphens and dashes
+    '/', '\\',               # Slashes
+    '%', '°',                # Percent, degree
+])
+
+# Characters that may precede a phrase (for potential future left extension)
+LEADING_PUNCTUATION = frozenset([
+    '(', '[', '{',           # Opening brackets
+    "'", '"', '"', '"',      # Quotes
+    '-', '–', '—',           # Hyphens and dashes
+])
+
 
 @dataclass
 class CDERef:
@@ -286,6 +305,35 @@ def extract_field_texts(item: CDEItem, field_names: List[str]) -> List[Tuple[str
     return results
 
 
+def extend_verbatim_span(text: str, char_start: int, char_end: int) -> Tuple[int, int]:
+    """
+    Extend verbatim character span to include adjacent punctuation.
+
+    When lemmatization removes trailing punctuation from tokens (e.g., "outcome)" becomes
+    "outcome"), the verbatim span should still include that punctuation to capture the
+    complete original phrase.
+
+    Args:
+        text: The full original text
+        char_start: Starting character position
+        char_end: Ending character position (exclusive)
+
+    Returns:
+        Tuple of (extended_start, extended_end) character positions
+    """
+    text_len = len(text)
+
+    # Extend right to include trailing punctuation
+    while char_end < text_len and text[char_end] in TRAILING_PUNCTUATION:
+        char_end += 1
+
+    # Extend left to include leading punctuation (optional, for completeness)
+    while char_start > 0 and text[char_start - 1] in LEADING_PUNCTUATION:
+        char_start -= 1
+
+    return char_start, char_end
+
+
 def count_kmers_with_masking(token_seqs: List[TokenSeq], k: int, freq_min: int) -> List[KmerCount]:
     """
     Count k-mers in unmasked regions only, capturing verbatim text per occurrence.
@@ -316,6 +364,10 @@ def count_kmers_with_masking(token_seqs: List[TokenSeq], k: int, freq_min: int) 
                     try:
                         char_start = seq.char_offsets[i][0]
                         char_end = seq.char_offsets[i + k - 1][1]
+                        # Extend span to include adjacent punctuation
+                        char_start, char_end = extend_verbatim_span(
+                            seq.original_text, char_start, char_end
+                        )
                         verbatim_text = seq.original_text[char_start:char_end]
                         char_span = (char_start, char_end)
                     except (IndexError, TypeError):
