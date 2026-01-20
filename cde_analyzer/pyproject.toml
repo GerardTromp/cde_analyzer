@@ -44,11 +44,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "pydantic>=2.11.0,<3.0.0",
-    "spacy>=3.8.0,<4.0.0",
-    "nltk>=3.9.0,<4.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "spacy>=3.7.0,<4.0.0",
+    "nltk>=3.8.0,<4.0.0",
     "pandas>=2.0.0,<3.0.0",
     "PyYAML>=6.0.0,<7.0.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
@@ -73,13 +76,30 @@ Repository = "https://github.com/gtromp/cde-analyzer"
 "Bug Tracker" = "https://github.com/gtromp/cde-analyzer/issues"
 
 [project.scripts]
-cde-analyzer = "cde_analyzer:main"
+cde-analyzer = "cli:main"
 
 [tool.setuptools]
-packages = ["cde_analyzer", "cde_analyzer.actions", "cde_analyzer.core", "cde_analyzer.logic", "cde_analyzer.utils", "cde_analyzer.CDE_Schema"]
+# Use flat layout - packages are at the root level, not nested under cde_analyzer
+py-modules = ["cde_analyzer", "cli"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "actions*",
+    "logic*",
+    "utils*",
+    "core*",
+    "CDE_Schema*",
+]
+exclude = [
+    "tests*",
+    "docs*",
+    ".claude*",
+    "scripts*",
+]
 
 [tool.setuptools.package-data]
-cde_analyzer = ["py.typed"]
+"*" = ["py.typed", "*.json", "*.md"]
 
 # Black configuration
 [tool.black]
@@ -157,10 +177,6 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--cov=cde_analyzer",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
@@ -173,11 +189,12 @@ markers = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["cde_analyzer"]
+source = ["actions", "logic", "utils", "core", "CDE_Schema", "cde_analyzer.py", "cli.py"]
 omit = [
     "*/tests/*",
     "*/utils/kmer_*.py",
     "*/utils/plot_kmer_counts.py",
+    "*/utils/legacy_kmer/*",
 ]
 
 [tool.coverage.report]

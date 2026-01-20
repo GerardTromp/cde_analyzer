@@ -1,0 +1,93 @@
+# Commands Overview
+
+CDE Analyzer provides a suite of CLI commands for processing and analyzing Common Data Elements.
+
+## Phrase Detection
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [phrase_miner](phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | NEW (Phase 1-3) |
+| [phrase](../help/phrase.md) | Original phrase detection using n-gram counting | Stable |
+| phrase_builder | Incremental phrase construction | Stable |
+| strip_phrases | Remove detected phrases from data | Stable |
+
+## Data Cleaning
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [fix_underscores](../help/fix_underscores.md) | Fix Pydantic-incompatible field names (underscore prefix) | Stable |
+| [strip_html](../help/strip.md) | Remove HTML markup from CDE fields | Stable |
+
+## Analysis
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [count](../help/count.md) | Count structural elements and field occurrences | Stable |
+| [extract_embed](../help/extract_embed.md) | Extract fields for transformer embeddings | Stable |
+
+## Export
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| lemma_fasta | Create FASTA format from lemma sequences | Stable |
+| subset | Extract subsets using literal/regex/tinyID filters | Stable |
+
+## Usage Pattern
+
+All commands follow the same basic pattern:
+
+```bash
+python cde_analyzer.py <command> --input <file.json> [options]
+```
+
+## Getting Help
+
+```bash
+# List all commands
+python cde_analyzer.py --help
+
+# Get help for a specific command
+python cde_analyzer.py <command> --help
+
+# Example
+python cde_analyzer.py phrase_miner --help
+```
+
+## Common Options
+
+Most commands share these common options:
+
+| Option | Description |
+|--------|-------------|
+| `--input`, `-i` | Input JSON file |
+| `--output`, `-o` | Output file or directory |
+| `--output-format` | Output format (json, csv, tsv) |
+| `--fields`, `-f` | Field names to process |
+
+## Workflow Examples
+
+### Typical Data Processing Pipeline
+
+```bash
+# 1. Fix field names for Pydantic compatibility
+python cde_analyzer.py fix_underscores --input raw_data.json --output fixed.json
+
+# 2. Strip HTML markup
+python cde_analyzer.py strip_html --input fixed.json --output cleaned.json --model CDE
+
+# 3. Find repeated phrases
+python cde_analyzer.py phrase_miner --input cleaned.json --output-dir phrases
+
+# 4. Analyze results
+python cde_analyzer.py count --input cleaned.json --fields designation --output counts.json
+```
+
+### Phrase Detection Comparison
+
+```bash
+# Original phrase detection (n-gram based)
+python cde_analyzer.py phrase --input data.json --fields designation --output phrases.json
+
+# NEW: Advanced k-mer mining (longest-first with masking)
+python cde_analyzer.py phrase_miner --input data.json --output-dir phrase_output
+```

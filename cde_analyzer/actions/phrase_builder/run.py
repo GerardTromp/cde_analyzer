@@ -4,35 +4,27 @@
 # Long phrases unlikely to cause problems, but short phrases need to be
 #   curated to avoid change in semantic intent of the remaining text
 
-# import os
 import json
-# import base64
-# import struct
 import sys
 import time
-import json
-# import hashlib
-import networkx as nx
-import numpy as np
-import pandas as pd # type: ignore -- vs does not have access to WSL modules
-import matplotlib.pyplot as plt  # type: ignore -- vs does not have access to WSL modules
-from argparse import ArgumentParser, Namespace
-from utils.logger import logging
-from utils.constants import MODEL_REGISTRY
-from utils.phrase_builder import rename_embed
-from typing import Tuple, Dict, Any, List
-# from collections import defaultdict
-from pydantic import BaseModel, ValidationError
-# from nltk.tokenize import RegexpTokenizer
-from logic.phrase_builder import df_kmers, gen_kmer_counts, gen_kmers, tokenizer
+from argparse import Namespace
 from datetime import datetime
-from utils.plot_kmer_counts import plot_kmer_counts
+
+from utils.logger import logging
 
 
 logger = logging.getLogger(__name__)
 
 def run_action(args: Namespace):
-    fields_wanted = ["Name", "Question", "Definition"] # This should come from args. 
+    # Lazy imports - heavy dependencies loaded only when action runs
+    import pandas as pd  # type: ignore
+    from pydantic import ValidationError
+    from utils.constants import MODEL_REGISTRY
+    from utils.phrase_builder import rename_embed
+    from logic.phrase_builder import gen_kmer_counts, gen_kmers, tokenizer
+    from utils.plot_kmer_counts import plot_kmer_counts
+
+    fields_wanted = ["Name", "Question", "Definition"] # This should come from args.
     k_list = [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
     model_class = MODEL_REGISTRY[args.model]
 

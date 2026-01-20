@@ -1,0 +1,76 @@
+# MkDocs configuration for CDE Analyzer
+
+site_name: CDE Analyzer
+site_description: Python CLI for parsing and analyzing NLM Common Data Elements
+site_author: CDE Analyzer Team
+
+# Repository
+repo_name: cde-clustering
+repo_url: https://github.com/your-repo/cde-clustering
+
+# Navigation
+nav:
+  - Home: index.md
+  - Commands:
+    - Overview: commands/index.md
+    - phrase_miner: commands/phrase_miner.md
+    - phrase: help/phrase.md
+    - count: help/count.md
+    - extract_embed: help/extract_embed.md
+    - strip_html: help/strip.md
+    - fix_underscores: help/fix_underscores.md
+  - Reference:
+    - CLI Reference: help/all-commands.md
+    - cde_analyzer: help/cde_analyzer.md
+  - Development:
+    - Architecture: architecture.md
+    - Data Models: data-models.md
+    - Contributing: contributing.md
+
+# Theme
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+# Plugins
+plugins:
+  - search
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-repo/cde-clustering
