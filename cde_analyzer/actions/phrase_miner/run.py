@@ -101,9 +101,13 @@ def run_action(args: Namespace):
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Get verbatim filtering options
+    verbatim_case_sensitive = getattr(args, 'verbatim_case_sensitive', False)
+
     write_phrases_tsv(phrases, output_dir / "phrases.tsv", vocab)
     write_occurrences_tsv(phrases, output_dir / "occurrences.tsv")
-    write_verbatim_phrases_tsv(phrases, output_dir / "verbatim_phrases.tsv")
+    write_verbatim_phrases_tsv(phrases, output_dir / "verbatim_phrases.tsv",
+                               case_sensitive=verbatim_case_sensitive)
     write_verbatim_variants_tsv(verbatim_tracker, output_dir / "verbatim_variants.tsv")
     if extended_phrases:
         write_extended_tsv(extended_phrases, output_dir / "extended.tsv", vocab)
@@ -130,7 +134,7 @@ def write_phrases_tsv(phrases: List, path: Path, vocab):
                    f"{len(p.distinct_tinyids)}\t{p.extension_method}\n")
 
 
-def write_verbatim_phrases_tsv(phrases: List, path: Path):
+def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool = False):
     """
     Write verbatim_phrases.tsv: maps lemmatized phrases to unique verbatim forms.
 
@@ -138,11 +142,20 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path):
     occurrences. One lemmatized phrase may map to multiple verbatim phrases
     (e.g., "patient report outcome" → "Patient Reported Outcome", "patient-reported outcomes").
 
+    Applies subsumption filtering to verbatim forms: shorter verbatim strings that
+    are substrings of longer verbatim strings (for the same phrase) are removed.
+    This prevents output like "may lead to...", "lead to...", "to..." which are
+    just different extraction windows of the same source text.
+
     Columns: phrase_id, lemma_text, verbatim_text, verbatim_count, tinyids
 
     Args:
         phrases: List of Phrase objects with occurrences containing verbatim_text
         path: Output file path
+        case_sensitive: If True, use case-sensitive substring matching for subsumption.
+                        This preserves case variants (e.g., "Patient Reported" vs
+                        "patient reported") for QC purposes. Default False uses
+                        case-insensitive matching which removes more duplicates.
     """
     from collections import defaultdict
 
@@ -161,8 +174,45 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path):
                     verbatim_groups[verbatim_normalized]["count"] += 1
                     verbatim_groups[verbatim_normalized]["tinyids"].add(occ.tinyId)
 
-            # Write one row per unique verbatim form
-            for verbatim, data in sorted(verbatim_groups.items(), key=lambda x: -x[1]["count"]):
+            # Apply verbatim subsumption: remove shorter strings contained in longer ones
+            verbatim_list = list(verbatim_groups.keys())
+            subsumed = set()
+
+            # Sort by length descending so longer strings are processed first
+            verbatim_list.sort(key=len, reverse=True)
+
+            for i, long_verbatim in enumerate(verbatim_list):
+                if long_verbatim in subsumed:
+                    continue
+
+                # Prepare comparison strings based on case sensitivity setting
+                if case_sensitive:
+                    long_compare = long_verbatim
+                else:
+                    long_compare = long_verbatim.lower()
+
+                for j in range(i + 1, len(verbatim_list)):
+                    short_verbatim = verbatim_list[j]
+                    if short_verbatim in subsumed:
+                        continue
+
+                    # Prepare comparison strings based on case sensitivity setting
+                    if case_sensitive:
+                        short_compare = short_verbatim
+                    else:
+                        short_compare = short_verbatim.lower()
+
+                    # Check if shorter is a substring of longer
+                    if short_compare in long_compare:
+                        # Also require tinyId overlap for subsumption
+                        long_tinyids = verbatim_groups[long_verbatim]["tinyids"]
+                        short_tinyids = verbatim_groups[short_verbatim]["tinyids"]
+                        if long_tinyids & short_tinyids:  # Non-empty intersection
+                            subsumed.add(short_verbatim)
+
+            # Write one row per unique non-subsumed verbatim form
+            non_subsumed = [(v, verbatim_groups[v]) for v in verbatim_list if v not in subsumed]
+            for verbatim, data in sorted(non_subsumed, key=lambda x: -x[1]["count"]):
                 # Escape for TSV
                 verbatim_safe = verbatim.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
                 tinyids_str = "|".join(sorted(data["tinyids"]))

@@ -116,6 +116,13 @@ def register_subparser(subparser: ArgumentParser):
         help="Use naive pattern matching instead of Aho-Corasick (slower, for debugging)"
     )
 
+    # Verbatim output options
+    subparser.add_argument(
+        "--verbatim-case-sensitive",
+        action="store_true",
+        help="Use case-sensitive comparison for verbatim subsumption (preserves case variants for QC)"
+    )
+
     # Optional features
     subparser.add_argument(
         "--histograms",
