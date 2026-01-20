@@ -4,16 +4,14 @@ Phrase Miner - Iterative k-mer phrase detection with de Bruijn extension.
 Detects repeated multi-word phrases using descending k-mer mining (k=25 to k=3)
 with de Bruijn graph extension, subsumption filtering, and optional anchor extension.
 
-Initial implementation (Phase 1-3) includes:
-- Core k-mer mining with iterative descent
+Implemented features:
+- Core k-mer mining with iterative descent (Phase 1-3)
 - Frequency and tinyId filtering
-- Basic masking to prevent re-detection
-
-Future enhancements (Phase 4+):
-- Aho-Corasick multi-pattern matching
-- De Bruijn graph contig extension
-- Subsumption filtering
-- Anchor-based phrase extension
+- Aho-Corasick multi-pattern matching for efficient masking (Phase 4)
+- De Bruijn graph contig extension for phrase merging (Phase 5)
+- Verbatim text recovery for original surface forms (Phase 3.5)
+- Subsumption filtering to remove redundant shorter phrases (Phase 6)
+- Anchor-based phrase extension using context bigrams (Phase 7)
 """
 
 from argparse import ArgumentParser, BooleanOptionalAction
@@ -85,16 +83,37 @@ def register_subparser(subparser: ArgumentParser):
         help="Remove English stopwords during tokenization"
     )
 
-    # Algorithm stages (for future enhancements)
+    # Algorithm stages
     subparser.add_argument(
         "--skip-debruijn",
         action="store_true",
-        help="Skip de Bruijn contig extension (deferred to Phase 5+)"
+        help="Skip de Bruijn contig extension (enabled by default)"
+    )
+    subparser.add_argument(
+        "--enable-debruijn",
+        action="store_true",
+        help="Enable de Bruijn graph extension to merge overlapping k-mers into longer phrases"
+    )
+    subparser.add_argument(
+        "--enable-subsumption",
+        action="store_true",
+        help="Enable subsumption filtering to remove shorter phrases contained in longer ones"
     )
     subparser.add_argument(
         "--skip-anchor",
         action="store_true",
-        help="Skip anchor-based extension (deferred to Phase 7+)"
+        default=True,
+        help="Skip anchor-based extension (default: True, use --enable-anchor to enable)"
+    )
+    subparser.add_argument(
+        "--enable-anchor",
+        action="store_true",
+        help="Enable anchor-based phrase extension using context bigrams"
+    )
+    subparser.add_argument(
+        "--no-aho-corasick",
+        action="store_true",
+        help="Use naive pattern matching instead of Aho-Corasick (slower, for debugging)"
     )
 
     # Optional features

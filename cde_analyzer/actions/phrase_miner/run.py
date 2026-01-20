@@ -32,6 +32,23 @@ def run_action(args: Namespace):
     logger.info(f"Loaded {len(items)} CDE items")
 
     # 2. Build configuration
+    # De Bruijn is disabled by default, enabled with --enable-debruijn
+    # (--skip-debruijn kept for compatibility but --enable-debruijn takes precedence)
+    skip_debruijn = not getattr(args, 'enable_debruijn', False)
+    if hasattr(args, 'skip_debruijn') and args.skip_debruijn:
+        skip_debruijn = True
+
+    # Aho-Corasick is enabled by default
+    use_aho_corasick = not getattr(args, 'no_aho_corasick', False)
+
+    # Anchor extension: disabled by default, enabled with --enable-anchor
+    skip_anchor = not getattr(args, 'enable_anchor', False)
+    if hasattr(args, 'skip_anchor') and args.skip_anchor:
+        skip_anchor = True
+
+    # Subsumption filtering: disabled by default, enabled with --enable-subsumption
+    enable_subsumption = getattr(args, 'enable_subsumption', False)
+
     config = MinerConfig(
         k_max=args.k_max,
         k_min=args.k_min,
@@ -40,34 +57,61 @@ def run_action(args: Namespace):
         field_names=args.fields,
         lemmatize=args.lemmatize,
         remove_stopwords=args.remove_stopwords,
-        skip_debruijn=args.skip_debruijn,
-        skip_anchor=args.skip_anchor,
+        skip_debruijn=skip_debruijn,
+        skip_anchor=skip_anchor,
+        use_aho_corasick=use_aho_corasick,
         generate_histograms=args.histograms,
     )
 
-    # 3. Execute mining pipeline
+    # Log configuration
+    logger.info(f"Configuration: k={args.k_min}-{args.k_max}, freq_min={args.freq_min}, "
+                f"min_tinyids={args.min_tinyids}")
+    logger.info(f"Features: debruijn={'enabled' if not skip_debruijn else 'disabled'}, "
+                f"aho_corasick={'enabled' if use_aho_corasick else 'disabled'}, "
+                f"subsumption={'enabled' if enable_subsumption else 'disabled'}, "
+                f"anchor={'enabled' if not skip_anchor else 'disabled'}")
+
+    # 3. Execute mining pipeline (now returns verbatim_tracker)
     logger.info("Starting phrase mining pipeline...")
-    phrases, token_seqs, vocab = mine_phrases(items, config)
+    phrases, token_seqs, vocab, verbatim_tracker = mine_phrases(items, config)
     logger.info(f"Mined {len(phrases)} phrases (vocabulary size: {len(vocab)})")
 
-    # 4. Optional anchor extension (deferred to Phase 7+)
+    # Log verbatim tracker statistics
+    stats = verbatim_tracker.get_statistics()
+    logger.info(f"Verbatim tracker: {stats['unique_lemmas']} lemmas, "
+                f"{stats['total_variants']} variants, "
+                f"avg {stats['avg_variants_per_lemma']:.1f} per lemma")
+
+    # 4. Optional subsumption filtering
+    if enable_subsumption:
+        from utils.subsumption_filter import subsumption_filter
+        original_count = len(phrases)
+        phrases = subsumption_filter(phrases, require_tinyid_overlap=True)
+        logger.info(f"Subsumption filter: {original_count} -> {len(phrases)} phrases")
+
+    # 5. Optional anchor extension
     extended_phrases = []
-    if not args.skip_anchor:
+    if not skip_anchor:
         logger.info("Performing anchor extension...")
         extended_phrases = extend_anchors(phrases, token_seqs, vocab, config)
         if extended_phrases:
             logger.info(f"Extended {len(extended_phrases)} phrases")
 
-    # 5. Write outputs
+    # 6. Write outputs
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     write_phrases_tsv(phrases, output_dir / "phrases.tsv", vocab)
     write_occurrences_tsv(phrases, output_dir / "occurrences.tsv")
+    write_verbatim_phrases_tsv(phrases, output_dir / "verbatim_phrases.tsv")
+    write_verbatim_variants_tsv(verbatim_tracker, output_dir / "verbatim_variants.tsv")
     if extended_phrases:
         write_extended_tsv(extended_phrases, output_dir / "extended.tsv", vocab)
 
+    # Log verbatim phrase statistics
+    verbatim_count = sum(1 for p in phrases for occ in p.occurrences if occ.verbatim_text)
     logger.info(f"Results written to {output_dir}")
+    logger.info(f"Occurrences with verbatim text: {verbatim_count}")
 
 
 def write_phrases_tsv(phrases: List, path: Path, vocab):
@@ -86,20 +130,85 @@ def write_phrases_tsv(phrases: List, path: Path, vocab):
                    f"{len(p.distinct_tinyids)}\t{p.extension_method}\n")
 
 
+def write_verbatim_phrases_tsv(phrases: List, path: Path):
+    """
+    Write verbatim_phrases.tsv: maps lemmatized phrases to unique verbatim forms.
+
+    For each lemmatized phrase, extracts all unique verbatim surface forms from
+    occurrences. One lemmatized phrase may map to multiple verbatim phrases
+    (e.g., "patient report outcome" → "Patient Reported Outcome", "patient-reported outcomes").
+
+    Columns: phrase_id, lemma_text, verbatim_text, verbatim_count, tinyids
+
+    Args:
+        phrases: List of Phrase objects with occurrences containing verbatim_text
+        path: Output file path
+    """
+    from collections import defaultdict
+
+    with path.open('w', encoding='utf-8') as f:
+        f.write("phrase_id\tlemma_text\tverbatim_text\tverbatim_count\ttinyids\n")
+
+        for p in phrases:
+            # Group occurrences by verbatim text
+            verbatim_groups = defaultdict(lambda: {"count": 0, "tinyids": set()})
+
+            for occ in p.occurrences:
+                verbatim = occ.verbatim_text if occ.verbatim_text else ""
+                # Normalize whitespace for grouping
+                verbatim_normalized = " ".join(verbatim.split())
+                if verbatim_normalized:
+                    verbatim_groups[verbatim_normalized]["count"] += 1
+                    verbatim_groups[verbatim_normalized]["tinyids"].add(occ.tinyId)
+
+            # Write one row per unique verbatim form
+            for verbatim, data in sorted(verbatim_groups.items(), key=lambda x: -x[1]["count"]):
+                # Escape for TSV
+                verbatim_safe = verbatim.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
+                tinyids_str = "|".join(sorted(data["tinyids"]))
+                f.write(f"{p.phrase_id}\t{p.text}\t{verbatim_safe}\t{data['count']}\t{tinyids_str}\n")
+
+
 def write_occurrences_tsv(phrases: List, path: Path):
     """
-    Write occurrences.tsv: phrase_id, tinyId, field_path, token_start, token_end
+    Write occurrences.tsv with verbatim text column.
+
+    Columns: phrase_id, tinyId, field_path, token_start, token_end, verbatim_text
 
     Args:
         phrases: List of Phrase objects
         path: Output file path
     """
     with path.open('w', encoding='utf-8') as f:
-        f.write("phrase_id\ttinyId\tfield_path\ttoken_start\ttoken_end\n")
+        f.write("phrase_id\ttinyId\tfield_path\ttoken_start\ttoken_end\tverbatim_text\n")
         for p in phrases:
             for occ in p.occurrences:
+                # Handle verbatim text - escape tabs/newlines for TSV format
+                verbatim = occ.verbatim_text if occ.verbatim_text else ""
+                verbatim = verbatim.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
                 f.write(f"{p.phrase_id}\t{occ.tinyId}\t{occ.field_path}\t"
-                       f"{occ.token_span[0]}\t{occ.token_span[1]}\n")
+                       f"{occ.token_span[0]}\t{occ.token_span[1]}\t{verbatim}\n")
+
+
+def write_verbatim_variants_tsv(tracker, path: Path):
+    """
+    Write verbatim_variants.tsv: lemma→variants dictionary for analysis.
+
+    Columns: lemma, variants (pipe-separated), count
+
+    Args:
+        tracker: VerbatimTracker object
+        path: Output file path
+    """
+    with path.open('w', encoding='utf-8') as f:
+        f.write("lemma\tvariants\tcount\n")
+        for lemma in sorted(tracker.lemma_to_variants.keys()):
+            trie = tracker.lemma_to_variants[lemma]
+            variants = trie.all_variants()
+            if variants:
+                # Sort variants for consistent output
+                variants_str = "|".join(sorted(variants))
+                f.write(f"{lemma}\t{variants_str}\t{len(variants)}\n")
 
 
 def write_extended_tsv(extended: List, path: Path, vocab):

@@ -67,10 +67,16 @@
 
 ### Active Branch: feature/phrase-miner-kmer-detection (CURRENT)
 - **Purpose**: Advanced k-mer phrase mining implementation
-- **Status**: Implementation complete (Phase 1-3), ready for testing
+- **Status**: ALL PHASES COMPLETE - ready for merge to main
 - **Created**: 2026-01-13
-- **Latest Commit**: d543ff2 "Implement phrase_miner action (Phase 1-3: Core k-mer mining)"
-- **Contains**: New phrase_miner action with iterative descending k-mer detection
+- **Latest Work**: 2026-01-20 (All 7 phases + Phase 3.5 implemented)
+- **Contains**: Full phrase_miner action with:
+  - Iterative descending k-mer detection (k=25 → k=3)
+  - Aho-Corasick multi-pattern masking
+  - De Bruijn graph extension
+  - Subsumption filtering
+  - Anchor-based phrase extension
+  - Verbatim text recovery
 
 ### Active Branch: Repeats
 - **Purpose**: Repeated phrase detection work
@@ -223,17 +229,44 @@ main (2ca729c) ← older, stable
 
 ## Recently Completed
 
-### ✓ Phrase Miner Implementation (Phase 1-3)
-- Completed: 2026-01-13
-- Commit: d543ff2
+### ✓ Phrase Miner Implementation (ALL PHASES COMPLETE)
+- Completed: 2026-01-20
 - Branch: feature/phrase-miner-kmer-detection
-- Status: Implementation complete, ready for testing
-- Features:
-  - Iterative descending k-mer detection (k=25 → k=3)
-  - Masking with ownership tracking
-  - Frequency and tinyID filtering
-  - TSV output format (phrases.tsv, occurrences.tsv)
-- Files: 6 new files, 2 modified files, 679 lines added
+- Status: All phases implemented and tested
+
+**Implemented Features**:
+- ✅ Phase 1: Foundation (data structures, vocabulary)
+- ✅ Phase 2: Action setup (CLI, orchestration)
+- ✅ Phase 3: Core k-mer mining (iterative descent k=25→k=3)
+- ✅ Phase 3.5: Verbatim text recovery (position-based + lemma→variants)
+- ✅ Phase 4: Aho-Corasick multi-pattern matching for masking
+- ✅ Phase 5: De Bruijn graph extension for phrase merging
+- ✅ Phase 6: Subsumption filtering to remove redundant phrases
+- ✅ Phase 7: Anchor-based phrase extension using context bigrams
+
+**Output Files**:
+1. `phrases.tsv` - All detected phrases with metadata
+2. `occurrences.tsv` - Every occurrence with verbatim text
+3. `verbatim_phrases.tsv` - Lemma→verbatim mappings (one-to-many)
+4. `verbatim_variants.tsv` - Token-level variants
+5. `extended.tsv` - Anchor-extended phrases (when enabled)
+
+**CLI Flags**:
+- `--enable-debruijn` - Enable De Bruijn graph extension
+- `--enable-subsumption` - Enable subsumption filtering
+- `--enable-anchor` - Enable anchor-based extension
+- `--no-aho-corasick` - Use naive matching (for debugging)
+
+**Files Created/Modified**:
+- utils/phrase_miner_vocab.py (Vocabulary class)
+- utils/verbatim_tracker.py (VerbatimTracker, PrefixTrie)
+- utils/subsumption_filter.py (subsumption filtering)
+- utils/aho_corasick_token.py (token-based AC automaton)
+- utils/debruijn_graph.py (De Bruijn graph extension)
+- utils/phrase_extraction.py (added tokenize_text_with_positions)
+- logic/phrase_miner.py (core mining algorithm)
+- logic/phrase_anchor_extend.py (anchor extension)
+- actions/phrase_miner/ (CLI and orchestration)
 
 ### ✓ Lazy Loading Refactoring
 - Completed: December 2024
@@ -378,6 +411,37 @@ All functional and updated for lazy loading
 **Next**: Update CLAUDE.md to reference checkpoint system
 
 ## Session Notes
+
+### Session 2026-01-20: phrase_miner All Phases Complete
+
+**Branch**: feature/phrase-miner-kmer-detection
+
+**Goals**:
+- Complete remaining phases (6, 7) of phrase_miner
+- Implement verbatim phrase extraction
+- Update all documentation
+
+**Accomplishments**:
+- ✅ Implemented Phase 6: Subsumption filtering (`utils/subsumption_filter.py`)
+- ✅ Implemented Phase 7: Anchor-based extension (`logic/phrase_anchor_extend.py`)
+- ✅ Added verbatim phrase output (`write_verbatim_phrases_tsv()`)
+- ✅ Added CLI flags: `--enable-subsumption`, `--enable-anchor`
+- ✅ Updated plan document (marked all phases complete)
+- ✅ Updated context documentation
+
+**Files Created**:
+- utils/subsumption_filter.py (subsumption filtering with tinyId overlap check)
+
+**Files Modified**:
+- logic/phrase_anchor_extend.py (full implementation replacing stub)
+- actions/phrase_miner/run.py (added verbatim output, subsumption integration)
+- actions/phrase_miner/cli.py (added new CLI flags)
+
+**Performance**: ~40s for 22,000 CDEs with k_min=7
+
+**Status**: All phases complete, ready for production use
+
+---
 
 ### Session 2026-01-15: Documentation Update for phrase_miner
 

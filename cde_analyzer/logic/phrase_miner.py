@@ -28,14 +28,19 @@ class CDERef:
     tinyId: str
     field_path: str           # e.g., "designations[0].designation"
     token_span: Tuple[int, int]  # (start_tok, end_tok) in token sequence
+    verbatim_text: Optional[str] = None  # Original text for this occurrence
+    char_span: Optional[Tuple[int, int]] = None  # Character offsets in source
 
 
 @dataclass
 class TokenSeq:
-    """Token sequence with masking state"""
-    tokens: List[int]         # Vocab token IDs
+    """Token sequence with masking state and verbatim tracking"""
+    tokens: List[int]                    # Vocab token IDs (lemmatized)
     cde_ref: CDERef
-    mask_owner: List[Optional[str]]  # phrase_id that owns each token (None = unmasked)
+    mask_owner: List[Optional[str]]      # phrase_id that owns each token (None = unmasked)
+    original_tokens: Optional[List[str]] = None  # Original tokens before lemmatization
+    original_text: Optional[str] = None          # Full original text of this field
+    char_offsets: Optional[List[Tuple[int, int]]] = None  # (start, end) char positions per token
 
 
 @dataclass
@@ -70,12 +75,13 @@ class MinerConfig:
     field_names: List[str] = field(default_factory=lambda: ["designation", "definition"])
     remove_stopwords: bool = True
     lemmatize: bool = True
-    skip_debruijn: bool = True  # Defer to future enhancement
+    skip_debruijn: bool = True  # Set to False to enable de Bruijn extension
     skip_anchor: bool = True    # Defer to future enhancement
+    use_aho_corasick: bool = True  # Use Aho-Corasick for masking (faster)
     generate_histograms: bool = False
 
 
-def mine_phrases(items: List[CDEItem], config: MinerConfig) -> Tuple[List[Phrase], List[TokenSeq], Vocabulary]:
+def mine_phrases(items: List[CDEItem], config: MinerConfig):
     """
     Main phrase mining pipeline.
 
@@ -84,13 +90,14 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig) -> Tuple[List[Phrase
         config: Mining configuration
 
     Returns:
-        Tuple of (phrases, token_seqs, vocab):
+        Tuple of (phrases, token_seqs, vocab, verbatim_tracker):
         - phrases: List of detected phrases
         - token_seqs: Token sequences for each text span (with masking state)
         - vocab: Vocabulary mapping
+        - verbatim_tracker: VerbatimTracker for lemma→variants lookup
     """
     # Stage 1: Extract and tokenize text spans from CDE fields
-    token_seqs, vocab = extract_token_sequences(items, config)
+    token_seqs, vocab, verbatim_tracker = extract_token_sequences(items, config)
     logger.info(f"Extracted {len(token_seqs)} token sequences, vocab size {len(vocab)}")
 
     all_phrases = []
@@ -107,15 +114,20 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig) -> Tuple[List[Phrase
         if not kmer_counts:
             continue
 
-        # Stage 3: De Bruijn graph extension (deferred to future enhancement)
-        # if not config.skip_debruijn:
-        #     from utils.debruijn_graph import debruijn_extend_bin
-        #     kmer_counts = debruijn_extend_bin(kmer_counts, vocab, config)
+        # Stage 3: De Bruijn graph extension
+        if not config.skip_debruijn:
+            from utils.debruijn_graph import debruijn_extend_bin
+            original_count = len(kmer_counts)
+            kmer_counts = debruijn_extend_bin(kmer_counts, vocab, config)
+            if len(kmer_counts) != original_count:
+                logger.info(f"  De Bruijn: {original_count} -> {len(kmer_counts)} k-mers")
 
         # Stage 4: Convert k-mers to phrases
         new_phrases = []
         for kmer_count in kmer_counts:
-            phrase = kmer_count_to_phrase(kmer_count, phrase_id_counter, k, vocab)
+            # Determine extension method based on k-mer length vs original k
+            extension_method = "debruijn" if len(kmer_count.kmer) > k else "kmer"
+            phrase = kmer_count_to_phrase(kmer_count, phrase_id_counter, k, vocab, extension_method)
             phrase_id_counter += 1
 
             # Stage 5: Filter by tinyId support
@@ -125,8 +137,11 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig) -> Tuple[List[Phrase
         all_phrases.extend(new_phrases)
         logger.info(f"  Added {len(new_phrases)} phrases (filtered by min_tinyids={config.min_distinct_tinyids})")
 
-        # Stage 6: Mask detected phrases (naive implementation for Phase 1-3)
-        mask_phrases_naive(token_seqs, new_phrases)
+        # Stage 6: Mask detected phrases
+        if config.use_aho_corasick:
+            mask_phrases_aho_corasick(token_seqs, new_phrases)
+        else:
+            mask_phrases_naive(token_seqs, new_phrases)
 
     # Stage 7: Subsumption filtering (deferred to future enhancement)
     # from utils.subsumption_filter import subsumption_filter
@@ -134,25 +149,30 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig) -> Tuple[List[Phrase
     # logger.info(f"After subsumption filter: {len(filtered_phrases)} phrases (removed {len(all_phrases) - len(filtered_phrases)})")
 
     logger.info(f"Total phrases detected: {len(all_phrases)}")
-    return all_phrases, token_seqs, vocab
+    return all_phrases, token_seqs, vocab, verbatim_tracker
 
 
-def extract_token_sequences(items: List[CDEItem], config: MinerConfig) -> Tuple[List[TokenSeq], Vocabulary]:
+def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
     """
     Extract text from specified fields, tokenize, lemmatize, build vocabulary.
+
+    Now also tracks original tokens for verbatim text recovery.
 
     Args:
         items: List of CDEItem objects
         config: Mining configuration
 
     Returns:
-        Tuple of (token_seqs, vocab):
-        - token_seqs: List of TokenSeq objects
+        Tuple of (token_seqs, vocab, verbatim_tracker):
+        - token_seqs: List of TokenSeq objects with original token tracking
         - vocab: Vocabulary object
+        - verbatim_tracker: VerbatimTracker for lemma→variants lookup
     """
-    from utils.phrase_extraction import tokenize_text, make_lemma, STOPWORDS
+    from utils.phrase_extraction import tokenize_text_with_positions, make_lemma, STOPWORDS
+    from utils.verbatim_tracker import VerbatimTracker
 
     vocab = Vocabulary()
+    verbatim_tracker = VerbatimTracker(prefix_len=2)
     token_seqs = []
 
     for item in items:
@@ -163,22 +183,47 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig) -> Tuple[
         text_spans = extract_field_texts(item, config.field_names)
 
         for field_path, text in text_spans:
-            # Tokenize (reuse existing utility)
-            tokens_str = tokenize_text(text)
-            if not tokens_str:
+            # Tokenize with position tracking for verbatim recovery
+            tokens_with_pos = tokenize_text_with_positions(text)
+            if not tokens_with_pos:
                 continue
+
+            # Separate tokens and positions
+            original_tokens = [t[0] for t in tokens_with_pos]
+            char_offsets = [t[1] for t in tokens_with_pos]
+
+            # For lemmatization, we need lowercase tokens
+            tokens_lower = [t.lower() for t in original_tokens]
 
             # Lemmatize if configured
             if config.lemmatize:
-                tokens_str = make_lemma(tokens_str, config.remove_stopwords, STOPWORDS)
+                lemmas = make_lemma(tokens_lower, config.remove_stopwords, STOPWORDS)
 
-            if not tokens_str:  # Skip if no tokens remain after lemmatization
+                # Build lemma→original mapping for verbatim recovery
+                # Note: After stopword removal, lists may have different lengths
+                # We need to track which tokens were kept
+                if config.remove_stopwords:
+                    # Re-align: filter original_tokens and char_offsets to match lemmas
+                    stopwords_lower = {s.lower() for s in STOPWORDS}
+                    kept_indices = [i for i, t in enumerate(tokens_lower) if t not in stopwords_lower]
+                    original_tokens = [original_tokens[i] for i in kept_indices]
+                    char_offsets = [char_offsets[i] for i in kept_indices]
+
+                # Now register lemma→original mappings
+                for orig, lemma in zip(original_tokens, lemmas):
+                    verbatim_tracker.register_token(lemma, orig)
+
+                tokens_str = lemmas
+            else:
+                tokens_str = tokens_lower
+
+            if not tokens_str:  # Skip if no tokens remain after processing
                 continue
 
             # Convert to vocab IDs
             token_ids = [vocab.add_token(t) for t in tokens_str]
 
-            # Create TokenSeq with unmasked state
+            # Create TokenSeq with verbatim tracking
             cde_ref = CDERef(
                 tinyId=item.tinyId,
                 field_path=field_path,
@@ -187,10 +232,13 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig) -> Tuple[
             token_seqs.append(TokenSeq(
                 tokens=token_ids,
                 cde_ref=cde_ref,
-                mask_owner=[None] * len(token_ids)
+                mask_owner=[None] * len(token_ids),
+                original_tokens=original_tokens,
+                original_text=text,
+                char_offsets=char_offsets
             ))
 
-    return token_seqs, vocab
+    return token_seqs, vocab, verbatim_tracker
 
 
 def extract_field_texts(item: CDEItem, field_names: List[str]) -> List[Tuple[str, str]]:
@@ -240,7 +288,7 @@ def extract_field_texts(item: CDEItem, field_names: List[str]) -> List[Tuple[str
 
 def count_kmers_with_masking(token_seqs: List[TokenSeq], k: int, freq_min: int) -> List[KmerCount]:
     """
-    Count k-mers in unmasked regions only.
+    Count k-mers in unmasked regions only, capturing verbatim text per occurrence.
 
     Args:
         token_seqs: List of TokenSeq objects
@@ -261,11 +309,25 @@ def count_kmers_with_masking(token_seqs: List[TokenSeq], k: int, freq_min: int) 
                 kmer_map[kmer_tuple]["freq"] += 1
                 kmer_map[kmer_tuple]["tinyids"].add(seq.cde_ref.tinyId)
 
-                # Record occurrence location
+                # Extract verbatim text for this occurrence
+                verbatim_text = None
+                char_span = None
+                if seq.char_offsets and seq.original_text:
+                    try:
+                        char_start = seq.char_offsets[i][0]
+                        char_end = seq.char_offsets[i + k - 1][1]
+                        verbatim_text = seq.original_text[char_start:char_end]
+                        char_span = (char_start, char_end)
+                    except (IndexError, TypeError):
+                        pass  # Fall back to None if offsets unavailable
+
+                # Record occurrence location with verbatim text
                 occ = CDERef(
                     tinyId=seq.cde_ref.tinyId,
                     field_path=seq.cde_ref.field_path,
-                    token_span=(i, i+k)
+                    token_span=(i, i+k),
+                    verbatim_text=verbatim_text,
+                    char_span=char_span
                 )
                 kmer_map[kmer_tuple]["occurrences"].append(occ)
 
@@ -287,8 +349,12 @@ def mask_phrases_naive(token_seqs: List[TokenSeq], phrases: List[Phrase]):
     """
     Mark tokens as masked using naive pattern matching.
 
-    This is a simple implementation for Phase 1-3.
-    Future enhancement: Replace with Aho-Corasick for O(n+m) performance.
+    This is a simple O(n*m*k) implementation where:
+    - n = total tokens across all sequences
+    - m = number of phrases
+    - k = average phrase length
+
+    For large datasets, use mask_phrases_aho_corasick() instead.
 
     Args:
         token_seqs: List of TokenSeq objects (modified in-place)
@@ -307,15 +373,57 @@ def mask_phrases_naive(token_seqs: List[TokenSeq], phrases: List[Phrase]):
                             seq.mask_owner[i+j] = phrase.phrase_id
 
 
-def kmer_count_to_phrase(kmer_count: KmerCount, phrase_id: int, k: int, vocab: Vocabulary) -> Phrase:
+def mask_phrases_aho_corasick(token_seqs: List[TokenSeq], phrases: List[Phrase]):
+    """
+    Mark tokens as masked using Aho-Corasick multi-pattern matching.
+
+    This is an O(n + m + z) implementation where:
+    - n = total tokens across all sequences
+    - m = total pattern length (sum of all phrase lengths)
+    - z = number of matches found
+
+    Significantly faster than naive matching for large phrase sets.
+
+    Args:
+        token_seqs: List of TokenSeq objects (modified in-place)
+        phrases: List of Phrase objects to mask
+    """
+    from utils.aho_corasick_token import build_automaton
+
+    if not phrases:
+        return
+
+    # Build Aho-Corasick automaton from phrase token sequences
+    patterns = {p.phrase_id: list(p.token_ids) for p in phrases}
+    automaton = build_automaton(patterns)
+
+    # Match patterns in each token sequence
+    for seq in token_seqs:
+        matches = automaton.search(seq.tokens)
+
+        # Sort matches by start position, then by length (longer first)
+        # This ensures longer phrases get priority at same position
+        matches.sort(key=lambda m: (m[1], -(m[2] - m[1])))
+
+        # Mark matched regions as owned (first-come-first-served)
+        for phrase_id, start_idx, end_idx in matches:
+            # Check if this region is still unmasked
+            if all(seq.mask_owner[i] is None for i in range(start_idx, end_idx)):
+                for i in range(start_idx, end_idx):
+                    seq.mask_owner[i] = phrase_id
+
+
+def kmer_count_to_phrase(kmer_count: KmerCount, phrase_id: int, k: int, vocab: Vocabulary,
+                         extension_method: str = "kmer") -> Phrase:
     """
     Convert KmerCount to Phrase object.
 
     Args:
         kmer_count: KmerCount object
         phrase_id: Sequential phrase ID number
-        k: K-mer length
+        k: K-mer length (original k value from mining loop)
         vocab: Vocabulary for text conversion
+        extension_method: How this phrase was detected ("kmer", "debruijn", or "anchor")
 
     Returns:
         Phrase object
@@ -329,5 +437,5 @@ def kmer_count_to_phrase(kmer_count: KmerCount, phrase_id: int, k: int, vocab: V
         distinct_tinyids=kmer_count.tinyids,
         k=k,
         occurrences=kmer_count.occurrences,
-        extension_method="kmer"
+        extension_method=extension_method
     )

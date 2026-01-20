@@ -146,11 +146,11 @@ def rm_stopwords(words: list, stopset: set) -> List:
 
 def tokenize_text(text:str) -> List[str]:
     '''Simple tokenization
-    
+
     Args:
         text (str): Some sentence or phrase.
     Return:
-        list (str): separated alphanumeric tokens. 
+        list (str): separated alphanumeric tokens.
     '''
     log_if_verbose(f"[TOKENIZE] raw: {repr(text)}", 3)
     tokens = word_tokenize(text.lower())
@@ -161,8 +161,62 @@ def tokenize_text(text:str) -> List[str]:
     if not tokens:
         log_if_verbose(f"[POS] Skipped empty token list: {repr(text)}", 3)
         return []
-    
+
     return tokens
+
+
+def tokenize_text_with_positions(text: str) -> List[Tuple[str, Tuple[int, int]]]:
+    """
+    Tokenize text while tracking character positions in original text.
+
+    This function preserves the original case of tokens by finding their
+    positions in the source text after tokenization. Useful for verbatim
+    text recovery in phrase mining.
+
+    Args:
+        text: Source text to tokenize
+
+    Returns:
+        List of (original_token, (start_char, end_char)) tuples where:
+        - original_token: The token with original case preserved
+        - start_char: Starting character offset in source text
+        - end_char: Ending character offset (exclusive) in source text
+
+    Example:
+        >>> tokenize_text_with_positions("Patient Reported Outcome")
+        [('Patient', (0, 7)), ('Reported', (8, 16)), ('Outcome', (17, 24))]
+    """
+    log_if_verbose(f"[TOKENIZE_POS] raw: {repr(text)}", 3)
+
+    tokens_with_pos = []
+    current_pos = 0
+    text_lower = text.lower()
+
+    # Get tokens from lowercased text (NLTK standard behavior)
+    tokens = word_tokenize(text_lower)
+    log_if_verbose(f"[TOKENIZE_POS] tokens: {tokens}", 3)
+
+    for token in tokens:
+        # Skip non-alphanumeric tokens
+        if not token.isalnum():
+            continue
+
+        # Find token position in lowercased text (starting from current position)
+        start = text_lower.find(token, current_pos)
+        if start == -1:
+            # Token not found - skip (shouldn't happen normally)
+            log_if_verbose(f"[TOKENIZE_POS] Warning: token '{token}' not found after pos {current_pos}", 2)
+            continue
+
+        end = start + len(token)
+
+        # Get original case from source text
+        original_token = text[start:end]
+        tokens_with_pos.append((original_token, (start, end)))
+        current_pos = end
+
+    log_if_verbose(f"[TOKENIZE_POS] result: {tokens_with_pos}", 3)
+    return tokens_with_pos
  
     
 def extract_phrases(

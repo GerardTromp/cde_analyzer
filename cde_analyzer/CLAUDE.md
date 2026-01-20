@@ -51,17 +51,29 @@ The `cde_analyzer` wrapper script accepts action arguments:
 
 1. **fix_underscores** - Fix Pydantic-incompatible field names (underscore prefix)
 2. **strip_html** - Remove HTML markup from CDE fields
-3. **phrase** - Find repeated phrases across CDE records
-4. **count** - Count structural elements and field occurrences
-5. **extract_embed** - Extract fields for transformer model embedding
-6. **strip_phrases** - Remove literal phrases at specified paths
-7. **lemma_fasta** - Create FASTA format from lemma sequences
-8. **phrase_builder** - Incremental phrase construction
-9. **subset** - Extract subsets using literal/regex/tinyID filters
+3. **phrase** - Find repeated phrases across CDE records (original approach)
+4. **phrase_miner** - Advanced k-mer phrase mining with iterative descent (NEW)
+5. **count** - Count structural elements and field occurrences
+6. **extract_embed** - Extract fields for transformer model embedding
+7. **strip_phrases** - Remove literal phrases at specified paths
+8. **lemma_fasta** - Create FASTA format from lemma sequences
+9. **phrase_builder** - Incremental phrase construction
+10. **subset** - Extract subsets using literal/regex/tinyID filters
 
 **Usage**: `cde_analyzer <action> [arguments]`
 
 **Help**: `cde_analyzer <action> --help` for action-specific options
+
+### phrase_miner Features (Advanced)
+The `phrase_miner` action provides sophisticated phrase detection:
+- Iterative descending k-mer mining (k=25 → k=3)
+- Aho-Corasick multi-pattern matching for efficient masking
+- De Bruijn graph extension (`--enable-debruijn`)
+- Subsumption filtering (`--enable-subsumption`)
+- Anchor-based phrase extension (`--enable-anchor`)
+- Verbatim text recovery for original surface forms
+
+**Example**: `cde_analyzer phrase_miner -i cdes.json -o output/ --enable-subsumption`
 
 ## Key Technical Notes
 
@@ -74,8 +86,13 @@ Files in `utils/` with `kmer_*` prefix are **legacy experimental code** for phra
 - May document evolution toward effective phrase detection algorithms
 
 Current phrase detection uses:
-- `logic/phrase_extractor.py`
-- `utils/phrase_extraction.py`
+- `logic/phrase_extractor.py` (original approach via `phrase` action)
+- `logic/phrase_miner.py` (advanced k-mer mining via `phrase_miner` action)
+- `logic/phrase_anchor_extend.py` (anchor-based extension)
+- `utils/phrase_extraction.py` (shared tokenization utilities)
+- `utils/verbatim_tracker.py` (verbatim text recovery)
+- `utils/subsumption_filter.py` (redundant phrase removal)
+- `utils/aho_corasick_token.py` (efficient pattern matching)
 
 ### Data Model Characteristics
 - **Self-referential nesting** - Models can contain nested instances of themselves

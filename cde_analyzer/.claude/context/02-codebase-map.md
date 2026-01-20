@@ -77,10 +77,10 @@ cde_analyzer/
 │   ├── extract_embed.py     # Embedding extraction logic
 │   ├── html_stripper.py     # HTML removal logic
 │   ├── lemma_fasta.py       # FASTA generation logic
-│   ├── phrase_anchor_extend.py # Anchor extension (placeholder, Phase 7+)
+│   ├── phrase_anchor_extend.py # Anchor extension with bigram model (373 lines)
 │   ├── phrase_builder.py    # Phrase construction logic
-│   ├── phrase_extractor.py  # Phrase detection logic
-│   ├── phrase_miner.py      # Core k-mer mining algorithm (334 lines)
+│   ├── phrase_extractor.py  # Phrase detection logic (original)
+│   ├── phrase_miner.py      # Core k-mer mining algorithm (~430 lines)
 │   └── phrase_stripper.py   # Phrase removal logic
 │
 ├── scripts/                  # Utility scripts
@@ -107,6 +107,10 @@ cde_analyzer/
 │   ├── phrase_extraction.py # Phrase extraction (9.4 KB)
 │   ├── phrase_miner_vocab.py # Vocabulary for phrase_miner (54 lines)
 │   ├── phrase_pruning.py    # Phrase filtering (3.1 KB)
+│   ├── verbatim_tracker.py  # Verbatim text recovery (PrefixTrie) (~200 lines)
+│   ├── subsumption_filter.py # Phrase subsumption filtering (~230 lines)
+│   ├── aho_corasick_token.py # Token-based Aho-Corasick automaton (~150 lines)
+│   ├── debruijn_graph.py    # De Bruijn graph extension (~200 lines)
 │   ├── tinyid_utils.py      # TinyID utilities (1.5 KB)
 │   ├── unicode.py           # Unicode handling (2.2 KB)
 │   ├── lemma_fasta.py       # FASTA lemma utils (7.4 KB)
@@ -273,8 +277,13 @@ Based on git history (last 90 days):
 ### Legacy Code
 The `utils/kmer_*.py` files represent experimental approaches to phrase detection. They are retained for reference but not actively used. The current phrase detection implementations are:
 - logic/phrase_extractor.py (original phrase detection)
-- logic/phrase_miner.py (NEW: iterative k-mer mining, Phase 1-3 implementation)
+- logic/phrase_miner.py (iterative k-mer mining - ALL PHASES COMPLETE)
+- logic/phrase_anchor_extend.py (anchor-based phrase extension)
 - utils/phrase_extraction.py (tokenization and lemmatization utilities)
+- utils/verbatim_tracker.py (verbatim text recovery)
+- utils/subsumption_filter.py (redundant phrase removal)
+- utils/aho_corasick_token.py (efficient pattern matching)
+- utils/debruijn_graph.py (phrase extension via graph)
 
 ### Checkpoint System
 The `.claude/` directory contains a structured checkpoint system for maintaining context across sessions. See `.claude/CHECKPOINT_SYSTEM.md` for details.
