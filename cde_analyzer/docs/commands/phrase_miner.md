@@ -6,7 +6,7 @@ Advanced k-mer phrase mining with iterative descending detection.
 
 The `phrase_miner` action detects repeated multi-word phrases across CDE records using an iterative k-mer mining algorithm. It starts with the longest phrases (k=25) and works down to the shortest (k=3), masking detected phrases to prevent re-detection.
 
-**Implementation Status**: Phase 1-3 complete (core k-mer mining)
+**Implementation Status**: All phases complete (Phase 1-7 + enhancements)
 
 ## Usage
 
@@ -34,9 +34,12 @@ python cde_analyzer.py phrase_miner --input <file.json> [options]
 | `--min-tinyids` | `2` | Minimum distinct tinyIds (document support) |
 | `--lemmatize` / `--no-lemmatize` | `True` | Apply lemmatization to tokens |
 | `--remove-stopwords` | `False` | Remove English stopwords during tokenization |
-| `--skip-debruijn` | `False` | Skip de Bruijn contig extension (Phase 5+) |
-| `--skip-anchor` | `False` | Skip anchor-based extension (Phase 7+) |
-| `--histograms` | `False` | Generate k-mer frequency histograms (not yet implemented) |
+| `--enable-debruijn` | `False` | Enable de Bruijn graph extension (Phase 5) |
+| `--enable-subsumption` | `False` | Enable subsumption filtering (Phase 6) |
+| `--enable-anchor` | `False` | Enable anchor-based extension (Phase 7) |
+| `--no-aho-corasick` | `False` | Use naive pattern matching instead of Aho-Corasick |
+| `--verbatim-case-sensitive` | `False` | Use case-sensitive verbatim grouping |
+| `--histograms` | `False` | Generate k-mer frequency histograms |
 
 ## Examples
 
@@ -110,7 +113,7 @@ Metadata for each detected phrase.
 | Column | Description |
 |--------|-------------|
 | `phrase_id` | Unique identifier (e.g., `phrase_00001`) |
-| `text` | Human-readable phrase text |
+| `text` | Human-readable phrase text (lemmatized) |
 | `k` | Original k-mer length |
 | `frequency` | Total occurrence count |
 | `n_tinyids` | Number of distinct CDE documents |
@@ -126,7 +129,7 @@ phrase_00003	clinical trial participant	3	76	32	kmer
 
 ### occurrences.tsv
 
-Location of each phrase occurrence.
+Location of each phrase occurrence with verbatim text.
 
 | Column | Description |
 |--------|-------------|
@@ -135,16 +138,62 @@ Location of each phrase occurrence.
 | `field_path` | Path to field (e.g., `designations[0].designation`) |
 | `token_start` | Start token index |
 | `token_end` | End token index |
+| `verbatim_text` | Original surface text (pre-lemmatization) |
 
 **Example**:
 ```tsv
-phrase_id	tinyId	field_path	token_start	token_end
-phrase_00001	CDE123	designations[0].designation	5	8
-phrase_00001	CDE456	definitions[0].definition	2	5
-phrase_00002	CDE789	designations[1].designation	0	4
+phrase_id	tinyId	field_path	token_start	token_end	verbatim_text
+phrase_00001	CDE123	designations[0].designation	5	8	Patient Reported Outcomes
+phrase_00001	CDE456	definitions[0].definition	2	5	patient-reported outcome
+phrase_00002	CDE789	designations[1].designation	0	4	Adverse Event Severity
 ```
 
-### extended.tsv (Future - Phase 7+)
+### verbatim_phrases.tsv
+
+Lemma-to-verbatim mappings showing all surface forms for each phrase.
+
+| Column | Description |
+|--------|-------------|
+| `phrase_id` | Reference to phrases.tsv |
+| `lemma_text` | Lemmatized phrase text |
+| `verbatim_text` | Original surface form |
+| `count` | Occurrence count for this verbatim form |
+| `n_tinyids` | Number of distinct documents with this form |
+| `tinyids` | Pipe-separated list of tinyIds |
+
+### verbatim_variants.tsv
+
+Token-level variants showing lemma-to-surface mappings.
+
+| Column | Description |
+|--------|-------------|
+| `lemma` | Lemmatized token |
+| `variant` | Surface form variant |
+| `count` | Occurrence count |
+
+### verbatim_templates.tsv
+
+Structural templates extracted from verbatim variants.
+
+| Column | Description |
+|--------|-------------|
+| `phrase_id` | Reference to phrases.tsv |
+| `lemma_text` | Lemmatized phrase text |
+| `n_variants` | Number of distinct verbatim forms |
+| `core` | Longest common substring across all variants |
+| `template_regex` | Full regex matching all variants |
+| `prefix_slot` | Regex for prefix variations |
+| `prefix_variants` | Pipe-separated prefix values |
+| `suffix_slot` | Regex for suffix variations |
+| `suffix_variants` | Pipe-separated suffix values |
+| `infix1_slot` | Regex for first internal variation |
+| `infix1_variants` | Pipe-separated infix1 values |
+| `infix2_slot` | Regex for second internal variation |
+| `infix2_variants` | Pipe-separated infix2 values |
+
+Only phrases with 2+ distinct verbatim forms are included.
+
+### extended.tsv (with --enable-anchor)
 
 Extended phrases with context-based boundary improvement.
 
@@ -198,18 +247,22 @@ Where:
 
 ## Implementation Phases
 
-### Completed (Phase 1-3)
+### All Phases Complete
 
 - ✅ **Phase 1: Foundation** - Data structures, vocabulary class
 - ✅ **Phase 2: Action Setup** - CLI, orchestration layer
 - ✅ **Phase 3: Core Mining** - K-mer counting, basic masking
+- ✅ **Phase 3.5: Verbatim Recovery** - Position-based verbatim text extraction
+- ✅ **Phase 4: Aho-Corasick** - O(n+m) multi-pattern matching
+- ✅ **Phase 5: De Bruijn** - Graph-based phrase extension
+- ✅ **Phase 6: Subsumption** - Remove phrases contained in longer ones
+- ✅ **Phase 7: Anchor Extension** - Context-based boundary improvement
 
-### Deferred (Phase 4-7)
+### Recent Enhancements
 
-- ⏸️ **Phase 4: Aho-Corasick** - O(n+m) multi-pattern matching
-- ⏸️ **Phase 5: De Bruijn** - Graph-based phrase extension
-- ⏸️ **Phase 6: Subsumption** - Remove phrases contained in longer ones
-- ⏸️ **Phase 7: Anchor Extension** - Context-based boundary improvement
+- ✅ **Verbatim Coalescing** - Case-insensitive grouping of verbatim forms
+- ✅ **Verbatim Templates** - Regex pattern extraction from multi-form phrases
+- ✅ **Unicode Normalization** - Expanded substitution table (156 entries)
 
 ## Comparison with `phrase` Command
 
@@ -233,11 +286,18 @@ Where:
 
 | File | Description |
 |------|-------------|
-| `actions/phrase_miner/cli.py` | Argument parsing (109 lines) |
-| `actions/phrase_miner/run.py` | Orchestration layer (122 lines) |
-| `logic/phrase_miner.py` | Core algorithm (334 lines) |
-| `logic/phrase_anchor_extend.py` | Anchor extension placeholder (39 lines) |
-| `utils/phrase_miner_vocab.py` | Vocabulary class (54 lines) |
+| `actions/phrase_miner/cli.py` | Argument parsing |
+| `actions/phrase_miner/run.py` | Orchestration and output generation |
+| `logic/phrase_miner.py` | Core k-mer mining algorithm |
+| `logic/phrase_anchor_extend.py` | Anchor-based phrase extension |
+| `utils/phrase_miner_vocab.py` | Vocabulary class |
+| `utils/verbatim_tracker.py` | Verbatim text recovery (PrefixTrie) |
+| `utils/aho_corasick_token.py` | Token-based Aho-Corasick automaton |
+| `utils/subsumption_filter.py` | Phrase subsumption filtering |
+| `utils/debruijn_graph.py` | De Bruijn graph extension |
+| `utils/verbatim_coalesce.py` | Case-insensitive verbatim grouping |
+| `utils/verbatim_template.py` | Template extraction from verbatim variants |
+| `utils/unicode.py` | Unicode normalization (156 substitutions) |
 
 ### Data Structures
 

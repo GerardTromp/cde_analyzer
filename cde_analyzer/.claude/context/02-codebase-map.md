@@ -108,11 +108,14 @@ cde_analyzer/
 │   ├── phrase_miner_vocab.py # Vocabulary for phrase_miner (54 lines)
 │   ├── phrase_pruning.py    # Phrase filtering (3.1 KB)
 │   ├── verbatim_tracker.py  # Verbatim text recovery (PrefixTrie) (~200 lines)
+│   ├── verbatim_coalesce.py # Case-insensitive verbatim grouping (~150 lines)
+│   ├── verbatim_template.py # Template extraction from verbatim variants (~250 lines)
+│   ├── verbatim_diff.py     # Diff annotation for verbatim comparison (~100 lines)
 │   ├── subsumption_filter.py # Phrase subsumption filtering (~230 lines)
 │   ├── aho_corasick_token.py # Token-based Aho-Corasick automaton (~150 lines)
 │   ├── debruijn_graph.py    # De Bruijn graph extension (~200 lines)
 │   ├── tinyid_utils.py      # TinyID utilities (1.5 KB)
-│   ├── unicode.py           # Unicode handling (2.2 KB)
+│   ├── unicode.py           # Unicode normalization (156 substitutions)
 │   ├── lemma_fasta.py       # FASTA lemma utils (7.4 KB)
 │   ├── plot_kmer_counts.py  # LEGACY: Kmer visualization (5.9 KB)
 │   │
@@ -281,9 +284,13 @@ The `utils/kmer_*.py` files represent experimental approaches to phrase detectio
 - logic/phrase_anchor_extend.py (anchor-based phrase extension)
 - utils/phrase_extraction.py (tokenization and lemmatization utilities)
 - utils/verbatim_tracker.py (verbatim text recovery)
+- utils/verbatim_coalesce.py (case-insensitive verbatim grouping)
+- utils/verbatim_template.py (template extraction from variants)
+- utils/verbatim_diff.py (diff annotation for comparison)
 - utils/subsumption_filter.py (redundant phrase removal)
 - utils/aho_corasick_token.py (efficient pattern matching)
 - utils/debruijn_graph.py (phrase extension via graph)
+- utils/unicode.py (Unicode normalization, 156 substitutions)
 
 ### Checkpoint System
 The `.claude/` directory contains a structured checkpoint system for maintaining context across sessions. See `.claude/CHECKPOINT_SYSTEM.md` for details.

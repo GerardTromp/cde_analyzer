@@ -69,7 +69,7 @@
 - **Purpose**: Advanced k-mer phrase mining implementation
 - **Status**: ALL PHASES COMPLETE - ready for merge to main
 - **Created**: 2026-01-13
-- **Latest Work**: 2026-01-20 (All 7 phases + Phase 3.5 implemented)
+- **Latest Work**: 2026-01-21 (All phases + Unicode normalization + verbatim templates)
 - **Contains**: Full phrase_miner action with:
   - Iterative descending k-mer detection (k=25 → k=3)
   - Aho-Corasick multi-pattern masking
@@ -249,7 +249,8 @@ main (2ca729c) ← older, stable
 2. `occurrences.tsv` - Every occurrence with verbatim text
 3. `verbatim_phrases.tsv` - Lemma→verbatim mappings (one-to-many)
 4. `verbatim_variants.tsv` - Token-level variants
-5. `extended.tsv` - Anchor-extended phrases (when enabled)
+5. `verbatim_templates.tsv` - Regex templates from multi-form phrases
+6. `extended.tsv` - Anchor-extended phrases (when enabled)
 
 **CLI Flags**:
 - `--enable-debruijn` - Enable De Bruijn graph extension
@@ -411,6 +412,54 @@ All functional and updated for lazy loading
 **Next**: Update CLAUDE.md to reference checkpoint system
 
 ## Session Notes
+
+### Session 2026-01-21: Unicode Normalization and Verbatim Templates
+
+**Branch**: feature/phrase-miner-kmer-detection
+
+**Commit**: c1f7af9 "Add Unicode normalization pipeline and verbatim template extraction"
+
+**Goals**:
+- Add Unicode normalization earlier in pipeline (strip_html)
+- Expand Unicode substitution table
+- Implement verbatim template extraction
+
+**Accomplishments**:
+- ✅ Expanded `utils/unicode.py` UNICODE_SUBSTITUTIONS from 39 to 156 entries
+  - Control characters (misencoded quotes/dashes)
+  - Full Latin-1 Supplement (accented letters, symbols)
+  - Greek alphabet (scientific/medical text)
+  - General Punctuation (spaces, quotes, dashes)
+  - Superscripts/Subscripts, Number Forms, Math Operators
+  - Miscellaneous symbols (bullets, checkboxes)
+- ✅ Added Unicode normalization to all HTML text extraction paths
+  - `strip_html()` already called `normalize_unicode()` via `normalize_string()`
+  - `process_html_blob()` now uses `normalize_string()` for all text
+  - Table cell extraction uses new `_normalize_cell()` helper
+- ✅ Added `normalize_unicode()` call to `sanitize()` in `utils/extract_embed.py`
+- ✅ Created `utils/verbatim_template.py` for template extraction
+- ✅ Created `utils/verbatim_coalesce.py` for case-insensitive grouping
+- ✅ Created `utils/verbatim_diff.py` for diff annotation
+- ✅ Added `write_verbatim_templates_tsv()` to phrase_miner run.py
+- ✅ Updated documentation (phrase_miner.md, context files)
+
+**Files Created** (3):
+- utils/verbatim_template.py (extract_template, format_template_row)
+- utils/verbatim_coalesce.py (coalesce_verbatim_groups)
+- utils/verbatim_diff.py (annotate_diff)
+
+**Files Modified** (4):
+- utils/unicode.py (expanded substitution table 39→156 entries)
+- utils/html.py (added _normalize_cell helper, normalize all text paths)
+- utils/extract_embed.py (added normalize_unicode call to sanitize)
+- actions/phrase_miner/run.py (added write_verbatim_templates_tsv)
+
+**Impact**: Unicode variants (smart quotes, em-dashes, accented chars) now
+collapsed before phrase detection, reducing false phrase variants.
+
+**Status**: Complete, pushed to remote
+
+---
 
 ### Session 2026-01-20: phrase_miner All Phases Complete
 
