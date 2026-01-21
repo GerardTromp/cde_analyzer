@@ -3,6 +3,7 @@ import re
 from typing import Union, Dict, Any, List
 from utils.path_utils import permis_values_to_dict_list
 from utils.logger import log_if_verbose
+from utils.unicode import normalize_unicode
 
 DOS_NL = re.compile(r"\r\n")
 MAC_NL = re.compile(r"\r")
@@ -33,13 +34,18 @@ def strip_embedded_nl(text: str) -> Union[str, None]:
 
 def sanitize(s):
     """
-    clean up strings
+    Clean up strings by:
+    - Converting None to empty string
+    - Stripping leading/trailing whitespace
+    - Normalizing embedded newlines to spaces
+    - Normalizing Unicode characters to ASCII equivalents
     """
     if s is None:
         return ""
     else:
         s = str(s).strip()
         s = strip_embedded_nl(s)
+        s = normalize_unicode(s)
         return s
     
 

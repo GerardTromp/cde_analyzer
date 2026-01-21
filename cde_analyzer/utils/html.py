@@ -18,12 +18,23 @@ verbosity = get_verbosity()
 
 
 def normalize_string(text: str) -> str:
+    """
+    Normalize a string by:
+    - Applying Unicode NFC normalization
+    - Converting Unicode characters to ASCII equivalents
+    - Collapsing whitespace to single spaces
+    """
     # Original has .lower() but we want to maintain case
     # return unicodedata.normalize("NFC", text).strip().lower()
     text = unicodedata.normalize("NFC", text).strip()
     text = normalize_unicode(text)
     text = re.sub(r"\s+", " ", text)
     return text
+
+
+def _normalize_cell(cell) -> str:
+    """Extract and normalize text from an HTML table cell."""
+    return normalize_string(cell.get_text(strip=True))
 
 
 def strip_html(text: str) -> str:
@@ -105,12 +116,12 @@ def process_html_blob(html_string, header_col: bool):
             # Assuming the first row is the header, if applicable
             header_row = table.find("tr")
             headers = [
-                cell.get_text(strip=True) for cell in header_row.find_all(["th", "td"])
+                _normalize_cell(cell) for cell in header_row.find_all(["th", "td"])
             ]
 
             for row in table.find_all("tr")[1:]:  # Start from the second row
                 row_data = [
-                    cell.get_text(strip=True) for cell in row.find_all(["td", "th"])
+                    _normalize_cell(cell) for cell in row.find_all(["td", "th"])
                 ]
                 # Create a dictionary for each row using headers as keys
                 row_dict = dict(zip(headers, row_data))
@@ -125,7 +136,7 @@ def process_html_blob(html_string, header_col: bool):
             for row in table.find_all("tr")[0:]:  # Start from the first row
                 row_cnt += 1
                 row_data = [
-                    cell.get_text(strip=True) for cell in row.find_all(["td", "th"])
+                    _normalize_cell(cell) for cell in row.find_all(["td", "th"])
                 ]
                 log_message = (
                     f"Processing headerless table. row: {row_cnt}, data: {row_data}"
@@ -143,6 +154,5 @@ def process_html_blob(html_string, header_col: bool):
     else:
         # If no tables are found, extract plain text
         mtext = soup.get_text(separator=" ")
-        mtext = re.sub(r"\s+", " ", mtext).strip()
+        mtext = normalize_string(mtext)
         return mtext
-        # return soup.get_text(strip=True)  # Extract text and strip whitespace

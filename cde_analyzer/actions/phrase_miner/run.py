@@ -109,6 +109,15 @@ def run_action(args: Namespace):
     write_verbatim_phrases_tsv(phrases, output_dir / "verbatim_phrases.tsv",
                                case_sensitive=verbatim_case_sensitive)
     write_verbatim_variants_tsv(verbatim_tracker, output_dir / "verbatim_variants.tsv")
+
+    # Write verbatim templates (extracts structural patterns from multi-form phrases)
+    templates_count = write_verbatim_templates_tsv(
+        phrases, output_dir / "verbatim_templates.tsv",
+        case_sensitive=verbatim_case_sensitive
+    )
+    if templates_count > 0:
+        logger.info(f"Extracted {templates_count} verbatim templates (phrases with 2+ variants)")
+
     if extended_phrases:
         write_extended_tsv(extended_phrases, output_dir / "extended.tsv", vocab)
 
@@ -142,25 +151,41 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
     occurrences. One lemmatized phrase may map to multiple verbatim phrases
     (e.g., "patient report outcome" → "Patient Reported Outcome", "patient-reported outcomes").
 
-    Applies subsumption filtering to verbatim forms: shorter verbatim strings that
-    are substrings of longer verbatim strings (for the same phrase) are removed.
-    This prevents output like "may lead to...", "lead to...", "to..." which are
-    just different extraction windows of the same source text.
+    Applies three-stage filtering to verbatim forms:
+    1. Coalescing: Overlapping fragments from the same tinyId set are merged into
+       a single longer string. This handles sliding window artifacts where
+       "harmful and usually..." and "and usually subject..." become one merged string.
+    2. Subsumption (conservative): Shorter verbatim strings that are substrings
+       of longer ones WITH tinyId overlap are removed.
+    3. Subsumption (refinement): Remaining stragglers that are exact substrings
+       of longer forms are merged into the longer form, combining tinyIds and counts.
+       This catches cases where different document sets produced the same substring.
 
-    Columns: phrase_id, lemma_text, verbatim_text, verbatim_count, tinyids
+    Columns: phrase_id, lemma_text, verbatim_text, verbatim_count, tinyids,
+             prefix_diff, suffix_diff, diff_summary
+
+    The diff columns annotate differences between multiple verbatim forms of the
+    same phrase_id, helping humans understand why forms weren't merged:
+    - prefix_diff: Content missing from prefix compared to longest form
+    - suffix_diff: Content missing from suffix compared to longest form
+    - diff_summary: Human-readable summary of divergent portions
+
+    For phrases with only one verbatim form, diff columns are empty.
 
     Args:
         phrases: List of Phrase objects with occurrences containing verbatim_text
         path: Output file path
-        case_sensitive: If True, use case-sensitive substring matching for subsumption.
-                        This preserves case variants (e.g., "Patient Reported" vs
-                        "patient reported") for QC purposes. Default False uses
-                        case-insensitive matching which removes more duplicates.
+        case_sensitive: If True, use case-sensitive comparison for coalescing and
+                        subsumption. This preserves case variants (e.g., "Patient
+                        Reported" vs "patient reported") for QC purposes. Default
+                        False uses case-insensitive matching which produces cleaner output.
     """
     from collections import defaultdict
+    from utils.verbatim_coalesce import coalesce_verbatim_groups
+    from utils.verbatim_diff import annotate_verbatim_differences
 
     with path.open('w', encoding='utf-8') as f:
-        f.write("phrase_id\tlemma_text\tverbatim_text\tverbatim_count\ttinyids\n")
+        f.write("phrase_id\tlemma_text\tverbatim_text\tverbatim_count\ttinyids\tprefix_diff\tsuffix_diff\tdiff_summary\n")
 
         for p in phrases:
             # Group occurrences by verbatim text
@@ -174,15 +199,24 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
                     verbatim_groups[verbatim_normalized]["count"] += 1
                     verbatim_groups[verbatim_normalized]["tinyids"].add(occ.tinyId)
 
-            # Apply verbatim subsumption: remove shorter strings contained in longer ones
-            verbatim_list = list(verbatim_groups.keys())
-            subsumed = set()
+            # Stage 1: Coalesce overlapping fragments with same tinyId set
+            # Convert defaultdict to regular dict for coalescing
+            verbatim_dict = {k: dict(v) for k, v in verbatim_groups.items()}
+            coalesced_groups = coalesce_verbatim_groups(
+                verbatim_dict,
+                case_sensitive=case_sensitive,
+                min_overlap=10
+            )
+
+            # Stage 2: Conservative subsumption (requires tinyId overlap)
+            verbatim_list = list(coalesced_groups.keys())
+            subsumed_stage2 = set()
 
             # Sort by length descending so longer strings are processed first
             verbatim_list.sort(key=len, reverse=True)
 
             for i, long_verbatim in enumerate(verbatim_list):
-                if long_verbatim in subsumed:
+                if long_verbatim in subsumed_stage2:
                     continue
 
                 # Prepare comparison strings based on case sensitivity setting
@@ -193,7 +227,7 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
 
                 for j in range(i + 1, len(verbatim_list)):
                     short_verbatim = verbatim_list[j]
-                    if short_verbatim in subsumed:
+                    if short_verbatim in subsumed_stage2:
                         continue
 
                     # Prepare comparison strings based on case sensitivity setting
@@ -204,19 +238,63 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
 
                     # Check if shorter is a substring of longer
                     if short_compare in long_compare:
-                        # Also require tinyId overlap for subsumption
-                        long_tinyids = verbatim_groups[long_verbatim]["tinyids"]
-                        short_tinyids = verbatim_groups[short_verbatim]["tinyids"]
+                        # Require tinyId overlap for conservative subsumption
+                        long_tinyids = coalesced_groups[long_verbatim]["tinyids"]
+                        short_tinyids = coalesced_groups[short_verbatim]["tinyids"]
                         if long_tinyids & short_tinyids:  # Non-empty intersection
-                            subsumed.add(short_verbatim)
+                            subsumed_stage2.add(short_verbatim)
 
-            # Write one row per unique non-subsumed verbatim form
-            non_subsumed = [(v, verbatim_groups[v]) for v in verbatim_list if v not in subsumed]
-            for verbatim, data in sorted(non_subsumed, key=lambda x: -x[1]["count"]):
+            # Stage 3: Refinement subsumption - merge exact substrings regardless of tinyId
+            # This catches stragglers from different document sets that are true substrings
+            remaining = [v for v in verbatim_list if v not in subsumed_stage2]
+            remaining.sort(key=len, reverse=True)  # Re-sort after filtering
+
+            # Build refined groups - merge shorter into longer if exact substring
+            refined_groups = {}
+            merged_into = {}  # Track which short forms merged into which long form
+
+            for verbatim in remaining:
+                if case_sensitive:
+                    compare_key = verbatim
+                else:
+                    compare_key = verbatim.lower()
+
+                # Check if this verbatim is a substring of any already-added longer form
+                merged = False
+                for existing_verbatim in list(refined_groups.keys()):
+                    if case_sensitive:
+                        existing_compare = existing_verbatim
+                    else:
+                        existing_compare = existing_verbatim.lower()
+
+                    if compare_key in existing_compare and compare_key != existing_compare:
+                        # Merge: add counts and tinyIds to the longer form
+                        refined_groups[existing_verbatim]["count"] += coalesced_groups[verbatim]["count"]
+                        refined_groups[existing_verbatim]["tinyids"].update(coalesced_groups[verbatim]["tinyids"])
+                        merged_into[verbatim] = existing_verbatim
+                        merged = True
+                        break
+
+                if not merged:
+                    # Add as new entry (copy to avoid mutation issues)
+                    refined_groups[verbatim] = {
+                        "count": coalesced_groups[verbatim]["count"],
+                        "tinyids": set(coalesced_groups[verbatim]["tinyids"])
+                    }
+
+            # Stage 4: Annotate differences between multiple verbatim forms
+            # This adds prefix_diff, suffix_diff, diff_summary columns
+            annotate_verbatim_differences(refined_groups, case_sensitive)
+
+            # Write one row per unique refined verbatim form
+            for verbatim, data in sorted(refined_groups.items(), key=lambda x: -x[1]["count"]):
                 # Escape for TSV
                 verbatim_safe = verbatim.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
                 tinyids_str = "|".join(sorted(data["tinyids"]))
-                f.write(f"{p.phrase_id}\t{p.text}\t{verbatim_safe}\t{data['count']}\t{tinyids_str}\n")
+                prefix_diff = data.get("prefix_diff", "").replace('\t', ' ').replace('\n', ' ')
+                suffix_diff = data.get("suffix_diff", "").replace('\t', ' ').replace('\n', ' ')
+                diff_summary = data.get("diff_summary", "").replace('\t', ' ').replace('\n', ' ')
+                f.write(f"{p.phrase_id}\t{p.text}\t{verbatim_safe}\t{data['count']}\t{tinyids_str}\t{prefix_diff}\t{suffix_diff}\t{diff_summary}\n")
 
 
 def write_occurrences_tsv(phrases: List, path: Path):
@@ -278,3 +356,127 @@ def write_extended_tsv(extended: List, path: Path, vocab):
             full_text = f"{left_text} {ext.original_phrase.text} {right_text}".strip()
             f.write(f"{ext.original_phrase.phrase_id}\t{full_text}\t"
                    f"{len(ext.left_extension)}\t{len(ext.right_extension)}\t{ext.score:.4f}\n")
+
+
+def write_verbatim_templates_tsv(phrases: List, path: Path, case_sensitive: bool = False):
+    """
+    Write verbatim_templates.tsv: extracts structural templates from verbatim variants.
+
+    For phrases with multiple verbatim forms, extracts the common core pattern and
+    identifies variable slots (prefix, suffix, internal infixes) where forms diverge.
+    Output is designed for programmatic use - slots contain regex patterns.
+
+    Columns:
+        phrase_id: Phrase identifier
+        lemma_text: Lemmatized phrase text
+        n_variants: Number of verbatim variants for this phrase
+        core: The longest common substring shared by all variants
+        template_regex: Full regex pattern matching all variants
+        prefix_slot: Regex pattern for prefix variations (empty if none)
+        prefix_variants: Pipe-separated list of observed prefix values
+        suffix_slot: Regex pattern for suffix variations (empty if none)
+        suffix_variants: Pipe-separated list of observed suffix values
+        infix1_slot: Regex for first internal divergence (empty if none)
+        infix1_variants: Pipe-separated list of first infix values
+        infix2_slot: Regex for second internal divergence (empty if none)
+        infix2_variants: Pipe-separated list of second infix values
+
+    Only phrases with 2+ distinct verbatim forms are included (single-form phrases
+    have no template to extract).
+
+    Args:
+        phrases: List of Phrase objects with occurrences containing verbatim_text
+        path: Output file path
+        case_sensitive: If True, use case-sensitive comparison for template extraction
+    """
+    from collections import defaultdict
+    from utils.verbatim_coalesce import coalesce_verbatim_groups
+    from utils.verbatim_template import extract_template, format_template_row
+
+    templates_written = 0
+
+    with path.open('w', encoding='utf-8') as f:
+        # Write header
+        f.write("phrase_id\tlemma_text\tn_variants\tcore\ttemplate_regex\t"
+                "prefix_slot\tprefix_variants\tsuffix_slot\tsuffix_variants\t"
+                "infix1_slot\tinfix1_variants\tinfix2_slot\tinfix2_variants\n")
+
+        for p in phrases:
+            # Group occurrences by verbatim text (same logic as verbatim_phrases)
+            verbatim_groups = defaultdict(lambda: {"count": 0, "tinyids": set()})
+
+            for occ in p.occurrences:
+                verbatim = occ.verbatim_text if occ.verbatim_text else ""
+                verbatim_normalized = " ".join(verbatim.split())
+                if verbatim_normalized:
+                    verbatim_groups[verbatim_normalized]["count"] += 1
+                    verbatim_groups[verbatim_normalized]["tinyids"].add(occ.tinyId)
+
+            # Apply same coalescing and subsumption as verbatim_phrases
+            verbatim_dict = {k: dict(v) for k, v in verbatim_groups.items()}
+            coalesced_groups = coalesce_verbatim_groups(
+                verbatim_dict,
+                case_sensitive=case_sensitive,
+                min_overlap=10
+            )
+
+            # Apply subsumption stages (simplified - just get final forms)
+            verbatim_list = list(coalesced_groups.keys())
+            verbatim_list.sort(key=len, reverse=True)
+
+            # Stage 2: Conservative subsumption
+            subsumed = set()
+            for i, long_v in enumerate(verbatim_list):
+                if long_v in subsumed:
+                    continue
+                long_cmp = long_v if case_sensitive else long_v.lower()
+                for j in range(i + 1, len(verbatim_list)):
+                    short_v = verbatim_list[j]
+                    if short_v in subsumed:
+                        continue
+                    short_cmp = short_v if case_sensitive else short_v.lower()
+                    if short_cmp in long_cmp:
+                        if coalesced_groups[long_v]["tinyids"] & coalesced_groups[short_v]["tinyids"]:
+                            subsumed.add(short_v)
+
+            # Stage 3: Refinement subsumption
+            remaining = [v for v in verbatim_list if v not in subsumed]
+            remaining.sort(key=len, reverse=True)
+
+            refined_forms = []
+            for verbatim in remaining:
+                cmp_key = verbatim if case_sensitive else verbatim.lower()
+                merged = False
+                for existing in refined_forms:
+                    existing_cmp = existing if case_sensitive else existing.lower()
+                    if cmp_key in existing_cmp and cmp_key != existing_cmp:
+                        merged = True
+                        break
+                if not merged:
+                    refined_forms.append(verbatim)
+
+            # Only extract template if multiple forms remain
+            if len(refined_forms) < 2:
+                continue
+
+            # Extract template
+            template = extract_template(refined_forms, p.phrase_id, case_sensitive)
+            if not template:
+                continue
+
+            # Format and write row
+            row = format_template_row(template)
+
+            # Escape TSV special characters
+            def escape_tsv(s):
+                return s.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
+
+            f.write(f"{p.phrase_id}\t{p.text}\t{row['n_variants']}\t"
+                   f"{escape_tsv(row['core'])}\t{escape_tsv(row['template_regex'])}\t"
+                   f"{escape_tsv(row['prefix_slot'])}\t{escape_tsv(row['prefix_variants'])}\t"
+                   f"{escape_tsv(row['suffix_slot'])}\t{escape_tsv(row['suffix_variants'])}\t"
+                   f"{escape_tsv(row['infix1_slot'])}\t{escape_tsv(row['infix1_variants'])}\t"
+                   f"{escape_tsv(row['infix2_slot'])}\t{escape_tsv(row['infix2_variants'])}\n")
+            templates_written += 1
+
+    return templates_written
