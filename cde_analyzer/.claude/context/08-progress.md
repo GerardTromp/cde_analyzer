@@ -413,6 +413,66 @@ All functional and updated for lazy loading
 
 ## Session Notes
 
+### Session 2026-01-21b: Instrument Pattern Extraction
+
+**Branch**: main
+
+**Goals**:
+- Implement instrument pattern extraction for "as part of <Instrument>" patterns
+- Create two-phase workflow for instrument curation
+- Add pre-masking of curated instruments before k-mer mining
+
+**Accomplishments**:
+- ✅ Created `utils/instrument_extractor.py` with InstrumentExtractor class
+  - Regex-based detection of "as part of [version X.X of] [the] <Instrument Name> [(<ACRONYM>)]"
+  - APA-style Title Case validation (>60% correct casing)
+  - Support for ALL CAPS abbreviations (TBI, PTSD) and Roman numerals (III, IV)
+  - Multi-hyphen acronym support (K-SADS-PL, WHOQOL-BREF)
+- ✅ Added CLI arguments to `actions/phrase_miner/cli.py`:
+  - `--extract-instruments` - Enable instrument extraction
+  - `--instruments-only` - Phase 1 mode (extract only, skip phrase mining)
+  - `--instrument-list` - Phase 2 pre-masking from curated TSV
+  - `--min-instrument-words` - Minimum words in instrument name (default: 3)
+- ✅ Implemented `load_instrument_list()` in `actions/phrase_miner/run.py`
+  - Flexible format: `filename` or `filename,column_name`
+  - Default column: `full_match`
+- ✅ Added `extract_instruments_only()` function to `logic/phrase_miner.py`
+- ✅ Integrated instrument pre-masking in `extract_token_sequences()`
+  - Case-insensitive pattern matching
+  - Character-to-token span mapping
+  - Mask key: `__CURATED_INSTRUMENT__:<pattern>`
+- ✅ Added `write_instruments_tsv()` and `write_instruments_verbatim_tsv()` output functions
+- ✅ Created comprehensive unit tests in `tests/test_instrument_extractor.py`
+- ✅ Updated `docs/commands/phrase_miner.md` with new arguments and examples
+
+**Files Created** (2):
+- utils/instrument_extractor.py (InstrumentExtractor, InstrumentMatch, InstrumentCatalog)
+- tests/test_instrument_extractor.py (31 test cases)
+
+**Files Modified** (4):
+- actions/phrase_miner/cli.py (added 4 CLI arguments)
+- actions/phrase_miner/run.py (added load_instrument_list, output functions)
+- logic/phrase_miner.py (added MinerConfig fields, extract_instruments_only, pre-masking)
+- docs/commands/phrase_miner.md (documented new features)
+
+**Two-Phase Workflow**:
+1. **Phase 1**: `--instruments-only` extracts instruments for curation
+2. **Curation**: User reviews `instruments_verbatim.tsv`, removes false positives
+3. **Phase 2**: `--instrument-list <file>` pre-masks curated patterns
+
+**Example Usage**:
+```bash
+# Phase 1: Extract instruments
+cde_analyzer phrase_miner -i data.json -o output/ --instruments-only --min-tinyids 1
+
+# Phase 2: Full mining with curated list
+cde_analyzer phrase_miner -i data.json -o output/ --instrument-list output/instruments_verbatim.tsv
+```
+
+**Status**: Complete and tested
+
+---
+
 ### Session 2026-01-21: Unicode Normalization and Verbatim Templates
 
 **Branch**: feature/phrase-miner-kmer-detection

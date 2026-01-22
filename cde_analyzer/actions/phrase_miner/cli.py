@@ -123,6 +123,33 @@ def register_subparser(subparser: ArgumentParser):
         help="Use case-sensitive comparison for verbatim subsumption (preserves case variants for QC)"
     )
 
+    # Instrument extraction (pre-processing)
+    subparser.add_argument(
+        "--extract-instruments",
+        action="store_true",
+        help="Extract and mask 'as part of <Instrument>' patterns before k-mer mining"
+    )
+    subparser.add_argument(
+        "--instruments-only",
+        action="store_true",
+        help="Phase 1 mode: extract instruments only, skip phrase mining outputs. "
+             "Use with lower --min-tinyids for instrument discovery, then curate "
+             "instruments_verbatim.tsv before phase 2."
+    )
+    subparser.add_argument(
+        "--instrument-list",
+        type=str,
+        help="Phase 2: TSV file with curated instrument patterns to pre-mask. "
+             "Format: 'filename' (uses 'full_match' column) or 'filename,column_name'. "
+             "Patterns are masked before k-mer mining to prevent fragmented detection."
+    )
+    subparser.add_argument(
+        "--min-instrument-words",
+        type=int,
+        default=3,
+        help="Minimum words required in instrument name (default: 3)"
+    )
+
     # Optional features
     subparser.add_argument(
         "--histograms",

@@ -39,6 +39,10 @@ python cde_analyzer.py phrase_miner --input <file.json> [options]
 | `--enable-anchor` | `False` | Enable anchor-based extension (Phase 7) |
 | `--no-aho-corasick` | `False` | Use naive pattern matching instead of Aho-Corasick |
 | `--verbatim-case-sensitive` | `False` | Use case-sensitive verbatim grouping |
+| `--extract-instruments` | `False` | Extract 'as part of <Instrument>' patterns |
+| `--instruments-only` | `False` | Phase 1: Extract instruments only, skip phrase mining |
+| `--instrument-list` | - | Phase 2: TSV file with curated patterns to pre-mask |
+| `--min-instrument-words` | `3` | Minimum words in instrument name |
 | `--histograms` | `False` | Generate k-mer frequency histograms |
 
 ## Examples
@@ -103,6 +107,30 @@ python cde_analyzer.py phrase_miner \
   --output-dir phrase_output \
   --remove-stopwords
 ```
+
+### Instrument Extraction (Two-Phase Workflow)
+
+```bash
+# Phase 1: Extract instruments only (for curation)
+python cde_analyzer.py phrase_miner \
+  --input data/cde_records.json \
+  --output-dir instrument_output \
+  --instruments-only \
+  --min-tinyids 1
+
+# Curate instruments_verbatim.tsv (remove false positives)
+
+# Phase 2: Full phrase mining with curated instrument pre-masking
+python cde_analyzer.py phrase_miner \
+  --input data/cde_records.json \
+  --output-dir phrase_output \
+  --instrument-list instrument_output/instruments_verbatim.tsv \
+  --min-tinyids 3
+```
+
+The `--instrument-list` argument accepts:
+- `filename` - Uses the `full_match` column (default)
+- `filename,column_name` - Uses the specified column
 
 ## Output Files
 
@@ -205,6 +233,34 @@ Extended phrases with context-based boundary improvement.
 | `right_tokens` | Tokens added on right |
 | `score` | Extension confidence score |
 
+### instruments.tsv (with --instruments-only or --extract-instruments)
+
+Summary of detected research instrument references.
+
+| Column | Description |
+|--------|-------------|
+| `instrument_id` | Unique identifier |
+| `normalized_name` | Lowercase normalized name for grouping |
+| `canonical_name` | Most common surface form |
+| `acronym` | Extracted acronym(s) if present |
+| `frequency` | Total occurrence count |
+| `n_tinyids` | Number of distinct CDE documents |
+| `tinyids` | Pipe-separated list of tinyIds |
+
+### instruments_verbatim.tsv (with --instruments-only)
+
+Detailed instrument variants for curation.
+
+| Column | Description |
+|--------|-------------|
+| `normalized_name` | Normalized name for grouping |
+| `acronym` | Extracted acronym if present |
+| `verbatim_name` | Exact instrument name as found |
+| `full_match` | Complete matched text (for --instrument-list) |
+| `count` | Occurrence count |
+| `n_tinyids` | Number of distinct documents |
+| `tinyids` | Pipe-separated list of tinyIds |
+
 ## Algorithm
 
 ### Iterative Descending K-mer Mining
@@ -260,6 +316,8 @@ Where:
 
 ### Recent Enhancements
 
+- ✅ **Instrument Extraction** - Detect "as part of <Instrument> (<ACRONYM>)" patterns
+- ✅ **Two-Phase Workflow** - Phase 1 extracts instruments, Phase 2 pre-masks curated list
 - ✅ **Verbatim Coalescing** - Case-insensitive grouping of verbatim forms
 - ✅ **Verbatim Templates** - Regex pattern extraction from multi-form phrases
 - ✅ **Unicode Normalization** - Expanded substitution table (156 entries)
@@ -298,6 +356,7 @@ Where:
 | `utils/verbatim_coalesce.py` | Case-insensitive verbatim grouping |
 | `utils/verbatim_template.py` | Template extraction from verbatim variants |
 | `utils/unicode.py` | Unicode normalization (156 substitutions) |
+| `utils/instrument_extractor.py` | Instrument pattern detection |
 
 ### Data Structures
 

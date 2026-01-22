@@ -98,6 +98,11 @@ class MinerConfig:
     skip_anchor: bool = True    # Defer to future enhancement
     use_aho_corasick: bool = True  # Use Aho-Corasick for masking (faster)
     generate_histograms: bool = False
+    # Instrument extraction (pre-processing)
+    extract_instruments: bool = False  # Extract "as part of <Instrument>" patterns
+    min_instrument_words: int = 3      # Minimum words in instrument name
+    # Pre-loaded instrument patterns for masking (from curated list)
+    instrument_patterns: Optional[Set[str]] = None  # Patterns to pre-mask before k-mer mining
 
 
 def mine_phrases(items: List[CDEItem], config: MinerConfig):
@@ -109,15 +114,21 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
         config: Mining configuration
 
     Returns:
-        Tuple of (phrases, token_seqs, vocab, verbatim_tracker):
+        Tuple of (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog):
         - phrases: List of detected phrases
         - token_seqs: Token sequences for each text span (with masking state)
         - vocab: Vocabulary mapping
         - verbatim_tracker: VerbatimTracker for lemma→variants lookup
+        - instrument_catalog: InstrumentCatalog if extract_instruments=True, else None
     """
     # Stage 1: Extract and tokenize text spans from CDE fields
-    token_seqs, vocab, verbatim_tracker = extract_token_sequences(items, config)
+    # (optionally with instrument extraction and pre-masking)
+    token_seqs, vocab, verbatim_tracker, instrument_catalog = extract_token_sequences(items, config)
     logger.info(f"Extracted {len(token_seqs)} token sequences, vocab size {len(vocab)}")
+    if instrument_catalog:
+        n_instruments = len(instrument_catalog.instruments)
+        n_matches = sum(len(m) for m in instrument_catalog.instruments.values())
+        logger.info(f"Extracted {n_instruments} distinct instruments ({n_matches} total matches)")
 
     all_phrases = []
     phrase_id_counter = 0
@@ -168,7 +179,59 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
     # logger.info(f"After subsumption filter: {len(filtered_phrases)} phrases (removed {len(all_phrases) - len(filtered_phrases)})")
 
     logger.info(f"Total phrases detected: {len(all_phrases)}")
-    return all_phrases, token_seqs, vocab, verbatim_tracker
+    return all_phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog
+
+
+def extract_instruments_only(items: List[CDEItem], config: MinerConfig):
+    """
+    Phase 1 mode: extract instrument patterns only, without k-mer mining.
+
+    This is a lightweight alternative to mine_phrases() for the two-phase workflow:
+    1. Phase 1: Extract instruments with lower min_tinyids threshold for discovery
+    2. User curates instruments_verbatim.tsv (remove false positives)
+    3. Phase 2: Run full phrase mining with curated instrument list for pre-masking
+
+    Args:
+        items: List of CDEItem objects to process
+        config: Mining configuration (uses extract_instruments, min_instrument_words)
+
+    Returns:
+        InstrumentCatalog with detected instrument patterns (or None if disabled)
+    """
+    from utils.instrument_extractor import InstrumentExtractor, InstrumentCatalog
+    from utils.phrase_extraction import tokenize_text_with_positions
+
+    extractor = InstrumentExtractor(min_name_words=config.min_instrument_words)
+    catalog = InstrumentCatalog()
+
+    for item in items:
+        if not item.tinyId:
+            continue
+
+        # Extract text spans from specified fields
+        text_spans = extract_field_texts(item, config.field_names)
+
+        for field_path, text in text_spans:
+            # Tokenize to get character offsets (needed for token span computation)
+            tokens_with_pos = tokenize_text_with_positions(text)
+            if not tokens_with_pos:
+                continue
+
+            char_offsets = [t[1] for t in tokens_with_pos]
+
+            # Extract instrument patterns
+            matches = extractor.extract_from_text(text, item.tinyId, field_path)
+            # Compute token spans
+            matches = extractor.compute_token_spans(matches, char_offsets)
+
+            for match in matches:
+                catalog.add(match)
+
+    n_instruments = len(catalog.instruments)
+    n_matches = sum(len(m) for m in catalog.instruments.values())
+    logger.info(f"Extracted {n_instruments} distinct instruments ({n_matches} total matches)")
+
+    return catalog
 
 
 def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
@@ -176,19 +239,29 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
     Extract text from specified fields, tokenize, lemmatize, build vocabulary.
 
     Now also tracks original tokens for verbatim text recovery.
+    Optionally extracts instrument patterns and pre-masks them.
 
     Args:
         items: List of CDEItem objects
         config: Mining configuration
 
     Returns:
-        Tuple of (token_seqs, vocab, verbatim_tracker):
+        Tuple of (token_seqs, vocab, verbatim_tracker, instrument_catalog):
         - token_seqs: List of TokenSeq objects with original token tracking
         - vocab: Vocabulary object
         - verbatim_tracker: VerbatimTracker for lemma→variants lookup
+        - instrument_catalog: InstrumentCatalog if extract_instruments=True, else None
     """
     from utils.phrase_extraction import tokenize_text_with_positions, make_lemma, STOPWORDS
     from utils.verbatim_tracker import VerbatimTracker
+
+    # Conditional import for instrument extraction
+    instrument_catalog = None
+    instrument_extractor = None
+    if config.extract_instruments:
+        from utils.instrument_extractor import InstrumentExtractor, InstrumentCatalog
+        instrument_extractor = InstrumentExtractor(min_name_words=config.min_instrument_words)
+        instrument_catalog = InstrumentCatalog()
 
     vocab = Vocabulary()
     verbatim_tracker = VerbatimTracker(prefix_len=2)
@@ -210,6 +283,19 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
             # Separate tokens and positions
             original_tokens = [t[0] for t in tokens_with_pos]
             char_offsets = [t[1] for t in tokens_with_pos]
+
+            # Extract instrument patterns BEFORE lemmatization (need original case)
+            instrument_matches = []
+            if instrument_extractor:
+                instrument_matches = instrument_extractor.extract_from_text(
+                    text, item.tinyId, field_path
+                )
+                # Compute token spans for masking
+                instrument_matches = instrument_extractor.compute_token_spans(
+                    instrument_matches, char_offsets
+                )
+                for match in instrument_matches:
+                    instrument_catalog.add(match)
 
             # For lemmatization, we need lowercase tokens
             tokens_lower = [t.lower() for t in original_tokens]
@@ -248,16 +334,61 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
                 field_path=field_path,
                 token_span=(0, len(token_ids))
             )
+
+            # Initialize mask_owner (all unmasked)
+            mask_owner = [None] * len(token_ids)
+
+            # Pre-mask instrument tokens if extraction is enabled
+            # This prevents them from being detected as separate phrases during k-mer mining
+            if instrument_matches:
+                for match in instrument_matches:
+                    if match.token_span:
+                        start, end = match.token_span
+                        instrument_key = f"__INSTRUMENT__:{match.instrument_name}"
+                        for i in range(start, min(end, len(mask_owner))):
+                            mask_owner[i] = instrument_key
+
+            # Pre-mask curated instrument patterns from --instrument-list
+            # These are verbatim strings to find and mask in the original text
+            if config.instrument_patterns:
+                text_lower = text.lower()
+                for pattern in config.instrument_patterns:
+                    pattern_lower = pattern.lower()
+                    # Find all occurrences of the pattern in the text
+                    start_pos = 0
+                    while True:
+                        idx = text_lower.find(pattern_lower, start_pos)
+                        if idx == -1:
+                            break
+                        pattern_end = idx + len(pattern)
+                        # Find token range that overlaps with this character range
+                        # char_offsets contains (start, end) for each token
+                        token_start = None
+                        token_end = None
+                        for ti, (cs, ce) in enumerate(char_offsets):
+                            # Token overlaps if it starts before pattern ends AND ends after pattern starts
+                            if cs < pattern_end and ce > idx:
+                                if token_start is None:
+                                    token_start = ti
+                                token_end = ti + 1
+                        # Mask the token range
+                        if token_start is not None and token_end is not None:
+                            mask_key = f"__CURATED_INSTRUMENT__:{pattern[:50]}"
+                            for i in range(token_start, min(token_end, len(mask_owner))):
+                                if mask_owner[i] is None:  # Don't overwrite existing masks
+                                    mask_owner[i] = mask_key
+                        start_pos = idx + 1  # Continue searching for more occurrences
+
             token_seqs.append(TokenSeq(
                 tokens=token_ids,
                 cde_ref=cde_ref,
-                mask_owner=[None] * len(token_ids),
+                mask_owner=mask_owner,
                 original_tokens=original_tokens,
                 original_text=text,
                 char_offsets=char_offsets
             ))
 
-    return token_seqs, vocab, verbatim_tracker
+    return token_seqs, vocab, verbatim_tracker, instrument_catalog
 
 
 def extract_field_texts(item: CDEItem, field_names: List[str]) -> List[Tuple[str, str]]:
