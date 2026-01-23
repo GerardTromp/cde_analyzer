@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520">
   <defs>
     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
@@ -16,73 +16,81 @@
   </defs>
 
   <!-- Title -->
-  <text x="400" y="30" text-anchor="middle" class="title">PHRASE MINER PIPELINE</text>
+  <text x="300" y="30" text-anchor="middle" class="title">PHRASE MINER PIPELINE</text>
 
   <!-- Input -->
-  <rect x="30" y="60" width="120" height="60" class="box-orange"/>
-  <text x="90" y="85" text-anchor="middle" class="label">INPUT</text>
-  <text x="90" y="105" text-anchor="middle" class="sublabel">CDE JSON</text>
+  <rect x="30" y="55" width="120" height="50" class="box-orange"/>
+  <text x="90" y="77" text-anchor="middle" class="label">INPUT</text>
+  <text x="90" y="93" text-anchor="middle" class="sublabel">CDE JSON</text>
 
   <!-- Arrow to Orchestration -->
-  <line x1="150" y1="90" x2="190" y2="90" class="arrow"/>
+  <line x1="150" y1="80" x2="190" y2="80" class="arrow"/>
 
   <!-- Orchestration -->
-  <rect x="200" y="50" width="200" height="80" class="box"/>
-  <text x="300" y="75" text-anchor="middle" class="label">ORCHESTRATION</text>
-  <text x="300" y="95" text-anchor="middle" class="sublabel">run.py</text>
-  <text x="300" y="110" text-anchor="middle" class="sublabel">Parse CLI, Build Config</text>
+  <rect x="200" y="50" width="200" height="60" class="box"/>
+  <text x="300" y="72" text-anchor="middle" class="label">ORCHESTRATION</text>
+  <text x="300" y="88" text-anchor="middle" class="sublabel">run.py - Parse CLI, Build Config</text>
 
   <!-- Fork arrows -->
-  <line x1="300" y1="130" x2="300" y2="160" class="arrow" style="marker-end: none"/>
-  <line x1="300" y1="160" x2="180" y2="160" stroke="#4a5568" stroke-width="2"/>
-  <line x1="300" y1="160" x2="420" y2="160" stroke="#4a5568" stroke-width="2"/>
-  <line x1="180" y1="160" x2="180" y2="200" class="arrow"/>
-  <line x1="420" y1="160" x2="420" y2="200" class="arrow"/>
+  <line x1="300" y1="110" x2="300" y2="130" class="arrow" style="marker-end: none"/>
+  <line x1="300" y1="130" x2="150" y2="130" stroke="#4a5568" stroke-width="2"/>
+  <line x1="300" y1="130" x2="450" y2="130" stroke="#4a5568" stroke-width="2"/>
+  <line x1="150" y1="130" x2="150" y2="160" class="arrow"/>
+  <line x1="450" y1="130" x2="450" y2="160" class="arrow"/>
 
   <!-- Phase 1 -->
-  <rect x="80" y="200" width="200" height="100" class="box-alt"/>
-  <text x="180" y="225" text-anchor="middle" class="label">PHASE 1</text>
-  <text x="180" y="245" text-anchor="middle" class="sublabel">--instruments-only</text>
-  <text x="180" y="265" text-anchor="middle" class="sublabel">Extract instrument patterns</text>
-  <text x="180" y="285" text-anchor="middle" class="sublabel">For human curation</text>
+  <rect x="50" y="165" width="200" height="90" class="box-alt"/>
+  <text x="150" y="188" text-anchor="middle" class="label">PHASE 1</text>
+  <text x="150" y="206" text-anchor="middle" class="sublabel">--instruments-only</text>
+  <text x="150" y="224" text-anchor="middle" class="sublabel">Extract instrument patterns</text>
+  <text x="150" y="242" text-anchor="middle" class="sublabel">For human curation</text>
 
   <!-- Phase 2 -->
-  <rect x="320" y="200" width="200" height="100" class="box"/>
-  <text x="420" y="225" text-anchor="middle" class="label">PHASE 2</text>
-  <text x="420" y="245" text-anchor="middle" class="sublabel">Full Mining</text>
-  <text x="420" y="265" text-anchor="middle" class="sublabel">Tokenize, K-mer descent</text>
-  <text x="420" y="285" text-anchor="middle" class="sublabel">Mask, Filter, Output</text>
+  <rect x="350" y="165" width="200" height="90" class="box"/>
+  <text x="450" y="188" text-anchor="middle" class="label">PHASE 2</text>
+  <text x="450" y="206" text-anchor="middle" class="sublabel">Full Mining</text>
+  <text x="450" y="224" text-anchor="middle" class="sublabel">Tokenize, K-mer descent</text>
+  <text x="450" y="242" text-anchor="middle" class="sublabel">Mask, Filter, Output</text>
 
-  <!-- Arrow from Phase 2 to Output -->
-  <line x1="420" y1="300" x2="420" y2="340" class="arrow"/>
+  <!-- Arrows from phases to output -->
+  <line x1="150" y1="255" x2="150" y2="295" class="arrow"/>
+  <line x1="450" y1="255" x2="450" y2="295" class="arrow"/>
 
   <!-- Output Files -->
-  <rect x="560" y="60" width="200" height="220" class="box-green"/>
-  <text x="660" y="85" text-anchor="middle" class="label">OUTPUT FILES</text>
-  <text x="660" y="110" text-anchor="middle" class="sublabel">phrases.tsv</text>
-  <text x="660" y="130" text-anchor="middle" class="sublabel">occurrences.tsv</text>
-  <text x="660" y="150" text-anchor="middle" class="sublabel">verbatim_phrases.tsv</text>
-  <text x="660" y="170" text-anchor="middle" class="sublabel">verbatim_variants.tsv</text>
-  <text x="660" y="190" text-anchor="middle" class="sublabel">verbatim_templates.tsv</text>
-  <text x="660" y="220" text-anchor="middle" class="sublabel" style="fill: #9f7aea">instruments.tsv</text>
-  <text x="660" y="240" text-anchor="middle" class="sublabel" style="fill: #9f7aea">instruments_verbatim.tsv</text>
-  <text x="660" y="265" text-anchor="middle" class="sublabel" style="font-style: italic">(optional)</text>
+  <rect x="50" y="300" width="500" height="140" class="box-green"/>
+  <text x="300" y="325" text-anchor="middle" class="label">OUTPUT FILES</text>
 
-  <!-- Arrow from Phase 2 to Output -->
-  <line x1="520" y1="250" x2="555" y2="170" class="arrow"/>
+  <!-- Output columns -->
+  <g transform="translate(70, 335)">
+    <text x="0" y="15" class="sublabel" style="font-weight: bold">Core:</text>
+    <text x="0" y="35" class="sublabel">phrases.tsv</text>
+    <text x="0" y="50" class="sublabel">occurrences.tsv</text>
+    <text x="0" y="65" class="sublabel">verbatim_phrases.tsv</text>
+  </g>
 
-  <!-- Arrow from Phase 1 to instruments output -->
-  <line x1="280" y1="250" x2="555" y2="230" class="arrow"/>
+  <g transform="translate(230, 335)">
+    <text x="0" y="15" class="sublabel" style="font-weight: bold">Verbatim:</text>
+    <text x="0" y="35" class="sublabel">verbatim_variants.tsv</text>
+    <text x="0" y="50" class="sublabel">verbatim_templates.tsv</text>
+    <text x="0" y="65" class="sublabel">extended.tsv (optional)</text>
+  </g>
+
+  <g transform="translate(400, 335)">
+    <text x="0" y="15" class="sublabel" style="font-weight: bold; fill: #9f7aea">Instruments:</text>
+    <text x="0" y="35" class="sublabel" style="fill: #9f7aea">instruments.tsv</text>
+    <text x="0" y="50" class="sublabel" style="fill: #9f7aea">instruments_verbatim.tsv</text>
+    <text x="0" y="65" class="sublabel" style="font-style: italic">(Phase 1 output)</text>
+  </g>
 
   <!-- Legend -->
-  <rect x="30" y="420" width="740" height="70" fill="#f7fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>
-  <text x="50" y="445" class="sublabel" style="font-weight: bold">Legend:</text>
-  <rect x="50" y="455" width="20" height="15" class="box-orange"/>
-  <text x="80" y="467" class="sublabel">Input</text>
-  <rect x="150" y="455" width="20" height="15" class="box"/>
-  <text x="180" y="467" class="sublabel">Processing</text>
-  <rect x="280" y="455" width="20" height="15" class="box-alt"/>
-  <text x="310" y="467" class="sublabel">Phase 1 (Discovery)</text>
-  <rect x="450" y="455" width="20" height="15" class="box-green"/>
-  <text x="480" y="467" class="sublabel">Output</text>
+  <rect x="50" y="460" width="500" height="45" fill="#f7fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>
+  <text x="70" y="480" class="sublabel" style="font-weight: bold">Legend:</text>
+  <rect x="130" y="472" width="16" height="12" class="box-orange"/>
+  <text x="152" y="483" class="sublabel">Input</text>
+  <rect x="200" y="472" width="16" height="12" class="box"/>
+  <text x="222" y="483" class="sublabel">Processing</text>
+  <rect x="300" y="472" width="16" height="12" class="box-alt"/>
+  <text x="322" y="483" class="sublabel">Phase 1</text>
+  <rect x="380" y="472" width="16" height="12" class="box-green"/>
+  <text x="402" y="483" class="sublabel">Output</text>
 </svg>
