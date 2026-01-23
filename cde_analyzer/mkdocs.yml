@@ -25,6 +25,7 @@ nav:
   - Development:
     - Architecture: architecture.md
     - Data Models: data-models.md
+    - Phrase Miner Logic: phrase_miner_logic.md
     - Contributing: contributing.md
 
 # Theme
