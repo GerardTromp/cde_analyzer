@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 400">
+  <defs>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .label { font: bold 12px sans-serif; fill: #2d3748; }
+      .sublabel { font: 11px sans-serif; fill: #4a5568; }
+      .token { font: 11px monospace; fill: #2d3748; }
+      .token-box { fill: #ebf4ff; stroke: #4299e1; stroke-width: 1.5; }
+      .token-masked { fill: #fed7d7; stroke: #fc8181; stroke-width: 1.5; }
+      .token-instr { fill: #faf5ff; stroke: #9f7aea; stroke-width: 1.5; }
+      .mask-label { font: 9px monospace; fill: #c53030; }
+      .mask-label-instr { font: 9px monospace; fill: #6b46c1; }
+      .check { font: 12px sans-serif; fill: #38a169; }
+      .cross { font: 12px sans-serif; fill: #e53e3e; }
+      .note { font: 10px sans-serif; fill: #718096; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="375" y="30" text-anchor="middle" class="title">TOKEN MASKING MECHANISM</text>
+
+  <!-- Example text -->
+  <text x="40" y="60" class="sublabel">Original text: "Patient Reported Outcome Measure for Anxiety Questionnaire"</text>
+
+  <!-- Token row -->
+  <text x="40" y="95" class="label">tokens:</text>
+  <g transform="translate(100, 75)">
+    <rect width="65" height="30" class="token-box"/>
+    <text x="32" y="20" text-anchor="middle" class="token">patient</text>
+  </g>
+  <g transform="translate(170, 75)">
+    <rect width="55" height="30" class="token-box"/>
+    <text x="27" y="20" text-anchor="middle" class="token">report</text>
+  </g>
+  <g transform="translate(230, 75)">
+    <rect width="65" height="30" class="token-masked"/>
+    <text x="32" y="20" text-anchor="middle" class="token">outcome</text>
+  </g>
+  <g transform="translate(300, 75)">
+    <rect width="65" height="30" class="token-masked"/>
+    <text x="32" y="20" text-anchor="middle" class="token">measure</text>
+  </g>
+  <g transform="translate(370, 75)">
+    <rect width="60" height="30" class="token-box"/>
+    <text x="30" y="20" text-anchor="middle" class="token">anxiety</text>
+  </g>
+  <g transform="translate(435, 75)">
+    <rect width="95" height="30" class="token-box"/>
+    <text x="47" y="20" text-anchor="middle" class="token">questionnaire</text>
+  </g>
+
+  <!-- Mask owner row -->
+  <text x="40" y="135" class="label">mask_owner:</text>
+  <g transform="translate(100, 115)">
+    <rect width="65" height="30" fill="#f7fafc" stroke="#e2e8f0"/>
+    <text x="32" y="20" text-anchor="middle" class="token" style="fill: #a0aec0">None</text>
+  </g>
+  <g transform="translate(170, 115)">
+    <rect width="55" height="30" fill="#f7fafc" stroke="#e2e8f0"/>
+    <text x="27" y="20" text-anchor="middle" class="token" style="fill: #a0aec0">None</text>
+  </g>
+  <g transform="translate(230, 115)">
+    <rect width="65" height="30" fill="#fed7d7" stroke="#fc8181"/>
+    <text x="32" y="20" text-anchor="middle" class="mask-label">phrase_01</text>
+  </g>
+  <g transform="translate(300, 115)">
+    <rect width="65" height="30" fill="#fed7d7" stroke="#fc8181"/>
+    <text x="32" y="20" text-anchor="middle" class="mask-label">phrase_01</text>
+  </g>
+  <g transform="translate(370, 115)">
+    <rect width="60" height="30" fill="#f7fafc" stroke="#e2e8f0"/>
+    <text x="30" y="20" text-anchor="middle" class="token" style="fill: #a0aec0">None</text>
+  </g>
+  <g transform="translate(435, 115)">
+    <rect width="95" height="30" fill="#f7fafc" stroke="#e2e8f0"/>
+    <text x="47" y="20" text-anchor="middle" class="token" style="fill: #a0aec0">None</text>
+  </g>
+
+  <!-- Bracket for masked phrase -->
+  <path d="M 230 150 L 230 160 L 365 160 L 365 150" fill="none" stroke="#c53030" stroke-width="1.5"/>
+  <text x="297" y="175" text-anchor="middle" class="mask-label">"outcome measure" detected at k=2</text>
+
+  <!-- K-mer counting example -->
+  <text x="40" y="215" class="label">K-mer counting at k=3:</text>
+
+  <g transform="translate(40, 230)">
+    <text x="0" y="15" class="token">[patient, report, outcome]</text>
+    <text x="230" y="15" class="cross">✗ BLOCKED</text>
+    <text x="310" y="15" class="note">(outcome is masked)</text>
+  </g>
+  <g transform="translate(40, 250)">
+    <text x="0" y="15" class="token">[report, outcome, measure]</text>
+    <text x="230" y="15" class="cross">✗ BLOCKED</text>
+    <text x="310" y="15" class="note">(both masked)</text>
+  </g>
+  <g transform="translate(40, 270)">
+    <text x="0" y="15" class="token">[outcome, measure, anxiety]</text>
+    <text x="230" y="15" class="cross">✗ BLOCKED</text>
+    <text x="310" y="15" class="note">(outcome, measure masked)</text>
+  </g>
+  <g transform="translate(40, 290)">
+    <text x="0" y="15" class="token">[measure, anxiety, questionnaire]</text>
+    <text x="230" y="15" class="cross">✗ BLOCKED</text>
+    <text x="310" y="15" class="note">(measure is masked)</text>
+  </g>
+  <g transform="translate(40, 310)">
+    <text x="0" y="15" class="token">[anxiety, questionnaire, ...]</text>
+    <text x="230" y="15" class="check">✓ OK</text>
+    <text x="310" y="15" class="note">(if next token unmasked)</text>
+  </g>
+
+  <!-- Pre-masking section -->
+  <rect x="530" y="195" width="200" height="130" fill="#faf5ff" stroke="#9f7aea" stroke-width="1.5" rx="6"/>
+  <text x="630" y="215" text-anchor="middle" class="label" style="fill: #6b46c1">Pre-masking Types</text>
+
+  <rect x="545" y="230" width="170" height="35" fill="white" stroke="#9f7aea" rx="4"/>
+  <text x="550" y="248" class="sublabel" style="fill: #6b46c1">Instruments (auto-detected):</text>
+  <text x="550" y="260" class="mask-label-instr">__INSTRUMENT__:Name</text>
+
+  <rect x="545" y="275" width="170" height="35" fill="white" stroke="#9f7aea" rx="4"/>
+  <text x="550" y="293" class="sublabel" style="fill: #6b46c1">Curated patterns:</text>
+  <text x="550" y="305" class="mask-label-instr">__CURATED_INSTRUMENT__:...</text>
+
+  <!-- Legend -->
+  <g transform="translate(40, 350)">
+    <rect width="400" height="40" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+    <text x="15" y="17" class="sublabel" style="font-weight: bold">Legend:</text>
+    <rect x="80" y="8" width="30" height="18" class="token-box"/>
+    <text x="115" y="22" class="note">Unmasked</text>
+    <rect x="180" y="8" width="30" height="18" class="token-masked"/>
+    <text x="215" y="22" class="note">Phrase-masked</text>
+    <rect x="300" y="8" width="30" height="18" class="token-instr"/>
+    <text x="335" y="22" class="note">Pre-masked</text>
+  </g>
+</svg>

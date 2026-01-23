@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 550">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+    </marker>
+    <marker id="diamond" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+      <polygon points="6,0 12,6 6,12 0,6" fill="#4299e1"/>
+    </marker>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .class-box { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; }
+      .class-header { fill: #4299e1; }
+      .class-name { font: bold 12px sans-serif; fill: white; }
+      .field { font: 11px monospace; fill: #2d3748; }
+      .field-type { font: 11px monospace; fill: #805ad5; }
+      .note { font: 10px sans-serif; fill: #718096; font-style: italic; }
+      .arrow { stroke: #4a5568; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .assoc { stroke: #4299e1; stroke-width: 1.5; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">DATA STRUCTURES</text>
+
+  <!-- CDEItem (Input) -->
+  <g transform="translate(30, 50)">
+    <rect width="150" height="100" class="class-box"/>
+    <rect width="150" height="25" class="class-header"/>
+    <text x="75" y="17" text-anchor="middle" class="class-name">CDEItem</text>
+    <text x="10" y="42" class="field">tinyId: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="58" class="field">designations: <tspan class="field-type">[]</tspan></text>
+    <text x="10" y="74" class="field">definitions: <tspan class="field-type">[]</tspan></text>
+    <text x="10" y="90" class="note">(Pydantic model)</text>
+  </g>
+
+  <!-- Arrow from CDEItem -->
+  <line x1="180" y1="100" x2="230" y2="100" class="arrow"/>
+  <text x="205" y="90" class="note">extract</text>
+
+  <!-- TokenSeq -->
+  <g transform="translate(240, 50)">
+    <rect width="180" height="140" class="class-box"/>
+    <rect width="180" height="25" class="class-header"/>
+    <text x="90" y="17" text-anchor="middle" class="class-name">TokenSeq</text>
+    <text x="10" y="42" class="field">tokens: <tspan class="field-type">[int]</tspan></text>
+    <text x="10" y="58" class="field">mask_owner: <tspan class="field-type">[str|None]</tspan></text>
+    <text x="10" y="74" class="field">original_tokens: <tspan class="field-type">[str]</tspan></text>
+    <text x="10" y="90" class="field">original_text: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="106" class="field">char_offsets: <tspan class="field-type">[(int,int)]</tspan></text>
+    <text x="10" y="122" class="field">cde_ref: <tspan class="field-type">CDERef</tspan></text>
+  </g>
+
+  <!-- Vocabulary -->
+  <g transform="translate(450, 50)">
+    <rect width="160" height="80" class="class-box"/>
+    <rect width="160" height="25" class="class-header"/>
+    <text x="80" y="17" text-anchor="middle" class="class-name">Vocabulary</text>
+    <text x="10" y="42" class="field">token_to_id: <tspan class="field-type">dict</tspan></text>
+    <text x="10" y="58" class="field">id_to_token: <tspan class="field-type">dict</tspan></text>
+    <text x="10" y="74" class="note">bidirectional mapping</text>
+  </g>
+
+  <!-- Association line TokenSeq - Vocabulary -->
+  <line x1="420" y1="100" x2="450" y2="90" class="assoc" stroke-dasharray="4,2"/>
+
+  <!-- CDERef -->
+  <g transform="translate(240, 220)">
+    <rect width="180" height="120" class="class-box"/>
+    <rect width="180" height="25" class="class-header"/>
+    <text x="90" y="17" text-anchor="middle" class="class-name">CDERef</text>
+    <text x="10" y="42" class="field">tinyId: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="58" class="field">field_path: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="74" class="field">token_span: <tspan class="field-type">(int,int)</tspan></text>
+    <text x="10" y="90" class="field">verbatim_text: <tspan class="field-type">str?</tspan></text>
+    <text x="10" y="106" class="field">char_span: <tspan class="field-type">(int,int)?</tspan></text>
+  </g>
+
+  <!-- Arrow from TokenSeq to CDERef -->
+  <line x1="330" y1="190" x2="330" y2="215" class="arrow"/>
+
+  <!-- KmerCount -->
+  <g transform="translate(30, 370)">
+    <rect width="160" height="100" class="class-box"/>
+    <rect width="160" height="25" class="class-header"/>
+    <text x="80" y="17" text-anchor="middle" class="class-name">KmerCount</text>
+    <text x="10" y="42" class="field">kmer: <tspan class="field-type">(int,...)</tspan></text>
+    <text x="10" y="58" class="field">frequency: <tspan class="field-type">int</tspan></text>
+    <text x="10" y="74" class="field">tinyids: <tspan class="field-type">set</tspan></text>
+    <text x="10" y="90" class="field">occurrences: <tspan class="field-type">[CDERef]</tspan></text>
+  </g>
+
+  <!-- Arrow from KmerCount to Phrase -->
+  <line x1="190" y1="420" x2="240" y2="420" class="arrow"/>
+  <text x="215" y="410" class="note">convert</text>
+
+  <!-- Phrase -->
+  <g transform="translate(250, 360)">
+    <rect width="200" height="140" class="class-box"/>
+    <rect width="200" height="25" class="class-header"/>
+    <text x="100" y="17" text-anchor="middle" class="class-name">Phrase</text>
+    <text x="10" y="42" class="field">phrase_id: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="58" class="field">token_ids: <tspan class="field-type">(int,...)</tspan></text>
+    <text x="10" y="74" class="field">text: <tspan class="field-type">str</tspan></text>
+    <text x="10" y="90" class="field">frequency: <tspan class="field-type">int</tspan></text>
+    <text x="10" y="106" class="field">distinct_tinyids: <tspan class="field-type">set</tspan></text>
+    <text x="10" y="122" class="field">occurrences: <tspan class="field-type">[CDERef]</tspan></text>
+    <text x="10" y="138" class="field">extension_method: <tspan class="field-type">str</tspan></text>
+  </g>
+
+  <!-- Arrow from Phrase to CDERef (occurrences) -->
+  <line x1="350" y1="355" x2="350" y2="345" class="assoc"/>
+  <text x="365" y="352" class="note">1..*</text>
+
+  <!-- VerbatimTracker -->
+  <g transform="translate(500, 220)">
+    <rect width="180" height="100" class="class-box"/>
+    <rect width="180" height="25" class="class-header"/>
+    <text x="90" y="17" text-anchor="middle" class="class-name">VerbatimTracker</text>
+    <text x="10" y="42" class="field">lemma_to_variants:</text>
+    <text x="20" y="58" class="field-type">Dict[str, PrefixTrie]</text>
+    <text x="10" y="80" class="note">lemma → original forms</text>
+    <text x="10" y="95" class="note">e.g., "patient" → {Patient,</text>
+    <text x="10" y="108" class="note">patients, PATIENT}</text>
+  </g>
+
+  <!-- MinerConfig -->
+  <g transform="translate(620, 50)">
+    <rect width="150" height="140" class="class-box" style="fill: #faf5ff; stroke: #9f7aea"/>
+    <rect width="150" height="25" style="fill: #9f7aea"/>
+    <text x="75" y="17" text-anchor="middle" class="class-name">MinerConfig</text>
+    <text x="10" y="42" class="field">k_max: <tspan class="field-type">25</tspan></text>
+    <text x="10" y="58" class="field">k_min: <tspan class="field-type">3</tspan></text>
+    <text x="10" y="74" class="field">freq_min: <tspan class="field-type">3</tspan></text>
+    <text x="10" y="90" class="field">min_tinyids: <tspan class="field-type">2</tspan></text>
+    <text x="10" y="106" class="field">field_names: <tspan class="field-type">[str]</tspan></text>
+    <text x="10" y="122" class="field">use_aho_corasick:</text>
+    <text x="20" y="136" class="field-type">True</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(500, 400)">
+    <rect width="270" height="90" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+    <text x="15" y="20" class="field" style="font-weight: bold">Legend</text>
+    <rect x="15" y="30" width="60" height="20" class="class-box"/>
+    <text x="85" y="45" class="note">Data class</text>
+    <rect x="15" y="55" width="60" height="20" style="fill: #faf5ff; stroke: #9f7aea; stroke-width: 2"/>
+    <text x="85" y="70" class="note">Configuration</text>
+    <line x1="160" y1="40" x2="200" y2="40" class="arrow"/>
+    <text x="210" y="45" class="note">transforms to</text>
+    <line x1="160" y1="65" x2="200" y2="65" class="assoc" stroke-dasharray="4,2"/>
+    <text x="210" y="70" class="note">references</text>
+  </g>
+</svg>

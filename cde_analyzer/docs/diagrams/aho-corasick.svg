@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 480">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e53e3e"/>
+    </marker>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .label { font: bold 12px sans-serif; fill: #2d3748; }
+      .sublabel { font: 11px sans-serif; fill: #4a5568; }
+      .node { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; }
+      .node-output { fill: #c6f6d5; stroke: #38a169; stroke-width: 2; }
+      .node-root { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; }
+      .node-label { font: bold 11px sans-serif; fill: #2d3748; }
+      .edge-label { font: 10px monospace; fill: #553c9a; }
+      .edge { stroke: #4a5568; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .fail-link { stroke: #e53e3e; stroke-width: 1.5; fill: none; stroke-dasharray: 4,3; marker-end: url(#arrowhead-red); }
+      .note { font: 10px sans-serif; fill: #718096; font-style: italic; }
+      .code { font: 11px monospace; fill: #553c9a; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="375" y="30" text-anchor="middle" class="title">AHO-CORASICK AUTOMATON (Token-Based)</text>
+
+  <!-- Complexity note -->
+  <text x="375" y="50" text-anchor="middle" class="sublabel">Time: O(n + m + z) vs naive O(n × m × k)</text>
+
+  <!-- Example patterns -->
+  <g transform="translate(40, 70)">
+    <rect width="280" height="60" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+    <text x="10" y="20" class="label">Example patterns:</text>
+    <text x="10" y="38" class="code">phrase_01: [45, 23, 78] → "patient reported outcome"</text>
+    <text x="10" y="54" class="code">phrase_02: [23, 78, 12] → "reported outcome measure"</text>
+  </g>
+
+  <!-- Automaton structure -->
+  <text x="375" y="160" text-anchor="middle" class="label">Automaton Structure</text>
+
+  <!-- ROOT node -->
+  <g transform="translate(350, 180)">
+    <circle r="25" class="node-root"/>
+    <text y="5" text-anchor="middle" class="node-label">ROOT</text>
+  </g>
+
+  <!-- Node 1 (after 45) -->
+  <g transform="translate(200, 260)">
+    <circle r="20" class="node"/>
+    <text y="5" text-anchor="middle" class="node-label">n1</text>
+  </g>
+  <!-- Edge ROOT -> n1 -->
+  <path d="M 330 200 Q 270 220 220 245" class="edge"/>
+  <text x="260" y="210" class="edge-label">45</text>
+
+  <!-- Node 2 (after 45,23) -->
+  <g transform="translate(200, 340)">
+    <circle r="20" class="node"/>
+    <text y="5" text-anchor="middle" class="node-label">n2</text>
+  </g>
+  <!-- Edge n1 -> n2 -->
+  <line x1="200" y1="280" x2="200" y2="315" class="edge"/>
+  <text x="210" y="300" class="edge-label">23</text>
+
+  <!-- Node 3 (after 23 from root) -->
+  <g transform="translate(350, 260)">
+    <circle r="20" class="node"/>
+    <text y="5" text-anchor="middle" class="node-label">n3</text>
+  </g>
+  <!-- Edge ROOT -> n3 -->
+  <line x1="350" y1="205" x2="350" y2="235" class="edge"/>
+  <text x="360" y="222" class="edge-label">23</text>
+
+  <!-- Node 4 (after 23,78) - OUTPUT phrase_02 partial -->
+  <g transform="translate(350, 340)">
+    <circle r="20" class="node"/>
+    <text y="5" text-anchor="middle" class="node-label">n4</text>
+  </g>
+  <!-- Edge n3 -> n4 -->
+  <line x1="350" y1="280" x2="350" y2="315" class="edge"/>
+  <text x="360" y="300" class="edge-label">78</text>
+
+  <!-- Node 5 (after 45,23,78) - OUTPUT phrase_01 -->
+  <g transform="translate(200, 420)">
+    <circle r="20" class="node-output"/>
+    <text y="5" text-anchor="middle" class="node-label">n5</text>
+  </g>
+  <!-- Edge n2 -> n5 -->
+  <line x1="200" y1="360" x2="200" y2="395" class="edge"/>
+  <text x="210" y="380" class="edge-label">78</text>
+  <!-- Output label -->
+  <text x="200" y="455" text-anchor="middle" class="note" style="fill: #38a169">output: phrase_01</text>
+
+  <!-- Node 6 (after 23,78,12) - OUTPUT phrase_02 -->
+  <g transform="translate(350, 420)">
+    <circle r="20" class="node-output"/>
+    <text y="5" text-anchor="middle" class="node-label">n6</text>
+  </g>
+  <!-- Edge n4 -> n6 -->
+  <line x1="350" y1="360" x2="350" y2="395" class="edge"/>
+  <text x="360" y="380" class="edge-label">12</text>
+  <!-- Output label -->
+  <text x="350" y="455" text-anchor="middle" class="note" style="fill: #38a169">output: phrase_02</text>
+
+  <!-- Failure links -->
+  <!-- n1 -> ROOT -->
+  <path d="M 180 255 Q 140 230 330 190" class="fail-link"/>
+  <!-- n2 -> n3 -->
+  <path d="M 220 335 Q 270 310 330 265" class="fail-link"/>
+  <!-- n5 -> n4 (same suffix) -->
+  <path d="M 220 415 Q 270 390 330 350" class="fail-link"/>
+
+  <!-- Failure link legend -->
+  <g transform="translate(480, 180)">
+    <rect width="230" height="140" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+    <text x="15" y="20" class="label">Failure Links (dashed red)</text>
+    <text x="15" y="40" class="sublabel">On mismatch, follow failure</text>
+    <text x="15" y="55" class="sublabel">link to continue matching</text>
+    <text x="15" y="75" class="sublabel">(like KMP algorithm)</text>
+
+    <text x="15" y="100" class="label">Search Process:</text>
+    <text x="15" y="118" class="sublabel">1. Traverse with input tokens</text>
+    <text x="15" y="133" class="sublabel">2. Collect outputs at green nodes</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(480, 340)">
+    <rect width="230" height="90" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+    <text x="15" y="20" class="label">Legend</text>
+    <circle cx="30" cy="40" r="12" class="node-root"/>
+    <text x="50" y="45" class="note">Root node</text>
+    <circle cx="130" cy="40" r="12" class="node"/>
+    <text x="150" y="45" class="note">State node</text>
+    <circle cx="30" cy="70" r="12" class="node-output"/>
+    <text x="50" y="75" class="note">Output node (pattern ends)</text>
+  </g>
+</svg>

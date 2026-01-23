@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+    </marker>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .box { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; rx: 8; }
+      .box-alt { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 8; }
+      .box-green { fill: #f0fff4; stroke: #48bb78; stroke-width: 2; rx: 8; }
+      .box-orange { fill: #fffaf0; stroke: #ed8936; stroke-width: 2; rx: 8; }
+      .label { font: bold 12px sans-serif; fill: #2d3748; }
+      .sublabel { font: 11px sans-serif; fill: #4a5568; }
+      .arrow { stroke: #4a5568; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">PHRASE MINER PIPELINE</text>
+
+  <!-- Input -->
+  <rect x="30" y="60" width="120" height="60" class="box-orange"/>
+  <text x="90" y="85" text-anchor="middle" class="label">INPUT</text>
+  <text x="90" y="105" text-anchor="middle" class="sublabel">CDE JSON</text>
+
+  <!-- Arrow to Orchestration -->
+  <line x1="150" y1="90" x2="190" y2="90" class="arrow"/>
+
+  <!-- Orchestration -->
+  <rect x="200" y="50" width="200" height="80" class="box"/>
+  <text x="300" y="75" text-anchor="middle" class="label">ORCHESTRATION</text>
+  <text x="300" y="95" text-anchor="middle" class="sublabel">run.py</text>
+  <text x="300" y="110" text-anchor="middle" class="sublabel">Parse CLI, Build Config</text>
+
+  <!-- Fork arrows -->
+  <line x1="300" y1="130" x2="300" y2="160" class="arrow" style="marker-end: none"/>
+  <line x1="300" y1="160" x2="180" y2="160" stroke="#4a5568" stroke-width="2"/>
+  <line x1="300" y1="160" x2="420" y2="160" stroke="#4a5568" stroke-width="2"/>
+  <line x1="180" y1="160" x2="180" y2="200" class="arrow"/>
+  <line x1="420" y1="160" x2="420" y2="200" class="arrow"/>
+
+  <!-- Phase 1 -->
+  <rect x="80" y="200" width="200" height="100" class="box-alt"/>
+  <text x="180" y="225" text-anchor="middle" class="label">PHASE 1</text>
+  <text x="180" y="245" text-anchor="middle" class="sublabel">--instruments-only</text>
+  <text x="180" y="265" text-anchor="middle" class="sublabel">Extract instrument patterns</text>
+  <text x="180" y="285" text-anchor="middle" class="sublabel">For human curation</text>
+
+  <!-- Phase 2 -->
+  <rect x="320" y="200" width="200" height="100" class="box"/>
+  <text x="420" y="225" text-anchor="middle" class="label">PHASE 2</text>
+  <text x="420" y="245" text-anchor="middle" class="sublabel">Full Mining</text>
+  <text x="420" y="265" text-anchor="middle" class="sublabel">Tokenize, K-mer descent</text>
+  <text x="420" y="285" text-anchor="middle" class="sublabel">Mask, Filter, Output</text>
+
+  <!-- Arrow from Phase 2 to Output -->
+  <line x1="420" y1="300" x2="420" y2="340" class="arrow"/>
+
+  <!-- Output Files -->
+  <rect x="560" y="60" width="200" height="220" class="box-green"/>
+  <text x="660" y="85" text-anchor="middle" class="label">OUTPUT FILES</text>
+  <text x="660" y="110" text-anchor="middle" class="sublabel">phrases.tsv</text>
+  <text x="660" y="130" text-anchor="middle" class="sublabel">occurrences.tsv</text>
+  <text x="660" y="150" text-anchor="middle" class="sublabel">verbatim_phrases.tsv</text>
+  <text x="660" y="170" text-anchor="middle" class="sublabel">verbatim_variants.tsv</text>
+  <text x="660" y="190" text-anchor="middle" class="sublabel">verbatim_templates.tsv</text>
+  <text x="660" y="220" text-anchor="middle" class="sublabel" style="fill: #9f7aea">instruments.tsv</text>
+  <text x="660" y="240" text-anchor="middle" class="sublabel" style="fill: #9f7aea">instruments_verbatim.tsv</text>
+  <text x="660" y="265" text-anchor="middle" class="sublabel" style="font-style: italic">(optional)</text>
+
+  <!-- Arrow from Phase 2 to Output -->
+  <line x1="520" y1="250" x2="555" y2="170" class="arrow"/>
+
+  <!-- Arrow from Phase 1 to instruments output -->
+  <line x1="280" y1="250" x2="555" y2="230" class="arrow"/>
+
+  <!-- Legend -->
+  <rect x="30" y="420" width="740" height="70" fill="#f7fafc" stroke="#e2e8f0" stroke-width="1" rx="4"/>
+  <text x="50" y="445" class="sublabel" style="font-weight: bold">Legend:</text>
+  <rect x="50" y="455" width="20" height="15" class="box-orange"/>
+  <text x="80" y="467" class="sublabel">Input</text>
+  <rect x="150" y="455" width="20" height="15" class="box"/>
+  <text x="180" y="467" class="sublabel">Processing</text>
+  <rect x="280" y="455" width="20" height="15" class="box-alt"/>
+  <text x="310" y="467" class="sublabel">Phase 1 (Discovery)</text>
+  <rect x="450" y="455" width="20" height="15" class="box-green"/>
+  <text x="480" y="467" class="sublabel">Output</text>
+</svg>

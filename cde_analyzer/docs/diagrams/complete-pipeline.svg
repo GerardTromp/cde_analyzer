@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 750">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+    </marker>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .step-num { font: bold 14px sans-serif; fill: white; }
+      .step-title { font: bold 12px sans-serif; fill: #2d3748; }
+      .sublabel { font: 11px sans-serif; fill: #4a5568; }
+      .box { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; rx: 6; }
+      .box-opt { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 6; stroke-dasharray: 5,3; }
+      .box-output { fill: #f0fff4; stroke: #48bb78; stroke-width: 2; rx: 6; }
+      .box-input { fill: #fffaf0; stroke: #ed8936; stroke-width: 2; rx: 6; }
+      .circle { fill: #4299e1; }
+      .circle-opt { fill: #9f7aea; }
+      .arrow { stroke: #4a5568; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .note { font: 10px sans-serif; fill: #718096; font-style: italic; }
+      .result { font: 10px sans-serif; fill: #276749; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">COMPLETE PIPELINE FLOW</text>
+
+  <!-- Step 1: Load Data -->
+  <circle cx="60" cy="70" r="18" class="circle"/>
+  <text x="60" y="75" text-anchor="middle" class="step-num">1</text>
+  <rect x="90" y="50" width="300" height="45" class="box-input"/>
+  <text x="100" y="70" class="step-title">LOAD DATA</text>
+  <text x="100" y="85" class="sublabel">JSON File → [CDEItem, CDEItem, CDEItem, ...]</text>
+
+  <!-- Arrow -->
+  <line x1="240" y1="95" x2="240" y2="120" class="arrow"/>
+
+  <!-- Step 2: Extract & Tokenize -->
+  <circle cx="60" cy="155" r="18" class="circle"/>
+  <text x="60" y="160" text-anchor="middle" class="step-num">2</text>
+  <rect x="90" y="125" width="400" height="100" class="box"/>
+  <text x="100" y="145" class="step-title">EXTRACT &amp; TOKENIZE</text>
+  <text x="100" y="165" class="sublabel">• Extract text from fields (designations, definitions, etc.)</text>
+  <text x="100" y="180" class="sublabel">• Tokenize with position tracking</text>
+  <text x="100" y="195" class="sublabel">• (Optional) Extract instrument patterns</text>
+  <text x="100" y="210" class="sublabel">• Lemmatize, build vocabulary, track verbatim variants</text>
+
+  <!-- Result box -->
+  <rect x="510" y="135" width="250" height="80" fill="#f7fafc" stroke="#e2e8f0" rx="4"/>
+  <text x="520" y="155" class="result">Result:</text>
+  <text x="520" y="175" class="sublabel">• List[TokenSeq]</text>
+  <text x="520" y="190" class="sublabel">• Vocabulary</text>
+  <text x="520" y="205" class="sublabel">• VerbatimTracker</text>
+
+  <!-- Arrow -->
+  <line x1="240" y1="225" x2="240" y2="250" class="arrow"/>
+
+  <!-- Step 3: Iterative K-mer Mining -->
+  <circle cx="60" cy="315" r="18" class="circle"/>
+  <text x="60" y="320" text-anchor="middle" class="step-num">3</text>
+  <rect x="90" y="255" width="400" height="130" class="box"/>
+  <text x="100" y="275" class="step-title">ITERATIVE K-MER MINING (k=25 → k=3)</text>
+  <text x="100" y="295" class="sublabel">For each k value:</text>
+  <text x="115" y="315" class="sublabel">3a. COUNT: Scan TokenSeqs for k-length unmasked windows</text>
+  <text x="115" y="335" class="sublabel">3b. FILTER: Keep k-mers with freq ≥ 3, tinyIds ≥ 2</text>
+  <text x="115" y="355" class="sublabel">3c. (Optional) DE BRUIJN: Extend k-mers via overlap</text>
+  <text x="115" y="375" class="sublabel">3d. MASK: Mark detected phrases using Aho-Corasick</text>
+
+  <!-- Loop indicator -->
+  <path d="M 480 280 L 510 280 L 510 370 L 480 370" fill="none" stroke="#4299e1" stroke-width="2"/>
+  <text x="520" y="330" class="note" style="fill: #4299e1">repeat</text>
+  <text x="520" y="345" class="note" style="fill: #4299e1">k = k-1</text>
+
+  <!-- Arrow -->
+  <line x1="240" y1="385" x2="240" y2="410" class="arrow"/>
+
+  <!-- Step 4: Post-processing (Optional) -->
+  <circle cx="60" cy="455" r="18" class="circle-opt"/>
+  <text x="60" y="460" text-anchor="middle" class="step-num">4</text>
+  <rect x="90" y="415" width="400" height="80" class="box-opt"/>
+  <text x="100" y="435" class="step-title">(Optional) POST-PROCESSING</text>
+  <text x="100" y="455" class="sublabel">• Subsumption filter: Remove redundant shorter phrases</text>
+  <text x="100" y="475" class="sublabel">• Anchor extension: Extend phrases at boundaries</text>
+  <text x="100" y="490" class="note">Enabled with --enable-subsumption, --enable-anchor</text>
+
+  <!-- Arrow -->
+  <line x1="240" y1="495" x2="240" y2="520" class="arrow"/>
+
+  <!-- Step 5: Output -->
+  <circle cx="60" cy="605" r="18" class="circle"/>
+  <text x="60" y="610" text-anchor="middle" class="step-num">5</text>
+  <rect x="90" y="525" width="670" height="165" class="box-output"/>
+  <text x="100" y="545" class="step-title" style="fill: #276749">OUTPUT</text>
+
+  <!-- Output files in columns -->
+  <g transform="translate(100, 555)">
+    <rect width="200" height="125" fill="white" stroke="#c6f6d5" rx="4"/>
+    <text x="10" y="20" class="sublabel" style="font-weight: bold">Core Outputs</text>
+    <text x="10" y="40" class="sublabel">phrases.tsv</text>
+    <text x="15" y="52" class="note">Lemmatized phrase summary</text>
+    <text x="10" y="70" class="sublabel">occurrences.tsv</text>
+    <text x="15" y="82" class="note">Every occurrence with location</text>
+    <text x="10" y="100" class="sublabel">verbatim_phrases.tsv</text>
+    <text x="15" y="112" class="note">Unique surface forms per phrase</text>
+  </g>
+
+  <g transform="translate(320, 555)">
+    <rect width="200" height="125" fill="white" stroke="#c6f6d5" rx="4"/>
+    <text x="10" y="20" class="sublabel" style="font-weight: bold">Verbatim Outputs</text>
+    <text x="10" y="40" class="sublabel">verbatim_variants.tsv</text>
+    <text x="15" y="52" class="note">Lemma → variants dictionary</text>
+    <text x="10" y="70" class="sublabel">verbatim_templates.tsv</text>
+    <text x="15" y="82" class="note">Structural patterns from</text>
+    <text x="15" y="94" class="note">multi-form phrases</text>
+    <text x="10" y="115" class="sublabel">extended.tsv (if anchor enabled)</text>
+  </g>
+
+  <g transform="translate(540, 555)">
+    <rect width="200" height="125" fill="#faf5ff" stroke="#d6bcfa" rx="4"/>
+    <text x="10" y="20" class="sublabel" style="font-weight: bold; fill: #6b46c1">Instrument Outputs</text>
+    <text x="10" y="35" class="note" style="fill: #6b46c1">(if extraction enabled)</text>
+    <text x="10" y="55" class="sublabel">instruments.tsv</text>
+    <text x="15" y="67" class="note">Detected instruments summary</text>
+    <text x="10" y="85" class="sublabel">instruments_verbatim.tsv</text>
+    <text x="15" y="97" class="note">For human curation</text>
+    <text x="15" y="109" class="note">(Phase 1 workflow)</text>
+  </g>
+
+  <!-- Summary stats -->
+  <rect x="90" y="700" width="670" height="35" fill="#edf2f7" stroke="#a0aec0" rx="4"/>
+  <text x="100" y="722" class="sublabel">Pipeline logs: token count, vocabulary size, phrases detected, verbatim recovery stats</text>
+</svg>

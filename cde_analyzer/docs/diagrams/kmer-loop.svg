@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 600">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4299e1"/>
+    </marker>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a202c; }
+      .stage { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; rx: 6; }
+      .stage-opt { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 6; stroke-dasharray: 5,3; }
+      .loop-box { fill: #f7fafc; stroke: #718096; stroke-width: 2; rx: 8; }
+      .label { font: bold 12px sans-serif; fill: #2d3748; }
+      .sublabel { font: 11px sans-serif; fill: #4a5568; }
+      .code { font: 11px monospace; fill: #553c9a; }
+      .arrow { stroke: #4a5568; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .loop-arrow { stroke: #4299e1; stroke-width: 2; fill: none; marker-end: url(#arrowhead-blue); }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">ITERATIVE DESCENDING K-MER LOOP</text>
+
+  <!-- Loop parameters -->
+  <rect x="50" y="50" width="180" height="50" fill="#fff5f5" stroke="#fc8181" stroke-width="2" rx="6"/>
+  <text x="140" y="72" text-anchor="middle" class="code">k_max = 25</text>
+  <text x="140" y="88" text-anchor="middle" class="code">k_min = 3</text>
+
+  <!-- Loop header -->
+  <rect x="260" y="50" width="380" height="35" fill="#edf2f7" stroke="#a0aec0" stroke-width="2" rx="6"/>
+  <text x="450" y="73" text-anchor="middle" class="code">for k in range(k_max, k_min - 1, -1):</text>
+
+  <!-- Main loop box -->
+  <rect x="50" y="110" width="600" height="430" class="loop-box"/>
+  <text x="70" y="135" class="label" style="fill: #718096">Loop body (k = 25, 24, 23, ... 3)</text>
+
+  <!-- Stage 1: Count -->
+  <rect x="80" y="150" width="540" height="70" class="stage"/>
+  <text x="100" y="175" class="label">STAGE 1: Count k-mers in UNMASKED regions</text>
+  <text x="100" y="195" class="sublabel">• Scan all TokenSeqs for k-length windows</text>
+  <text x="100" y="210" class="sublabel">• Skip windows where any token is masked</text>
+
+  <!-- Arrow -->
+  <line x1="350" y1="220" x2="350" y2="240" class="arrow"/>
+
+  <!-- Stage 2: Filter -->
+  <rect x="80" y="245" width="540" height="70" class="stage"/>
+  <text x="100" y="270" class="label">STAGE 2: Filter by frequency and tinyId support</text>
+  <text x="100" y="290" class="sublabel">• freq_min: Minimum occurrence count (default: 3)</text>
+  <text x="100" y="305" class="sublabel">• min_tinyids: Minimum distinct documents (default: 2)</text>
+
+  <!-- Arrow -->
+  <line x1="350" y1="315" x2="350" y2="335" class="arrow"/>
+
+  <!-- Stage 3: De Bruijn (optional) -->
+  <rect x="80" y="340" width="540" height="50" class="stage-opt"/>
+  <text x="100" y="365" class="label">(Optional) STAGE 3: De Bruijn Graph Extension</text>
+  <text x="100" y="380" class="sublabel">• Extends k-mers by finding overlapping sequences (--enable-debruijn)</text>
+
+  <!-- Arrow -->
+  <line x1="350" y1="390" x2="350" y2="410" class="arrow"/>
+
+  <!-- Stage 4: Mask -->
+  <rect x="80" y="415" width="540" height="70" class="stage"/>
+  <text x="100" y="440" class="label">STAGE 4: MASK detected phrases</text>
+  <text x="100" y="460" class="sublabel">• Build Aho-Corasick automaton from new phrases</text>
+  <text x="100" y="475" class="sublabel">• Mark matched token positions as owned (prevents re-detection)</text>
+
+  <!-- Loop back arrow -->
+  <path d="M 620 480 L 660 480 L 660 130 L 620 130" class="loop-arrow" style="marker-end: none"/>
+  <polygon points="620,125 620,135 630,130" fill="#4299e1"/>
+  <text x="665" y="310" class="sublabel" style="fill: #4299e1; writing-mode: tb">k = k - 1</text>
+
+  <!-- Exit arrow -->
+  <line x1="350" y1="540" x2="350" y2="575" class="arrow"/>
+  <text x="360" y="565" class="sublabel">When k &lt; k_min</text>
+
+  <!-- Output box -->
+  <rect x="280" y="580" width="140" height="35" fill="#f0fff4" stroke="#48bb78" stroke-width="2" rx="6"/>
+  <text x="350" y="602" text-anchor="middle" class="label" style="fill: #276749">All Phrases</text>
+</svg>
