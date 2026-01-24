@@ -6,10 +6,10 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| [phrase_miner](phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | NEW (Phase 1-3) |
+| [phrase_miner](phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | Stable |
 | [phrase](../help/phrase.md) | Original phrase detection using n-gram counting | Stable |
-| phrase_builder | Incremental phrase construction | Stable |
-| strip_phrases | Remove detected phrases from data | Stable |
+| [phrase_builder](../help/phrase_builder.md) | K-mer analysis for phrase identification | Stable |
+| [strip_phrases](../help/strip_phrases.md) | Remove detected phrases from data | Stable |
 
 ## Data Cleaning
 
@@ -25,12 +25,12 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | [count](../help/count.md) | Count structural elements and field occurrences | Stable |
 | [extract_embed](../help/extract_embed.md) | Extract fields for transformer embeddings | Stable |
 
-## Export
+## Export & Filtering
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| lemma_fasta | Create FASTA format from lemma sequences | Stable |
-| subset | Extract subsets using literal/regex/tinyID filters | Stable |
+| [lemma_fasta](../help/lemma_fasta.md) | Create FASTA format from lemma sequences | Stable |
+| [subset](../help/subset.md) | Extract subsets by tinyID or filter criteria | In Development |
 
 ## Usage Pattern
 

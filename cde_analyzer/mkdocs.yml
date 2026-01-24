@@ -15,8 +15,12 @@ nav:
     - Overview: commands/index.md
     - phrase_miner: commands/phrase_miner.md
     - phrase: help/phrase.md
+    - phrase_builder: help/phrase_builder.md
+    - strip_phrases: help/strip_phrases.md
     - count: help/count.md
     - extract_embed: help/extract_embed.md
+    - lemma_fasta: help/lemma_fasta.md
+    - subset: help/subset.md
     - strip_html: help/strip.md
     - fix_underscores: help/fix_underscores.md
   - Reference:
