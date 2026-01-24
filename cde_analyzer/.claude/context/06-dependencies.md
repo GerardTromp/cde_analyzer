@@ -51,6 +51,48 @@
 - **Usage**: All modules, utils/logger.py
 - **Criticality**: MEDIUM
 
+### LLM Provider Dependencies (NEW)
+
+**anthropic**
+- **Purpose**: Anthropic Claude API client
+- **Usage**: utils/llm/provider_claude.py
+- **Version**: >=0.18.0
+- **Criticality**: HIGH for llm_classify with Claude provider
+- **Notes**:
+  - Async client for parallel queries
+  - Used for claude-sonnet-4-20250514 model (configurable)
+
+**openai**
+- **Purpose**: OpenAI ChatGPT API client
+- **Usage**: utils/llm/provider_openai.py
+- **Version**: >=1.12.0
+- **Criticality**: HIGH for llm_classify with OpenAI provider
+- **Notes**:
+  - Async client for parallel queries
+  - Used for gpt-4o model (configurable)
+  - JSON mode for structured responses
+
+**google-generativeai**
+- **Purpose**: Google Gemini API client
+- **Usage**: utils/llm/provider_google.py
+- **Version**: >=0.4.0
+- **Criticality**: HIGH for llm_classify with Google provider
+- **Notes**:
+  - Async client for parallel queries
+  - Used for gemini-1.5-pro model (configurable)
+
+**aiohttp**
+- **Purpose**: Async HTTP client/server
+- **Usage**: utils/llm/rate_limiter.py, provider implementations
+- **Version**: >=3.9.0
+- **Criticality**: HIGH for async LLM operations
+
+**tenacity**
+- **Purpose**: Retry with exponential backoff
+- **Usage**: utils/llm/rate_limiter.py
+- **Version**: >=8.2.0
+- **Criticality**: MEDIUM for robust API calls
+
 ### Likely Dependencies (Not Confirmed in Sampled Code)
 
 **requests** (Inferred)
@@ -176,9 +218,16 @@ CDE_Schema/*.py          pydantic
 **Option 1: requirements.txt** (Simple)
 ```
 pydantic>=2.0.0
-# Add NLP library if confirmed
+# NLP library (if confirmed)
 # spacy>=3.0.0
 # nltk>=3.8.0
+
+# LLM providers (for llm_classify action)
+anthropic>=0.18.0
+openai>=1.12.0
+google-generativeai>=0.4.0
+aiohttp>=3.9.0
+tenacity>=8.2.0
 ```
 
 **Option 2: pyproject.toml** (Modern)

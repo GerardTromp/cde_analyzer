@@ -19,6 +19,8 @@ cde_analyzer/
 │   ├── __init__.py
 │   ├── CDE_Item.py          # CDEItem model (42 lines)
 │   ├── CDE_Form.py          # CDEForm model (86 lines)
+│   ├── EmbedText.py         # EmbedText model for embedding output
+│   ├── LLM_Classification.py # LLM classification result models (NEW)
 │   └── classes.py           # Shared model classes (>150 lines)
 │
 ├── actions/                  # CLI action modules (plugin architecture)
@@ -39,6 +41,10 @@ cde_analyzer/
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
+│   ├── llm_classify/        # Multi-LLM phrase classification (NEW)
+│   │   ├── __init__.py
+│   │   ├── cli.py           # Argument parser (128 lines)
+│   │   └── run.py           # Action orchestration (196 lines)
 │   ├── phrase/              # Repeated phrase detection
 │   │   ├── __init__.py
 │   │   ├── cli.py
@@ -68,15 +74,25 @@ cde_analyzer/
 │   └── recursor.py          # Recursive descent visitor (25 lines)
 │
 ├── docs/                     # Documentation
-│   └── help/
-│       ├── all-commands.md  # Command reference
-│       └── all-commands2.md # Additional command docs
+│   ├── commands/            # Command documentation
+│   │   ├── index.md         # Commands overview
+│   │   └── phrase_miner.md  # phrase_miner detailed docs
+│   ├── help/
+│   │   ├── all-commands.md  # Command reference
+│   │   ├── llm_classify.md  # llm_classify CLI synopsis (NEW)
+│   │   └── ...              # Other help files
+│   └── llm/                  # LLM Classification docs (NEW)
+│       ├── index.md         # LLM module overview (152 lines)
+│       ├── llm_classify.md  # Comprehensive command guide (379 lines)
+│       ├── configuration.md # API key setup (324 lines)
+│       └── query_modules.md # Module reference (319 lines)
 │
 ├── logic/                    # Business logic implementations
 │   ├── counter.py           # Field counting logic (~50 lines visible)
 │   ├── extract_embed.py     # Embedding extraction logic
 │   ├── html_stripper.py     # HTML removal logic
 │   ├── lemma_fasta.py       # FASTA generation logic
+│   ├── llm_classifier.py    # LLM classification orchestration (506 lines) (NEW)
 │   ├── phrase_anchor_extend.py # Anchor extension with bigram model (373 lines)
 │   ├── phrase_builder.py    # Phrase construction logic
 │   ├── phrase_extractor.py  # Phrase detection logic (original)
@@ -91,6 +107,23 @@ cde_analyzer/
 │
 ├── utils/                    # Utility functions
 │   ├── __pycache__/
+│   │
+│   ├── llm/                  # LLM provider infrastructure (NEW)
+│   │   ├── __init__.py       # Provider factory (200 lines)
+│   │   ├── config.py         # API key resolution (325 lines)
+│   │   ├── provider_base.py  # Abstract LLMProvider (293 lines)
+│   │   ├── provider_claude.py # Anthropic Claude (262 lines)
+│   │   ├── provider_openai.py # OpenAI ChatGPT (267 lines)
+│   │   ├── provider_google.py # Google Gemini (289 lines)
+│   │   ├── rate_limiter.py   # Async rate limiting (356 lines)
+│   │   └── result_aggregator.py # Multi-LLM aggregation (401 lines)
+│   │
+│   ├── query_modules/        # Query module framework (NEW)
+│   │   ├── __init__.py       # Module registry (174 lines)
+│   │   ├── module_base.py    # Abstract QueryModule (310 lines)
+│   │   ├── instrument_detector.py # Instrument detection (154 lines)
+│   │   └── temporal_detector.py # Temporal patterns (196 lines)
+│   │
 │   ├── analyzer_state.py    # Global state (verbosity) (459 bytes)
 │   ├── cde_impexport.py     # JSON import/export (2.0 KB)
 │   ├── constants.py         # Constants (542 bytes)
@@ -257,6 +290,19 @@ Based on git history (last 90 days):
 - logic/phrase_miner.py (phrase detection - k-mer mining)
 - logic/phrase_stripper.py (phrase removal)
 - logic/html_stripper.py (HTML cleaning)
+- logic/llm_classifier.py (LLM phrase classification - NEW)
+
+### LLM Integration (NEW)
+- utils/llm/config.py (API key resolution)
+- utils/llm/provider_base.py (abstract provider)
+- utils/llm/provider_claude.py (Claude implementation)
+- utils/llm/provider_openai.py (OpenAI implementation)
+- utils/llm/provider_google.py (Gemini implementation)
+- utils/llm/rate_limiter.py (async rate limiting)
+- utils/llm/result_aggregator.py (multi-LLM aggregation)
+- utils/query_modules/module_base.py (abstract module)
+- utils/query_modules/instrument_detector.py (instrument detection)
+- utils/query_modules/temporal_detector.py (temporal patterns)
 
 ### Utilities
 - utils/helpers.py (general utilities)

@@ -403,6 +403,114 @@ def get_verbosity() -> int:
 
 ---
 
+## ADR-011: Multi-LLM Classification Architecture
+
+**Date**: January 2026 (commit 10b7f13)
+
+**Status**: Accepted
+
+**Context**:
+- Need to classify phrases extracted by phrase_miner into semantic categories
+- Manual curation of thousands of phrases is time-consuming
+- Different LLMs may have different strengths/biases
+- Want confidence scoring to prioritize human review
+- API keys are sensitive and need secure handling
+
+**Decision**: Implement multi-LLM classification with async providers, pluggable modules, and confidence aggregation
+
+**Implementation**:
+
+1. **Provider Abstraction** (`utils/llm/provider_base.py`)
+   - Abstract LLMProvider class for uniform interface
+   - Implementations for Claude, OpenAI, Gemini
+   - Async batch processing with rate limiting
+
+2. **API Key Resolution** (`utils/llm/config.py`)
+   - Priority: config file → environment variables → CLI
+   - Config file: `~/.cde_analyzer/llm_config.json`
+   - CLI args documented as least preferred (security)
+
+3. **Query Module Framework** (`utils/query_modules/`)
+   - Abstract QueryModule for pluggable classification tasks
+   - Current modules: instrument_detector, temporal_detector
+   - Modules define categories, prompts, and response parsing
+
+4. **Result Aggregation** (`utils/llm/result_aggregator.py`)
+   - Four methods: unanimous, majority, weighted_majority, confidence_weighted
+   - Quintile system: highly_likely → highly_unlikely (5 levels)
+   - Agreement tracking: unanimous, majority, split
+
+**Rationale**:
+- Multi-LLM reduces single-provider bias
+- Async pattern enables parallel queries (faster)
+- Pluggable modules allow easy extension
+- Quintile system aids human curation prioritization
+- Config file priority protects API keys
+
+**Consequences**:
+- **Positive**:
+  - Robust classification with cross-validation
+  - Fast execution via async parallelism
+  - Extensible to new classification tasks
+  - Secure API key handling
+  - Human curation aided by confidence scores
+- **Negative**:
+  - External API dependency (costs, availability)
+  - Requires API keys from multiple providers
+  - Added complexity (async, multiple providers)
+  - Network latency affects performance
+
+**Commit**: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
+
+**Files Created**:
+- CDE_Schema/LLM_Classification.py
+- logic/llm_classifier.py
+- actions/llm_classify/ (cli.py, run.py)
+- utils/llm/ (7 files)
+- utils/query_modules/ (4 files)
+- docs/llm/ (4 documentation files)
+
+---
+
+## ADR-012: Confidence Quintile System
+
+**Date**: January 2026
+
+**Status**: Accepted
+
+**Context**:
+- LLMs return confidence scores (0.0-1.0)
+- Need human-readable confidence levels
+- Want consistent terminology across tools
+
+**Decision**: Use 5-tier quintile system for confidence levels
+
+**Mapping**:
+| Score Range | Quintile | Interpretation |
+|------------|----------|----------------|
+| 0.81-1.00 | highly_likely | High confidence, minimal review needed |
+| 0.61-0.80 | likely | Good confidence, spot-check recommended |
+| 0.41-0.60 | indeterminate | Uncertain, human review required |
+| 0.21-0.40 | unlikely | Low confidence, likely incorrect |
+| 0.00-0.20 | highly_unlikely | Very low confidence, probably wrong |
+
+**Rationale**:
+- Equal-width bins are intuitive
+- Five levels balance granularity and simplicity
+- Names convey clear meaning
+- "Indeterminate" highlights uncertainty for review
+
+**Consequences**:
+- **Positive**:
+  - Easy to understand
+  - Actionable (prioritize "indeterminate" for review)
+  - Consistent terminology
+- **Negative**:
+  - Loses precision of raw scores
+  - Boundary effects (0.60 vs 0.61)
+
+---
+
 ## Deferred Decisions
 
 ### DD-001: Test Framework Choice

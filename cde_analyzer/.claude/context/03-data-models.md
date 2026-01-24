@@ -554,6 +554,82 @@ Three interpretation modes (`--group-type`):
 - **path**: Full path contains key (e.g., `valueDomain.datatypeText`)
 - **terminal**: Deepest component matches (e.g., any `*.name`)
 
+## LLM Classification Models (NEW)
+
+### LLM_Classification.py
+
+Data models for LLM-based phrase classification results.
+
+**ConfidenceQuintile** - Enum for confidence levels
+```python
+class ConfidenceQuintile(str, Enum):
+    HIGHLY_LIKELY = "highly_likely"      # 81-100% confidence
+    LIKELY = "likely"                     # 61-80% confidence
+    INDETERMINATE = "indeterminate"       # 41-60% confidence
+    UNLIKELY = "unlikely"                 # 21-40% confidence
+    HIGHLY_UNLIKELY = "highly_unlikely"   # 0-20% confidence
+```
+
+**LLMResponse** - Single provider response
+```python
+provider: str                    # Provider name (claude, openai, google)
+model_id: str                    # Model identifier used
+category: str                    # Classified category
+confidence: float                # Confidence score (0.0-1.0)
+reasoning: str                   # LLM's explanation
+raw_response: Optional[str]      # Raw API response for debugging
+latency_ms: Optional[float]      # Response time
+```
+
+**AggregatedClassification** - Multi-LLM aggregated result
+```python
+final_category: str              # Consensus category
+final_quintile: ConfidenceQuintile
+aggregated_confidence: float     # Combined confidence (0.0-1.0)
+agreement_level: str             # unanimous, majority, split
+individual_responses: List[LLMResponse]
+vote_distribution: Dict[str, int]  # Category → vote count
+combined_reasoning: str          # Merged reasoning from all LLMs
+```
+
+**PhraseContext** - Phrase with context for classification
+```python
+phrase_id: str                   # Unique identifier
+phrase_text: str                 # Lemmatized phrase
+verbatim_forms: List[str]        # Original text variants
+occurrences: List[dict]          # Context per occurrence
+n_tinyids: int                   # Number of CDEs containing phrase
+total_frequency: int             # Total occurrences
+```
+
+**PhraseClassification** - Complete classification result
+```python
+phrase_context: PhraseContext    # Input phrase data
+classification: AggregatedClassification  # Classification result
+timestamp: str                   # ISO 8601 timestamp
+module_name: str                 # Query module used
+```
+
+### Quintile Computation
+
+Confidence scores (0.0-1.0) map to quintiles:
+- 0.81-1.00 → highly_likely
+- 0.61-0.80 → likely
+- 0.41-0.60 → indeterminate
+- 0.21-0.40 → unlikely
+- 0.00-0.20 → highly_unlikely
+
+### Aggregation Methods
+
+Results from multiple LLMs are combined using configurable methods:
+
+| Method | Description |
+|--------|-------------|
+| `unanimous` | All providers must agree |
+| `majority` | Most common category wins (default) |
+| `weighted_majority` | Weighted by confidence scores |
+| `confidence_weighted` | Full confidence-weighted voting |
+
 ## Future Extensibility
 
 The README mentions potential extension to:

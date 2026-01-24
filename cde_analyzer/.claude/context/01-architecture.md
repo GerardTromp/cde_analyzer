@@ -38,13 +38,14 @@ Current actions:
 - **fix_underscores** - Fix Pydantic incompatible field names starting with underscore
 - **strip_html** - Remove HTML markup from CDE fields
 - **phrase** - Find repeated phrases across CDE records (original implementation)
-- **phrase_miner** - Advanced k-mer phrase mining with iterative descending detection (NEW)
+- **phrase_miner** - Advanced k-mer phrase mining with iterative descending detection
 - **count** - Count structural elements and field occurrences
 - **extract_embed** - Extract fields for transformer embedding
 - **strip_phrases** - Remove literal phrases at specified paths
 - **lemma_fasta** - Create FASTA format from lemma sequences
 - **phrase_builder** - Incremental phrase construction
 - **subset** - Extract subsets using literal/regex/tinyID filters
+- **llm_classify** - Multi-LLM phrase classification with confidence aggregation (NEW)
 
 ### 3. Business Logic (`logic/`)
 Core processing implementations:
@@ -57,23 +58,44 @@ Core processing implementations:
 - **extract_embed.py** - Field extraction for embeddings
 - **html_stripper.py** - HTML tag removal
 - **lemma_fasta.py** - FASTA format generation
+- **llm_classifier.py** - LLM-based phrase classification orchestration (NEW)
 
 ### 4. Data Models (`CDE_Schema/`)
 Pydantic-based object models mirroring the NLM CDE API schema:
 - **CDE_Item.py** - CDEItem model (individual data elements)
 - **CDE_Form.py** - CDEForm model (form structures)
-- **classes.py** - Shared classes (Source, Designation, Definition, ValueDomain, etc.)
+- **classes.py** - Shared model classes (Source, Designation, Definition, ValueDomain, etc.)
+- **EmbedText.py** - EmbedText model for embedding extraction output
+- **LLM_Classification.py** - LLM classification result models (NEW)
 
-Key characteristic: **Self-referential nesting** - models can contain nested instances of themselves, requiring recursive traversal.
+### 5. LLM Integration Layer (`utils/llm/`) - NEW
+Async LLM provider infrastructure for multi-provider classification:
+- **config.py** - API key resolution (config file → env vars → CLI)
+- **provider_base.py** - Abstract LLMProvider interface
+- **provider_claude.py** - Anthropic Claude implementation
+- **provider_openai.py** - OpenAI ChatGPT implementation
+- **provider_google.py** - Google Gemini implementation
+- **rate_limiter.py** - Async rate limiting with token bucket algorithm
+- **result_aggregator.py** - Multi-LLM result reconciliation and quintile calculation
+- **__init__.py** - Provider factory with lazy loading
 
-### 5. Recursive Engine (`core/recursor.py`)
+### 6. Query Module Framework (`utils/query_modules/`) - NEW
+Pluggable classification modules for semantic categorization:
+- **module_base.py** - Abstract QueryModule interface
+- **instrument_detector.py** - Instrument/device name detection
+- **temporal_detector.py** - Temporal pattern detection
+- **__init__.py** - Module registry with lazy loading
+
+### 7. Recursive Engine (`core/recursor.py`)
 - Implements recursive descent pattern
 - Traverses nested Pydantic models and dictionaries
 - Visitor pattern for processing nodes
 - Handles both dictionary and list structures
 - Path tracking for field identification
 
-### 6. Utilities (`utils/`)
+Key characteristic: **Self-referential nesting** - models can contain nested instances of themselves, requiring recursive traversal.
+
+### 8. Utilities (`utils/`)
 Reusable functions grouped by purpose:
 - **cde_impexport.py** - JSON import/export
 - **datatype_check.py** - Type validation utilities
@@ -212,18 +234,24 @@ Based on import analysis:
 
 ## Current State
 
-- **Active branch**: feature/phrase-miner-kmer-detection (advanced k-mer phrase mining)
-- **Previous branch**: Repeats (earlier phrase detection work)
-- **Main branch**: Stable, behind feature branches
+- **Active branch**: phrase-curator (LLM-based phrase classification)
+- **Previous branch**: feature/phrase-miner-kmer-detection (k-mer phrase mining - COMPLETE)
+- **Main branch**: Stable, recently updated
 - **Recent focus**:
-  - Lazy loading refactoring (Dec 2024, commit 4400bf7)
-  - Launcher performance optimization (Jan 2026)
-  - Phrase mining implementation (Jan 2026, commit d543ff2)
-  - K-mer-based phrase detection with masking
+  - LLM-based phrase classification (Jan 2026)
+  - Multi-provider support (Claude, OpenAI, Gemini)
+  - Async architecture with rate limiting
+  - Comprehensive MkDocs documentation
 
-**Latest Development** (2026-01-13):
-- Implemented new `phrase_miner` action with iterative descending k-mer detection
-- Branch: feature/phrase-miner-kmer-detection
-- Status: Implementation complete (Phase 1-3), ready for testing
-- Commit: d543ff2 "Implement phrase_miner action (Phase 1-3: Core k-mer mining)"
-- Published to GitHub: 2026-01-14
+**Latest Development** (2026-01-24):
+- Implemented new `llm_classify` action for multi-LLM phrase classification
+- Branch: phrase-curator
+- Status: Implementation complete (all 5 phases + documentation)
+- Commit: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
+- Features:
+  - Async LLM provider implementations (Claude, OpenAI, Gemini)
+  - Modular query framework (instrument detection, temporal detection)
+  - Four aggregation methods (unanimous, majority, weighted, confidence-weighted)
+  - Confidence quintile system (highly_likely → highly_unlikely)
+  - API key resolution: config file → env vars → CLI
+- Published to GitHub: 2026-01-24
