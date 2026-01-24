@@ -30,7 +30,7 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | Command | Description | Status |
 |---------|-------------|--------|
 | [lemma_fasta](../help/lemma_fasta.md) | Create FASTA format from lemma sequences | Stable |
-| [subset](../help/subset.md) | Extract subsets by tinyID or filter criteria | In Development |
+| [subset](../help/subset.md) | Extract subsets by tinyId with Pydantic validation | Stable |
 
 ## Usage Pattern
 
@@ -90,4 +90,14 @@ python cde_analyzer.py phrase --input data.json --fields designation --output ph
 
 # NEW: Advanced k-mer mining (longest-first with masking)
 python cde_analyzer.py phrase_miner --input data.json --output-dir phrase_output
+```
+
+### Subsetting Records
+
+```bash
+# Extract specific CDEs by tinyId list
+python cde_analyzer.py subset -i cdes_full.json -o subset.json -m CDE --id-file ids.txt
+
+# Exclude problematic records
+python cde_analyzer.py subset -i cdes.json -o cleaned.json -m CDE --id-list bad1 bad2 --exclude
 ```

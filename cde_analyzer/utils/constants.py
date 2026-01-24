@@ -14,9 +14,25 @@ class EmbedItem(BaseModel):
     Pv1: str
     Pv2: str
 
+
+class EmbedText(BaseModel):
+    """
+    Simplified model for embedding text extraction.
+
+    Mandatory fields: tinyId, Name
+    Optional fields: Question, Definition, PermissibleValues
+    """
+    tinyId: str
+    Name: str
+    Question: Optional[str] = None
+    Definition: Optional[str] = None
+    PermissibleValues: Optional[str] = None
+
+
 MODEL_REGISTRY: dict[str, Type[BaseModel]] = {
     "CDE": CDEItem,
     "Form": CDEForm,
     "Embed": EmbedItem,
+    "EmbedText": EmbedText,
 }
 
