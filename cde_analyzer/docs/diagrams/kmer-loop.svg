@@ -1,82 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 600">
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/>
-    </marker>
-    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#4299e1"/>
-    </marker>
-    <style>
-      .title { font: bold 16px sans-serif; fill: #1a202c; }
-      .stage { fill: #ebf4ff; stroke: #4299e1; stroke-width: 2; rx: 6; }
-      .stage-opt { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 6; stroke-dasharray: 5,3; }
-      .loop-box { fill: #f7fafc; stroke: #718096; stroke-width: 2; rx: 8; }
-      .label { font: bold 12px sans-serif; fill: #2d3748; }
-      .sublabel { font: 11px sans-serif; fill: #4a5568; }
-      .code { font: 11px monospace; fill: #553c9a; }
-      .arrow { stroke: #4a5568; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-      .loop-arrow { stroke: #4299e1; stroke-width: 2; fill: none; marker-end: url(#arrowhead-blue); }
-    </style>
-  </defs>
-
-  <!-- Title -->
-  <text x="350" y="30" text-anchor="middle" class="title">ITERATIVE DESCENDING K-MER LOOP</text>
-
-  <!-- Loop parameters -->
-  <rect x="50" y="50" width="180" height="50" fill="#fff5f5" stroke="#fc8181" stroke-width="2" rx="6"/>
-  <text x="140" y="72" text-anchor="middle" class="code">k_max = 25</text>
-  <text x="140" y="88" text-anchor="middle" class="code">k_min = 3</text>
-
-  <!-- Loop header -->
-  <rect x="260" y="50" width="380" height="35" fill="#edf2f7" stroke="#a0aec0" stroke-width="2" rx="6"/>
-  <text x="450" y="73" text-anchor="middle" class="code">for k in range(k_max, k_min - 1, -1):</text>
-
-  <!-- Main loop box -->
-  <rect x="50" y="110" width="600" height="430" class="loop-box"/>
-  <text x="70" y="135" class="label" style="fill: #718096">Loop body (k = 25, 24, 23, ... 3)</text>
-
-  <!-- Stage 1: Count -->
-  <rect x="80" y="150" width="540" height="70" class="stage"/>
-  <text x="100" y="175" class="label">STAGE 1: Count k-mers in UNMASKED regions</text>
-  <text x="100" y="195" class="sublabel">• Scan all TokenSeqs for k-length windows</text>
-  <text x="100" y="210" class="sublabel">• Skip windows where any token is masked</text>
-
-  <!-- Arrow -->
-  <line x1="350" y1="220" x2="350" y2="240" class="arrow"/>
-
-  <!-- Stage 2: Filter -->
-  <rect x="80" y="245" width="540" height="70" class="stage"/>
-  <text x="100" y="270" class="label">STAGE 2: Filter by frequency and tinyId support</text>
-  <text x="100" y="290" class="sublabel">• freq_min: Minimum occurrence count (default: 3)</text>
-  <text x="100" y="305" class="sublabel">• min_tinyids: Minimum distinct documents (default: 2)</text>
-
-  <!-- Arrow -->
-  <line x1="350" y1="315" x2="350" y2="335" class="arrow"/>
-
-  <!-- Stage 3: De Bruijn (optional) -->
-  <rect x="80" y="340" width="540" height="50" class="stage-opt"/>
-  <text x="100" y="365" class="label">(Optional) STAGE 3: De Bruijn Graph Extension</text>
-  <text x="100" y="380" class="sublabel">• Extends k-mers by finding overlapping sequences (--enable-debruijn)</text>
-
-  <!-- Arrow -->
-  <line x1="350" y1="390" x2="350" y2="410" class="arrow"/>
-
-  <!-- Stage 4: Mask -->
-  <rect x="80" y="415" width="540" height="70" class="stage"/>
-  <text x="100" y="440" class="label">STAGE 4: MASK detected phrases</text>
-  <text x="100" y="460" class="sublabel">• Build Aho-Corasick automaton from new phrases</text>
-  <text x="100" y="475" class="sublabel">• Mark matched token positions as owned (prevents re-detection)</text>
-
-  <!-- Loop back arrow -->
-  <path d="M 620 480 L 660 480 L 660 130 L 620 130" class="loop-arrow" style="marker-end: none"/>
-  <polygon points="620,125 620,135 630,130" fill="#4299e1"/>
-  <text x="665" y="310" class="sublabel" style="fill: #4299e1; writing-mode: tb">k = k - 1</text>
-
-  <!-- Exit arrow -->
-  <line x1="350" y1="540" x2="350" y2="575" class="arrow"/>
-  <text x="360" y="565" class="sublabel">When k &lt; k_min</text>
-
-  <!-- Output box -->
-  <rect x="280" y="580" width="140" height="35" fill="#f0fff4" stroke="#48bb78" stroke-width="2" rx="6"/>
-  <text x="350" y="602" text-anchor="middle" class="label" style="fill: #276749">All Phrases</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 700 629.53">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <text transform="translate(199.92 30)" fill="#1a202c" font-family="Arial-BoldMT, Arial" font-size="16" font-weight="700"><tspan x="0" y="0">ITER</tspan><tspan x="36.45" y="0" letter-spacing="-.07em">A</tspan><tspan x="46.82" y="0">TIVE DESCENDING K-MER LOOP</tspan></text>
+  <rect x="50" y="50" width="180" height="50" rx="6" ry="6" fill="#fff5f5"/>
+  <rect x="50" y="50" width="180" height="50" rx="6" ry="6" fill="none" stroke="#fc8181" stroke-width="2"/>
+  <text transform="translate(106.99 72)" fill="#553c9a" font-family="CourierNewPSMT, &apos;Courier New&apos;" font-size="11"><tspan x="0" y="0">k_max = 25</tspan></text>
+  <text transform="translate(110.29 88)" fill="#553c9a" font-family="CourierNewPSMT, &apos;Courier New&apos;" font-size="11"><tspan x="0" y="0">k_min = 3</tspan></text>
+  <rect x="260" y="50" width="380" height="35" rx="6" ry="6" fill="#edf2f7"/>
+  <rect x="260" y="50" width="380" height="35" rx="6" ry="6" fill="none" stroke="#a0aec0" stroke-width="2"/>
+  <text transform="translate(327.88 73)" fill="#553c9a" font-family="CourierNewPSMT, &apos;Courier New&apos;" font-size="11"><tspan x="0" y="0">for k in range(k_max, k_min - 1, -1):</tspan></text>
+  <rect x="50" y="110" width="600" height="430" fill="#f7fafc"/>
+  <rect x="50" y="110" width="600" height="430" fill="none" stroke="#718096" stroke-width="2"/>
+  <text transform="translate(70 135)" fill="#718096" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">Loop body (k = 25, 24, 23, ... 3)</tspan></text>
+  <rect x="80" y="150" width="540" height="70" fill="#ebf4ff"/>
+  <rect x="80" y="150" width="540" height="70" fill="none" stroke="#4299e1" stroke-width="2"/>
+  <text transform="translate(100 175)" fill="#2d3748" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">S</tspan><tspan x="8" y="0" letter-spacing="-.07em">T</tspan><tspan x="14.45" y="0">AGE 1: Count k-mers in UNMASKED regions</tspan></text>
+  <text transform="translate(100 195)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• Scan all</tspan><tspan x="46.04" y="0" letter-spacing="-.02em"> </tspan><tspan x="48.9" y="0" letter-spacing="-.11em">T</tspan><tspan x="54.41" y="0" letter-spacing="0em">okenSeqs for k-length windows</tspan></text>
+  <text transform="translate(100 210)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• Skip windows where any token is masked</tspan></text>
+  <polygon points="357 228.94 350 248.94 343 228.94 357 228.94" fill="#4a5568"/>
+  <rect x="80" y="251.94" width="540" height="70" fill="#ebf4ff"/>
+  <rect x="80" y="251.94" width="540" height="70" fill="none" stroke="#4299e1" stroke-width="2"/>
+  <text transform="translate(100 276.94)" fill="#2d3748" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">S</tspan><tspan x="8" y="0" letter-spacing="-.07em">T</tspan><tspan x="14.45" y="0">AGE 2: Filter by frequency and tinyId support</tspan></text>
+  <text transform="translate(100 296.94)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• freq_min: Minimum occurrence count (default: 3)</tspan></text>
+  <text transform="translate(100 311.94)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• min_tinyids: Minimum distinct documents (default: 2)</tspan></text>
+  <polygon points="357 333.72 350 353.72 343 333.72 357 333.72" fill="#4a5568"/>
+  <rect x="80" y="356.72" width="540" height="50" fill="#faf5ff"/>
+  <rect x="80" y="356.72" width="540" height="50" fill="none" stroke="#9f7aea" stroke-dasharray="5 3" stroke-width="2"/>
+  <text transform="translate(100 381.72)" fill="#2d3748" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">(Optional) S</tspan><tspan x="67.99" y="0" letter-spacing="-.07em">T</tspan><tspan x="74.43" y="0">AGE 3: De Bruijn Graph Extension</tspan></text>
+  <text transform="translate(100 396.72)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• Extends k-mers by finding overlapping sequences (--enable-debruijn)</tspan></text>
+  <polygon points="357 419.5 350 439.5 343 419.5 357 419.5" fill="#4a5568"/>
+  <rect x="80" y="443.35" width="540" height="70" fill="#ebf4ff"/>
+  <rect x="80" y="443.35" width="540" height="70" fill="none" stroke="#4299e1" stroke-width="2"/>
+  <text transform="translate(100 467.49)" fill="#2d3748" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">S</tspan><tspan x="8" y="0" letter-spacing="-.07em">T</tspan><tspan x="14.45" y="0">AGE 4: MASK detected phrases</tspan></text>
+  <text transform="translate(100 487.49)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• Build</tspan><tspan x="31.37" y="0" letter-spacing="-.06em"> </tspan><tspan x="33.82" y="0">Aho-Corasick automaton from new phrases</tspan></text>
+  <text transform="translate(100 502.49)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">• Mark matched token positions as owned (prevents re-detection)</tspan></text>
+  <polyline points="620 480 660 480 660 130 620 130" fill="none" stroke="#4299e1" stroke-width="2"/>
+  <polygon points="620 130 630 135 630 125 620 130" fill="#4299e1"/>
+  <text transform="translate(661.06 310) rotate(90)" fill="#4299e1" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">k = k - 1</tspan></text>
+  <polygon points="357 557 350 577 343 557 357 557" fill="#4a5568"/>
+  <text transform="translate(360 565)" fill="#4a5568" font-family="ArialMT, Arial" font-size="11"><tspan x="0" y="0">When k &lt; k_min</tspan></text>
+  <rect x="280" y="580" width="140" height="35" rx="6" ry="6" fill="#f0fff4"/>
+  <rect x="280" y="580" width="140" height="35" rx="6" ry="6" fill="none" stroke="#48bb78" stroke-width="2"/>
+  <text transform="translate(317.32 602)" fill="#276749" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="700"><tspan x="0" y="0">All Phrases</tspan></text>
+  <line x1="350" y1="220" x2="350" y2="231.43" fill="none" stroke="#4a5568" stroke-width="2"/>
+  <line x1="350" y1="321.94" x2="350" y2="333.38" fill="none" stroke="#4a5568" stroke-width="2"/>
+  <line x1="350" y1="406.72" x2="350" y2="422.13" fill="none" stroke="#4a5568" stroke-width="2"/>
+  <line x1="350.3" y1="540" x2="350.3" y2="557.12" fill="none" stroke="#4a5568" stroke-width="2"/>
 </svg>
