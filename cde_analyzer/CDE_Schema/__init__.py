@@ -1,5 +1,6 @@
 from .CDE_Item import CDEItem
 from .CDE_Form import CDEForm
+from .EmbedText import EmbedText
 from .classes import (
     Attachment,
     CDE,
@@ -96,4 +97,5 @@ __all__ = [
     "SkipLogic",
     "FormElement",
     "CDEForm",
+    "EmbedText",
 ]
