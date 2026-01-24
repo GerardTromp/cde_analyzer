@@ -23,23 +23,25 @@ python cde_analyzer.py --help
 python cde_analyzer.py
 
 # Get help for a specific command
-python cde_analyzer.py phrase_miner --help
+python cde_analyzer.py phrase-miner --help
 ```
 
 ## Available Commands
 
+> **Note**: Command names use **hyphens** on the command line (e.g., `phrase-miner`) following pip/CLI convention. Both hyphen and underscore forms work.
+
 | Command | Description |
 |---------|-------------|
-| [phrase_miner](commands/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection |
+| [phrase-miner](commands/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection |
 | [phrase](help/phrase.md) | Find repeated phrases (original implementation) |
+| [phrase-builder](help/phrase_builder.md) | K-mer analysis for phrase identification |
+| [strip-phrases](help/strip_phrases.md) | Remove curated phrases from CDE documents |
 | [count](help/count.md) | Count structural elements and field occurrences |
-| [extract_embed](help/extract_embed.md) | Extract fields for transformer embeddings |
-| [strip_html](help/strip.md) | Remove HTML markup from CDE fields |
-| [fix_underscores](help/fix_underscores.md) | Fix Pydantic-incompatible field names |
-| phrase_builder | Incremental phrase construction |
-| strip_phrases | Remove literal phrases at specified paths |
-| lemma_fasta | Create FASTA format from lemma sequences |
-| subset | Extract subsets using literal/regex/tinyID filters |
+| [strip-html](help/strip.md) | Remove HTML markup from CDE fields |
+| [fix-underscores](help/fix_underscores.md) | Fix Pydantic-incompatible field names |
+| [extract-embed](help/extract_embed.md) | Extract fields for transformer embeddings |
+| [lemma-fasta](help/lemma_fasta.md) | Create pseudo-FASTA format for genomic tools |
+| [subset](help/subset.md) | Extract subsets by tinyId with Pydantic validation |
 
 ## Architecture
 

@@ -1,171 +1,264 @@
-# CDE Analyzer CLI Cheat Sheet
+# CDE Analyzer CLI Reference
 
-# `cde_analyzer` Command
+Quick reference for all CDE Analyzer commands. For detailed documentation, see the individual command pages.
 
-```typescript
-usage: export_help_docs.py [-h] {} ...
+> **Note**: Command names use **hyphens** on the command line (e.g., `phrase-miner`, `strip-html`) but **underscores** in Python module names. Both forms work with argparse, but hyphens are the conventional CLI style.
 
-CDE Analyzer CLI
+---
 
-positional arguments:
-  {}
+## Launcher
 
-options:
-  -h, --help  show this help message and exit
+The `cde_analyzer` script is a launcher that dispatches to individual commands. It does not perform any analysis itself.
+
+```bash
+# List all available commands
+cde_analyzer --help
+
+# Get help for a specific command
+cde_analyzer <command> --help
 ```
 
 ---
 
-# `phrase` Command
+## Phrase Detection
 
-```typescript
-usage: phrase [-h] [--input INPUT] --fields FIELDS [FIELDS ...] \
-              [--min-words MIN_WORDS] [--min-ids MIN_IDS] [--remove-stopwords] \
-              [--lemmatize | --no-lemmatize] [--prune-subphrases] \
+### `phrase_miner` Command
+
+Advanced k-mer phrase mining with iterative detection and masking.
+
+```bash
+usage: phrase_miner [-h] --input INPUT [--output-dir OUTPUT_DIR]
+                    [--fields FIELDS [FIELDS ...]] [--k-max K_MAX] [--k-min K_MIN]
+                    [--freq-min FREQ_MIN] [--min-tinyids MIN_TINYIDS]
+                    [--lemmatize | --no-lemmatize] [--remove-stopwords]
+                    [--enable-debruijn] [--enable-subsumption] [--enable-anchor]
+                    [--extract-instruments] [--instrument-list FILE]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input JSON file (list of CDE items)
+  --output-dir, -o DIR  Output directory for results (default: phrase_output)
+  --fields, -f FIELDS   Field names to extract (default: designation definition)
+  --k-max K_MAX         Maximum k-mer length (default: 25)
+  --k-min K_MIN         Minimum k-mer length (default: 3)
+  --freq-min FREQ_MIN   Minimum frequency threshold (default: 3)
+  --min-tinyids N       Minimum distinct tinyIds (default: 2)
+  --lemmatize           Apply lemmatization (default: True)
+  --remove-stopwords    Remove English stopwords
+  --enable-debruijn     Enable de Bruijn graph extension
+  --enable-subsumption  Enable subsumption filtering
+  --enable-anchor       Enable anchor-based phrase extension
+  --extract-instruments Extract 'as part of <Instrument>' patterns
+  --instrument-list F   TSV file with curated instrument patterns
+```
+
+---
+
+### `phrase` Command
+
+Original phrase detection using n-gram counting.
+
+```bash
+usage: phrase [-h] --input INPUT --fields FIELDS [FIELDS ...]
+              [--min-words N] [--min-ids N] [--remove-stopwords]
+              [--lemmatize | --no-lemmatize] [--prune-subphrases]
               [--output-format {json,csv,tsv}] [--output OUTPUT] [--verbatim]
-
-phrase command
 
 options:
   -h, --help            show this help message and exit
   --input INPUT         Input JSON file
-  --fields FIELDS [FIELDS ...]
-                        Field names from pydantic classes
-  --min-words MIN_WORDS
-                        Minimum length of phrases, i.e., discard shorter phrases
-  --min-ids MIN_IDS     Minimum number of objects that share a phrase
-  --remove-stopwords    Remove common English stop words (articles, prepositions, conjunctions)?
-  --lemmatize, --no-lemmatize
-                        Convert the text to standardized (lemma) form so that similar phrases match? 
-                        (default: True)
-  --prune-subphrases    Collect longest shared phrases?
-  --output-format {json,csv,tsv}
-                        Choose output format
-  --output OUTPUT       Path, including filename, to store results.
-  --verbatim            Include verbatim (non-lemmatized) phrases alongside lemma phrases
+  --fields FIELDS       Field names from pydantic classes
+  --min-words N         Minimum phrase length (discard shorter)
+  --min-ids N           Minimum objects sharing a phrase
+  --remove-stopwords    Remove common English stop words
+  --lemmatize           Convert text to lemma form (default: True)
+  --prune-subphrases    Collect longest shared phrases only
+  --output-format FMT   Output format: json, csv, tsv
+  --output OUTPUT       Path to store results
+  --verbatim            Include verbatim phrases
 ```
 
 ---
 
-# `count` Command
+### `phrase_builder` Command
 
-```typescript
-usage: count [-h] [--input INPUT] --fields FIELDS [FIELDS ...] \
-             [--match-type {non_null,null,fixed,regex}] [--value VALUE] \
-             [--output-format {json,csv,tsv}] [--output OUTPUT] [--group-by GROUP_BY] \
-             [--group-type {top,path,terminal}] [--logic LOGIC] [--verbose] [--count-type]
-             [--char-limit CHAR_LIMIT] [--output-flat]
+K-mer analysis for phrase identification with frequency visualization.
 
-count command
+```bash
+usage: phrase_builder [-h] -i INPUT -m MODEL -o OUTPUT
 
 options:
   -h, --help            show this help message and exit
-  --input INPUT         Input JSON file.
-  --fields FIELDS [FIELDS ...]
-  --match-type {non_null,null,fixed,regex}
-                        Type of match, null type is empty string or list, or None.
-  --value VALUE         Value to match if match-type is fixed or regex.
-  --output-format {json,csv,tsv}
-                        Output format.
-  --output OUTPUT       Path, including filename, to store results.
-  --group-by GROUP_BY   Dotted path or key name to group by (e.g. tinyId or path.to.tinyId)
-  --group-type {top,path,terminal}
-                        Interpret group-by field as a top-level, full-path, or terminal 
-                        (deepest) component of model
-  --logic LOGIC         Logical expression (e.g. 'A and not B')
-  --verbose             Enable debug output for group-by resolution
-  --count-type          Classify and count field values by type (int, float, strN)
-  --char-limit CHAR_LIMIT
-                        Character limit for short string classification
-  --output-flat         Flatten nested result keys for easier analysis
+  -i, --input INPUT     Path to input JSON file
+  -m, --model MODEL     Pydantic model name (e.g., CDE, Form)
+  -o, --output OUTPUT   Output path prefix (timestamp appended)
 ```
 
 ---
 
-# `strip_html` Command
+### `strip_phrases` Command
 
-```typescript
-usage: strip_html  [-h] [--input INPUT] [--output OUTPUT] \
-                   --model {CDE,Form} [--outdir OUTDIR] [--format {json,yaml,csv}] \
-                   [--dry-run] [--verbosity] [--logfile LOGFILE] [--pretty | --no-pretty] \
-                   [--set-keys | --no-set-keys] [--tables | --no-tables] [--colnames]
+Remove curated phrases from specific paths in CDE documents.
 
-strip command
+```bash
+usage: strip_phrases [-h] -i INPUT -m MODEL -p PHRASES -o OUTPUT
+                     [-d] [--diff-output FILE] [-c] [--summary] [-C N]
 
 options:
   -h, --help            show this help message and exit
-  --input INPUT         Input JSON file that has underscore tags fixed.
-  --output OUTPUT       Path, including filename, to store results.
-  --model {CDE,Form}, -m {CDE,Form}
-                        Model to use for validation
-  --outdir OUTDIR       Directory for output files (default: current directory)
-  --format {json,yaml,csv}
-                        Output format (default: json)
+  -i, --input INPUT     Path to input JSON file
+  -m, --model MODEL     Pydantic model (CDE, Form)
+  -p, --phrases FILE    Path to phrases file (JSON, CSV, or TSV)
+  -o, --output OUTPUT   Path to output JSON file
+  -d, --diff            Show diff between original and cleaned JSON
+  --diff-output FILE    Write diff information to a file
+  -c, --color           Colorize diff output
+  --summary             Show summary of changed lines
+  -C, --context N       Number of context lines (default: 3)
+```
+
+---
+
+## Analysis
+
+### `count` Command
+
+Count structural elements and field occurrences.
+
+```bash
+usage: count [-h] --input INPUT --fields FIELDS [FIELDS ...]
+             [--match-type {non_null,null,fixed,regex}] [--value VALUE]
+             [--output-format {json,csv,tsv}] [--output OUTPUT]
+             [--group-by PATH] [--group-type {top,path,terminal}]
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT         Input JSON file
+  --fields FIELDS       Fields to count
+  --match-type TYPE     Match type: non_null, null, fixed, regex
+  --value VALUE         Value to match (for fixed or regex)
+  --output-format FMT   Output format: json, csv, tsv
+  --output OUTPUT       Path to store results
+  --group-by PATH       Dotted path to group by (e.g., tinyId)
+  --group-type TYPE     Interpret as: top, path, terminal
+  --logic EXPR          Logical expression (e.g., 'A and not B')
+  --count-type          Classify values by type (int, float, strN)
+  --output-flat         Flatten nested result keys
+```
+
+---
+
+## Data Cleaning
+
+### `strip_html` Command
+
+Remove HTML markup from CDE fields.
+
+```bash
+usage: strip_html [-h] --input INPUT --output OUTPUT -m MODEL
+                  [--outdir OUTDIR] [--format {json,yaml,csv}] [--dry-run]
+                  [--pretty | --no-pretty] [--tables | --no-tables]
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT         Input JSON file (with underscore tags fixed)
+  --output OUTPUT       Path to store results
+  -m, --model MODEL     Model for validation: CDE, Form
+  --outdir OUTDIR       Directory for output files
+  --format FMT          Output format: json, yaml, csv
   --dry-run             Do not write output files
-  --verbosity, -v       Increase verbosity level (-vv for debug)
-  --logfile LOGFILE     Optional log file path
-  --pretty, --no-pretty
-                        Produce pretty (default: --pretty) or minified (--no-pretty) 
-                        JSON (no whitespace) (default: True)
-  --set-keys, --no-set-keys
-                        Save model with keys only represented if they are set 
-                        (no null, None, or empty sets) (default: True)
-  --tables, --no-tables
-                        Convert html tables to JSON representation (default: --tables, 
-                        i.e., true) or munged text (--no-tables) (default: True)
-  --colnames            Use first row of table as column names (default: false). 
-                        Only relevant if --tables.---
+  --pretty              Pretty print JSON (default: True)
+  --tables              Convert HTML tables to JSON (default: True)
+  --colnames            Use first row as column names
 ```
 
 ---
 
-# `extract_embed` Command
+### `fix_underscores` Command
 
-```typescript
-usage: extract_embed [-h] [--input INPUT] \
-                     --fields FIELDS [FIELDS ...] [--min-words MIN_WORDS] \
-                     [--min-ids MIN_IDS] [--remove-stopwords]
-                     [--lemmatize | --no-lemmatize] [--prune-subphrases] 
-                     [--output-format {json,csv,tsv}] [--output OUTPUT] 
-                     [--verbatim]
+Fix Pydantic-incompatible field names (underscore prefix).
 
-extract_embed command
-
-options:
-  -h, --help            show this help message and exit
-  --input INPUT         Input JSON file.
-  --fields FIELDS [FIELDS ...]
-                        Field names from pydantic classes.
-  --min-words MIN_WORDS
-                        Minimum length of phrases, i.e., discard shorter phrases. (default: 2)
-  --min-ids MIN_IDS     Minimum number of objects that share a phrase. (default: 2)
-  --remove-stopwords    Remove common English stop words (articles, prepositions, conjunctions)? 
-                        (default: False)
-  --lemmatize, --no-lemmatize
-                        Convert the text to standardized (lemma) form so that similar phrases 
-                        match? (default: True)
-  --prune-subphrases    Collect longest shared phrases? (default: False)
-  --output-format {json,csv,tsv}
-                        Choose output format. (default JSON)
-  --output OUTPUT       Path, including filename, to store results.
-  --verbatim            Include verbatim (non-lemmatized) phrases alongside lemma phrases. 
-                        (default: False)
-```
-
----
-
-# `fix_underscores` Command
-
-```typescript
-usage: fix_underscores [-h] [--input INPUT] [--output OUTPUT] [--prefix PREFIX] \
-                       [--depth DEPTH]
-
-fix_underscores command
+```bash
+usage: fix_underscores [-h] --input INPUT --output OUTPUT
+                       [--prefix PREFIX] [--depth DEPTH]
 
 options:
   -h, --help       show this help message and exit
-  --input INPUT    Full path, including name, of input JSON file
-  --output OUTPUT  Full path, including name, of output JSON file
-  --prefix PREFIX  Character to prepend on fields starting with an underscore
-  --depth DEPTH    Maximum depth (JSON nesting) to process
+  --input INPUT    Input JSON file
+  --output OUTPUT  Output JSON file
+  --prefix PREFIX  Character to prepend on underscore fields
+  --depth DEPTH    Maximum nesting depth to process
+```
+
+---
+
+## Export & Filtering
+
+### `extract_embed` Command
+
+Extract fields for transformer model embeddings.
+
+```bash
+usage: extract_embed [-h] --input INPUT --fields FIELDS [FIELDS ...]
+                     [--output-format {json,csv,tsv}] [--output OUTPUT]
+                     [--lemmatize | --no-lemmatize] [--remove-stopwords]
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT         Input JSON file
+  --fields FIELDS       Field names from pydantic classes
+  --output-format FMT   Output format: json, csv, tsv
+  --output OUTPUT       Path to store results
+  --lemmatize           Convert to lemma form (default: True)
+  --remove-stopwords    Remove common English stop words
+  --verbatim            Include verbatim phrases alongside lemmas
+```
+
+---
+
+### `lemma_fasta` Command
+
+Create pseudo-FASTA format from lemmatized text for genomic tools.
+
+```bash
+usage: lemma_fasta [-h] --input INPUT -m MODEL -o OUTPUT
+                   [--path-file FILE] [--output-format {pfasta,lfasta}]
+                   [--id-list IDS] [--id-file FILE] [--exclude | --no-exclude]
+                   [--remove-stopwords] [--min-freq N]
+
+options:
+  -h, --help            show this help message and exit
+  --input INPUT         Input JSON file
+  -m, --model MODEL     Pydantic model (CDE, Form)
+  -o, --output OUTPUT   Output path prefix (multiple files generated)
+  --path-file FILE      File specifying fields as name:path pairs
+  --output-format FMT   Output format: pfasta, lfasta (default: pfasta)
+  --id-list IDS         List of tinyIds to process
+  --id-file FILE        File containing tinyIds
+  --exclude             Exclude specified IDs (default: True)
+  --remove-stopwords    Remove English stop words
+  --min-freq N          Minimum token frequency for uint16 encoding
+```
+
+---
+
+### `subset` Command
+
+Extract a subset of CDE records by tinyId with Pydantic validation.
+
+```bash
+usage: subset [-h] -i INPUT -o OUTPUT -m MODEL
+              [--output-format {json,csv,tsv}]
+              [--id-list IDS [IDS ...]] [--id-file FILE]
+              [--exclude | --no-exclude]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input INPUT     Path to input JSON file
+  -o, --output OUTPUT   Path to output file
+  -m, --model MODEL     Pydantic model: CDE, Form, EmbedText
+  --output-format FMT   Output format: json, csv, tsv (default: json)
+  --id-list IDS         List of tinyIds to include or exclude
+  --id-file FILE        File containing tinyIds (JSON, CSV, or TSV)
+  --exclude             Exclude matching tinyIds (default: include)
 ```

@@ -25,7 +25,7 @@ nav:
     - fix_underscores: help/fix_underscores.md
   - Reference:
     - CLI Reference: help/all-commands.md
-    - cde_analyzer: help/cde_analyzer.md
+    - Launcher: help/cde_analyzer.md
   - Development:
     - Architecture: architecture.md
     - Data Models: data-models.md
