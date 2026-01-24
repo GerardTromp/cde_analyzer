@@ -262,3 +262,49 @@ options:
   --id-file FILE        File containing tinyIds (JSON, CSV, or TSV)
   --exclude             Exclude matching tinyIds (default: include)
 ```
+
+---
+
+## LLM-Assisted Classification
+
+> **Note**: These commands require API keys for LLM providers. See [LLM Configuration](../llm/configuration.md).
+
+### `llm_classify` Command
+
+Multi-LLM phrase classification with confidence aggregation.
+
+```bash
+usage: llm_classify [-h] -i INPUT_DIR -m MODULE [--output-dir DIR]
+                    [--providers {claude,openai,google} ...]
+                    [--config-file FILE] [--api-keys KEYS ...]
+                    [--aggregation-method METHOD]
+                    [--batch-size N] [--min-frequency N]
+                    [--context-window N] [--reference-file FILE]
+                    [--skip-validation] [--dry-run]
+
+options:
+  -h, --help              show this help message and exit
+  -i, --input-dir DIR     Directory with phrase_miner output
+  -m, --module MODULE     Query module: instrument, temporal
+  --output-dir DIR        Output directory (default: llm_output)
+  --providers PROVIDERS   LLM providers (default: claude)
+  --config-file FILE      LLM config file path
+  --api-keys KEYS         API keys as provider:key pairs
+  --aggregation-method M  Aggregation: unanimous, majority, weighted_majority,
+                          confidence_weighted (default: majority)
+  --batch-size N          Phrases per batch (default: 20)
+  --min-frequency N       Minimum phrase frequency (default: 1)
+  --context-window N      Context chars per occurrence (default: 200)
+  --reference-file FILE   Reference data for module
+  --skip-validation       Skip API key validation
+  --dry-run               Validate config without LLM calls
+```
+
+**Query Modules**:
+
+| Module | Categories |
+|--------|------------|
+| `instrument` | `instrument_name`, `possible_instrument`, `not_instrument` |
+| `temporal` | `recency_window`, `age_range`, `time_point`, `duration`, `frequency`, `not_temporal` |
+
+See [LLM Classification](../llm/index.md) for comprehensive documentation.
