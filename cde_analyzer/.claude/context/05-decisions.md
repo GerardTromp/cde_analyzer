@@ -511,6 +511,74 @@ def get_verbosity() -> int:
 
 ---
 
+## ADR-013: Two-Tier Instrument Identification
+
+**Date**: January 2026
+
+**Status**: Accepted
+
+**Context**:
+- Instruments extracted by phrase_miner need grouping by family (e.g., all Neuro-QOL subscales together)
+- Need to enable text substitution testing (family-level vs full instrument name)
+- Pattern-based detection may have low confidence for some instruments
+- LLM adjudication can resolve uncertain cases but adds cost
+- Need to track which instruments need human review
+
+**Decision**: Implement two-tier identification with `family_id` + `instrument_id` and confidence-based LLM adjudication
+
+**Implementation**:
+
+1. **Two-Tier ID System**:
+   - `family_id`: Short identifier (e.g., "neuro-qol", "promis", "mds-updrs")
+   - `instrument_id`: Unique slug (e.g., "neuro-qol-ability-participate-sra")
+   - `family_display_name`: Human-readable name for substitution testing
+
+2. **Pattern-Based Detection** (`utils/instrument_family_patterns.py`):
+   - 13 known families with regex patterns
+   - Confidence scoring based on pattern specificity
+   - False positive exclusion patterns
+
+3. **Confidence Thresholding**:
+   - Instruments with `family_confidence < 0.7` flagged with `needs_review=True`
+   - Enables prioritized human curation
+
+4. **LLM Adjudication** (optional):
+   - `llm_classify --adjudicate-instruments` for uncertain cases
+   - 15-category query module (`instrument_family_detector.py`)
+   - Only processes instruments below threshold
+
+**Rationale**:
+- Two-tier system enables both family-level and individual analysis
+- Pattern-based detection is fast and free (no API costs)
+- Confidence thresholding focuses LLM costs on uncertain cases
+- Human review queue prevents unvalidated classifications
+
+**Consequences**:
+- **Positive**:
+  - Enables family-based text substitution experiments
+  - Reduces LLM costs by only adjudicating uncertain cases
+  - Provides clear review queue for human curators
+  - Extensible to new instrument families
+- **Negative**:
+  - Additional complexity in output files
+  - Regex patterns may miss novel naming conventions
+  - Requires domain expertise to add new family patterns
+
+**Files Created**:
+- `utils/instrument_family_patterns.py` (InstrumentFamilyDetector)
+- `utils/query_modules/instrument_family_detector.py` (LLM module)
+- `logic/instrument_family_assigner.py` (orchestration)
+
+**Files Modified**:
+- `CDE_Schema/LLM_Classification.py` (InstrumentFamily enum, InstrumentIdentification)
+- `utils/instrument_extractor.py` (InstrumentMatch family fields, assign_families method)
+- `actions/phrase_miner/cli.py` (--detect-families, --family-confidence-threshold, --family-summary)
+- `actions/phrase_miner/run.py` (family output generation)
+- `actions/llm_classify/cli.py` (--adjudicate-instruments, --adjudicate-threshold)
+- `utils/query_modules/__init__.py` (instrument_family module registration)
+
+---
+
 ## Deferred Decisions
 
 ### DD-001: Test Framework Choice

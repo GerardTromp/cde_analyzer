@@ -12,6 +12,7 @@ Query modules define specific classification tasks with their own categories, pr
 |--------|---------|------------|
 | `instrument` | Detect measurement instruments, devices, assessment tools | 3 categories |
 | `temporal` | Identify temporal patterns and time expressions | 6 categories |
+| `instrument_family` | Classify instruments into known families (Neuro-QOL, PROMIS, etc.) | 15 categories |
 
 ## Instrument Detection Module
 
@@ -173,6 +174,65 @@ phrase_00089	18 year of age	age_range	highly_likely	0.88
 phrase_00134	at baseline	time_point	highly_likely	0.95
 phrase_00201	twice weekly	frequency	likely	0.76
 phrase_00267	blood glucose level	not_temporal	likely	0.82
+```
+
+---
+
+## Instrument Family Module
+
+**Module Name**: `instrument_family`
+
+Classifies instruments into known instrument families, enabling grouping of related subscales and variants. Used for LLM adjudication when pattern-based family detection has low confidence.
+
+### Categories
+
+| Category | Description | Examples |
+|----------|-------------|----------|
+| `neuro-qol` | Neuro-QOL subscales | Neuro-QOL Ability to Participate, Neuro-QOL Positive Affect |
+| `promis` | PROMIS instruments | PROMIS Anxiety, PROMIS Depression, PROMIS Physical Function |
+| `mds-updrs` | MDS-UPDRS parts | MDS-UPDRS Part I, MDS-UPDRS Part II |
+| `sf-health` | SF Health Survey family | SF-36, SF-12, Short Form Health Survey |
+| `beck` | Beck Inventory family | Beck Depression Inventory, Beck Anxiety Inventory, BDI-II |
+| `phq` | Patient Health Questionnaire | PHQ-9, PHQ-8, PHQ-2 |
+| `gad` | Generalized Anxiety Disorder | GAD-7, GAD-2 |
+| `mmse` | Mini-Mental State Examination | MMSE |
+| `moca` | Montreal Cognitive Assessment | MoCA |
+| `nihss` | NIH Stroke Scale | NIHSS, NIH Stroke Scale |
+| `pdqualif` | Parkinson's Disease Quality of Life | PDQUALIF |
+| `dsq` | DePaul Symptom Questionnaire | DSQ |
+| `rome` | Rome Diagnostic Criteria | Rome III Constipation Module, RCM3 |
+| `other_instrument` | Recognized instrument, unknown family | Glasgow Coma Scale, CAGE questionnaire |
+| `not_instrument` | Not an instrument | Anatomical terms, diseases, procedures |
+
+### Primary Use Case: LLM Adjudication
+
+This module is primarily used for adjudicating uncertain family assignments from pattern-based detection:
+
+```bash
+# Adjudicate instruments with low family confidence
+cde_analyzer llm_classify \
+  --adjudicate-instruments instruments.tsv \
+  --adjudicate-threshold 0.7 \
+  --module instrument_family \
+  --providers claude
+```
+
+### Workflow Integration
+
+The `instrument_family` module integrates with `phrase_miner`'s family detection:
+
+1. **Pattern Detection**: `phrase_miner --detect-families` assigns families using regex patterns
+2. **Confidence Flagging**: Instruments with `family_confidence < 0.7` get `needs_review=True`
+3. **LLM Adjudication**: `llm_classify --adjudicate-instruments` resolves uncertain cases
+4. **Manual Review**: Human curator reviews and confirms/corrects assignments
+
+### Example Output
+
+```tsv
+phrase_id	phrase_text	category	quintile	confidence
+instr_00042	neuro qol ability participate sra	neuro-qol	highly_likely	0.95
+instr_00108	glasgow coma scale	other_instrument	likely	0.78
+instr_00215	patient age at admission	not_instrument	likely	0.82
 ```
 
 ---

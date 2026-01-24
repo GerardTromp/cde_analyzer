@@ -1,0 +1,383 @@
+"""
+Instrument family assignment orchestration.
+
+Coordinates the workflow for assigning instrument family identifications:
+1. Load instrument matches from InstrumentCatalog
+2. Apply pattern-based family detection
+3. Generate instrument_id slugs
+4. Flag uncertain cases for optional LLM adjudication
+5. Output enhanced instruments.tsv and instrument_families.tsv
+
+Usage:
+    from logic.instrument_family_assigner import InstrumentFamilyAssigner
+
+    assigner = InstrumentFamilyAssigner(confidence_threshold=0.7)
+    assigner.assign_families(catalog)
+    assigner.write_enhanced_output(catalog, output_dir)
+"""
+
+import csv
+import json
+import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Set
+from dataclasses import dataclass
+
+from utils.instrument_extractor import InstrumentCatalog, InstrumentMatch
+from utils.instrument_family_patterns import InstrumentFamilyDetector
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class FamilyAssignmentStats:
+    """Statistics from family assignment process."""
+    total_instruments: int = 0
+    total_matches: int = 0
+    families_detected: int = 0
+    needs_review_count: int = 0
+    family_distribution: Dict[str, int] = None
+
+    def __post_init__(self):
+        if self.family_distribution is None:
+            self.family_distribution = {}
+
+
+class InstrumentFamilyAssigner:
+    """
+    Orchestrates instrument family assignment workflow.
+
+    Provides methods for:
+    - Assigning families using pattern detection
+    - Generating enhanced output files
+    - Tracking assignment statistics
+    """
+
+    def __init__(
+        self,
+        confidence_threshold: float = 0.7,
+        generate_family_summary: bool = True,
+    ):
+        """
+        Initialize the assigner.
+
+        Args:
+            confidence_threshold: Minimum confidence for automatic acceptance.
+            generate_family_summary: Whether to generate instrument_families.tsv.
+        """
+        self.confidence_threshold = confidence_threshold
+        self.generate_family_summary = generate_family_summary
+        self._detector = InstrumentFamilyDetector(confidence_threshold=confidence_threshold)
+        self._stats = FamilyAssignmentStats()
+
+    def assign_families(self, catalog: InstrumentCatalog) -> FamilyAssignmentStats:
+        """
+        Assign family identifications to all instruments in the catalog.
+
+        Updates InstrumentMatch objects in place with family fields.
+
+        Args:
+            catalog: InstrumentCatalog with detected instruments
+
+        Returns:
+            FamilyAssignmentStats with assignment statistics
+        """
+        self._stats = FamilyAssignmentStats()
+        family_counts: Dict[str, int] = {}
+
+        for normalized_name, matches in catalog.instruments.items():
+            self._stats.total_instruments += 1
+            self._stats.total_matches += len(matches)
+
+            for match in matches:
+                # Detect family and generate identification
+                result = self._detector.detect_and_identify(
+                    instrument_name=match.instrument_name,
+                    full_match=match.full_match,
+                    acronym=match.acronym,
+                )
+
+                # Populate family fields
+                match.family_id = result["family_id"]
+                match.family_display_name = result["family_display_name"]
+                match.instrument_id = result["instrument_id"]
+                match.family_confidence = result["family_confidence"]
+                match.identification_method = result["identification_method"]
+                match.needs_review = result["needs_review"]
+
+                # Track statistics
+                family_id = result["family_id"]
+                family_counts[family_id] = family_counts.get(family_id, 0) + 1
+
+                if result["needs_review"]:
+                    self._stats.needs_review_count += 1
+
+        self._stats.families_detected = len(family_counts)
+        self._stats.family_distribution = family_counts
+
+        logger.info(
+            f"Family assignment complete: {self._stats.total_instruments} instruments, "
+            f"{self._stats.families_detected} families, "
+            f"{self._stats.needs_review_count} need review"
+        )
+
+        return self._stats
+
+    def write_enhanced_instruments_tsv(
+        self,
+        catalog: InstrumentCatalog,
+        output_path: Path,
+    ) -> None:
+        """
+        Write enhanced instruments.tsv with family columns.
+
+        Adds columns: family_id, family_display_name, instrument_id,
+        family_confidence, identification_method, needs_review
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+            output_path: Path to output TSV file
+        """
+        fieldnames = [
+            "instrument_id",
+            "family_id",
+            "family_display_name",
+            "normalized_name",
+            "canonical_name",
+            "acronym",
+            "frequency",
+            "n_tinyids",
+            "family_confidence",
+            "identification_method",
+            "needs_review",
+            "tinyids",
+            "example_contexts",
+        ]
+
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+            writer.writeheader()
+
+            for normalized_name, matches in sorted(catalog.instruments.items()):
+                if not matches:
+                    continue
+
+                first_match = matches[0]
+                tinyids = sorted({m.tinyId for m in matches if m.tinyId})
+                acronyms = sorted({m.acronym for m in matches if m.acronym})
+
+                # Get example contexts (first 3 unique full matches)
+                seen_contexts = set()
+                example_contexts = []
+                for m in matches:
+                    if m.full_match not in seen_contexts and len(example_contexts) < 3:
+                        example_contexts.append(m.full_match)
+                        seen_contexts.add(m.full_match)
+
+                writer.writerow({
+                    "instrument_id": first_match.instrument_id or "",
+                    "family_id": first_match.family_id or "",
+                    "family_display_name": first_match.family_display_name or "",
+                    "normalized_name": normalized_name,
+                    "canonical_name": first_match.instrument_name,
+                    "acronym": "|".join(acronyms) if acronyms else "",
+                    "frequency": len(matches),
+                    "n_tinyids": len(tinyids),
+                    "family_confidence": f"{first_match.family_confidence:.2f}" if first_match.family_confidence is not None else "",
+                    "identification_method": first_match.identification_method or "",
+                    "needs_review": "True" if first_match.needs_review else "False",
+                    "tinyids": "|".join(tinyids),
+                    "example_contexts": "|".join(example_contexts),
+                })
+
+        logger.info(f"Wrote enhanced instruments to {output_path}")
+
+    def write_enhanced_verbatim_tsv(
+        self,
+        catalog: InstrumentCatalog,
+        output_path: Path,
+    ) -> None:
+        """
+        Write enhanced instruments_verbatim.tsv with family columns.
+
+        Outputs one row per exact verbatim form for curation.
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+            output_path: Path to output TSV file
+        """
+        fieldnames = [
+            "normalized_name",
+            "family_id",
+            "family_confidence",
+            "needs_review",
+            "acronym",
+            "verbatim_name",
+            "full_match",
+            "frequency",
+            "n_tinyids",
+            "tinyids",
+        ]
+
+        # Group by verbatim form
+        verbatim_groups: Dict[str, Dict] = {}
+
+        for normalized_name, matches in catalog.instruments.items():
+            for match in matches:
+                verbatim_key = (normalized_name, match.instrument_name)
+                if verbatim_key not in verbatim_groups:
+                    verbatim_groups[verbatim_key] = {
+                        "normalized_name": normalized_name,
+                        "family_id": match.family_id,
+                        "family_confidence": match.family_confidence,
+                        "needs_review": match.needs_review,
+                        "acronym": match.acronym,
+                        "verbatim_name": match.instrument_name,
+                        "full_match": match.full_match,
+                        "matches": [],
+                        "tinyids": set(),
+                    }
+                verbatim_groups[verbatim_key]["matches"].append(match)
+                if match.tinyId:
+                    verbatim_groups[verbatim_key]["tinyids"].add(match.tinyId)
+
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+            writer.writeheader()
+
+            for verbatim_key, data in sorted(verbatim_groups.items()):
+                tinyids = sorted(data["tinyids"])
+                writer.writerow({
+                    "normalized_name": data["normalized_name"],
+                    "family_id": data["family_id"] or "",
+                    "family_confidence": f"{data['family_confidence']:.2f}" if data['family_confidence'] is not None else "",
+                    "needs_review": "True" if data["needs_review"] else "False",
+                    "acronym": data["acronym"] or "",
+                    "verbatim_name": data["verbatim_name"],
+                    "full_match": data["full_match"],
+                    "frequency": len(data["matches"]),
+                    "n_tinyids": len(tinyids),
+                    "tinyids": "|".join(tinyids),
+                })
+
+        logger.info(f"Wrote enhanced verbatim instruments to {output_path}")
+
+    def write_families_summary_tsv(
+        self,
+        catalog: InstrumentCatalog,
+        output_path: Path,
+    ) -> None:
+        """
+        Write instrument_families.tsv summary file.
+
+        Groups instruments by family with aggregate statistics.
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+            output_path: Path to output TSV file
+        """
+        fieldnames = [
+            "family_id",
+            "family_display_name",
+            "n_instruments",
+            "n_tinyids",
+            "total_frequency",
+            "top_instruments",
+            "all_acronyms",
+        ]
+
+        # Get family summary from catalog
+        families_summary = catalog.get_families_summary()
+
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+            writer.writeheader()
+
+            for family_id, data in sorted(families_summary.items()):
+                # Get top 5 instruments by name
+                top_instruments = data["instruments"][:5]
+
+                writer.writerow({
+                    "family_id": family_id,
+                    "family_display_name": data["display_name"],
+                    "n_instruments": data["n_instruments"],
+                    "n_tinyids": data["n_tinyids"],
+                    "total_frequency": data["total_frequency"],
+                    "top_instruments": "|".join(top_instruments),
+                    "all_acronyms": "|".join(data["acronyms"]),
+                })
+
+        logger.info(f"Wrote families summary to {output_path}")
+
+    def write_all_outputs(
+        self,
+        catalog: InstrumentCatalog,
+        output_dir: Path,
+    ) -> Dict[str, Path]:
+        """
+        Write all enhanced output files.
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+            output_dir: Output directory
+
+        Returns:
+            Dict mapping output type to file path
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+        outputs = {}
+
+        # Enhanced instruments.tsv
+        instruments_path = output_dir / "instruments.tsv"
+        self.write_enhanced_instruments_tsv(catalog, instruments_path)
+        outputs["instruments"] = instruments_path
+
+        # Enhanced verbatim.tsv
+        verbatim_path = output_dir / "instruments_verbatim.tsv"
+        self.write_enhanced_verbatim_tsv(catalog, verbatim_path)
+        outputs["instruments_verbatim"] = verbatim_path
+
+        # Family summary
+        if self.generate_family_summary:
+            families_path = output_dir / "instrument_families.tsv"
+            self.write_families_summary_tsv(catalog, families_path)
+            outputs["instrument_families"] = families_path
+
+        # Write stats JSON
+        stats_path = output_dir / "family_assignment_stats.json"
+        with open(stats_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                "total_instruments": self._stats.total_instruments,
+                "total_matches": self._stats.total_matches,
+                "families_detected": self._stats.families_detected,
+                "needs_review_count": self._stats.needs_review_count,
+                "family_distribution": self._stats.family_distribution,
+            }, f, indent=2)
+        outputs["stats"] = stats_path
+
+        return outputs
+
+    @property
+    def stats(self) -> FamilyAssignmentStats:
+        """Get assignment statistics."""
+        return self._stats
+
+    def get_instruments_needing_review(
+        self,
+        catalog: InstrumentCatalog,
+    ) -> List[InstrumentMatch]:
+        """
+        Get list of instruments flagged for review.
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+
+        Returns:
+            List of InstrumentMatch objects where needs_review=True
+        """
+        needs_review = []
+        for matches in catalog.instruments.values():
+            for match in matches:
+                if match.needs_review:
+                    needs_review.append(match)
+        return needs_review

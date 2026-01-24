@@ -630,6 +630,73 @@ Results from multiple LLMs are combined using configurable methods:
 | `weighted_majority` | Weighted by confidence scores |
 | `confidence_weighted` | Full confidence-weighted voting |
 
+## Instrument Family Models (NEW)
+
+### InstrumentFamily Enum
+
+Known instrument families for automatic detection:
+```python
+class InstrumentFamily(str, Enum):
+    NEURO_QOL = "neuro-qol"       # Neuro-QOL subscales
+    PROMIS = "promis"              # PROMIS instruments
+    MDS_UPDRS = "mds-updrs"        # MDS-UPDRS parts
+    SF_HEALTH = "sf-health"        # SF-36, SF-12
+    BECK = "beck"                  # Beck Depression/Anxiety Inventory
+    PHQ = "phq"                    # PHQ-9, PHQ-8, PHQ-2
+    GAD = "gad"                    # GAD-7, GAD-2
+    MMSE = "mmse"                  # Mini-Mental State Examination
+    MOCA = "moca"                  # Montreal Cognitive Assessment
+    NIHSS = "nihss"                # NIH Stroke Scale
+    PDQUALIF = "pdqualif"          # Parkinson's Disease Quality of Life
+    DSQ = "dsq"                    # DePaul Symptom Questionnaire
+    ROME = "rome"                  # Rome III/IV criteria
+    OTHER = "other"                # Known instrument, unknown family
+    UNKNOWN = "unknown"            # Family could not be determined
+```
+
+### InstrumentIdentification Dataclass
+
+Two-tier instrument identification for family grouping:
+```python
+@dataclass
+class InstrumentIdentification:
+    family_id: str                  # e.g., "neuro-qol"
+    family_display_name: str        # e.g., "Neuro-QOL" (for substitution)
+    instrument_id: str              # e.g., "neuro-qol-ability-participate-sra"
+    canonical_name: str             # Full instrument name
+    family_confidence: float        # 0.0-1.0 confidence in family assignment
+    identification_method: str      # "pattern", "llm", or "manual"
+    needs_review: bool = False      # True if confidence < threshold
+```
+
+### InstrumentMatch Extended Fields
+
+Additional fields added to InstrumentMatch for family detection:
+```python
+@dataclass
+class InstrumentMatch:
+    # ... existing fields (normalized_name, verbatim_name, etc.) ...
+    family_id: Optional[str] = None
+    family_display_name: Optional[str] = None
+    instrument_id: Optional[str] = None
+    family_confidence: Optional[float] = None
+    identification_method: Optional[str] = None
+    needs_review: bool = False
+```
+
+### Family Detection Workflow
+
+1. **Pattern Detection**: `InstrumentFamilyDetector.detect_family()` applies regex patterns
+2. **Confidence Scoring**: Based on pattern specificity and match quality
+3. **Threshold Check**: If `family_confidence < 0.7`, set `needs_review=True`
+4. **LLM Adjudication**: Optional, via `llm_classify --adjudicate-instruments`
+5. **ID Generation**: `generate_instrument_id()` creates slug from canonical name
+
+### Output Files
+
+- **instruments.tsv**: Extended with `family_id`, `family_display_name`, `instrument_id`, `family_confidence`, `identification_method`, `needs_review` columns
+- **instrument_families.tsv**: Summary by family (n_instruments, n_tinyids, total_frequency, top_instruments)
+
 ## Future Extensibility
 
 The README mentions potential extension to:

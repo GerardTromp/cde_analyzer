@@ -91,6 +91,7 @@ cde_analyzer/
 │   ├── counter.py           # Field counting logic (~50 lines visible)
 │   ├── extract_embed.py     # Embedding extraction logic
 │   ├── html_stripper.py     # HTML removal logic
+│   ├── instrument_family_assigner.py # Family assignment orchestration (NEW)
 │   ├── lemma_fasta.py       # FASTA generation logic
 │   ├── llm_classifier.py    # LLM classification orchestration (506 lines) (NEW)
 │   ├── phrase_anchor_extend.py # Anchor extension with bigram model (373 lines)
@@ -122,7 +123,11 @@ cde_analyzer/
 │   │   ├── __init__.py       # Module registry (174 lines)
 │   │   ├── module_base.py    # Abstract QueryModule (310 lines)
 │   │   ├── instrument_detector.py # Instrument detection (154 lines)
-│   │   └── temporal_detector.py # Temporal patterns (196 lines)
+│   │   ├── temporal_detector.py # Temporal patterns (196 lines)
+│   │   └── instrument_family_detector.py # LLM family adjudication (NEW)
+│   │
+│   ├── instrument_extractor.py # Instrument pattern detection (~300 lines)
+│   ├── instrument_family_patterns.py # Family detection patterns (NEW)
 │   │
 │   ├── analyzer_state.py    # Global state (verbosity) (459 bytes)
 │   ├── cde_impexport.py     # JSON import/export (2.0 KB)
@@ -303,6 +308,12 @@ Based on git history (last 90 days):
 - utils/query_modules/module_base.py (abstract module)
 - utils/query_modules/instrument_detector.py (instrument detection)
 - utils/query_modules/temporal_detector.py (temporal patterns)
+- utils/query_modules/instrument_family_detector.py (family classification)
+
+### Instrument Family Detection (NEW)
+- utils/instrument_extractor.py (InstrumentExtractor, InstrumentCatalog)
+- utils/instrument_family_patterns.py (InstrumentFamilyDetector, regex patterns)
+- logic/instrument_family_assigner.py (InstrumentFamilyAssigner orchestration)
 
 ### Utilities
 - utils/helpers.py (general utilities)

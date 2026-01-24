@@ -513,6 +513,72 @@ All functional and updated for lazy loading
 
 ---
 
+### Session 2026-01-24b: Enhanced Instrument Detection with Family Grouping
+
+**Branch**: phrase-curator
+
+**Goals**:
+- Add two-tier identification system (family_id + instrument_id)
+- Enable instrument family grouping for substitution testing
+- Pattern-based family detection with LLM adjudication fallback
+- Extended output formats for family analysis
+
+**Accomplishments**:
+- ✅ Phase 1: Data Model Extensions
+  - Added `InstrumentFamily` enum to `CDE_Schema/LLM_Classification.py` (15 families)
+  - Added `InstrumentIdentification` dataclass for two-tier ID system
+- ✅ Phase 2: Family Detection Patterns
+  - Created `utils/instrument_family_patterns.py` with `InstrumentFamilyDetector` class
+  - 13 known families with regex patterns (neuro-qol, promis, mds-updrs, sf-health, beck, phq, gad, mmse, moca, nihss, pdqualif, dsq, rome)
+  - False positive exclusion patterns
+  - Confidence scoring based on pattern specificity
+- ✅ Phase 3: Extended InstrumentMatch/Catalog
+  - Added family fields to `InstrumentMatch` dataclass
+  - Added `assign_families()` and `get_families_summary()` methods to `InstrumentCatalog`
+- ✅ Phase 4: Family Assigner Orchestration
+  - Created `logic/instrument_family_assigner.py` with `InstrumentFamilyAssigner` class
+  - Handles family assignment workflow with confidence thresholding
+- ✅ Phase 5: CLI Integration
+  - Added `--detect-families`, `--family-confidence-threshold`, `--family-summary` to phrase_miner
+  - Added `--adjudicate-instruments`, `--adjudicate-threshold` to llm_classify
+- ✅ Phase 6: LLM Adjudication Module
+  - Created `utils/query_modules/instrument_family_detector.py` (15 categories)
+  - Registered in module registry
+- ✅ Phase 7: Documentation
+  - Updated `docs/commands/phrase_miner.md` with family detection
+  - Updated `docs/llm/llm_classify.md` with adjudication mode
+  - Updated `docs/llm/query_modules.md` with instrument_family module
+  - Updated `docs/help/all-commands.md` with new CLI options
+
+**Files Created** (3):
+- `logic/instrument_family_assigner.py` (InstrumentFamilyAssigner orchestration)
+- `utils/instrument_family_patterns.py` (InstrumentFamilyDetector, regex patterns)
+- `utils/query_modules/instrument_family_detector.py` (LLM adjudication module)
+
+**Files Modified** (7):
+- `CDE_Schema/LLM_Classification.py` (+67 lines: InstrumentFamily enum, InstrumentIdentification)
+- `utils/instrument_extractor.py` (+89 lines: family fields, assign_families method)
+- `actions/phrase_miner/cli.py` (+19 lines: family detection flags)
+- `actions/phrase_miner/run.py` (+69 lines: family output generation)
+- `actions/llm_classify/cli.py` (+16 lines: adjudication mode)
+- `utils/query_modules/__init__.py` (+2 lines: instrument_family registration)
+- Various documentation files
+
+**Key Design Decisions**:
+1. Two-tier ID enables family-level and individual analysis
+2. Pattern-based detection is fast and free (no API costs)
+3. Confidence threshold (0.7) flags uncertain cases for review
+4. LLM adjudication only for instruments below threshold
+
+**Status**: Implementation complete, documentation updated
+
+**Next Steps**:
+- Run integration tests on real CDE data
+- Test LLM adjudication with API keys
+- Consider merging to main after validation
+
+---
+
 ### Session 2026-01-21b: Instrument Pattern Extraction
 
 **Branch**: main

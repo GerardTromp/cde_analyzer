@@ -29,6 +29,13 @@ class InstrumentMatch:
     token_span: Optional[Tuple[int, int]] = None  # (start, end) token indices
     tinyId: Optional[str] = None            # Source CDE identifier
     field_path: Optional[str] = None        # Source field path
+    # Family identification fields (populated when detect_families=True)
+    family_id: Optional[str] = None         # e.g., "neuro-qol"
+    family_display_name: Optional[str] = None  # e.g., "Neuro-QOL"
+    instrument_id: Optional[str] = None     # e.g., "neuro-qol-ability-participate-sra"
+    family_confidence: Optional[float] = None  # 0.0-1.0 confidence in family assignment
+    identification_method: Optional[str] = None  # "pattern", "llm", "manual"
+    needs_review: bool = False              # True if confidence < threshold
 
 
 @dataclass
@@ -62,6 +69,88 @@ class InstrumentCatalog:
                 if m.token_span and m.tinyId and m.field_path:
                     spans.append((m.tinyId, m.field_path, m.token_span))
         return spans
+
+    def assign_families(self, confidence_threshold: float = 0.7) -> None:
+        """
+        Assign family identification to all instruments using pattern detection.
+
+        Args:
+            confidence_threshold: Minimum confidence for automatic acceptance.
+                Below this threshold, instruments are flagged for review.
+        """
+        from utils.instrument_family_patterns import InstrumentFamilyDetector
+
+        detector = InstrumentFamilyDetector(confidence_threshold=confidence_threshold)
+
+        for matches in self.instruments.values():
+            for match in matches:
+                # Detect family and generate identification
+                result = detector.detect_and_identify(
+                    instrument_name=match.instrument_name,
+                    full_match=match.full_match,
+                    acronym=match.acronym,
+                )
+                # Populate family fields
+                match.family_id = result["family_id"]
+                match.family_display_name = result["family_display_name"]
+                match.instrument_id = result["instrument_id"]
+                match.family_confidence = result["family_confidence"]
+                match.identification_method = result["identification_method"]
+                match.needs_review = result["needs_review"]
+
+    def get_families_summary(self) -> Dict[str, Dict]:
+        """
+        Get summary statistics grouped by family.
+
+        Returns:
+            Dict mapping family_id to summary dict with:
+            - display_name: Human-readable family name
+            - n_instruments: Count of distinct instruments
+            - n_tinyids: Total distinct documents
+            - total_frequency: Sum of all occurrences
+            - instruments: List of canonical instrument names
+            - acronyms: Set of all acronyms
+        """
+        families: Dict[str, Dict] = {}
+
+        for normalized_name, matches in self.instruments.items():
+            if not matches:
+                continue
+
+            # Get family from first match (all should have same family)
+            first_match = matches[0]
+            family_id = first_match.family_id or "unknown"
+            display_name = first_match.family_display_name or "Unknown"
+
+            if family_id not in families:
+                families[family_id] = {
+                    "display_name": display_name,
+                    "n_instruments": 0,
+                    "n_tinyids": 0,
+                    "total_frequency": 0,
+                    "instruments": [],
+                    "acronyms": set(),
+                    "_tinyids": set(),  # Internal tracking
+                }
+
+            # Aggregate stats
+            families[family_id]["n_instruments"] += 1
+            families[family_id]["instruments"].append(first_match.instrument_name)
+            families[family_id]["total_frequency"] += len(matches)
+
+            for m in matches:
+                if m.tinyId:
+                    families[family_id]["_tinyids"].add(m.tinyId)
+                if m.acronym:
+                    families[family_id]["acronyms"].add(m.acronym)
+
+        # Finalize tinyid counts and convert sets
+        for family_id, data in families.items():
+            data["n_tinyids"] = len(data["_tinyids"])
+            data["acronyms"] = sorted(data["acronyms"])
+            del data["_tinyids"]
+
+        return families
 
 
 def normalize_instrument_name(name: str) -> str:

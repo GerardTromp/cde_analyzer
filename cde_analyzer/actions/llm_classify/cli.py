@@ -44,12 +44,26 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "-m", "--module",
         required=True,
-        choices=["instrument", "temporal"],
+        choices=["instrument", "temporal", "instrument_family"],
         help="Query module to use for classification."
     )
     subparser.add_argument(
         "--reference-file",
         help="Path to reference data file for the module (e.g., known instruments)."
+    )
+
+    # Instrument adjudication mode
+    subparser.add_argument(
+        "--adjudicate-instruments",
+        metavar="INSTRUMENTS_TSV",
+        help="Path to instruments.tsv for family adjudication. "
+             "Reads instruments with needs_review=True and submits to LLM for family classification."
+    )
+    subparser.add_argument(
+        "--adjudicate-threshold",
+        type=float,
+        default=0.7,
+        help="Adjudicate instruments with family_confidence below this threshold (default: 0.7)."
     )
 
     # LLM provider configuration

@@ -84,7 +84,14 @@ Pluggable classification modules for semantic categorization:
 - **module_base.py** - Abstract QueryModule interface
 - **instrument_detector.py** - Instrument/device name detection
 - **temporal_detector.py** - Temporal pattern detection
+- **instrument_family_detector.py** - Instrument family classification (15 categories)
 - **__init__.py** - Module registry with lazy loading
+
+### 6b. Instrument Family Detection (`utils/`, `logic/`) - NEW
+Two-tier instrument identification and family grouping:
+- **instrument_extractor.py** - Pattern-based instrument extraction (InstrumentExtractor, InstrumentCatalog)
+- **instrument_family_patterns.py** - Regex patterns for 13 known families (InstrumentFamilyDetector)
+- **instrument_family_assigner.py** (logic/) - Orchestration for family assignment workflow
 
 ### 7. Recursive Engine (`core/recursor.py`)
 - Implements recursive descent pattern
@@ -250,8 +257,16 @@ Based on import analysis:
 - Commit: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
 - Features:
   - Async LLM provider implementations (Claude, OpenAI, Gemini)
-  - Modular query framework (instrument detection, temporal detection)
+  - Modular query framework (instrument detection, temporal detection, instrument_family)
   - Four aggregation methods (unanimous, majority, weighted, confidence-weighted)
   - Confidence quintile system (highly_likely → highly_unlikely)
   - API key resolution: config file → env vars → CLI
 - Published to GitHub: 2026-01-24
+
+**Enhanced Instrument Detection** (2026-01-24):
+- Added two-tier identification system (family_id + instrument_id)
+- Pattern-based family detection for 13 known instrument families
+- LLM adjudication module for uncertain cases (instrument_family_detector)
+- Extended output with family columns (instruments.tsv, instrument_families.tsv)
+- CLI flags: `--detect-families`, `--family-confidence-threshold`, `--family-summary`
+- Adjudication mode: `llm_classify --adjudicate-instruments`

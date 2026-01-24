@@ -10,6 +10,73 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 
+class InstrumentFamily(str, Enum):
+    """
+    Known instrument families for automatic detection.
+
+    Each family represents a group of related instruments, questionnaires,
+    or assessment tools that share a common origin or purpose. The family_id
+    enables grouping related subscales/subinstruments for analysis.
+    """
+    NEURO_QOL = "neuro-qol"           # Neuro-QOL subscales
+    PROMIS = "promis"                  # PROMIS instruments
+    MDS_UPDRS = "mds-updrs"           # Movement Disorder Society - UPDRS
+    SF_HEALTH = "sf-health"            # SF-36, SF-12, Short Form Health Survey
+    BECK = "beck"                      # Beck Depression/Anxiety Inventory
+    PHQ = "phq"                        # Patient Health Questionnaire family
+    GAD = "gad"                        # Generalized Anxiety Disorder scales
+    MMSE = "mmse"                      # Mini-Mental State Examination
+    MOCA = "moca"                      # Montreal Cognitive Assessment
+    NIHSS = "nihss"                    # NIH Stroke Scale
+    PDQUALIF = "pdqualif"             # Parkinson's Disease Quality of Life
+    DSQ = "dsq"                        # DePaul Symptom Questionnaire
+    ROME = "rome"                      # Rome criteria modules
+    OTHER = "other"                    # Known instrument, family not determined
+    UNKNOWN = "unknown"               # Could not determine if instrument
+
+    @classmethod
+    def get_display_name(cls, family_id: str) -> str:
+        """Get human-readable display name for a family_id."""
+        display_names = {
+            "neuro-qol": "Neuro-QOL",
+            "promis": "PROMIS",
+            "mds-updrs": "MDS-UPDRS",
+            "sf-health": "SF Health Survey",
+            "beck": "Beck Inventory",
+            "phq": "PHQ",
+            "gad": "GAD",
+            "mmse": "MMSE",
+            "moca": "MoCA",
+            "nihss": "NIHSS",
+            "pdqualif": "PDQUALIF",
+            "dsq": "DSQ",
+            "rome": "Rome Criteria",
+            "other": "Other Instrument",
+            "unknown": "Unknown",
+        }
+        return display_names.get(family_id, family_id.upper())
+
+
+@dataclass
+class InstrumentIdentification:
+    """
+    Two-tier instrument identification with family grouping.
+
+    Enables grouping related instruments (e.g., all Neuro-QOL subscales)
+    while retaining specific subscale/subinstrument identity. This supports:
+    - Family-level analysis and substitution testing
+    - Subscale-specific tracking
+    - Confidence-based curation workflows
+    """
+    family_id: str                     # e.g., "neuro-qol"
+    family_display_name: str           # e.g., "Neuro-QOL" (for substitution)
+    instrument_id: str                 # e.g., "neuro-qol-ability-participate-sra"
+    canonical_name: str                # Full instrument name
+    family_confidence: float           # 0.0-1.0 confidence in family assignment
+    identification_method: str         # "pattern", "llm", "manual"
+    needs_review: bool = False         # True if confidence < threshold
+
+
 class ConfidenceQuintile(str, Enum):
     """
     Classification confidence levels using quintile system.

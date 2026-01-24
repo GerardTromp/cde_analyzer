@@ -26,12 +26,14 @@ logger = logging.getLogger(__name__)
 _MODULE_REGISTRY: Dict[str, str] = {
     "instrument": "utils.query_modules.instrument_detector.InstrumentDetectorModule",
     "temporal": "utils.query_modules.temporal_detector.TemporalDetectorModule",
+    "instrument_family": "utils.query_modules.instrument_family_detector.InstrumentFamilyDetectorModule",
 }
 
 # Module descriptions for help text
 MODULE_DESCRIPTIONS: Dict[str, str] = {
     "instrument": "Detect instrument/device names in phrases",
     "temporal": "Detect temporal patterns (recency, age ranges, durations)",
+    "instrument_family": "Detect instrument family membership for grouping (e.g., Neuro-QOL, PROMIS)",
 }
 
 # Cached module classes

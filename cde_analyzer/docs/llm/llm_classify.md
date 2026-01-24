@@ -26,7 +26,7 @@ cde_analyzer llm_classify --input-dir <phrase_output> --module <module_name> [op
 | Argument | Description |
 |----------|-------------|
 | `--input-dir`, `-i` | Directory containing phrase_miner output (phrases.tsv, etc.) |
-| `--module`, `-m` | Query module: `instrument` or `temporal` |
+| `--module`, `-m` | Query module: `instrument`, `temporal`, or `instrument_family` |
 
 ### Output Options
 
@@ -66,6 +66,13 @@ cde_analyzer llm_classify --input-dir <phrase_output> --module <module_name> [op
 | `--min-frequency` | `1` | Minimum phrase frequency to process |
 | `--context-window` | `200` | Characters of context around each phrase occurrence |
 | `--reference-file` | - | Reference data file for the module (e.g., known instruments) |
+
+### Instrument Adjudication Mode
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--adjudicate-instruments` | - | Path to instruments.tsv for family adjudication |
+| `--adjudicate-threshold` | `0.7` | Adjudicate instruments with confidence below threshold |
 
 ### Validation Options
 
@@ -142,6 +149,20 @@ cde_analyzer llm_classify \
   --providers claude openai \
   --dry-run
 ```
+
+### Instrument Family Adjudication
+
+```bash
+# Adjudicate instruments with low family confidence
+cde_analyzer llm_classify \
+  --adjudicate-instruments instrument_output/instruments.tsv \
+  --adjudicate-threshold 0.7 \
+  --module instrument_family \
+  --providers claude \
+  --output-dir adjudicated_output
+```
+
+This reads instruments with `needs_review=True` or `family_confidence < 0.7` and submits them to the LLM for family classification.
 
 ## Output Files
 
@@ -321,6 +342,7 @@ The classifier includes automatic retry with exponential backoff:
 | `utils/query_modules/module_base.py` | Query module interface |
 | `utils/query_modules/instrument_detector.py` | Instrument detection |
 | `utils/query_modules/temporal_detector.py` | Temporal pattern detection |
+| `utils/query_modules/instrument_family_detector.py` | Instrument family adjudication |
 
 ### Data Flow
 
