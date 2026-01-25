@@ -43,6 +43,9 @@ python cde_analyzer.py phrase_miner --input <file.json> [options]
 | `--instruments-only` | `False` | Phase 1: Extract instruments only, skip phrase mining |
 | `--instrument-list` | - | Phase 2: TSV file with curated patterns to pre-mask |
 | `--min-instrument-words` | `3` | Minimum words in instrument name |
+| `--detect-families` | `False` | Enable instrument family detection |
+| `--family-confidence-threshold` | `0.7` | Minimum confidence for family assignment |
+| `--family-summary` | `False` | Generate instrument_families.tsv summary |
 | `--histograms` | `False` | Generate k-mer frequency histograms |
 
 ## Examples
@@ -131,6 +134,34 @@ python cde_analyzer.py phrase_miner \
 The `--instrument-list` argument accepts:
 - `filename` - Uses the `full_match` column (default)
 - `filename,column_name` - Uses the specified column
+
+### Instrument Family Detection
+
+```bash
+# Extract instruments with family grouping
+python cde_analyzer.py phrase_miner \
+  --input data/cde_records.json \
+  --output-dir instrument_output \
+  --instruments-only \
+  --detect-families \
+  --family-summary
+
+# Output includes:
+# - instruments.tsv with family_id, instrument_id columns
+# - instruments_verbatim.tsv with family assignments
+# - instrument_families.tsv summary (with --family-summary)
+```
+
+Family detection groups instruments into known families:
+- **neuro-qol**: Neuro-QOL subscales
+- **promis**: PROMIS instruments
+- **mds-updrs**: MDS-UPDRS parts
+- **sf-health**: SF-36, SF-12
+- **beck**: Beck Depression/Anxiety Inventory
+- **phq**: PHQ-9, PHQ-8, etc.
+- **other**: Recognized instrument, unknown family
+
+Instruments with `family_confidence < 0.7` are flagged with `needs_review=True` for optional LLM adjudication.
 
 ## Output Files
 
@@ -239,13 +270,32 @@ Summary of detected research instrument references.
 
 | Column | Description |
 |--------|-------------|
-| `instrument_id` | Unique identifier |
+| `instrument_id` | Unique identifier (slug format with --detect-families) |
 | `normalized_name` | Lowercase normalized name for grouping |
 | `canonical_name` | Most common surface form |
 | `acronym` | Extracted acronym(s) if present |
 | `frequency` | Total occurrence count |
 | `n_tinyids` | Number of distinct CDE documents |
 | `tinyids` | Pipe-separated list of tinyIds |
+| `family_id` | Family identifier (with --detect-families) |
+| `family_display_name` | Human-readable family name (with --detect-families) |
+| `family_confidence` | Confidence in family assignment 0.0-1.0 (with --detect-families) |
+| `identification_method` | "pattern" or "llm" (with --detect-families) |
+| `needs_review` | True if confidence < threshold (with --detect-families) |
+
+### instrument_families.tsv (with --family-summary)
+
+Summary statistics grouped by instrument family.
+
+| Column | Description |
+|--------|-------------|
+| `family_id` | Family identifier (e.g., "neuro-qol") |
+| `family_display_name` | Human-readable name (e.g., "Neuro-QOL") |
+| `n_instruments` | Count of distinct instruments in family |
+| `n_tinyids` | Total distinct CDE documents |
+| `total_frequency` | Sum of all occurrences |
+| `top_instruments` | Top 5 instrument names (pipe-separated) |
+| `all_acronyms` | All acronyms in family (pipe-separated) |
 
 ### instruments_verbatim.tsv (with --instruments-only)
 

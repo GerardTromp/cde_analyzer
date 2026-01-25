@@ -1,10 +1,10 @@
 # Progress and Current State
 
-## Current Branch: Repeats
+## Current Branch: phrase-curator
 
-**Focus**: Repeated phrase detection and analysis
+**Focus**: LLM-based phrase classification for semantic curation
 
-**Tracking**: origin/Repeats
+**Tracking**: origin/phrase-curator
 
 ## Recent Work (Last 30 Days)
 
@@ -65,42 +65,40 @@
 
 ## Branches
 
-### Active Branch: feature/phrase-miner-kmer-detection (CURRENT)
-- **Purpose**: Advanced k-mer phrase mining implementation
-- **Status**: ALL PHASES COMPLETE - ready for merge to main
-- **Created**: 2026-01-13
-- **Latest Work**: 2026-01-21 (All phases + Unicode normalization + verbatim templates)
-- **Contains**: Full phrase_miner action with:
-  - Iterative descending k-mer detection (k=25 → k=3)
-  - Aho-Corasick multi-pattern masking
-  - De Bruijn graph extension
-  - Subsumption filtering
-  - Anchor-based phrase extension
-  - Verbatim text recovery
+### Active Branch: phrase-curator (CURRENT)
+- **Purpose**: LLM-based phrase classification for semantic curation
+- **Status**: ALL PHASES COMPLETE (5 phases + documentation)
+- **Created**: 2026-01-24
+- **Latest Work**: 2026-01-24 (Full implementation)
+- **Contains**: Full llm_classify action with:
+  - Async LLM provider implementations (Claude, OpenAI, Gemini)
+  - Modular query framework (instrument detection, temporal detection)
+  - Four aggregation methods (unanimous, majority, weighted, confidence-weighted)
+  - Confidence quintile system (highly_likely → highly_unlikely)
+  - API key resolution: config file → env vars → CLI
+  - Comprehensive MkDocs documentation
 
-### Active Branch: Repeats
-- **Purpose**: Repeated phrase detection work
-- **Status**: Active development
-- **Divergence**: Ahead of main by several commits
-- **Contains**: Latest lazy loading fixes and phrase analysis work
+### Previous Branch: feature/phrase-miner-kmer-detection
+- **Purpose**: Advanced k-mer phrase mining implementation
+- **Status**: ALL PHASES COMPLETE - merged or ready to merge
+- **Contains**: Full phrase_miner action
 
 ### Main Branch: main
-- **Status**: Stable
-- **Last Sync**: Commit 2ca729c "Minor fix of phrase extractor invocation"
+- **Status**: Stable, recently updated
+- **Last Sync**: Commit 328b48e "Revamp CLI documentation with complete command reference"
 - **Purpose**: Stable release baseline
 - **Tracking**: origin/main
 
 ### Branch Relationship
 ```
-main (2ca729c) ← older, stable
+main (328b48e) ← stable baseline
   ↓
-  ├── Repeats (4e601c7) ← previous active work
-  └── feature/phrase-miner-kmer-detection (d543ff2) ← current development
+  └── phrase-curator (10b7f13) ← current development (llm_classify)
 ```
 
 **Recommendation**:
-- Test feature/phrase-miner-kmer-detection, then merge to main
-- Evaluate merging Repeats → main once stabilized
+- Review phrase-curator branch for llm_classify feature
+- Test with API keys before merging to main
 
 ## Development Phases (Historical)
 
@@ -229,6 +227,21 @@ main (2ca729c) ← older, stable
 
 ## Recently Completed
 
+### ✓ LLM Classify Implementation (ALL PHASES COMPLETE)
+- Completed: 2026-01-24
+- Branch: phrase-curator
+- Status: All 5 phases + documentation complete
+- Commit: 10b7f13
+
+**Implemented Features**:
+- ✅ Async LLM provider implementations (Claude, OpenAI, Gemini)
+- ✅ Modular query framework (instrument detection, temporal detection)
+- ✅ Four aggregation methods (unanimous, majority, weighted, confidence-weighted)
+- ✅ Confidence quintile system (highly_likely → highly_unlikely)
+- ✅ API key resolution: config file → env vars → CLI
+- ✅ Rate limiting with token bucket algorithm
+- ✅ Comprehensive MkDocs documentation (4 files)
+
 ### ✓ Phrase Miner Implementation (ALL PHASES COMPLETE)
 - Completed: 2026-01-20
 - Branch: feature/phrase-miner-kmer-detection
@@ -289,7 +302,8 @@ main (2ca729c) ← older, stable
 - lemma_fasta
 - phrase_builder
 - subset
-- phrase_miner (NEW)
+- phrase_miner
+- llm_classify (NEW)
 
 All functional and updated for lazy loading
 
@@ -365,10 +379,10 @@ All functional and updated for lazy loading
 ## Metrics
 
 ### Codebase Size
-- **Python Files**: ~75 files (including legacy)
-- **Lines of Code**: Unknown (not measured)
-- **Actions**: 9 implemented
-- **Data Models**: 3 top-level (CDEItem, CDEForm, 50+ classes)
+- **Python Files**: ~95 files (including legacy and new llm modules)
+- **Lines of Code**: ~5,600+ new lines in llm_classify feature
+- **Actions**: 11 implemented (added llm_classify)
+- **Data Models**: 4 top-level (CDEItem, CDEForm, EmbedText, LLM_Classification)
 
 ### Recent Activity
 - **Commits (30 days)**: 3
@@ -412,6 +426,158 @@ All functional and updated for lazy loading
 **Next**: Update CLAUDE.md to reference checkpoint system
 
 ## Session Notes
+
+### Session 2026-01-24: LLM Classify Implementation Complete
+
+**Branch**: phrase-curator
+
+**Commit**: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
+
+**Goals**:
+- Implement multi-LLM phrase classification action
+- Support Claude, OpenAI, and Gemini providers
+- Create modular query framework for extensible classification
+- Add comprehensive MkDocs documentation
+
+**Accomplishments**:
+- ✅ Phase 1: Core Infrastructure & Data Models
+  - Created `CDE_Schema/LLM_Classification.py` with Pydantic models
+  - Implemented ConfidenceQuintile enum and dataclasses
+- ✅ Phase 2: Async LLM Provider Implementations
+  - Created `utils/llm/config.py` for API key resolution
+  - Created `utils/llm/provider_base.py` abstract interface
+  - Implemented Claude, OpenAI, Gemini providers
+  - Added `utils/llm/rate_limiter.py` with token bucket algorithm
+- ✅ Phase 3: Query Module Framework
+  - Created `utils/query_modules/module_base.py` abstract interface
+  - Created module registry with lazy loading
+  - Implemented `utils/llm/result_aggregator.py` (4 aggregation methods)
+- ✅ Phase 4: Orchestration Layer
+  - Created `logic/llm_classifier.py` core orchestration
+  - Created `actions/llm_classify/` (cli.py, run.py)
+  - Registered in ACTION_REGISTRY
+- ✅ Phase 5: Query Modules
+  - Implemented instrument_detector.py (3 categories)
+  - Implemented temporal_detector.py (6 categories)
+- ✅ Documentation
+  - Created `docs/llm/` directory with 4 comprehensive files
+  - Updated `mkdocs.yml` with new navigation section
+  - Updated `docs/commands/index.md` and `docs/help/all-commands.md`
+
+**Files Created** (26 files, 5,615 lines):
+- CDE_Schema/LLM_Classification.py (186 lines)
+- actions/llm_classify/__init__.py (5 lines)
+- actions/llm_classify/cli.py (128 lines)
+- actions/llm_classify/run.py (196 lines)
+- logic/llm_classifier.py (506 lines)
+- utils/llm/__init__.py (200 lines)
+- utils/llm/config.py (325 lines)
+- utils/llm/provider_base.py (293 lines)
+- utils/llm/provider_claude.py (262 lines)
+- utils/llm/provider_openai.py (267 lines)
+- utils/llm/provider_google.py (289 lines)
+- utils/llm/rate_limiter.py (356 lines)
+- utils/llm/result_aggregator.py (401 lines)
+- utils/query_modules/__init__.py (174 lines)
+- utils/query_modules/module_base.py (310 lines)
+- utils/query_modules/instrument_detector.py (154 lines)
+- utils/query_modules/temporal_detector.py (196 lines)
+- docs/llm/index.md (152 lines)
+- docs/llm/llm_classify.md (379 lines)
+- docs/llm/configuration.md (324 lines)
+- docs/llm/query_modules.md (319 lines)
+- docs/help/llm_classify.md (103 lines)
+
+**Files Modified** (4 files):
+- cde_analyzer.py (added to ACTION_REGISTRY)
+- docs/commands/index.md (added LLM section)
+- docs/help/all-commands.md (added llm_classify command)
+- mkdocs.yml (added LLM Classification nav section)
+
+**Key Design Decisions**:
+1. API key priority: config file → env vars → CLI (security)
+2. Async pattern with asyncio for parallel LLM queries
+3. Token bucket rate limiting per provider
+4. Quintile confidence system (5 levels)
+5. Four aggregation methods for multi-LLM consensus
+6. Lazy loading for providers and modules
+
+**Checkpoint**: checkpoint-2026-01-24-llm-classify-complete.md
+
+**Status**: Complete, committed and pushed to remote
+
+**Next Steps**:
+- Test with actual API keys
+- Add unit tests for providers and modules
+- Consider merging to main after validation
+
+---
+
+### Session 2026-01-24b: Enhanced Instrument Detection with Family Grouping
+
+**Branch**: phrase-curator
+
+**Goals**:
+- Add two-tier identification system (family_id + instrument_id)
+- Enable instrument family grouping for substitution testing
+- Pattern-based family detection with LLM adjudication fallback
+- Extended output formats for family analysis
+
+**Accomplishments**:
+- ✅ Phase 1: Data Model Extensions
+  - Added `InstrumentFamily` enum to `CDE_Schema/LLM_Classification.py` (15 families)
+  - Added `InstrumentIdentification` dataclass for two-tier ID system
+- ✅ Phase 2: Family Detection Patterns
+  - Created `utils/instrument_family_patterns.py` with `InstrumentFamilyDetector` class
+  - 13 known families with regex patterns (neuro-qol, promis, mds-updrs, sf-health, beck, phq, gad, mmse, moca, nihss, pdqualif, dsq, rome)
+  - False positive exclusion patterns
+  - Confidence scoring based on pattern specificity
+- ✅ Phase 3: Extended InstrumentMatch/Catalog
+  - Added family fields to `InstrumentMatch` dataclass
+  - Added `assign_families()` and `get_families_summary()` methods to `InstrumentCatalog`
+- ✅ Phase 4: Family Assigner Orchestration
+  - Created `logic/instrument_family_assigner.py` with `InstrumentFamilyAssigner` class
+  - Handles family assignment workflow with confidence thresholding
+- ✅ Phase 5: CLI Integration
+  - Added `--detect-families`, `--family-confidence-threshold`, `--family-summary` to phrase_miner
+  - Added `--adjudicate-instruments`, `--adjudicate-threshold` to llm_classify
+- ✅ Phase 6: LLM Adjudication Module
+  - Created `utils/query_modules/instrument_family_detector.py` (15 categories)
+  - Registered in module registry
+- ✅ Phase 7: Documentation
+  - Updated `docs/commands/phrase_miner.md` with family detection
+  - Updated `docs/llm/llm_classify.md` with adjudication mode
+  - Updated `docs/llm/query_modules.md` with instrument_family module
+  - Updated `docs/help/all-commands.md` with new CLI options
+
+**Files Created** (3):
+- `logic/instrument_family_assigner.py` (InstrumentFamilyAssigner orchestration)
+- `utils/instrument_family_patterns.py` (InstrumentFamilyDetector, regex patterns)
+- `utils/query_modules/instrument_family_detector.py` (LLM adjudication module)
+
+**Files Modified** (7):
+- `CDE_Schema/LLM_Classification.py` (+67 lines: InstrumentFamily enum, InstrumentIdentification)
+- `utils/instrument_extractor.py` (+89 lines: family fields, assign_families method)
+- `actions/phrase_miner/cli.py` (+19 lines: family detection flags)
+- `actions/phrase_miner/run.py` (+69 lines: family output generation)
+- `actions/llm_classify/cli.py` (+16 lines: adjudication mode)
+- `utils/query_modules/__init__.py` (+2 lines: instrument_family registration)
+- Various documentation files
+
+**Key Design Decisions**:
+1. Two-tier ID enables family-level and individual analysis
+2. Pattern-based detection is fast and free (no API costs)
+3. Confidence threshold (0.7) flags uncertain cases for review
+4. LLM adjudication only for instruments below threshold
+
+**Status**: Implementation complete, documentation updated
+
+**Next Steps**:
+- Run integration tests on real CDE data
+- Test LLM adjudication with API keys
+- Consider merging to main after validation
+
+---
 
 ### Session 2026-01-21b: Instrument Pattern Extraction
 

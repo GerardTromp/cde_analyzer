@@ -64,6 +64,11 @@ ACTION_REGISTRY = {
         "help": "Iterative k-mer phrase mining with de Bruijn extension",
         "description": "Detects repeated phrases using descending k-mer mining (k=25 to k=3)",
     },
+    "llm_classify": {
+        "module": "actions.llm_classify.cli",
+        "help": "Classify phrases using multi-LLM queries",
+        "description": "Agentic LLM-based classification for phrase curation",
+    },
     # "depth": {...}
     # "quality": {...}
 }

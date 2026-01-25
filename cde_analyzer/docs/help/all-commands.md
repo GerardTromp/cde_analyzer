@@ -33,6 +33,8 @@ usage: phrase_miner [-h] --input INPUT [--output-dir OUTPUT_DIR]
                     [--lemmatize | --no-lemmatize] [--remove-stopwords]
                     [--enable-debruijn] [--enable-subsumption] [--enable-anchor]
                     [--extract-instruments] [--instrument-list FILE]
+                    [--detect-families] [--family-confidence-threshold N]
+                    [--family-summary]
 
 options:
   -h, --help            show this help message and exit
@@ -50,6 +52,10 @@ options:
   --enable-anchor       Enable anchor-based phrase extension
   --extract-instruments Extract 'as part of <Instrument>' patterns
   --instrument-list F   TSV file with curated instrument patterns
+  --detect-families     Enable instrument family detection
+  --family-confidence-threshold N
+                        Min confidence for family assignment (default: 0.7)
+  --family-summary      Generate instrument_families.tsv summary
 ```
 
 ---
@@ -262,3 +268,55 @@ options:
   --id-file FILE        File containing tinyIds (JSON, CSV, or TSV)
   --exclude             Exclude matching tinyIds (default: include)
 ```
+
+---
+
+## LLM-Assisted Classification
+
+> **Note**: These commands require API keys for LLM providers. See [LLM Configuration](../llm/configuration.md).
+
+### `llm_classify` Command
+
+Multi-LLM phrase classification with confidence aggregation.
+
+```bash
+usage: llm_classify [-h] -i INPUT_DIR -m MODULE [--output-dir DIR]
+                    [--providers {claude,openai,google} ...]
+                    [--config-file FILE] [--api-keys KEYS ...]
+                    [--aggregation-method METHOD]
+                    [--batch-size N] [--min-frequency N]
+                    [--context-window N] [--reference-file FILE]
+                    [--adjudicate-instruments FILE] [--adjudicate-threshold N]
+                    [--skip-validation] [--dry-run]
+
+options:
+  -h, --help              show this help message and exit
+  -i, --input-dir DIR     Directory with phrase_miner output
+  -m, --module MODULE     Query module: instrument, temporal, instrument_family
+  --output-dir DIR        Output directory (default: llm_output)
+  --providers PROVIDERS   LLM providers (default: claude)
+  --config-file FILE      LLM config file path
+  --api-keys KEYS         API keys as provider:key pairs
+  --aggregation-method M  Aggregation: unanimous, majority, weighted_majority,
+                          confidence_weighted (default: majority)
+  --batch-size N          Phrases per batch (default: 20)
+  --min-frequency N       Minimum phrase frequency (default: 1)
+  --context-window N      Context chars per occurrence (default: 200)
+  --reference-file FILE   Reference data for module
+  --adjudicate-instruments FILE
+                          Path to instruments.tsv for family adjudication
+  --adjudicate-threshold N
+                          Adjudicate if confidence < threshold (default: 0.7)
+  --skip-validation       Skip API key validation
+  --dry-run               Validate config without LLM calls
+```
+
+**Query Modules**:
+
+| Module | Categories |
+|--------|------------|
+| `instrument` | `instrument_name`, `possible_instrument`, `not_instrument` |
+| `temporal` | `recency_window`, `age_range`, `time_point`, `duration`, `frequency`, `not_temporal` |
+| `instrument_family` | `neuro-qol`, `promis`, `mds-updrs`, `sf-health`, `beck`, `phq`, `gad`, `mmse`, `moca`, `nihss`, `pdqualif`, `dsq`, `rome`, `other_instrument`, `not_instrument` |
+
+See [LLM Classification](../llm/index.md) for comprehensive documentation.

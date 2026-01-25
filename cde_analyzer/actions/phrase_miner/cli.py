@@ -150,6 +150,25 @@ def register_subparser(subparser: ArgumentParser):
         help="Minimum words required in instrument name (default: 3)"
     )
 
+    # Instrument family detection
+    subparser.add_argument(
+        "--detect-families",
+        action="store_true",
+        help="Enable instrument family detection (groups instruments by family, e.g., Neuro-QOL, PROMIS)"
+    )
+    subparser.add_argument(
+        "--family-confidence-threshold",
+        type=float,
+        default=0.7,
+        help="Minimum confidence for automatic family assignment (default: 0.7). "
+             "Below threshold, instruments are flagged for review."
+    )
+    subparser.add_argument(
+        "--family-summary",
+        action="store_true",
+        help="Generate instrument_families.tsv summary file (groups by family)"
+    )
+
     # Optional features
     subparser.add_argument(
         "--histograms",

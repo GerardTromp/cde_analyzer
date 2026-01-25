@@ -32,6 +32,22 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | [lemma_fasta](../help/lemma_fasta.md) | Create FASTA format from lemma sequences | Stable |
 | [subset](../help/subset.md) | Extract subsets by tinyId with Pydantic validation | Stable |
 
+## LLM-Assisted Classification
+
+!!! info "External API Required"
+    These commands require API keys for LLM providers. See [LLM Configuration](../llm/configuration.md).
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [llm_classify](../llm/llm_classify.md) | Multi-LLM phrase classification with confidence aggregation | New |
+
+**Available Modules**:
+
+- **instrument**: Detect measurement instruments, devices, assessment tools
+- **temporal**: Identify temporal patterns (recency, age ranges, durations)
+
+See the [LLM Classification](../llm/index.md) section for comprehensive documentation.
+
 ## Usage Pattern
 
 All commands follow the same basic pattern:
@@ -100,4 +116,21 @@ python cde_analyzer.py subset -i cdes_full.json -o subset.json -m CDE --id-file 
 
 # Exclude problematic records
 python cde_analyzer.py subset -i cdes.json -o cleaned.json -m CDE --id-list bad1 bad2 --exclude
+```
+
+### LLM-Assisted Classification
+
+```bash
+# 1. Extract phrases
+python cde_analyzer.py phrase_miner --input cdes.json --output-dir phrase_output
+
+# 2. Classify with LLMs (requires API keys)
+python cde_analyzer.py llm_classify \
+  --input-dir phrase_output \
+  --output-dir llm_output \
+  --module instrument \
+  --providers claude openai
+
+# 3. Review high-confidence results
+grep "highly_likely" llm_output/classified_instrument.tsv
 ```

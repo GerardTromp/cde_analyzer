@@ -403,6 +403,182 @@ def get_verbosity() -> int:
 
 ---
 
+## ADR-011: Multi-LLM Classification Architecture
+
+**Date**: January 2026 (commit 10b7f13)
+
+**Status**: Accepted
+
+**Context**:
+- Need to classify phrases extracted by phrase_miner into semantic categories
+- Manual curation of thousands of phrases is time-consuming
+- Different LLMs may have different strengths/biases
+- Want confidence scoring to prioritize human review
+- API keys are sensitive and need secure handling
+
+**Decision**: Implement multi-LLM classification with async providers, pluggable modules, and confidence aggregation
+
+**Implementation**:
+
+1. **Provider Abstraction** (`utils/llm/provider_base.py`)
+   - Abstract LLMProvider class for uniform interface
+   - Implementations for Claude, OpenAI, Gemini
+   - Async batch processing with rate limiting
+
+2. **API Key Resolution** (`utils/llm/config.py`)
+   - Priority: config file → environment variables → CLI
+   - Config file: `~/.cde_analyzer/llm_config.json`
+   - CLI args documented as least preferred (security)
+
+3. **Query Module Framework** (`utils/query_modules/`)
+   - Abstract QueryModule for pluggable classification tasks
+   - Current modules: instrument_detector, temporal_detector
+   - Modules define categories, prompts, and response parsing
+
+4. **Result Aggregation** (`utils/llm/result_aggregator.py`)
+   - Four methods: unanimous, majority, weighted_majority, confidence_weighted
+   - Quintile system: highly_likely → highly_unlikely (5 levels)
+   - Agreement tracking: unanimous, majority, split
+
+**Rationale**:
+- Multi-LLM reduces single-provider bias
+- Async pattern enables parallel queries (faster)
+- Pluggable modules allow easy extension
+- Quintile system aids human curation prioritization
+- Config file priority protects API keys
+
+**Consequences**:
+- **Positive**:
+  - Robust classification with cross-validation
+  - Fast execution via async parallelism
+  - Extensible to new classification tasks
+  - Secure API key handling
+  - Human curation aided by confidence scores
+- **Negative**:
+  - External API dependency (costs, availability)
+  - Requires API keys from multiple providers
+  - Added complexity (async, multiple providers)
+  - Network latency affects performance
+
+**Commit**: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
+
+**Files Created**:
+- CDE_Schema/LLM_Classification.py
+- logic/llm_classifier.py
+- actions/llm_classify/ (cli.py, run.py)
+- utils/llm/ (7 files)
+- utils/query_modules/ (4 files)
+- docs/llm/ (4 documentation files)
+
+---
+
+## ADR-012: Confidence Quintile System
+
+**Date**: January 2026
+
+**Status**: Accepted
+
+**Context**:
+- LLMs return confidence scores (0.0-1.0)
+- Need human-readable confidence levels
+- Want consistent terminology across tools
+
+**Decision**: Use 5-tier quintile system for confidence levels
+
+**Mapping**:
+| Score Range | Quintile | Interpretation |
+|------------|----------|----------------|
+| 0.81-1.00 | highly_likely | High confidence, minimal review needed |
+| 0.61-0.80 | likely | Good confidence, spot-check recommended |
+| 0.41-0.60 | indeterminate | Uncertain, human review required |
+| 0.21-0.40 | unlikely | Low confidence, likely incorrect |
+| 0.00-0.20 | highly_unlikely | Very low confidence, probably wrong |
+
+**Rationale**:
+- Equal-width bins are intuitive
+- Five levels balance granularity and simplicity
+- Names convey clear meaning
+- "Indeterminate" highlights uncertainty for review
+
+**Consequences**:
+- **Positive**:
+  - Easy to understand
+  - Actionable (prioritize "indeterminate" for review)
+  - Consistent terminology
+- **Negative**:
+  - Loses precision of raw scores
+  - Boundary effects (0.60 vs 0.61)
+
+---
+
+## ADR-013: Two-Tier Instrument Identification
+
+**Date**: January 2026
+
+**Status**: Accepted
+
+**Context**:
+- Instruments extracted by phrase_miner need grouping by family (e.g., all Neuro-QOL subscales together)
+- Need to enable text substitution testing (family-level vs full instrument name)
+- Pattern-based detection may have low confidence for some instruments
+- LLM adjudication can resolve uncertain cases but adds cost
+- Need to track which instruments need human review
+
+**Decision**: Implement two-tier identification with `family_id` + `instrument_id` and confidence-based LLM adjudication
+
+**Implementation**:
+
+1. **Two-Tier ID System**:
+   - `family_id`: Short identifier (e.g., "neuro-qol", "promis", "mds-updrs")
+   - `instrument_id`: Unique slug (e.g., "neuro-qol-ability-participate-sra")
+   - `family_display_name`: Human-readable name for substitution testing
+
+2. **Pattern-Based Detection** (`utils/instrument_family_patterns.py`):
+   - 13 known families with regex patterns
+   - Confidence scoring based on pattern specificity
+   - False positive exclusion patterns
+
+3. **Confidence Thresholding**:
+   - Instruments with `family_confidence < 0.7` flagged with `needs_review=True`
+   - Enables prioritized human curation
+
+4. **LLM Adjudication** (optional):
+   - `llm_classify --adjudicate-instruments` for uncertain cases
+   - 15-category query module (`instrument_family_detector.py`)
+   - Only processes instruments below threshold
+
+**Rationale**:
+- Two-tier system enables both family-level and individual analysis
+- Pattern-based detection is fast and free (no API costs)
+- Confidence thresholding focuses LLM costs on uncertain cases
+- Human review queue prevents unvalidated classifications
+
+**Consequences**:
+- **Positive**:
+  - Enables family-based text substitution experiments
+  - Reduces LLM costs by only adjudicating uncertain cases
+  - Provides clear review queue for human curators
+  - Extensible to new instrument families
+- **Negative**:
+  - Additional complexity in output files
+  - Regex patterns may miss novel naming conventions
+  - Requires domain expertise to add new family patterns
+
+**Files Created**:
+- `utils/instrument_family_patterns.py` (InstrumentFamilyDetector)
+- `utils/query_modules/instrument_family_detector.py` (LLM module)
+- `logic/instrument_family_assigner.py` (orchestration)
+
+**Files Modified**:
+- `CDE_Schema/LLM_Classification.py` (InstrumentFamily enum, InstrumentIdentification)
+- `utils/instrument_extractor.py` (InstrumentMatch family fields, assign_families method)
+- `actions/phrase_miner/cli.py` (--detect-families, --family-confidence-threshold, --family-summary)
+- `actions/phrase_miner/run.py` (family output generation)
+- `actions/llm_classify/cli.py` (--adjudicate-instruments, --adjudicate-threshold)
+- `utils/query_modules/__init__.py` (instrument_family module registration)
+
+---
+
 ## Deferred Decisions
 
 ### DD-001: Test Framework Choice

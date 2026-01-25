@@ -23,9 +23,15 @@ nav:
     - subset: help/subset.md
     - strip_html: help/strip.md
     - fix_underscores: help/fix_underscores.md
+  - LLM Classification:
+    - Overview: llm/index.md
+    - llm_classify Command: llm/llm_classify.md
+    - Configuration: llm/configuration.md
+    - Query Modules: llm/query_modules.md
   - Reference:
     - CLI Reference: help/all-commands.md
     - Launcher: help/cde_analyzer.md
+    - llm_classify: help/llm_classify.md
   - Development:
     - Architecture: architecture.md
     - Data Models: data-models.md

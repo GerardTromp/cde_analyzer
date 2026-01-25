@@ -167,18 +167,44 @@ def run_action(args: Namespace):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         if instrument_catalog and instrument_catalog.instruments:
-            instruments_count = write_instruments_tsv(
-                instrument_catalog, output_dir / "instruments.tsv",
-                min_tinyids=args.min_tinyids
-            )
-            logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
+            # Check if family detection is enabled
+            detect_families = getattr(args, 'detect_families', False)
+            family_summary = getattr(args, 'family_summary', False)
+            family_threshold = getattr(args, 'family_confidence_threshold', 0.7)
 
-            verbatim_count = write_instruments_verbatim_tsv(
-                instrument_catalog, output_dir / "instruments_verbatim.tsv",
-                min_tinyids=args.min_tinyids
-            )
-            logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
-            logger.info(f"Phase 1 complete. Curate instruments_verbatim.tsv, then run phase 2 with --instrument-list.")
+            if detect_families:
+                # Use enhanced family-aware output
+                from logic.instrument_family_assigner import InstrumentFamilyAssigner
+
+                logger.info(f"Assigning instrument families (threshold: {family_threshold})...")
+                assigner = InstrumentFamilyAssigner(
+                    confidence_threshold=family_threshold,
+                    generate_family_summary=family_summary,
+                )
+                stats = assigner.assign_families(instrument_catalog)
+                outputs = assigner.write_all_outputs(instrument_catalog, output_dir)
+
+                logger.info(f"Family assignment: {stats.total_instruments} instruments, "
+                           f"{stats.families_detected} families, "
+                           f"{stats.needs_review_count} need review")
+                logger.info(f"Phase 1 complete with family detection. Output files:")
+                for output_type, path in outputs.items():
+                    logger.info(f"  - {output_type}: {path.name}")
+                logger.info(f"Curate instruments needing review, then run phase 2 with --instrument-list.")
+            else:
+                # Original behavior without family detection
+                instruments_count = write_instruments_tsv(
+                    instrument_catalog, output_dir / "instruments.tsv",
+                    min_tinyids=args.min_tinyids
+                )
+                logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
+
+                verbatim_count = write_instruments_verbatim_tsv(
+                    instrument_catalog, output_dir / "instruments_verbatim.tsv",
+                    min_tinyids=args.min_tinyids
+                )
+                logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
+                logger.info(f"Phase 1 complete. Curate instruments_verbatim.tsv, then run phase 2 with --instrument-list.")
         else:
             logger.warning("No instruments extracted. Check input data contains 'as part of' patterns.")
 
@@ -235,18 +261,40 @@ def run_action(args: Namespace):
 
     # Write instruments.tsv and instruments_verbatim.tsv if instrument extraction was enabled
     if instrument_catalog:
-        instruments_count = write_instruments_tsv(
-            instrument_catalog, output_dir / "instruments.tsv",
-            min_tinyids=args.min_tinyids
-        )
-        logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
+        # Check if family detection is enabled
+        detect_families = getattr(args, 'detect_families', False)
+        family_summary = getattr(args, 'family_summary', False)
+        family_threshold = getattr(args, 'family_confidence_threshold', 0.7)
 
-        # Write verbatim variants for curation (one row per exact instrument name form)
-        verbatim_count = write_instruments_verbatim_tsv(
-            instrument_catalog, output_dir / "instruments_verbatim.tsv",
-            min_tinyids=args.min_tinyids
-        )
-        logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
+        if detect_families:
+            # Use enhanced family-aware output
+            from logic.instrument_family_assigner import InstrumentFamilyAssigner
+
+            logger.info(f"Assigning instrument families (threshold: {family_threshold})...")
+            assigner = InstrumentFamilyAssigner(
+                confidence_threshold=family_threshold,
+                generate_family_summary=family_summary,
+            )
+            stats = assigner.assign_families(instrument_catalog)
+            outputs = assigner.write_all_outputs(instrument_catalog, output_dir)
+
+            logger.info(f"Family assignment: {stats.total_instruments} instruments, "
+                       f"{stats.families_detected} families, "
+                       f"{stats.needs_review_count} need review")
+        else:
+            # Original behavior without family detection
+            instruments_count = write_instruments_tsv(
+                instrument_catalog, output_dir / "instruments.tsv",
+                min_tinyids=args.min_tinyids
+            )
+            logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
+
+            # Write verbatim variants for curation (one row per exact instrument name form)
+            verbatim_count = write_instruments_verbatim_tsv(
+                instrument_catalog, output_dir / "instruments_verbatim.tsv",
+                min_tinyids=args.min_tinyids
+            )
+            logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
 
     # Log verbatim phrase statistics
     verbatim_count = sum(1 for p in phrases for occ in p.occurrences if occ.verbatim_text)
