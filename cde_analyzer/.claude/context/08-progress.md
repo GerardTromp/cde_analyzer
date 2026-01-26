@@ -8,6 +8,59 @@
 
 ## Recent Work (Last 30 Days)
 
+### Session 2026-01-26b: Strip Discover Complete & False-Negative Reduction
+
+**Focus**: Completed strip_discover action, achieved 91% false-negative reduction
+
+**Key Accomplishments**:
+- Reduced false negatives from ~500 to 46 unique patterns (123 occurrences)
+- All remaining patterns are legitimate contextual phrases (not instruments)
+- Fixed RFQ-U patterns (changed from abbreviated to full form)
+- Added patterns: Neuro-QOL subscales, PROMIS Anxiety, NIH Toolbox
+- Refactored `--analyze-false-negatives` from string arg to boolean flag
+- Implemented per-mode argument validation in strip_discover
+
+**CLI Changes**:
+- `--analyze-false-negatives` now uses `-i/--input` for input file (consistent with other tools)
+- Arguments are optional at argparse level, validated per-mode in run.py
+
+**False-Negative Analysis Final Results**:
+```
+Total unique patterns: 46
+Total occurrences: 123
+Top patterns: medical history, treatment sessions, project descriptions
+```
+All remaining are legitimate "as part of" contextual phrases.
+
+**Status**: MILESTONE COMPLETE - Instrument stripping pipeline ready for production
+
+**Checkpoint**: checkpoint-20260126-1540-strip-discover-complete.md
+
+---
+
+### Session 2026-01-26a: Config Architecture & Diagnostic Action
+
+**Focus**: Refactored supplementary patterns to config-based architecture, created diagnostic action for iterative stripping improvement.
+
+**Key Changes**:
+- Created `config/supplementary_patterns.yaml` - 27 patterns for non-Title-Case instruments
+- Created `utils/config_loader.py` - Generic YAML config loader with caching
+- Created `actions/diagnose_strip/` - New action for stripping diagnostics
+- Refactored `utils/instrument_extractor.py` to load patterns from config
+
+**Critical Learning**: Two separate workflows exist:
+1. `phrase_miner --instruments-only --extract-supplementary` → Extract instrument catalog
+2. `strip_discover` → `strip_phrases` → Strip patterns from text
+
+These workflows use **different pattern sources**. For comprehensive stripping:
+1. Run phrase_miner with all extraction passes
+2. Use instruments_verbatim.tsv as pattern-list for strip_discover
+3. Run strip_phrases
+4. Run diagnose_strip to identify remaining patterns
+5. Add patterns to config, iterate
+
+**Status**: Config architecture complete, diagnostic action working
+
 ### Commits
 
 **2026-01-07: Launcher fixes (commits 4e601c7, 57b9437)**
@@ -792,6 +845,65 @@ collapsed before phrase detection, reducing false phrase variants.
 - Validate output quality and performance
 - Merge to main after successful testing
 - Future: Implement Phase 4-7 enhancements
+
+---
+
+### Session 2026-01-26: Config Architecture & Diagnostic Action
+
+**Branch**: phrase-curator
+
+**Goals**:
+- Move hardcoded supplementary patterns to YAML config
+- Create diagnostic action for iterative stripping improvement
+- Enable curator-friendly pattern curation workflow
+
+**Accomplishments**:
+- ✅ Created `config/supplementary_patterns.yaml` (27 patterns, categorized)
+- ✅ Created `utils/config_loader.py` (generic YAML loader with caching)
+- ✅ Refactored `utils/instrument_extractor.py` to load from config
+- ✅ Created `actions/diagnose_strip/` action (cli.py, run.py)
+- ✅ Registered `diagnose_strip` in ACTION_REGISTRY
+
+**Files Created** (4):
+- config/supplementary_patterns.yaml (27 patterns in YAML format)
+- utils/config_loader.py (load_yaml_config, load_supplementary_patterns)
+- actions/diagnose_strip/cli.py (CLI argument definitions)
+- actions/diagnose_strip/run.py (diagnostic logic, pattern categorization)
+
+**Files Modified** (2):
+- utils/instrument_extractor.py (removed hardcoded constant, added config loading)
+- cde_analyzer.py (added diagnose_strip to ACTION_REGISTRY)
+
+**Key Insight**: phrase_miner and strip_discover are **separate workflows**:
+- phrase_miner uses config/supplementary_patterns.yaml for extraction
+- strip_discover uses --pattern-list input (TSV)
+- For comprehensive stripping, use phrase_miner output as strip_discover input
+
+**Test Results** (on cde_all_06_20260105_phrases14/cleaned.json):
+- 170 unique remaining patterns
+- 936 total occurrences
+- Categories: other(499), test(186), questionnaire(122), model(61), scale(44), acronym(22), version(2)
+
+**Checkpoint**: checkpoint-2026-01-26-config-diagnostics.md
+
+**Status**: Implementation complete, ready for iteration
+
+**Recommended Workflow**:
+```bash
+# 1. Extract instruments with supplementary
+cde_analyzer phrase_miner -i cdes.json -o output/ --instruments-only --extract-supplementary
+
+# 2. Discover patterns using instrument list
+cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv --pattern-list output/instruments_verbatim.tsv
+
+# 3. Strip patterns
+cde_analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json --patterns discovered.tsv
+
+# 4. Diagnose remaining
+cde_analyzer diagnose_strip -i cleaned.json -m CDE -o remaining.tsv --suggest-patterns
+
+# 5. Review remaining.yaml, add to config, iterate
+```
 
 ---
 

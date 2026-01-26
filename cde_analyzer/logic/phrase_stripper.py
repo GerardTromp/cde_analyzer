@@ -1,6 +1,9 @@
 import json
 import csv
 import re
+import os
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any, List, Tuple, Type, Optional, Set
 from pydantic import BaseModel
 from CDE_Schema import CDEItem, CDEForm
@@ -8,9 +11,15 @@ import logging
 from utils.logger import log_if_verbose
 from utils.analyzer_state import get_verbosity
 from utils.extract_embed import sanitize
+from utils.file_utils import require_file
+from utils.flexible_pattern_matcher import get_optimal_workers
 
 logger = logging.getLogger(__name__)
 verbosity = get_verbosity()
+
+# Module-level variable for sharing phrase_map with worker processes
+_phrase_map_global: Optional[List[Tuple[str, str, str, Optional[Set[str]]]]] = None
+_model_class_global: Optional[Type[BaseModel]] = None
 
 
 # Modify to always expect replacement even if empty string
@@ -32,6 +41,20 @@ verbosity = get_verbosity()
 #                 print(f"{row}")
 #                 return [(row["path"], row["phrase"], row["replace"], row["tinyIds"]) for row in reader]  # type: ignore
 def load_phrase_map(filepath: str) -> List[Tuple[str, str, str, Optional[Set[str]]]]:
+    """
+    Load phrase map from JSON or CSV/TSV file.
+
+    Args:
+        filepath: Path to phrase map file
+
+    Returns:
+        List of (path, phrase, replace, tinyIds) tuples
+
+    Raises:
+        FileNotFoundError: If file does not exist
+    """
+    require_file(filepath, "Phrase map file")
+
     if filepath.endswith(".json"):
         with open(filepath, encoding="utf-8") as f:
             data = json.load(f)
@@ -104,7 +127,8 @@ def _navigate_and_strip(current: Any, parts: List[str], phrase: str):
 
 
 def traverse_and_replace_phrase(
-    obj: Any, path: str, phrase: str, replace_with: str = ""
+    obj: Any, path: str, phrase: str, replace_with: str = "",
+    tiny_id: str = None
 ):
     """
     Traverse the object using a dot-separated path with support for wildcards (*)
@@ -115,13 +139,15 @@ def traverse_and_replace_phrase(
         path: A dot-separated path like "definitions.*.definition"
         phrase: The exact phrase to remove (must match exactly).
         replace_with: String to replace the phrase with (default: empty string).
+        tiny_id: Optional tinyId for trace output.
     """
     parts = path.split(".")
-    _recurse_and_replace(obj, parts, phrase, replace_with)
+    _recurse_and_replace(obj, parts, phrase, replace_with, tiny_id)
 
 
 def _recurse_and_replace(
-    current: Any, parts: List[str], phrase: str, replace_with: str
+    current: Any, parts: List[str], phrase: str, replace_with: str,
+    tiny_id: str = None
 ):
     if not parts:
         return
@@ -132,15 +158,15 @@ def _recurse_and_replace(
     if key == "*":
         if isinstance(current, list):
             for i, item in enumerate(current):
-                _recurse_and_replace(item, rest, phrase, replace_with)
+                _recurse_and_replace(item, rest, phrase, replace_with, tiny_id)
         else:
             logger.debug(f"Wildcard expected list but got {type(current).__name__}")
     elif isinstance(current, dict):
         if key in current:
             if not rest:
-                _replace_if_match(current, key, phrase, replace_with)
+                _replace_if_match(current, key, phrase, replace_with, tiny_id)
             else:
-                _recurse_and_replace(current[key], rest, phrase, replace_with)
+                _recurse_and_replace(current[key], rest, phrase, replace_with, tiny_id)
         else:
             logger.debug(f"Key '{key}' not found in dict")
     elif isinstance(current, list):
@@ -148,9 +174,9 @@ def _recurse_and_replace(
             index = int(key)
             if index < len(current):
                 if not rest:
-                    _replace_if_match(current, index, phrase, replace_with)
+                    _replace_if_match(current, index, phrase, replace_with, tiny_id)
                 else:
-                    _recurse_and_replace(current[index], rest, phrase, replace_with)
+                    _recurse_and_replace(current[index], rest, phrase, replace_with, tiny_id)
         except ValueError:
             logger.debug(f"Invalid index '{key}' for list")
     else:
@@ -159,25 +185,59 @@ def _recurse_and_replace(
         )
 
 
+# Module-level trace file for detailed matching diagnostics
+_trace_file = None
+
+
+def set_trace_file(filepath: str):
+    """
+    Enable detailed matching trace output to a file.
+
+    Args:
+        filepath: Path to write trace output
+    """
+    global _trace_file
+    _trace_file = open(filepath, 'w', encoding='utf-8')
+    _trace_file.write("# Phrase Stripping Trace Log\n")
+    _trace_file.write("# Format: MATCH|NO_MATCH tinyId phrase_len phrase[:50] [result]\n\n")
+
+
+def close_trace_file():
+    """Close the trace file if open."""
+    global _trace_file
+    if _trace_file:
+        _trace_file.close()
+        _trace_file = None
+
+
 def _replace_if_match(
-    container: Any, key_or_index: Any, phrase: str, replace_with: str
+    container: Any, key_or_index: Any, phrase: str, replace_with: str,
+    tiny_id: str = None
 ):
+    """
+    Replace phrase in container at key_or_index if it exists.
+
+    Args:
+        container: Dict or list containing the value
+        key_or_index: Key (for dict) or index (for list)
+        phrase: Phrase to find and replace
+        replace_with: Replacement string
+        tiny_id: Optional tinyId for trace output
+    """
+    global _trace_file
     try:
         value = container[key_or_index]
-        # print(f"---------------------value:  {value}")
-        # print(f"----type {type(phrase)}------------phrase: x_.{phrase}._x")
-        # print(type(phrase))
         if isinstance(value, str):
             if phrase in value:
                 log_if_verbose(f"Replacing phrase in path: {key_or_index}", 3)
-                # print(f"Replacing phrase in path: {key_or_index}")
-                # print(f"Replacing original \"{value}\" in path: {key_or_index}")
-                # print(f"Replacing with _\"{replace_with}\"_ in path: {key_or_index}")
                 result = sanitize(value.replace(phrase, replace_with))
-                container[key_or_index] = sanitize(value.replace(phrase, replace_with))
-                # print(f"Replaced value \"{result}\"")
+                container[key_or_index] = result
+
+                # Trace output for diagnosis
+                if _trace_file:
+                    phrase_preview = phrase[:50] + "..." if len(phrase) > 50 else phrase
+                    _trace_file.write(f"MATCH\t{tiny_id or '-'}\t{len(phrase)}\t{phrase_preview}\n")
             else:
-                # logger.debug(f"Phrase not found at {key_or_index}")
                 log_if_verbose(f"Phrase not found at {key_or_index}", 3)
         else:
             logger.debug(f"Value at {key_or_index} is not a string: {value}")
@@ -216,26 +276,151 @@ def _strip_in_place(container: Any, key_or_index: Any, phrase: str):
         logger.error(f"Error stripping at {key_or_index}: {e}")
 
 
+def _strip_single_model(
+    model_data: dict,
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]]
+) -> dict:
+    """
+    Strip phrases from a single model's data dict.
+
+    This is extracted to enable parallel processing.
+
+    Args:
+        model_data: Model data as dict (from model_dump)
+        phrase_map: List of (path, phrase, replace, tinyIds) tuples
+
+    Returns:
+        Modified data dict with phrases stripped
+    """
+    tiny_id = model_data.get("tinyId")
+
+    for path, phrase, replace_with, allowed_ids in phrase_map:
+        if allowed_ids is not None and tiny_id not in allowed_ids:
+            continue
+        traverse_and_replace_phrase(model_data, path, phrase, replace_with, tiny_id)
+
+    return model_data
+
+
+def _worker_init(phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]], model_class_name: str):
+    """
+    Initialize worker process with shared phrase_map.
+
+    Uses global variables to avoid serializing large phrase_map for each task.
+    """
+    global _phrase_map_global, _model_class_global
+    _phrase_map_global = phrase_map
+
+    # Resolve model class from name
+    from utils.constants import MODEL_REGISTRY
+    _model_class_global = MODEL_REGISTRY.get(model_class_name)
+
+
+def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[int, List[dict]]:
+    """
+    Process a chunk of model data dicts in a worker process.
+
+    Args:
+        chunk_with_indices: Tuple of (chunk_index, list of model data dicts)
+
+    Returns:
+        Tuple of (chunk_index, list of processed data dicts)
+    """
+    global _phrase_map_global
+    chunk_idx, data_list = chunk_with_indices
+
+    processed = []
+    for data in data_list:
+        processed_data = _strip_single_model(data, _phrase_map_global)
+        processed.append(processed_data)
+
+    return chunk_idx, processed
+
+
 def strip_phrases(
-    model_list: List[BaseModel], phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]]
+    model_list: List[BaseModel],
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]],
+    n_workers: int = 1
 ) -> List[BaseModel]:
+    """
+    Strip phrases from a list of models.
+
+    Args:
+        model_list: List of Pydantic models to process
+        phrase_map: List of (path, phrase, replace, tinyIds) tuples
+        n_workers: Number of parallel workers (default: 1 for sequential)
+                   Use 0 for auto-detect (CPU count)
+
+    Returns:
+        List of cleaned models in original order
+    """
+    if not model_list:
+        return []
+
+    # Get model class for reconstruction
+    model_class = model_list[0].__class__
+    model_class_name = None
+
+    # Find model class name in registry for worker initialization
+    from utils.constants import MODEL_REGISTRY
+    for name, cls in MODEL_REGISTRY.items():
+        if cls == model_class:
+            model_class_name = name
+            break
+
+    # Convert models to dicts for processing
+    model_data_list = [
+        model.model_dump(mode="python", exclude_none=False)
+        for model in model_list
+    ]
+
+    # Sequential processing (n_workers=1 or small dataset)
+    if n_workers == 1 or len(model_list) < 100:
+        cleaned_models = []
+        for i, data in enumerate(model_data_list, 1):
+            log_if_verbose(f"[strip_phrases] Processing model {i}/{len(model_list)}", 3)
+            processed = _strip_single_model(data, phrase_map)
+            cleaned = model_class.model_validate(processed)
+            cleaned_models.append(cleaned)
+        return cleaned_models
+
+    # Parallel processing - resolve optimal worker count
+    n_workers = get_optimal_workers(n_workers)
+
+    # Don't use more workers than items
+    n_workers = min(n_workers, len(model_list))
+
+    # Split into chunks (one per worker)
+    chunk_size = (len(model_data_list) + n_workers - 1) // n_workers
+    chunks = []
+    for i in range(0, len(model_data_list), chunk_size):
+        chunk = model_data_list[i:i + chunk_size]
+        chunks.append((len(chunks), chunk))
+
+    logger.info(f"Parallel stripping: {len(model_list)} items across {n_workers} workers ({len(chunks)} chunks)")
+
+    # Process in parallel
+    results = {}
+    with ProcessPoolExecutor(
+        max_workers=n_workers,
+        initializer=_worker_init,
+        initargs=(phrase_map, model_class_name)
+    ) as executor:
+        futures = {
+            executor.submit(_worker_process_chunk, chunk): chunk[0]
+            for chunk in chunks
+        }
+
+        for future in as_completed(futures):
+            chunk_idx, processed_data = future.result()
+            results[chunk_idx] = processed_data
+
+    # Reassemble in original order
     cleaned_models = []
-    i = 1
-    for model in model_list:
-        data = model.model_dump(mode="python", exclude_none=False)
-        tiny_id = data.get("tinyId")
-        i += 1
-        log_message = f"[strip_phrases] Iterating over models. Model {i}"
-        log_if_verbose(log_message, 3)
-        for path, phrase, replace_with, allowed_ids in phrase_map:
-            if allowed_ids is not None and tiny_id not in allowed_ids:
-                continue
-            log_message = f"changing path: {path} phrase {phrase}"
-            # print(f"\n\n____{tiny_id}_____")
-            # print(f"____{allowed_ids}_____")
-            log_if_verbose(log_message, 3)
-            traverse_and_replace_phrase(data, path, phrase, replace_with)
-            # delete_phrase_at_path(data, path, phrase)
-        cleaned = model.__class__.model_validate(data)
-        cleaned_models.append(cleaned)
+    for chunk_idx in range(len(chunks)):
+        processed_data_list = results[chunk_idx]
+        for data in processed_data_list:
+            cleaned = model_class.model_validate(data)
+            cleaned_models.append(cleaned)
+
     return cleaned_models

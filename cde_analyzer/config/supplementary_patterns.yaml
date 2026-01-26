@@ -1,0 +1,194 @@
+# Supplementary Instrument Patterns
+#
+# Patterns for instruments that don't match the standard Title Case regex.
+# The main InstrumentExtractor requires 60%+ Title Case words and 3+ words,
+# which misses many valid instruments with non-standard naming.
+#
+# Format:
+#   - pattern: "text to match after anchor prefix"
+#     name: "Canonical instrument name"
+#     acronym: "ACRONYM"  # optional
+#
+# Anchors are automatically prepended: "as part of", "based on", "field of"
+# with optional "the " following.
+#
+# To add new patterns:
+#   1. Find the exact text in CDE definitions (case matters for matching)
+#   2. Add entry here with pattern, name, and optional acronym
+#   3. Re-run discovery to verify pattern is captured
+
+# =============================================================================
+# Abbreviation-only patterns with trailing context
+# These are patterns like "(RFQ-U) for Pesticides" where the instrument name
+# is primarily an abbreviation with descriptive suffix
+# =============================================================================
+abbreviation_with_context:
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticides (Work)"
+    name: "Risk Factor Questionnaire - Pesticides Work"
+    acronym: "RFQ-U"
+
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticide (Work)"
+    name: "Risk Factor Questionnaire - Pesticide Work"
+    acronym: "RFQ-U"
+
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticides (Home)"
+    name: "Risk Factor Questionnaire - Pesticides Home"
+    acronym: "RFQ-U"
+
+# =============================================================================
+# Animal behavioral tests
+# Tests with lowercase "test" suffix that fail Title Case validation
+# =============================================================================
+animal_behavioral_tests:
+  - pattern: "Beam Walk (BW) test"
+    name: "Beam Walk Test"
+    acronym: "BW"
+
+  - pattern: "Social interaction/resident intruder test"
+    name: "Social Interaction/Resident Intruder Test"
+
+  - pattern: "Partition test"
+    name: "Partition Test"
+
+  - pattern: "Rotor rod test"
+    name: "Rotor Rod Test"
+
+  - pattern: "Incline plane test"
+    name: "Incline Plane Test"
+
+  - pattern: "String test (ST)"
+    name: "String Test"
+    acronym: "ST"
+
+  - pattern: "Tube dominance test"
+    name: "Tube Dominance Test"
+
+  - pattern: "Righting reflex recovery test"
+    name: "Righting Reflex Recovery Test"
+
+# =============================================================================
+# Animal/injury models
+# Models with lowercase "model" suffix
+# =============================================================================
+injury_models:
+  - pattern: "Blast exposure model"
+    name: "Blast Exposure Model"
+
+  - pattern: "injury model"
+    name: "Injury Model"
+
+  - pattern: "ABS injury model"
+    name: "ABS Injury Model"
+
+  - pattern: "Penetrating ballistic-like brain injury (PBBI) model"
+    name: "Penetrating Ballistic-Like Brain Injury Model"
+    acronym: "PBBI"
+
+  - pattern: "blast induced injury model"
+    name: "Blast Induced Injury Model"
+
+  - pattern: "preclinical injury model CDE set"
+    name: "Preclinical Injury Model CDE Set"
+
+# =============================================================================
+# Questionnaires/scales with non-standard casing
+# =============================================================================
+questionnaires:
+  - pattern: "DePaul Symptom Questionnaire (DSQ)"
+    name: "DePaul Symptom Questionnaire"
+    acronym: "DSQ"
+
+  - pattern: "Neuroseverity score (NSS)"
+    name: "Neuroseverity Score"
+    acronym: "NSS"
+
+  - pattern: "MNA form"
+    name: "Mini Nutritional Assessment Form"
+    acronym: "MNA"
+
+  - pattern: "BQ form"
+    name: "BQ Form"
+    acronym: "BQ"
+
+  - pattern: "FPI"
+    name: "Fluid Percussion Injury"
+    acronym: "FPI"
+
+  - pattern: "PROMIS Anxiety"
+    name: "PROMIS Anxiety"
+
+  - pattern: "STOP Questionnaire (STOP)"
+    name: "STOP Questionnaire"
+    acronym: "STOP"
+
+  - pattern: "PIMS Questionnaire"
+    name: "PIMS Questionnaire"
+    acronym: "PIMS"
+
+  - pattern: "SCS-PD questionnaire"
+    name: "SCS-PD Questionnaire"
+    acronym: "SCS-PD"
+
+# =============================================================================
+# Neuro-QOL sub-scales
+# These are valid instruments that appear with lowercase prefix patterns
+# =============================================================================
+neuroqol_subscales:
+  - pattern: "Neuro-QOL Stigma"
+    name: "Neuro-QOL Stigma"
+
+  - pattern: "Neuro-QOL Anxiety"
+    name: "Neuro-QOL Anxiety"
+
+  - pattern: "Neuro-QOL Communication"
+    name: "Neuro-QOL Communication"
+
+  - pattern: "Neuro-QOL Depression"
+    name: "Neuro-QOL Depression"
+
+# =============================================================================
+# Specific assessments
+# =============================================================================
+specific_assessments:
+  - pattern: "U.S. Household Food Security Survey Module: Six-Item Short Form Economic Research Service"
+    name: "US Household Food Security Survey Module"
+
+  - pattern: "Vestibular/Ocular Motor Screening Test"
+    name: "Vestibular/Ocular Motor Screening Test"
+    acronym: "VOMS"
+
+  - pattern: "Timed 25-Foot Walk (T25FW)"
+    name: "Timed 25-Foot Walk"
+    acronym: "T25FW"
+
+  - pattern: "Face, Legs, Activity, Cry, Consolability scale (FLACC)"
+    name: "FLACC Scale"
+    acronym: "FLACC"
+
+  - pattern: "Return to Play case report form"
+    name: "Return to Play Case Report Form"
+
+  - pattern: "Cylinder Test"
+    name: "Cylinder Test"
+
+  - pattern: "Beighton Score"
+    name: "Beighton Score"
+
+  - pattern: "Gas Exchange"
+    name: "Gas Exchange"
+
+  - pattern: "atherosclerosis small-vessel disease cardiac pathology other cause dissection (ASCOD) system"
+    name: "ASCOD System"
+    acronym: "ASCOD"
+
+  - pattern: "NIH Toolbox"
+    name: "NIH Toolbox"
+
+# =============================================================================
+# Version variants
+# Patterns with version numbers that may be missed
+# =============================================================================
+version_variants:
+  - pattern: "version 1.0 of 36-item Short Form Health Survey (SF-36)"
+    name: "36-Item Short Form Health Survey Version 1.0"
+    acronym: "SF-36"

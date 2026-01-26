@@ -7,7 +7,7 @@ description_text = "Count pydantic model fields that satisify certain conditions
 
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", help="Input JSON file.")
+    subparser.add_argument("--input", "-i", required=True, help="Input JSON file.")
     subparser.add_argument("--fields", nargs="+", required=True)
     subparser.add_argument(
         "--match-type",

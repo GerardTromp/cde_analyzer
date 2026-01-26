@@ -2,6 +2,7 @@ import csv
 import json
 from typing import Any, Dict, List, Union
 from utils.logger import log_if_verbose
+from utils.file_utils import require_file
 
 
 id_columnname_mapping = {
@@ -25,7 +26,12 @@ def load_tinyids(path: str) -> List[str]:
 
     Should extract a generic function from this and call a special version with the mapped
     identifiers. Then the function could work for an ID with any name and any set of mappings
+
+    Raises:
+        FileNotFoundError: If the file does not exist
     """
+    require_file(path, "ID file")
+
     if path.endswith(".json"):
         with open(path, encoding="utf-8") as f:
             return json.load(f)["tinyId"]

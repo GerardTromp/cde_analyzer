@@ -6,11 +6,12 @@ import logging
 from argparse import Namespace
 from logic.phrase_extractor import collect_all_phrase_occurrences
 from utils.output_writer import phrase_write_output
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
-# This needs to change to import the MODEL_REGISTRY 
+# This needs to change to import the MODEL_REGISTRY
 # The run_action needs to be updated to a conditional based on the mode choice
 # from pydantic import parse_file_as
-from CDE_Schema import CDEItem  # type: ignore 
+from CDE_Schema import CDEItem  # type: ignore
 
 
 help_text = "Extract common phrases from CDEs (Forms not implemented yet)."
@@ -18,9 +19,11 @@ description_text = "Extract frequent phrases, verbatim or lemmatized, from desig
 
 logger = logging.getLogger(__name__)
 
+@graceful_interrupt
 def run_action(args: Namespace):
     # verbosity = get_verbosity()
-    raw = json.load(open(args.input))
+    input_path = exit_if_missing(args.input, "Input file")
+    raw = json.load(open(input_path))
     items = [CDEItem.model_validate(obj) for obj in raw]
 
     logger.info(f"arguments: {args}")

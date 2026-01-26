@@ -13,6 +13,7 @@ are implemented in separate utility modules.
 
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Optional, Set, Tuple
 from collections import defaultdict
 
@@ -98,11 +99,16 @@ class MinerConfig:
     skip_anchor: bool = True    # Defer to future enhancement
     use_aho_corasick: bool = True  # Use Aho-Corasick for masking (faster)
     generate_histograms: bool = False
+    histogram_output_dir: Optional[Path] = None  # Directory for histogram output
     # Instrument extraction (pre-processing)
     extract_instruments: bool = False  # Extract "as part of <Instrument>" patterns
     min_instrument_words: int = 3      # Minimum words in instrument name
+    extract_abbreviation_only: bool = False  # Second pass: extract "as part of (ACRONYM)" patterns
+    extract_supplementary: bool = False  # Third pass: extract non-Title-Case instruments
     # Pre-loaded instrument patterns for masking (from curated list)
     instrument_patterns: Optional[Set[str]] = None  # Patterns to pre-mask before k-mer mining
+    # Context-aware masking (Option D): uses instrument names with context detection
+    context_aware_masking: bool = False  # If True, use context-aware masking instead of exact patterns
 
 
 def mine_phrases(items: List[CDEItem], config: MinerConfig):
@@ -133,6 +139,13 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
     all_phrases = []
     phrase_id_counter = 0
 
+    # Initialize histogram collector if enabled
+    histogram_collector = None
+    if config.generate_histograms and config.histogram_output_dir:
+        from utils.histogram_generator import HistogramCollector
+        histogram_collector = HistogramCollector(config.histogram_output_dir)
+        logger.info("Histogram generation enabled")
+
     # Stage 2: Iterative descending k-mer mining
     for k in range(config.k_max, config.k_min - 1, -1):
         logger.info(f"Processing k={k}")
@@ -143,6 +156,11 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
 
         if not kmer_counts:
             continue
+
+        # Collect histogram data (tinyid counts before min_tinyids filter)
+        if histogram_collector:
+            tinyid_counts = [len(kc.tinyids) for kc in kmer_counts]
+            histogram_collector.add_kmer_counts(k, tinyid_counts)
 
         # Stage 3: De Bruijn graph extension
         if not config.skip_debruijn:
@@ -178,6 +196,12 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
     # filtered_phrases = subsumption_filter(all_phrases)
     # logger.info(f"After subsumption filter: {len(filtered_phrases)} phrases (removed {len(all_phrases) - len(filtered_phrases)})")
 
+    # Stage 8: Generate histograms if enabled
+    if histogram_collector:
+        histogram_collector.generate_histograms(
+            min_tinyids_threshold=config.min_distinct_tinyids
+        )
+
     logger.info(f"Total phrases detected: {len(all_phrases)}")
     return all_phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog
 
@@ -191,9 +215,13 @@ def extract_instruments_only(items: List[CDEItem], config: MinerConfig):
     2. User curates instruments_verbatim.tsv (remove false positives)
     3. Phase 2: Run full phrase mining with curated instrument list for pre-masking
 
+    Optionally performs a second pass to extract abbreviation-only references
+    like "as part of (PHQ-9)" using known acronyms from the first pass.
+
     Args:
         items: List of CDEItem objects to process
-        config: Mining configuration (uses extract_instruments, min_instrument_words)
+        config: Mining configuration (uses extract_instruments, min_instrument_words,
+                extract_abbreviation_only)
 
     Returns:
         InstrumentCatalog with detected instrument patterns (or None if disabled)
@@ -204,12 +232,16 @@ def extract_instruments_only(items: List[CDEItem], config: MinerConfig):
     extractor = InstrumentExtractor(min_name_words=config.min_instrument_words)
     catalog = InstrumentCatalog()
 
+    # Store text spans for potential second pass
+    text_spans_by_item = []
+
     for item in items:
         if not item.tinyId:
             continue
 
         # Extract text spans from specified fields
         text_spans = extract_field_texts(item, config.field_names)
+        text_spans_by_item.append((item, text_spans))
 
         for field_path, text in text_spans:
             # Tokenize to get character offsets (needed for token span computation)
@@ -230,6 +262,74 @@ def extract_instruments_only(items: List[CDEItem], config: MinerConfig):
     n_instruments = len(catalog.instruments)
     n_matches = sum(len(m) for m in catalog.instruments.values())
     logger.info(f"Extracted {n_instruments} distinct instruments ({n_matches} total matches)")
+
+    # Second pass: extract abbreviation-only patterns
+    if config.extract_abbreviation_only:
+        # Build acronym -> canonical name mapping from first pass
+        acronym_map = catalog.get_acronym_to_name_map()
+        logger.info(f"Built acronym map with {len(acronym_map)} known acronyms for second pass")
+
+        abbrev_count = 0
+        for item, text_spans in text_spans_by_item:
+            if not item.tinyId:
+                continue
+
+            for field_path, text in text_spans:
+                # Tokenize to get character offsets
+                tokens_with_pos = tokenize_text_with_positions(text)
+                if not tokens_with_pos:
+                    continue
+
+                char_offsets = [t[1] for t in tokens_with_pos]
+
+                # Extract abbreviation-only patterns
+                matches = extractor.extract_abbreviation_only(
+                    text,
+                    known_acronyms=acronym_map,
+                    tinyId=item.tinyId,
+                    field_path=field_path
+                )
+                # Compute token spans
+                matches = extractor.compute_token_spans(matches, char_offsets)
+
+                for match in matches:
+                    catalog.add(match)
+                    abbrev_count += 1
+
+        if abbrev_count > 0:
+            logger.info(f"Second pass: extracted {abbrev_count} abbreviation-only instrument references")
+
+    # Third pass: extract supplementary patterns (non-Title-Case instruments)
+    if config.extract_supplementary:
+        logger.debug("Starting third pass: supplementary pattern extraction")
+        supp_count = 0
+        for item, text_spans in text_spans_by_item:
+            if not item.tinyId:
+                continue
+
+            for field_path, text in text_spans:
+                # Tokenize to get character offsets
+                tokens_with_pos = tokenize_text_with_positions(text)
+                if not tokens_with_pos:
+                    continue
+
+                char_offsets = [t[1] for t in tokens_with_pos]
+
+                # Extract supplementary patterns
+                matches = extractor.extract_supplementary_patterns(
+                    text,
+                    tinyId=item.tinyId,
+                    field_path=field_path
+                )
+                # Compute token spans
+                matches = extractor.compute_token_spans(matches, char_offsets)
+
+                for match in matches:
+                    catalog.add(match)
+                    supp_count += 1
+
+        if supp_count > 0:
+            logger.info(f"Third pass: extracted {supp_count} supplementary pattern references")
 
     return catalog
 
@@ -301,6 +401,9 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
             tokens_lower = [t.lower() for t in original_tokens]
 
             # Lemmatize if configured
+            # Track index mapping for instrument token span translation
+            old_to_new_index = None  # Maps original token index to post-stopword index
+
             if config.lemmatize:
                 lemmas = make_lemma(tokens_lower, config.remove_stopwords, STOPWORDS)
 
@@ -311,6 +414,12 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
                     # Re-align: filter original_tokens and char_offsets to match lemmas
                     stopwords_lower = {s.lower() for s in STOPWORDS}
                     kept_indices = [i for i, t in enumerate(tokens_lower) if t not in stopwords_lower]
+
+                    # Build mapping from old indices to new indices for token span translation
+                    old_to_new_index = {}
+                    for new_idx, old_idx in enumerate(kept_indices):
+                        old_to_new_index[old_idx] = new_idx
+
                     original_tokens = [original_tokens[i] for i in kept_indices]
                     char_offsets = [char_offsets[i] for i in kept_indices]
 
@@ -343,41 +452,89 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
             if instrument_matches:
                 for match in instrument_matches:
                     if match.token_span:
-                        start, end = match.token_span
+                        old_start, old_end = match.token_span
                         instrument_key = f"__INSTRUMENT__:{match.instrument_name}"
-                        for i in range(start, min(end, len(mask_owner))):
-                            mask_owner[i] = instrument_key
+
+                        # Translate token span if stopwords were removed
+                        if old_to_new_index is not None:
+                            # Map old indices to new indices (skip indices that were removed)
+                            new_start = None
+                            new_end = None
+                            for old_idx in range(old_start, old_end):
+                                if old_idx in old_to_new_index:
+                                    new_idx = old_to_new_index[old_idx]
+                                    if new_start is None:
+                                        new_start = new_idx
+                                    new_end = new_idx + 1
+
+                            if new_start is not None and new_end is not None:
+                                for i in range(new_start, min(new_end, len(mask_owner))):
+                                    mask_owner[i] = instrument_key
+                        else:
+                            # No stopword removal - use original indices
+                            for i in range(old_start, min(old_end, len(mask_owner))):
+                                mask_owner[i] = instrument_key
 
             # Pre-mask curated instrument patterns from --instrument-list
-            # These are verbatim strings to find and mask in the original text
+            # Two modes: exact pattern matching (default) or context-aware (Option D)
             if config.instrument_patterns:
-                text_lower = text.lower()
-                for pattern in config.instrument_patterns:
-                    pattern_lower = pattern.lower()
-                    # Find all occurrences of the pattern in the text
-                    start_pos = 0
-                    while True:
-                        idx = text_lower.find(pattern_lower, start_pos)
-                        if idx == -1:
-                            break
-                        pattern_end = idx + len(pattern)
-                        # Find token range that overlaps with this character range
-                        # char_offsets contains (start, end) for each token
-                        token_start = None
-                        token_end = None
-                        for ti, (cs, ce) in enumerate(char_offsets):
-                            # Token overlaps if it starts before pattern ends AND ends after pattern starts
-                            if cs < pattern_end and ce > idx:
-                                if token_start is None:
-                                    token_start = ti
-                                token_end = ti + 1
-                        # Mask the token range
-                        if token_start is not None and token_end is not None:
-                            mask_key = f"__CURATED_INSTRUMENT__:{pattern[:50]}"
-                            for i in range(token_start, min(token_end, len(mask_owner))):
-                                if mask_owner[i] is None:  # Don't overwrite existing masks
-                                    mask_owner[i] = mask_key
-                        start_pos = idx + 1  # Continue searching for more occurrences
+                if config.context_aware_masking:
+                    # Option D: Context-aware masking
+                    # Uses instrument names extracted from patterns + context phrase detection
+                    from utils.context_aware_masking import (
+                        extract_instrument_names_from_patterns,
+                        compute_context_aware_mask_ranges
+                    )
+
+                    # Extract instrument names from patterns (cached after first call)
+                    if not hasattr(config, '_instrument_names_cache'):
+                        config._instrument_names_cache = extract_instrument_names_from_patterns(
+                            config.instrument_patterns
+                        )
+                        logger.info(f"Context-aware masking: {len(config._instrument_names_cache)} instrument names extracted")
+
+                    # Compute mask ranges using context-aware matching
+                    mask_ranges = compute_context_aware_mask_ranges(
+                        text,
+                        char_offsets,
+                        config._instrument_names_cache,
+                        old_to_new_index
+                    )
+
+                    # Apply masks
+                    for token_start, token_end, mask_key in mask_ranges:
+                        for i in range(token_start, min(token_end, len(mask_owner))):
+                            if mask_owner[i] is None:  # Don't overwrite existing masks
+                                mask_owner[i] = mask_key
+                else:
+                    # Original exact pattern matching (Option A or no expansion)
+                    text_lower = text.lower()
+                    for pattern in config.instrument_patterns:
+                        pattern_lower = pattern.lower()
+                        # Find all occurrences of the pattern in the text
+                        start_pos = 0
+                        while True:
+                            idx = text_lower.find(pattern_lower, start_pos)
+                            if idx == -1:
+                                break
+                            pattern_end = idx + len(pattern)
+                            # Find token range that overlaps with this character range
+                            # char_offsets contains (start, end) for each token
+                            token_start = None
+                            token_end = None
+                            for ti, (cs, ce) in enumerate(char_offsets):
+                                # Token overlaps if it starts before pattern ends AND ends after pattern starts
+                                if cs < pattern_end and ce > idx:
+                                    if token_start is None:
+                                        token_start = ti
+                                    token_end = ti + 1
+                            # Mask the token range
+                            if token_start is not None and token_end is not None:
+                                mask_key = f"__CURATED_INSTRUMENT__:{pattern[:50]}"
+                                for i in range(token_start, min(token_end, len(mask_owner))):
+                                    if mask_owner[i] is None:  # Don't overwrite existing masks
+                                        mask_owner[i] = mask_key
+                            start_pos = idx + 1  # Continue searching for more occurrences
 
             token_seqs.append(TokenSeq(
                 tokens=token_ids,

@@ -44,6 +44,11 @@ ACTION_REGISTRY = {
         "help": "Remove literal phrases at given paths",
         "description": "Literal search-and-replace on structured data",
     },
+    "strip_discover": {
+        "module": "actions.strip_discover.cli",
+        "help": "Discover instrument patterns in CDE text fields",
+        "description": "Flexible regex discovery for pattern curation workflow",
+    },
     "lemma_fasta": {
         "module": "actions.lemma_fasta.cli",
         "help": "Create FASTA from lemma sequences",
@@ -68,6 +73,11 @@ ACTION_REGISTRY = {
         "module": "actions.llm_classify.cli",
         "help": "Classify phrases using multi-LLM queries",
         "description": "Agentic LLM-based classification for phrase curation",
+    },
+    "diagnose_strip": {
+        "module": "actions.diagnose_strip.cli",
+        "help": "Diagnose remaining anchor patterns after stripping",
+        "description": "Analyze cleaned JSON for iterative stripping improvement",
     },
     # "depth": {...}
     # "quality": {...}
@@ -144,11 +154,18 @@ def main():
                 f"Action module {args._module_path} failed to set args.func in register_subparser()"
             )
 
-        # Run the action
-        args.func(args)
+        # Run the action and return its exit code
+        result = args.func(args)
+        return result if result is not None else 0
     else:
         parser.print_help()
+        return 0
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Graceful exit on Ctrl-C without stack trace
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)  # Standard exit code for SIGINT

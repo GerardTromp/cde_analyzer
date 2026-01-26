@@ -1,17 +1,33 @@
 #
-# File: actions/extract_embed/cli.py
+# File: actions/strip_phrases/cli.py
 #
-from argparse import ArgumentParser, BooleanOptionalAction
+"""
+Strip Phrases - Remove curated phrases from CDE text fields.
+
+Supports two input modes:
+1. Discovered patterns (--patterns): TSV from strip_discover with pattern, tinyIds columns
+2. Legacy phrase map (--phrases): JSON/CSV/TSV with path, phrase, replace, tinyIds columns
+
+Workflow:
+1. Run strip_discover to find patterns in CDE data
+2. Curator reviews/edits discovered patterns
+3. Run strip_phrases with --patterns to apply substitutions
+
+Example:
+  cde_analyzer strip_phrases -i input.json -m CDE -o output.json --patterns discovered.tsv
+"""
+from argparse import ArgumentParser
 from utils.constants import MODEL_REGISTRY
 from .run import run_action
 
+help_text = "Remove curated phrases from specific paths in CDE records"
+description_text = __doc__
+
+
 def register_subparser(subparser: ArgumentParser):
-    # parser = subparsers.add_parser(
-    #     "strip_phrases",
-    #     help="Remove curated phrases from specific paths in a JSON document.",
-    # )
+    # Required: input and output
     subparser.add_argument(
-        "--input", "-i", required=True, help="Path to input JSON file."
+        "--input", "-i", required=True, help="Path to input JSON file (CDE records)."
     )
     subparser.add_argument(
         "--model",
@@ -21,18 +37,63 @@ def register_subparser(subparser: ArgumentParser):
         help="Top-level Pydantic model name for parsing the input JSON.",
     )
     subparser.add_argument(
-        "--phrases",
+        "--output", "-o", required=True, help="Path to output JSON file (cleaned records)."
+    )
+
+    # Pattern source: either --patterns OR --phrases (mutually exclusive)
+    phrase_source = subparser.add_mutually_exclusive_group(required=True)
+    phrase_source.add_argument(
+        "--patterns",
         "-p",
-        required=True,
-        help="Path to phrases file (JSON, CSV, or TSV).",
+        help="Path to discovered patterns TSV (from strip_discover). "
+             "Format: pattern<TAB>tinyIds<TAB>type<TAB>source_pattern. "
+             "Column matching is case-insensitive.",
+    )
+    phrase_source.add_argument(
+        "--phrases",
+        help="Path to legacy phrase map file (JSON, CSV, or TSV) with columns: "
+             "path, phrase, replace, tinyIds.",
+    )
+
+    # Processing options
+    subparser.add_argument(
+        "--fields", "-f",
+        nargs="+",
+        default=["definitions.*.definition", "designations.*.designation"],
+        help="Field paths to strip phrases from "
+             "(default: definitions.*.definition designations.*.designation)",
     )
     subparser.add_argument(
-        "--output", "-o", required=True, help="Path to output JSON file."
+        "--sort-order",
+        choices=["length", "file", "alpha"],
+        default="length",
+        help="Pattern processing order: 'length' (longest-first, default), "
+             "'file' (preserve TSV file order for curator control), "
+             "'alpha' (alphabetical for reproducibility).",
     )
-    # subparser.add_argument(
-    #     "-t", "--tids", required=True, help="Path to JSON file with list of tids."
-    # )
-    # This should be moved to post-processing. Inefficient and memory hungry
+
+    # Parallelization
+    subparser.add_argument(
+        "--workers", "-w",
+        type=int,
+        default=1,
+        help="Number of parallel workers for phrase stripping. "
+             "Use 0 for auto-detect with headroom (n-1 CPUs for ≤10 cores, n-2 for >10). "
+             "Use 1 for sequential (default). "
+             "Positive values override to use exactly N workers.",
+    )
+
+    # Diagnostics
+    subparser.add_argument(
+        "--trace-matching",
+        type=str,
+        metavar="FILE",
+        help="Write detailed matching trace to FILE. "
+             "Logs each pattern match with tinyId, pattern length, and pattern text. "
+             "Useful for debugging ordering issues or unexpected orphan phrases.",
+    )
+
+    # Diff output options
     subparser.add_argument(
         "--diff",
         "-d",
@@ -46,7 +107,7 @@ def register_subparser(subparser: ArgumentParser):
         "--color", "-c", action="store_true", help="Colorize diff output."
     )
     subparser.add_argument(
-        "--summary", action="store_true", help="Show a summary of lines changed lines."
+        "--summary", action="store_true", help="Show a summary of changed lines."
     )
     subparser.add_argument(
         "--context",
@@ -55,7 +116,5 @@ def register_subparser(subparser: ArgumentParser):
         default=3,
         help="Number of context lines before and after changes.",
     )
-    subparser.set_defaults(
-        _runner="actions.strip_phrases.run"
-    )
+
     subparser.set_defaults(func=run_action)

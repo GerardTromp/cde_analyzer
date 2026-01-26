@@ -6,6 +6,7 @@ import sys
 import logging
 from utils.tinyid_utils import load_tinyids
 from utils.constants import MODEL_REGISTRY
+from utils.file_utils import exit_if_missing, graceful_interrupt
 from logic.extract_embed import extract_path
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 models_str = ", ".join(MODEL_REGISTRY.keys())
 
+@graceful_interrupt
 def run_action(args):
     if (args.id_list or args.id_file) and args.id_type is None:
         print(
@@ -36,7 +38,8 @@ def run_action(args):
     else:
         idlist = []
 
-    raw = json.load(open(args.input))
+    input_path = exit_if_missing(args.input, "Input file")
+    raw = json.load(open(input_path))
     # ModelType = TypeVar(MODEL_REGISTRY[args.model], bound=BaseModel)
     model_class = MODEL_REGISTRY[args.model]
 

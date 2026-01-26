@@ -11,7 +11,7 @@ description_text = "Clean and normalize string fields containing HTML in structu
 
 def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
-        "--input", nargs="+", help="Input JSON file that has underscore tags fixed."
+        "--input", "-i", nargs="+", required=True, help="Input JSON file that has underscore tags fixed."
     )
     # subparser.add_argument(
     #     "--output", help="Path, including filename, to store results."

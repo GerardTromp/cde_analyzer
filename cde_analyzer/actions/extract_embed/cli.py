@@ -16,7 +16,7 @@ The subset of fields is specified in a file (--path-file) as a set of
 """
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", help="Input JSON file.")
+    subparser.add_argument("--input", "-i", required=True, help="Input JSON file.")
 #    ids = subparser.add_mutually_exclusive_group()
     subparser.add_argument(
         "--id-list",

@@ -36,11 +36,14 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- MILESTONE: False-negative reduction complete (500 → 46 patterns, 91% reduction)
+- Split strip_phrases into strip_discover + strip_phrases (separation of concerns)
+- Config-based supplementary patterns (`config/supplementary_patterns.yaml`)
+- False-negative analysis and supplementary import modes in strip_discover
 - Enhanced Instrument Detection with family grouping (two-tier ID system)
 - LLM classify action implementation (commit 10b7f13, 7344e83)
 - Multi-provider support: Claude, OpenAI, Gemini
 - Comprehensive MkDocs documentation
-- Launcher fixes post lazy-load refactoring (commits 4e601c7, 57b9437)
 
 **Major Refactoring** (Dec 2024, commit 4400bf7):
 - Converted to max-lazy loading architecture
@@ -57,11 +60,13 @@ The `cde_analyzer` wrapper script accepts action arguments:
 4. **phrase_miner** - Advanced k-mer phrase mining with iterative descent
 5. **count** - Count structural elements and field occurrences
 6. **extract_embed** - Extract fields for transformer model embedding
-7. **strip_phrases** - Remove literal phrases at specified paths
-8. **lemma_fasta** - Create FASTA format from lemma sequences
-9. **phrase_builder** - Incremental phrase construction
-10. **subset** - Extract subsets using literal/regex/tinyID filters
-11. **llm_classify** - Multi-LLM phrase classification with confidence aggregation (NEW)
+7. **strip_phrases** - Remove literal phrases at specified paths (substitution only)
+8. **strip_discover** - Discover instrument patterns in CDE text fields (discovery phase)
+9. **diagnose_strip** - Diagnose remaining patterns after stripping (NEW)
+10. **lemma_fasta** - Create FASTA format from lemma sequences
+11. **phrase_builder** - Incremental phrase construction
+12. **subset** - Extract subsets using literal/regex/tinyID filters
+13. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
 
 **Usage**: `cde_analyzer <action> [arguments]`
 
@@ -114,7 +119,56 @@ cde_analyzer llm_classify --adjudicate-instruments instruments.tsv --adjudicate-
 
 **Documentation**: See [docs/llm/](docs/llm/) for comprehensive guide.
 
+### strip_discover / strip_phrases Workflow
+Two-phase pattern stripping with curator review point:
+
+**Phase 1: Discovery** (`strip_discover`)
+```bash
+cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv \
+    --pattern-list instruments.tsv --expand-variants --discover-bare-names
+```
+- Loads patterns from TSV file
+- Applies flexible regex matching to find verbatim occurrences
+- Outputs TSV with columns: `pattern`, `tinyIds`, `type`, `source_pattern`
+- Supports `--analyze-conflicts` for ordering diagnostics
+- Supports `--merge-patterns` to deduplicate curated files
+- Supports `--use-expected-tinyids` for filtered discovery
+- Supports `--discover-fails` for failure logging
+
+**Phase 2: Substitution** (`strip_phrases`)
+```bash
+cde_analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
+    --patterns discovered.tsv --trace-matching trace.tsv
+```
+- Reads curator-reviewed patterns TSV
+- Applies exact string replacement (longest-first by default)
+- Supports parallel processing (`--workers`)
+- Supports legacy phrase map format (`--phrases`)
+
+**False-Negative Analysis** (iterative improvement):
+```bash
+cde_analyzer strip_discover -i cleaned.json -o false_negatives.tsv --analyze-false-negatives
+```
+- Analyzes remaining "as part of" patterns after stripping
+- Outputs curated TSV with suggested canonical names
+- Review and set `include` column to 'yes' for patterns to add
+
+**Supplementary Pattern Import**:
+```bash
+cde_analyzer strip_discover --add-to-supplementary curated.tsv
+```
+- Imports curated patterns to `config/supplementary_patterns.yaml`
+- Re-run phrase_miner with `--extract-supplementary` to pick up new patterns
+
 ## Key Technical Notes
+
+### Python Environment (WSL)
+The project uses a Unix-style Python virtual environment. To run commands from Windows, use WSL:
+```bash
+wsl -d Ubuntu-22.04 -- bash -c "cd /mnt/d/GT/Professional/NLM_CDE/clone_git/cde-clustering/cde_analyzer && source /mnt/d/GT/Professional/NLM_CDE/cde_python/py313_base/bin/activate && python cde_analyzer.py <action> [args]"
+```
+- Venv location: `/mnt/d/GT/Professional/NLM_CDE/cde_python/py313_base/`
+- Has `bin/` directory (Unix-style), not `Scripts/` (Windows-style)
 
 ### Legacy Code
 Files in `utils/` with `kmer_*` prefix are **legacy experimental code** for phrase detection:
@@ -130,12 +184,16 @@ Current phrase detection uses:
 - `logic/phrase_anchor_extend.py` (anchor-based extension)
 - `logic/llm_classifier.py` (LLM-based classification via `llm_classify` action)
 - `logic/instrument_family_assigner.py` (instrument family assignment orchestration)
+- `logic/verbatim_discoverer.py` (pattern discovery for strip_discover)
 - `utils/phrase_extraction.py` (shared tokenization utilities)
 - `utils/verbatim_tracker.py` (verbatim text recovery)
 - `utils/subsumption_filter.py` (redundant phrase removal)
 - `utils/aho_corasick_token.py` (efficient pattern matching)
 - `utils/instrument_extractor.py` (instrument pattern extraction)
 - `utils/instrument_family_patterns.py` (family detection regex patterns)
+- `utils/flexible_pattern_matcher.py` (flexible regex for discovery)
+- `utils/pattern_variant_generator.py` (spelling/punctuation variants)
+- `utils/config_loader.py` (YAML config loading for supplementary patterns)
 - `utils/llm/` (LLM provider infrastructure)
 - `utils/query_modules/` (classification query modules including instrument_family)
 

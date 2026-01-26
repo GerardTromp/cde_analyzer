@@ -16,7 +16,7 @@ Usage:
 
 import re
 from typing import Tuple, Optional, List, Dict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -25,6 +25,7 @@ class FamilyPattern:
     family_id: str
     display_name: str
     patterns: List[re.Pattern]
+    acronym_patterns: List[re.Pattern] = field(default_factory=list)  # Patterns for acronym field
     confidence: float = 1.0  # Base confidence when pattern matches
 
 
@@ -46,7 +47,11 @@ FAMILY_PATTERNS: List[FamilyPattern] = [
         display_name="PROMIS",
         patterns=[
             re.compile(r'\bpromis\b', re.IGNORECASE),
-            re.compile(r'\bpatient[\-\s]?reported[\-\s]?outcomes[\-\s]?measurement[\-\s]?information[\-\s]?system\b', re.IGNORECASE),
+            # "outcome" (singular) as used in data, "outcomes" (plural) as sometimes written
+            re.compile(r'\bpatient[\-\s]?reported[\-\s]?outcome[s]?[\-\s]?measurement[\-\s]?information[\-\s]?system\b', re.IGNORECASE),
+        ],
+        acronym_patterns=[
+            re.compile(r'^PROMIS$', re.IGNORECASE),
         ],
         confidence=1.0,
     ),
@@ -67,6 +72,9 @@ FAMILY_PATTERNS: List[FamilyPattern] = [
             re.compile(r'\bsf[\-\s]?(?:36|12|8|6)\b', re.IGNORECASE),
             re.compile(r'\bshort[\-\s]?form.*health\s+survey\b', re.IGNORECASE),
             re.compile(r'\b\d+[\-\s]?item\s+short[\-\s]?form\b', re.IGNORECASE),
+        ],
+        acronym_patterns=[
+            re.compile(r'^SF[\-]?(?:36|12|8|6)$', re.IGNORECASE),
         ],
         confidence=1.0,
     ),
@@ -152,7 +160,110 @@ FAMILY_PATTERNS: List[FamilyPattern] = [
         ],
         confidence=1.0,
     ),
+    FamilyPattern(
+        family_id="nih-toolbox",
+        display_name="NIH Toolbox",
+        patterns=[
+            re.compile(r'\bnih\s+toolbox\b', re.IGNORECASE),
+            re.compile(r'\bnihtoolbox\b', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    # Quality of Life scales - disease-specific
+    FamilyPattern(
+        family_id="swal-qol",
+        display_name="SWAL-QOL",
+        patterns=[
+            re.compile(r'\bswal[\-\s]?qol\b', re.IGNORECASE),
+            re.compile(r'\bquality\s+of\s+life\s+in\s+swallowing\s+disorders?\b', re.IGNORECASE),
+        ],
+        acronym_patterns=[
+            re.compile(r'^SWAL[\-]?QOL$', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    FamilyPattern(
+        family_id="ms-qol",
+        display_name="MS-QOL",
+        patterns=[
+            re.compile(r'\bms[\-\s]?qol\b', re.IGNORECASE),
+            re.compile(r'\bmultiple\s+sclerosis\s+quality\s+of\s+life\b', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    FamilyPattern(
+        family_id="ss-qol",
+        display_name="SS-QOL",
+        patterns=[
+            re.compile(r'\bss[\-\s]?qol\b', re.IGNORECASE),
+            re.compile(r'\bstroke\s+specific\s+quality\s+of\s+life\b', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    # Gambling and addiction instruments
+    FamilyPattern(
+        family_id="sogs",
+        display_name="SOGS",
+        patterns=[
+            re.compile(r'\bsogs\b', re.IGNORECASE),
+            re.compile(r'\bsouth\s+oaks?\s+gambling\s+screen\b', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    # Visual functioning
+    FamilyPattern(
+        family_id="nei-vfq",
+        display_name="NEI-VFQ",
+        patterns=[
+            re.compile(r'\bnei[\-\s]?vfq\b', re.IGNORECASE),
+            re.compile(r'\bnational\s+eye\s+institute\s+visual\s+functioning\b', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
 ]
+
+
+# Hierarchical family prefixes for subinstrument extraction
+# Maps family_id to regex pattern matching the family prefix to strip
+# The remainder after the prefix is the subinstrument name
+HIERARCHICAL_FAMILY_PREFIXES: Dict[str, re.Pattern] = {
+    "neuro-qol": re.compile(r'^neuro[\-\s]?qol\s+', re.IGNORECASE),
+    "promis": re.compile(r'^promis\s+', re.IGNORECASE),
+    "nih-toolbox": re.compile(r'^nih\s+toolbox\s+', re.IGNORECASE),
+    "mds-updrs": re.compile(r'^(?:mds[\-\s]?updrs|unified\s+parkinson[\'s]*\s+disease\s+rating\s+scale)\s+', re.IGNORECASE),
+}
+
+
+def extract_subinstrument(instrument_name: str, family_id: str) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Extract subinstrument name and ID from a hierarchical instrument name.
+
+    For families like PROMIS, NIH Toolbox, Neuro-QOL that have multiple subscales,
+    extracts the subscale/subinstrument portion after the family prefix.
+
+    Args:
+        instrument_name: Full instrument name (e.g., "PROMIS Pain Interference")
+        family_id: Detected family ID
+
+    Returns:
+        Tuple of (subinstrument_name, subinstrument_id) or (None, None) if not hierarchical
+    """
+    prefix_pattern = HIERARCHICAL_FAMILY_PREFIXES.get(family_id)
+    if not prefix_pattern:
+        return None, None
+
+    # Remove the family prefix to get subinstrument name
+    subinstrument_name = prefix_pattern.sub('', instrument_name).strip()
+
+    if not subinstrument_name or subinstrument_name.lower() == instrument_name.lower():
+        # No subinstrument found or it's the same as the full name
+        return None, None
+
+    # Generate subinstrument_id slug
+    subinstrument_id = re.sub(r'[^a-z0-9\s]', '', subinstrument_name.lower())
+    subinstrument_id = '-'.join(subinstrument_id.split())
+
+    return subinstrument_name, subinstrument_id
 
 
 # False positive patterns - text that looks like instruments but isn't
@@ -228,6 +339,7 @@ class InstrumentFamilyDetector:
         self,
         instrument_name: str,
         full_match: Optional[str] = None,
+        acronym: Optional[str] = None,
     ) -> Tuple[str, str, float]:
         """
         Detect the family for an instrument name.
@@ -235,23 +347,43 @@ class InstrumentFamilyDetector:
         Args:
             instrument_name: Extracted instrument name (Title Case)
             full_match: Optional full matched text for false positive checking
+            acronym: Optional acronym (e.g., "SF-36") to check against acronym patterns
 
         Returns:
             Tuple of (family_id, display_name, confidence)
         """
-        # Check for false positives in full match
-        if full_match and self.is_false_positive(full_match):
-            return ("unknown", "Unknown", 0.0)
-
-        # Try each family pattern
+        # First, try to match by name patterns
+        matched_family = None
         for family_pattern in self._patterns:
             for pattern in family_pattern.patterns:
                 if pattern.search(instrument_name):
-                    return (
-                        family_pattern.family_id,
-                        family_pattern.display_name,
-                        family_pattern.confidence,
-                    )
+                    matched_family = family_pattern
+                    break
+            if matched_family:
+                break
+
+        # If no name match, try acronym patterns
+        if not matched_family and acronym:
+            for family_pattern in self._patterns:
+                for pattern in family_pattern.acronym_patterns:
+                    if pattern.search(acronym):
+                        matched_family = family_pattern
+                        break
+                if matched_family:
+                    break
+
+        # If we found a family match, return it (overrides false positive check)
+        if matched_family:
+            return (
+                matched_family.family_id,
+                matched_family.display_name,
+                matched_family.confidence,
+            )
+
+        # No family match - check for false positives in full match
+        # (only applies to unrecognized instruments)
+        if full_match and self.is_false_positive(full_match):
+            return ("unknown", "Unknown", 0.0)
 
         # No pattern matched - mark as "other" with lower confidence
         # These may be valid instruments but unrecognized families
@@ -262,6 +394,7 @@ class InstrumentFamilyDetector:
         instrument_name: str,
         full_match: Optional[str] = None,
         acronym: Optional[str] = None,
+        instrument_number: Optional[int] = None,
     ) -> Dict:
         """
         Detect family and generate full identification.
@@ -269,18 +402,29 @@ class InstrumentFamilyDetector:
         Args:
             instrument_name: Extracted instrument name
             full_match: Optional full matched text
-            acronym: Optional acronym (e.g., "SF-36")
+            acronym: Optional acronym (e.g., "SF-36") - also used for family detection
+            instrument_number: Optional sequential number for instrument_id generation
 
         Returns:
             Dict with family_id, family_display_name, instrument_id,
-            family_confidence, identification_method, needs_review
+            family_confidence, identification_method, needs_review,
+            subinstrument_name, subinstrument_id
         """
         family_id, display_name, confidence = self.detect_family(
-            instrument_name, full_match
+            instrument_name, full_match, acronym
         )
 
-        # Generate instrument_id
-        instrument_id = generate_instrument_id(instrument_name, family_id)
+        # Generate instrument_id (sequential format if number provided)
+        if instrument_number is not None:
+            instrument_id = f"instrument_{instrument_number:04d}"
+        else:
+            # Fallback to slug-based ID (deprecated)
+            instrument_id = generate_instrument_id(instrument_name, family_id)
+
+        # Extract subinstrument for hierarchical families
+        subinstrument_name, subinstrument_id = extract_subinstrument(
+            instrument_name, family_id
+        )
 
         # Flag for review if below threshold
         needs_review = confidence < self.confidence_threshold
@@ -292,6 +436,8 @@ class InstrumentFamilyDetector:
             "family_confidence": confidence,
             "identification_method": "pattern",
             "needs_review": needs_review,
+            "subinstrument_name": subinstrument_name,
+            "subinstrument_id": subinstrument_id,
         }
 
     def get_family_info(self, family_id: str) -> Optional[FamilyPattern]:

@@ -8,13 +8,16 @@ from utils.helpers import (
     export_results_csv,
     export_results_tsv,
 )
+from utils.file_utils import exit_if_missing, graceful_interrupt
 from argparse import ArgumentParser
 from CDE_Schema import CDEItem
 
 logger = logging.getLogger(__name__)
 
+@graceful_interrupt
 def run_action(args):
-    raw = json.load(open(args.input))
+    input_path = exit_if_missing(args.input, "Input file")
+    raw = json.load(open(input_path))
     items = [CDEItem.model_validate(obj) for obj in raw]
 
     results = count_matching_fields(

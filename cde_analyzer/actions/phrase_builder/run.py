@@ -11,10 +11,12 @@ from argparse import Namespace
 from datetime import datetime
 
 from utils.logger import logging
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
 
 logger = logging.getLogger(__name__)
 
+@graceful_interrupt
 def run_action(args: Namespace):
     # Lazy imports - heavy dependencies loaded only when action runs
     import pandas as pd  # type: ignore
@@ -28,7 +30,8 @@ def run_action(args: Namespace):
     k_list = [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
     model_class = MODEL_REGISTRY[args.model]
 
-    with open(args.input, encoding="utf-8") as f:
+    input_path = exit_if_missing(args.input, "Input file")
+    with open(input_path, encoding="utf-8") as f:
         data = json.load(f)
     
     ## 

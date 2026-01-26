@@ -8,7 +8,7 @@ description_text = "Pydantic reserves keys beginning with an underscore as priva
 
 def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
-        "--input", help="Full path, including name, of input JSON file."
+        "--input", "-i", required=True, help="Full path, including name, of input JSON file."
     )
     subparser.add_argument(
         "--output", help="Full path, including name, of output JSON file."

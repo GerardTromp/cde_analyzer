@@ -9,7 +9,7 @@ help_text = "Extract common phrases from CDEs (Forms, not implemented yet)"
 description_text = "Extract frequent phrases, verbatim or lemmatized, from designatted fields in CDE model classes"
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", "-i", help="Input JSON file")
+    subparser.add_argument("--input", "-i", required=True, help="Input JSON file")
     subparser.add_argument(
         "--fields",
         "-f",

@@ -30,7 +30,7 @@ Multiple files are generated so that the output name must be a stem/prefix.
 """
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", help="Input JSON file.")
+    subparser.add_argument("--input", "-i", required=True, help="Input JSON file.")
     ids = subparser.add_mutually_exclusive_group()
     ids.add_argument(
         "--id-list",

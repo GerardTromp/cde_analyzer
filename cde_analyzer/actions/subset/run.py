@@ -9,6 +9,7 @@ import sys
 import logging
 from argparse import Namespace
 
+from utils.file_utils import graceful_interrupt
 from utils.tinyid_utils import load_tinyids
 from utils.constants import MODEL_REGISTRY
 from logic.subset import subset_by_tinyids, write_subset_output
@@ -16,6 +17,7 @@ from logic.subset import subset_by_tinyids, write_subset_output
 logger = logging.getLogger(__name__)
 
 
+@graceful_interrupt
 def run_action(args: Namespace):
     """
     Subset CDE records by tinyId list.

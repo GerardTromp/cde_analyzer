@@ -7,17 +7,26 @@ from pathlib import Path
 from typing import List, Optional, Set
 
 from CDE_Schema.CDE_Item import CDEItem
+from utils.file_utils import graceful_interrupt
 
 logger = logging.getLogger(__name__)
 
 
-def load_instrument_list(spec: str) -> Set[str]:
+def load_instrument_list(
+    spec: str,
+    expand_variants: bool = False,
+    include_name_only: bool = True
+) -> Set[str]:
     """
     Load instrument patterns from a TSV file for pre-masking.
 
     Args:
         spec: File specification in format 'filename' or 'filename,column_name'.
               If column_name is omitted, defaults to 'full_match'.
+        expand_variants: If True, generate spelling/punctuation variants for better matching.
+                        Handles spacing around parentheses, trailing punctuation, prefix variations.
+        include_name_only: When expanding variants, also include bare instrument names
+                          without 'as part of' prefix for broader matching.
 
     Returns:
         Set of pattern strings to mask during tokenization.
@@ -65,10 +74,22 @@ def load_instrument_list(spec: str) -> Set[str]:
                 if pattern:
                     patterns.add(pattern)
 
-    logger.info(f"Loaded {len(patterns)} instrument patterns from {filepath} (column: {column_name})")
+    logger.info(f"Loaded {len(patterns)} base instrument patterns from {filepath} (column: {column_name})")
+
+    # Optionally expand variants (Option A)
+    if expand_variants:
+        from utils.pattern_variant_generator import expand_pattern_set
+        patterns = expand_pattern_set(
+            patterns,
+            include_name_only=include_name_only,
+            collect_acronyms=True
+        )
+        logger.info(f"Expanded to {len(patterns)} patterns with variants")
+
     return patterns
 
 
+@graceful_interrupt
 def run_action(args: Namespace):
     """
     Main entry point for phrase_miner action.
@@ -114,6 +135,8 @@ def run_action(args: Namespace):
     # Instrument extraction: disabled by default, enabled with --extract-instruments
     extract_instruments = getattr(args, 'extract_instruments', False)
     min_instrument_words = getattr(args, 'min_instrument_words', 3)
+    extract_abbreviation_only = getattr(args, 'extract_abbreviation_only', False)
+    extract_supplementary = getattr(args, 'extract_supplementary', False)
 
     # Phase 1 mode: instruments only, skip phrase mining outputs
     instruments_only = getattr(args, 'instruments_only', False)
@@ -123,8 +146,49 @@ def run_action(args: Namespace):
     # Load curated instrument list for pre-masking (Phase 2)
     instrument_patterns = None
     instrument_list_spec = getattr(args, 'instrument_list', None)
+    expand_variants = getattr(args, 'expand_variants', False)
+    include_name_only = getattr(args, 'include_name_only', True)
+
     if instrument_list_spec:
-        instrument_patterns = load_instrument_list(instrument_list_spec)
+        try:
+            instrument_patterns = load_instrument_list(
+                instrument_list_spec,
+                expand_variants=expand_variants,
+                include_name_only=include_name_only
+            )
+        except FileNotFoundError as e:
+            logger.error(f"Instrument list error: {e}")
+            raise SystemExit(1)
+        except ValueError as e:
+            logger.error(f"Instrument list error: {e}")
+            raise SystemExit(1)
+
+    # Load additional instrument lists (e.g., curated 2-word instruments)
+    additional_lists = getattr(args, 'additional_instrument_lists', None)
+    if additional_lists:
+        if instrument_patterns is None:
+            instrument_patterns = set()
+        for spec in additional_lists:
+            try:
+                additional_patterns = load_instrument_list(
+                    spec,
+                    expand_variants=expand_variants,
+                    include_name_only=include_name_only
+                )
+                logger.info(f"Merging {len(additional_patterns)} patterns from {spec}")
+                instrument_patterns.update(additional_patterns)
+            except FileNotFoundError as e:
+                logger.error(f"Additional instrument list error: {e}")
+                raise SystemExit(1)
+            except ValueError as e:
+                logger.error(f"Additional instrument list error: {e}")
+                raise SystemExit(1)
+
+    # Histogram output directory (only set if histograms enabled)
+    histogram_output_dir = Path(args.output_dir) if args.histograms else None
+
+    # Context-aware masking (Option D)
+    context_aware_masking = getattr(args, 'context_aware_masking', False)
 
     config = MinerConfig(
         k_max=args.k_max,
@@ -138,9 +202,13 @@ def run_action(args: Namespace):
         skip_anchor=skip_anchor,
         use_aho_corasick=use_aho_corasick,
         generate_histograms=args.histograms,
+        histogram_output_dir=histogram_output_dir,
         extract_instruments=extract_instruments,
         min_instrument_words=min_instrument_words,
+        extract_abbreviation_only=extract_abbreviation_only,
+        extract_supplementary=extract_supplementary,
         instrument_patterns=instrument_patterns,
+        context_aware_masking=context_aware_masking,
     )
 
     # Log configuration
@@ -149,12 +217,15 @@ def run_action(args: Namespace):
     if instruments_only:
         logger.info("Phase 1 mode: extracting instruments only (phrase outputs disabled)")
     if instrument_patterns:
-        logger.info(f"Pre-masking {len(instrument_patterns)} instrument patterns from curated list")
+        masking_mode = "context-aware (Option D)" if context_aware_masking else "exact pattern (Option A)"
+        logger.info(f"Pre-masking {len(instrument_patterns)} instrument patterns using {masking_mode}")
     logger.info(f"Features: debruijn={'enabled' if not skip_debruijn else 'disabled'}, "
                 f"aho_corasick={'enabled' if use_aho_corasick else 'disabled'}, "
                 f"subsumption={'enabled' if enable_subsumption else 'disabled'}, "
                 f"anchor={'enabled' if not skip_anchor else 'disabled'}, "
-                f"instruments={'enabled' if extract_instruments else 'disabled'}")
+                f"instrument_extract={'enabled' if extract_instruments else 'disabled'}, "
+                f"abbrev_only={'enabled' if extract_abbreviation_only else 'disabled'}, "
+                f"supplementary={'enabled' if extract_supplementary else 'disabled'}")
 
     # 3. Execute pipeline
     if instruments_only:
@@ -208,7 +279,7 @@ def run_action(args: Namespace):
         else:
             logger.warning("No instruments extracted. Check input data contains 'as part of' patterns.")
 
-        return  # Skip phrase mining
+        return 0  # Skip phrase mining
 
     # Phase 2 (normal): full phrase mining pipeline
     logger.info("Starting phrase mining pipeline...")
@@ -300,6 +371,40 @@ def run_action(args: Namespace):
     verbatim_count = sum(1 for p in phrases for occ in p.occurrences if occ.verbatim_text)
     logger.info(f"Results written to {output_dir}")
     logger.info(f"Occurrences with verbatim text: {verbatim_count}")
+
+    # Optional phrase family analysis (post-mining analysis of non-instrument phrases)
+    analyze_phrase_families = getattr(args, 'analyze_phrase_families', False)
+    if analyze_phrase_families:
+        from logic.phrase_family_analyzer import (
+            analyze_phrase_families as run_family_analysis,
+            FamilyAnalysisConfig
+        )
+
+        logger.info("Analyzing phrase families using prefix/suffix patterns...")
+
+        config = FamilyAnalysisConfig(
+            min_prefix_words=getattr(args, 'min_prefix_words', 2),
+            min_suffix_words=getattr(args, 'min_suffix_words', 1),
+            min_family_size=getattr(args, 'min_family_size', 3),
+            max_families=getattr(args, 'max_families', 100),
+            include_prefixes=True,
+            include_suffixes=True
+        )
+
+        verbatim_tsv = output_dir / "verbatim_phrases.tsv"
+        if verbatim_tsv.exists():
+            families = run_family_analysis(
+                str(verbatim_tsv),
+                str(output_dir),
+                config
+            )
+            logger.info(f"Phrase family analysis: {len(families)} families discovered")
+            logger.info(f"  - phrase_families.tsv: Family summaries")
+            logger.info(f"  - phrase_family_members.tsv: Detailed membership")
+        else:
+            logger.warning(f"Cannot analyze phrase families: {verbatim_tsv} not found")
+
+    return 0
 
 
 def write_phrases_tsv(phrases: List, path: Path, vocab):

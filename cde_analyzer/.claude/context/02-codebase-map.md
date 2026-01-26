@@ -15,6 +15,9 @@ cde_analyzer/
 ├── .vscode/                   # VSCode configuration
 ├── __pycache__/              # Python bytecode cache
 │
+├── config/                   # Configuration files (YAML)
+│   └── supplementary_patterns.yaml  # Non-Title-Case instrument patterns (195 lines, 27+ patterns)
+│
 ├── CDE_Schema/               # Pydantic data models
 │   ├── __init__.py
 │   ├── CDE_Item.py          # CDEItem model (42 lines)
@@ -61,10 +64,16 @@ cde_analyzer/
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
+│   ├── strip_discover/      # Discover instrument patterns (NEW)
+│   │   ├── cli.py           # Discovery CLI options (216 lines, multiple modes)
+│   │   └── run.py           # Discovery logic (692 lines, 5 modes)
 │   ├── strip_phrases/       # Remove literal phrases
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
+│   ├── diagnose_strip/      # Diagnose remaining patterns (NEW)
+│   │   ├── cli.py           # Diagnostic CLI options
+│   │   └── run.py           # Diagnostic logic
 │   └── subset/              # Extract data subsets
 │       ├── __init__.py
 │       ├── cli.py
@@ -98,7 +107,9 @@ cde_analyzer/
 │   ├── phrase_builder.py    # Phrase construction logic
 │   ├── phrase_extractor.py  # Phrase detection logic (original)
 │   ├── phrase_miner.py      # Core k-mer mining algorithm (~430 lines)
-│   └── phrase_stripper.py   # Phrase removal logic
+│   ├── phrase_stripper.py   # Phrase removal logic
+│   ├── verbatim_discoverer.py # Verbatim pattern discovery (~300 lines)
+│   └── phrase_family_analyzer.py # Phrase family analysis
 │
 ├── scripts/                  # Utility scripts
 │   └── export_help_docs.py  # Help documentation generator
@@ -131,6 +142,12 @@ cde_analyzer/
 │   │
 │   ├── analyzer_state.py    # Global state (verbosity) (459 bytes)
 │   ├── cde_impexport.py     # JSON import/export (2.0 KB)
+│   ├── config_loader.py     # YAML config loader with caching (~110 lines)
+│   ├── flexible_pattern_matcher.py # Flexible regex pattern matching (~400 lines)
+│   ├── pattern_variant_generator.py # Spelling/punctuation variants (~200 lines)
+│   ├── file_utils.py         # File utilities
+│   ├── histogram_generator.py # Histogram generation
+│   ├── context_aware_masking.py # Context-aware masking
 │   ├── constants.py         # Constants (542 bytes)
 │   ├── datatype_check.py    # Type validation (1.4 KB)
 │   ├── designation_parser.py # Designation parsing (1.5 KB)
