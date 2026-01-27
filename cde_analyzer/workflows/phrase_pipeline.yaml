@@ -1,0 +1,82 @@
+# Workflow: Generic Phrase Mining & Stripping (Phase 2)
+#
+# Executes the generic phrase detection and stripping pipeline:
+# 1. Mine phrases from instrument-stripped JSON
+# 2. Discover verbatim occurrences with variants
+# 3. Coalesce redundant patterns
+# 4. [CHECKPOINT] Human curator review
+# 5. Strip patterns from CDE JSON
+#
+# Prerequisites:
+#   - Run instrument_pipeline.yaml first to get inst_stripped.json
+#
+# Usage:
+#   cde_analyzer workflow run workflows/phrase_pipeline.yaml \
+#       --set input_json=/path/to/inst_stripped.json \
+#       --set output_dir=/path/to/phase2_output
+
+name: phrase_stripping
+description: Phase 2 - Mine and strip generic phrases from instrument-stripped CDE records
+
+variables:
+  # Input: usually output from Phase 1
+  input_json: "${PHRASE_INPUT:-inst_stripped.json}"
+  output_dir: "${OUTPUT_DIR:-./phase2_output}"
+
+  # Intermediate files
+  phrases_tsv: "${output_dir}/verbatim_phrases.tsv"
+  discovered_tsv: "${output_dir}/discovered.tsv"
+  coalesced_tsv: "${output_dir}/coalesced.tsv"
+  coalesce_report: "${output_dir}/coalesce_report.tsv"
+  curated_tsv: "${output_dir}/curated.tsv"
+  stripped_json: "${output_dir}/final_stripped.json"
+
+steps:
+  - name: mine_phrases
+    action: phrase_miner
+    args:
+      input: "${input_json}"
+      output: "${output_dir}/"
+      enable_subsumption: true
+
+  - name: discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${phrases_tsv}"
+      expand_variants: true
+
+  - name: coalesce_patterns
+    action: strip_discover
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+
+  - name: curator_review
+    checkpoint: true
+    message: |
+      Phrase pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (patterns to strip)
+        - ${coalesce_report} (subsumption details)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives (accidental phrase matches)
+        3. Verify coverage is complete
+        4. Save as ${curated_tsv}
+
+      When ready, resume with:
+        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  - name: strip_phrases
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${curated_tsv}"

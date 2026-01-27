@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from CDE_Schema.CDE_Item import CDEItem
-from utils.file_utils import graceful_interrupt
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +25,9 @@ def run_action(args: Namespace):
     from logic.phrase_miner import extract_instruments_only, MinerConfig
 
     # 1. Load data
-    logger.info(f"Loading data from {args.input}")
-    with open(args.input, 'r', encoding='utf-8') as f:
+    input_path = exit_if_missing(args.input, "Input file")
+    logger.info(f"Loading data from {input_path}")
+    with open(input_path, 'r', encoding='utf-8') as f:
         raw = json.load(f)
 
     items = [CDEItem.model_validate(obj) for obj in raw]

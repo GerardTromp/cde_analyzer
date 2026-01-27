@@ -89,6 +89,11 @@ ACTION_REGISTRY = {
         "help": "Diagnose remaining anchor patterns after stripping",
         "description": "Analyze cleaned JSON for iterative stripping improvement",
     },
+    "workflow": {
+        "module": "actions.workflow.cli",
+        "help": "YAML-based workflow orchestrator for CDE analysis pipelines",
+        "description": "Execute sequential workflows with checkpoints and resume capability",
+    },
     # "depth": {...}
     # "quality": {...}
 }

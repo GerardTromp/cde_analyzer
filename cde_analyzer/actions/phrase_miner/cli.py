@@ -18,10 +18,15 @@ Implemented features:
 """
 
 from argparse import ArgumentParser, BooleanOptionalAction
-from .run import run_action
 
 help_text = "Iterative phrase mining using descending k-mers and masking"
 description_text = __doc__
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 
 
 def register_subparser(subparser: ArgumentParser):
@@ -165,4 +170,8 @@ def register_subparser(subparser: ArgumentParser):
     )
 
     # Set defaults
-    subparser.set_defaults(func=run_action)
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

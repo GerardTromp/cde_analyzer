@@ -34,10 +34,15 @@ Where:
 """
 from argparse import ArgumentParser
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
 
 help_text = "Discover instrument patterns in CDE text fields"
 description_text = __doc__
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 
 
 def register_subparser(subparser: ArgumentParser):
@@ -85,9 +90,10 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--expand-variants",
         action="store_true",
-        help="Generate spelling/punctuation variants for better matching. "
-             "Handles: spacing around parentheses, trailing punctuation, "
-             "prefix variations, possessive forms (Parkinson/Parkinson's).",
+        help="Generate spelling/punctuation/number variants for better matching. "
+             "Handles: spacing around parentheses, trailing punctuation (including ' - ', ': '), "
+             "prefix variations, possessive forms (Parkinson/Parkinson's), "
+             "and number words (7/seven, 30/thirty for temporal phrases).",
     )
     subparser.add_argument(
         "--include-name-only",
@@ -213,4 +219,39 @@ def register_subparser(subparser: ArgumentParser):
         help="Column name for tinyIds in merge mode (default: 'tinyIds').",
     )
 
-    subparser.set_defaults(func=run_action)
+    # Coalesce utility (tinyId-aware subsumption)
+    subparser.add_argument(
+        "--coalesce-variants",
+        type=str,
+        metavar="FILE",
+        help="Coalesce mode: remove shorter patterns subsumed by longer ones. "
+             "A pattern is subsumed if it's a substring of longer pattern(s) AND "
+             "its tinyIds are covered by the union of those longer patterns' tinyIds. "
+             "Example: 'in the past 7 days' is subsumed by 'in the past 7 days:' and "
+             "'in the past 7 days - ' if all tinyIds are covered. "
+             "Writes coalesced patterns to --output.",
+    )
+    subparser.add_argument(
+        "--coalesce-report",
+        type=str,
+        metavar="FILE",
+        help="Write subsumption report showing which patterns were removed and why.",
+    )
+
+    # Abbreviation discovery mode
+    subparser.add_argument(
+        "--discover-abbreviations",
+        type=str,
+        metavar="FILE",
+        help="Discovery mode: extract abbreviations from instruments.tsv or instrument_families.tsv, "
+             "then scan --input JSON for designation patterns using those abbreviations. "
+             "Finds patterns like '[PROMIS]' (bracketed suffix) and 'PROMIS - ' (hyphen prefix). "
+             "These patterns are often missed by k-mer mining due to short length or variant forms. "
+             "Requires --input (CDE JSON) and --output (TSV). The --model flag is optional.",
+    )
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

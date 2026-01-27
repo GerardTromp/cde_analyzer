@@ -8,6 +8,7 @@ Applies exact string replacement using pre-discovered patterns
 from strip_discover or legacy phrase map files.
 """
 import json
+import re
 from argparse import Namespace
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
@@ -51,7 +52,7 @@ def find_column_index(headers: List[str], column_name: str) -> int:
 
 
 def load_discovered_patterns(
-    filepath: str,
+    spec: str,
     pattern_column: str = "pattern",
     tinyids_column: str = "tinyIds"
 ) -> List[Tuple[str, Optional[Set[str]]]]:
@@ -59,9 +60,13 @@ def load_discovered_patterns(
     Load discovered patterns from TSV file (output of strip_discover).
 
     Args:
-        filepath: Path to discovered patterns TSV file.
-        pattern_column: Column name for patterns (default: 'pattern').
-        tinyids_column: Column name for tinyIds (default: 'tinyIds').
+        spec: File specification in format:
+              - 'filename' (uses 'pattern' column, default tinyIds)
+              - 'filename,column_name' (uses specified pattern column)
+              - 'filename,pattern_column,tinyids_column' (explicit column names)
+              Column matching is case-insensitive.
+        pattern_column: Default column name for patterns (default: 'pattern').
+        tinyids_column: Default column name for tinyIds (default: 'tinyIds').
 
     Returns:
         List of (pattern, tinyIds) tuples in file order.
@@ -71,6 +76,20 @@ def load_discovered_patterns(
         FileNotFoundError: If the specified file doesn't exist.
         ValueError: If required columns are not found in the file.
     """
+    # Parse spec: "file.tsv" or "file.tsv,column_name" or "file.tsv,pattern_col,tinyids_col"
+    parts = spec.split(',')
+    if len(parts) == 1:
+        filepath = parts[0]
+    elif len(parts) == 2:
+        filepath = parts[0]
+        pattern_column = parts[1]
+    elif len(parts) >= 3:
+        filepath = parts[0]
+        pattern_column = parts[1]
+        tinyids_column = parts[2]
+    else:
+        filepath = spec
+
     if not Path(filepath).exists():
         raise FileNotFoundError(f"Patterns file not found: {filepath}")
 
@@ -104,16 +123,19 @@ def load_discovered_patterns(
             if pattern_idx >= len(fields):
                 continue
 
-            pattern = fields[pattern_idx].strip()
+            # Strip Excel's auto-added quotes around fields containing commas
+            pattern = fields[pattern_idx].strip().strip('"')
             if not pattern:
                 continue
 
             # Parse tinyIds if column exists
+            # Support both space-separated and pipe-separated formats (or mixed)
             tinyids = None
             if tinyids_idx is not None and tinyids_idx < len(fields):
-                tinyids_str = fields[tinyids_idx].strip()
+                tinyids_str = fields[tinyids_idx].strip().strip('"')
                 if tinyids_str:
-                    tinyids = set(tinyids_str.split())
+                    # Split on whitespace or pipe, filter empty strings
+                    tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
 
             patterns_list.append((pattern, tinyids))
 
@@ -199,6 +221,47 @@ def run_action(args: Namespace):
             logger.error(f"Patterns file error: {e}")
             raise SystemExit(1)
 
+        # Diagnostic: summarize what was loaded
+        patterns_with_tinyids = sum(1 for _, tids in patterns if tids is not None)
+        all_tinyids = set()
+        for _, tids in patterns:
+            if tids:
+                all_tinyids.update(tids)
+        logger.info(f"Patterns summary: {len(patterns)} total, {patterns_with_tinyids} with tinyId restrictions")
+        logger.info(f"  Unique tinyIds referenced: {len(all_tinyids)}")
+        if patterns:
+            sample = patterns[0]
+            sample_tids = len(sample[1]) if sample[1] else 0
+            logger.info(f"  First pattern: '{sample[0][:50]}...' ({sample_tids} tinyIds)")
+
+        # Check overlap between input tinyIds and pattern tinyIds
+        input_tinyids = set(p.tinyId for p in parsed if hasattr(p, 'tinyId') and p.tinyId)
+        overlap = all_tinyids & input_tinyids
+        logger.info(f"  Input records: {len(input_tinyids)} unique tinyIds")
+        logger.info(f"  Overlap with patterns: {len(overlap)} tinyIds")
+        if len(overlap) == 0 and len(all_tinyids) > 0:
+            logger.warning("NO OVERLAP: Pattern tinyIds don't match any input records!")
+            logger.warning("  Patterns will not match anything. Consider removing tinyIds column.")
+
+        # Deep diagnostic: sample an overlapping record and check if pattern exists in text
+        if overlap:
+            sample_tid = next(iter(overlap))
+            logger.info(f"  DEBUG: Sampling overlapping tinyId '{sample_tid}'")
+            # Find which pattern(s) reference this tinyId
+            for pattern_text, tids in patterns:
+                if tids and sample_tid in tids:
+                    logger.info(f"    Pattern for this tinyId: '{pattern_text[:60]}'")
+            # Find the record with this tinyId and check its text
+            for p in parsed:
+                if hasattr(p, 'tinyId') and p.tinyId == sample_tid:
+                    # Check definitions
+                    if hasattr(p, 'definitions') and p.definitions:
+                        for d in p.definitions:
+                            if hasattr(d, 'definition') and d.definition:
+                                text_sample = d.definition[:100].replace('\n', ' ')
+                                logger.info(f"    Definition text: '{text_sample}...'")
+                    break
+
         field_paths = getattr(args, 'fields', ["definitions.*.definition", "designations.*.designation"])
         sort_order = getattr(args, 'sort_order', 'length')
         phrase_map = patterns_to_phrase_map(patterns, field_paths, sort_order=sort_order)
@@ -216,6 +279,12 @@ def run_action(args: Namespace):
 
     # Apply phrase stripping
     n_workers = getattr(args, 'workers', 1)
+
+    # Force sequential when trace is enabled (trace file handle not shared across processes)
+    if trace_file and n_workers != 1:
+        logger.warning(f"Trace enabled: forcing sequential processing (workers=1 instead of {n_workers})")
+        n_workers = 1
+
     logger.info(f"Stripping phrases from {len(parsed)} records (workers={n_workers})...")
     cleaned = strip_phrases(parsed, phrase_map, n_workers=n_workers)
     logger.info("Phrase stripping complete")

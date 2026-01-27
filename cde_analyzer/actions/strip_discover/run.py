@@ -8,6 +8,7 @@ Discovers instrument patterns in CDE text fields using flexible regex matching.
 Outputs a TSV file for curator review before stripping.
 """
 import json
+import re
 from argparse import Namespace
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
@@ -110,7 +111,8 @@ def load_pattern_list(
 
             fields = line.split('\t')
             if col_idx < len(fields):
-                pattern = fields[col_idx].strip()
+                # Strip Excel's auto-added quotes around fields containing commas
+                pattern = fields[col_idx].strip().strip('"')
                 if pattern and pattern not in seen:
                     patterns_list.append(pattern)
                     seen.add(pattern)
@@ -209,16 +211,18 @@ def load_pattern_list_with_tinyids(
             if pattern_idx >= len(fields):
                 continue
 
-            pattern = fields[pattern_idx].strip()
+            # Strip Excel's auto-added quotes around fields containing commas
+            pattern = fields[pattern_idx].strip().strip('"')
             if not pattern:
                 continue
 
             # Parse tinyIds if column exists
+            # Support both space-separated and pipe-separated formats (or mixed)
             tinyids = set()
             if tinyids_idx is not None and tinyids_idx < len(fields):
-                tinyids_str = fields[tinyids_idx].strip()
+                tinyids_str = fields[tinyids_idx].strip().strip('"')
                 if tinyids_str:
-                    tinyids = set(tinyids_str.split())
+                    tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
 
             # Add to list (dedup) and update tinyIds mapping
             if pattern not in seen:
@@ -438,6 +442,201 @@ def analyze_false_negatives(
     return dict(counter)
 
 
+def extract_abbreviations_from_instruments(
+    instruments_path: str,
+    families_path: Optional[str] = None
+) -> Set[str]:
+    """
+    Extract unique abbreviations from instruments.tsv and optionally instrument_families.tsv.
+
+    Args:
+        instruments_path: Path to instruments.tsv file.
+        families_path: Optional path to instrument_families.tsv file.
+
+    Returns:
+        Set of unique abbreviation strings.
+    """
+    abbreviations = set()
+
+    # Read instruments.tsv - look for 'acronym' column
+    if Path(instruments_path).exists():
+        with open(instruments_path, encoding="utf-8") as f:
+            header_line = f.readline().strip()
+            headers = [h.lower() for h in header_line.split('\t')]
+
+            # Find acronym column
+            acronym_idx = -1
+            for i, h in enumerate(headers):
+                if h == 'acronym':
+                    acronym_idx = i
+                    break
+
+            if acronym_idx >= 0:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    fields = line.split('\t')
+                    if acronym_idx < len(fields):
+                        acronym = fields[acronym_idx].strip().strip('"')
+                        if acronym and len(acronym) >= 2:
+                            abbreviations.add(acronym)
+
+        logger.info(f"Extracted {len(abbreviations)} abbreviations from {instruments_path}")
+
+    # Read instrument_families.tsv if provided - look for 'all_acronyms' column
+    if families_path and Path(families_path).exists():
+        with open(families_path, encoding="utf-8") as f:
+            header_line = f.readline().strip()
+            headers = [h.lower() for h in header_line.split('\t')]
+
+            # Find all_acronyms column
+            all_acronyms_idx = -1
+            for i, h in enumerate(headers):
+                if h == 'all_acronyms':
+                    all_acronyms_idx = i
+                    break
+
+            if all_acronyms_idx >= 0:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    fields = line.split('\t')
+                    if all_acronyms_idx < len(fields):
+                        acronyms_str = fields[all_acronyms_idx].strip().strip('"')
+                        if acronyms_str:
+                            # Split on pipe or comma
+                            for acronym in re.split(r'[|,]', acronyms_str):
+                                acronym = acronym.strip()
+                                if acronym and len(acronym) >= 2:
+                                    abbreviations.add(acronym)
+
+            logger.info(f"Total abbreviations after families: {len(abbreviations)}")
+
+    return abbreviations
+
+
+def discover_abbreviation_patterns(
+    json_path: str,
+    abbreviations: Set[str],
+    output_path: str,
+    fields: List[str] = None
+) -> Dict[str, Dict]:
+    """
+    Discover designation patterns that use known abbreviations.
+
+    Finds two pattern types:
+    1. [ABBREV] - bracketed suffix (e.g., "[PROMIS]", "[Neuro-QOL]")
+    2. ABBREV -  - hyphen prefix (e.g., "PROMIS - Pain Interference...")
+
+    Args:
+        json_path: Path to CDE JSON file.
+        abbreviations: Set of abbreviations to search for.
+        output_path: Path to write output TSV.
+        fields: Field paths to search (default: designations.*.designation)
+
+    Returns:
+        Dict mapping pattern -> {count, tinyIds, type}
+    """
+    from collections import defaultdict
+
+    if fields is None:
+        fields = ["designations.*.designation"]
+
+    # Build regex patterns
+    abbrev_list = sorted(abbreviations, key=len, reverse=True)  # Longest first
+    abbrev_pattern = '|'.join(re.escape(a) for a in abbrev_list)
+
+    # Pattern 1: [ABBREV] at end or anywhere
+    bracketed_regex = re.compile(rf'\[({abbrev_pattern})\]', re.IGNORECASE)
+
+    # Pattern 2: ABBREV -  at start of string
+    hyphen_regex = re.compile(rf'^({abbrev_pattern})\s+-\s+', re.IGNORECASE)
+
+    # Load JSON
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    # Track discovered patterns
+    bracketed_patterns: Dict[str, Dict] = defaultdict(lambda: {'count': 0, 'tinyIds': set(), 'abbrev': ''})
+    hyphen_patterns: Dict[str, Dict] = defaultdict(lambda: {'count': 0, 'tinyIds': set(), 'abbrev': ''})
+
+    # Scan each record
+    for item in data:
+        tiny_id = item.get('tinyId', '')
+
+        # Check designations
+        for des_item in item.get('designations', []):
+            designation = des_item.get('designation', '')
+            if not designation:
+                continue
+
+            # Check for bracketed pattern
+            match = bracketed_regex.search(designation)
+            if match:
+                bracketed_patterns[designation]['count'] += 1
+                bracketed_patterns[designation]['tinyIds'].add(tiny_id)
+                bracketed_patterns[designation]['abbrev'] = match.group(1)
+
+            # Check for hyphen prefix pattern
+            match = hyphen_regex.match(designation)
+            if match:
+                hyphen_patterns[designation]['count'] += 1
+                hyphen_patterns[designation]['tinyIds'].add(tiny_id)
+                hyphen_patterns[designation]['abbrev'] = match.group(1)
+
+        # Also check definitions if in field list
+        if "definitions.*.definition" in fields:
+            for def_item in item.get('definitions', []):
+                definition = def_item.get('definition', '')
+                if not definition:
+                    continue
+
+                match = bracketed_regex.search(definition)
+                if match:
+                    bracketed_patterns[definition]['count'] += 1
+                    bracketed_patterns[definition]['tinyIds'].add(tiny_id)
+                    bracketed_patterns[definition]['abbrev'] = match.group(1)
+
+                match = hyphen_regex.match(definition)
+                if match:
+                    hyphen_patterns[definition]['count'] += 1
+                    hyphen_patterns[definition]['tinyIds'].add(tiny_id)
+                    hyphen_patterns[definition]['abbrev'] = match.group(1)
+
+    # Write output TSV
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("pattern\ttinyIds\ttype\tabbreviation\tcount\n")
+
+        # Write bracketed patterns (sorted by count descending)
+        for pattern, info in sorted(bracketed_patterns.items(), key=lambda x: -x[1]['count']):
+            tinyids_str = ' '.join(sorted(info['tinyIds']))
+            f.write(f"{pattern}\t{tinyids_str}\t[ABBREV]\t{info['abbrev']}\t{info['count']}\n")
+
+        # Write hyphen patterns (sorted by count descending)
+        for pattern, info in sorted(hyphen_patterns.items(), key=lambda x: -x[1]['count']):
+            tinyids_str = ' '.join(sorted(info['tinyIds']))
+            f.write(f"{pattern}\t{tinyids_str}\tABBREV - \t{info['abbrev']}\t{info['count']}\n")
+
+    # Summary by abbreviation
+    abbrev_summary = defaultdict(lambda: {'bracketed': 0, 'hyphen': 0, 'tinyIds_b': set(), 'tinyIds_h': set()})
+    for pattern, info in bracketed_patterns.items():
+        abbrev_summary[info['abbrev']]['bracketed'] += 1
+        abbrev_summary[info['abbrev']]['tinyIds_b'].update(info['tinyIds'])
+    for pattern, info in hyphen_patterns.items():
+        abbrev_summary[info['abbrev']]['hyphen'] += 1
+        abbrev_summary[info['abbrev']]['tinyIds_h'].update(info['tinyIds'])
+
+    logger.info(f"Wrote {len(bracketed_patterns) + len(hyphen_patterns)} patterns to {output_path}")
+
+    return {
+        'bracketed_patterns': dict(bracketed_patterns),
+        'hyphen_patterns': dict(hyphen_patterns),
+        'abbrev_summary': dict(abbrev_summary)
+    }
+
+
 def add_patterns_to_supplementary(
     curated_tsv_path: str,
     section_name: str = "added_patterns",
@@ -493,16 +692,17 @@ def add_patterns_to_supplementary(
             fields = line.split('\t')
 
             # Check include flag if present
+            # Strip Excel's auto-added quotes around fields containing commas
             if include_idx >= 0 and include_idx < len(fields):
-                include_val = fields[include_idx].strip().lower()
+                include_val = fields[include_idx].strip().strip('"').lower()
                 if include_val not in ('yes', 'y', 'true', '1'):
                     continue
 
             if pattern_idx >= len(fields) or name_idx >= len(fields):
                 continue
 
-            pattern = fields[pattern_idx].strip()
-            name = fields[name_idx].strip()
+            pattern = fields[pattern_idx].strip().strip('"')
+            name = fields[name_idx].strip().strip('"')
 
             if not pattern or not name:
                 continue
@@ -510,7 +710,7 @@ def add_patterns_to_supplementary(
             entry = {'pattern': pattern, 'name': name}
 
             if acronym_idx >= 0 and acronym_idx < len(fields):
-                acronym = fields[acronym_idx].strip()
+                acronym = fields[acronym_idx].strip().strip('"')
                 if acronym:
                     entry['acronym'] = acronym
 
@@ -627,6 +827,113 @@ def run_action(args: Namespace):
         print(f"Output: {stats['output_rows']} unique patterns")
         print(f"Merged: {stats['merged_count']} duplicate patterns")
         print(f"Wrote:  {args.output}")
+        return 0
+
+    # Check for coalesce mode (early exit)
+    coalesce_variants = getattr(args, 'coalesce_variants', None)
+    if coalesce_variants:
+        if not getattr(args, 'output', None):
+            logger.error("--output is required for --coalesce-variants")
+            raise SystemExit(1)
+        from utils.flexible_pattern_matcher import coalesce_variants_tsv
+
+        pattern_column = getattr(args, 'merge_pattern_column', 'pattern')
+        tinyids_column = getattr(args, 'merge_tinyids_column', 'tinyIds')
+        report_path = getattr(args, 'coalesce_report', None)
+
+        logger.info(f"Coalesce mode: removing subsumed patterns from {coalesce_variants}")
+        stats = coalesce_variants_tsv(
+            coalesce_variants,
+            args.output,
+            pattern_column=pattern_column,
+            tinyids_column=tinyids_column,
+            report_path=report_path
+        )
+
+        print(f"\nCoalesce complete:")
+        print(f"  Input:    {stats['input_patterns']} patterns")
+        print(f"  Output:   {stats['output_patterns']} patterns")
+        print(f"  Subsumed: {stats['subsumed_count']} patterns removed")
+        if report_path:
+            print(f"  Report:   {report_path}")
+        print(f"  Wrote:    {args.output}")
+
+        # Show a few examples of subsumptions
+        if stats['subsumptions']:
+            print(f"\nExample subsumptions (showing first 5):")
+            for pattern, covers in stats['subsumptions'][:5]:
+                cover_sample = covers[0][:40] if covers else "?"
+                if len(covers) > 1:
+                    cover_sample += f" (+{len(covers)-1} more)"
+                print(f"  '{pattern[:50]}' ⊂ '{cover_sample}'")
+
+        return 0
+
+    # Check for discover-abbreviations mode (early exit)
+    discover_abbrevs = getattr(args, 'discover_abbreviations', None)
+    if discover_abbrevs:
+        if not getattr(args, 'input', None):
+            logger.error("--input is required for --discover-abbreviations")
+            raise SystemExit(1)
+        if not getattr(args, 'output', None):
+            logger.error("--output is required for --discover-abbreviations")
+            raise SystemExit(1)
+
+        exit_if_missing(discover_abbrevs, "Instruments file")
+        exit_if_missing(args.input, "Input JSON file")
+
+        # Check for families file in same directory
+        instruments_dir = Path(discover_abbrevs).parent
+        families_path = instruments_dir / "instrument_families.tsv"
+        if not families_path.exists():
+            families_path = None
+
+        logger.info(f"Extracting abbreviations from {discover_abbrevs}...")
+        abbreviations = extract_abbreviations_from_instruments(
+            discover_abbrevs,
+            families_path=str(families_path) if families_path else None
+        )
+
+        if not abbreviations:
+            logger.error("No abbreviations found in instruments file")
+            raise SystemExit(1)
+
+        logger.info(f"Scanning {args.input} for abbreviation-based patterns...")
+        field_paths = getattr(args, 'fields', ["designations.*.designation"])
+        results = discover_abbreviation_patterns(
+            args.input,
+            abbreviations,
+            args.output,
+            fields=field_paths
+        )
+
+        # Print summary
+        n_bracketed = len(results['bracketed_patterns'])
+        n_hyphen = len(results['hyphen_patterns'])
+        total = n_bracketed + n_hyphen
+
+        print(f"\nAbbreviation Pattern Discovery:")
+        print(f"=" * 70)
+        print(f"Abbreviations searched: {len(abbreviations)}")
+        print(f"Patterns found:")
+        print(f"  [ABBREV] suffix patterns: {n_bracketed}")
+        print(f"  ABBREV -  prefix patterns: {n_hyphen}")
+        print(f"  Total: {total}")
+
+        # Summary by abbreviation
+        if results['abbrev_summary']:
+            print(f"\nBy abbreviation:")
+            for abbrev, info in sorted(results['abbrev_summary'].items(),
+                                        key=lambda x: -(x[1]['bracketed'] + x[1]['hyphen'])):
+                if info['bracketed'] or info['hyphen']:
+                    tinyids_count = len(info['tinyIds_b'] | info['tinyIds_h'])
+                    print(f"  {abbrev}: [{abbrev}]={info['bracketed']}, {abbrev} - ={info['hyphen']} ({tinyids_count} tinyIds)")
+
+        print(f"\nWrote: {args.output}")
+        print(f"\nTo include these patterns in stripping:")
+        print(f"  1. Review {args.output} and remove false positives")
+        print(f"  2. Merge with your curated instruments.tsv")
+        print(f"  3. Run strip_phrases with the merged pattern list")
         return 0
 
     # Check for analyze-conflicts mode (early exit)

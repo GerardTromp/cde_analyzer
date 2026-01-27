@@ -36,6 +36,9 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- Added `--coalesce-variants` mode for tinyId-aware pattern subsumption
+- Added number word variants (7↔seven) and spaced punctuation variants
+- Fixed tinyId format mismatch (space vs pipe separators) across pipeline
 - MILESTONE: False-negative reduction complete (500 → 46 patterns, 91% reduction)
 - Split strip_phrases into strip_discover + strip_phrases (separation of concerns)
 - Config-based supplementary patterns (`config/supplementary_patterns.yaml`)
@@ -62,11 +65,12 @@ The `cde_analyzer` wrapper script accepts action arguments:
 6. **extract_embed** - Extract fields for transformer model embedding
 7. **strip_phrases** - Remove literal phrases at specified paths (substitution only)
 8. **strip_discover** - Discover instrument patterns in CDE text fields (discovery phase)
-9. **diagnose_strip** - Diagnose remaining patterns after stripping (NEW)
+9. **diagnose_strip** - Diagnose remaining patterns after stripping
 10. **lemma_fasta** - Create FASTA format from lemma sequences
 11. **phrase_builder** - Incremental phrase construction
 12. **subset** - Extract subsets using literal/regex/tinyID filters
 13. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
+14. **workflow** - YAML-based workflow orchestrator with checkpoints (NEW)
 
 **Usage**: `cde_analyzer <action> [arguments]`
 
@@ -159,6 +163,73 @@ cde_analyzer strip_discover --add-to-supplementary curated.tsv
 ```
 - Imports curated patterns to `config/supplementary_patterns.yaml`
 - Re-run phrase_miner with `--extract-supplementary` to pick up new patterns
+
+**Abbreviation Pattern Discovery** (NEW):
+```bash
+cde_analyzer strip_discover --discover-abbreviations instruments.tsv \
+    -i cdes.json -o abbrev_patterns.tsv
+```
+- Extracts abbreviations from instruments.tsv (and instrument_families.tsv if present)
+- Scans input JSON for patterns using those abbreviations:
+  - `[ABBREV]` - bracketed suffix (e.g., `[PROMIS]`, `[NHANES]`)
+  - `ABBREV - ` - hyphen prefix (e.g., `PROMIS - Pain Interference...`)
+- Catches patterns missed by k-mer mining (too short, variant forms)
+- Use after initial instrument mining to catch edge cases
+
+### Workflow Orchestrator (NEW)
+YAML-based pipeline execution with checkpoints for human review:
+
+```bash
+# Run a workflow
+cde_analyzer workflow run workflows/instrument_pipeline.yaml
+
+# Override variables
+cde_analyzer workflow run workflows/instrument_pipeline.yaml \
+    --set input_json=/path/to/cdes.json \
+    --set output_dir=/path/to/output
+
+# Resume after checkpoint
+cde_analyzer workflow resume --state-file ./output/.workflow_state.json
+
+# Check status
+cde_analyzer workflow status
+
+# Preview without executing
+cde_analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
+```
+
+**Features**:
+- Sequential step execution with action chaining
+- Variable resolution: environment → YAML defaults → CLI overrides
+- Checkpoint steps pause for human review
+- State persistence for resume after interruption
+- Dry-run mode for command preview
+
+**Built-in Workflows** (`workflows/` directory):
+- `instrument_pipeline.yaml` - Phase 1: Instrument mining & stripping
+- `phrase_pipeline.yaml` - Phase 2: Generic phrase mining & stripping
+
+**Workflow YAML Format**:
+```yaml
+name: my_workflow
+variables:
+  input_json: "${CDE_INPUT:-cdes.json}"
+  output_dir: "./output"
+steps:
+  - name: mine_instruments
+    action: instrument_miner
+    args:
+      input: "${input_json}"
+      output: "${output_dir}/"
+  - name: curator_review
+    checkpoint: true
+    message: "Review output, then resume"
+  - name: strip_instruments
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      patterns: "${output_dir}/curated.tsv"
+```
 
 ## Key Technical Notes
 
@@ -329,6 +400,11 @@ See [.claude/CHECKPOINT_SYSTEM.md](.claude/CHECKPOINT_SYSTEM.md) for complete do
 6. Standardize CLI argument names (noted inconsistency in README)
 7. Document legacy kmer files explicitly
 8. Enhanced user documentation with examples
+9. **Split strip_discover** - CLI has grown too large (5+ modes). Planned split:
+   - `strip_discover` - Core discovery only (pattern list → verbatim → TSV)
+   - `strip_analyze` - Analysis modes (false-negatives, conflicts, supplementary import)
+   - `pattern_util` - TSV utilities (merge, coalesce) - no CDE input needed
+   - **After split**: Regenerate workflow diagrams in `docs/diagrams/` (see `.claude/sessions/diagram-generation-process.md` for process)
 
 ### Lower Priority
 9. Package for PyPI distribution
@@ -369,4 +445,6 @@ Can easily be extended to support:
 - [README.md](README.md) - User-facing overview
 - [docs/help/](docs/help/) - CLI command reference
 - [docs/llm/](docs/llm/) - LLM classification guide
+- [docs/workflow-diagram.md](docs/workflow-diagram.md) - Pipeline workflow (text)
+- [docs/diagrams/](docs/diagrams/) - SVG workflow diagrams for embedding
 - [.claude/context/](.claude/context/) - Comprehensive context for AI assistance

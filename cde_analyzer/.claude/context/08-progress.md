@@ -8,6 +8,41 @@
 
 ## Recent Work (Last 30 Days)
 
+### Session 2026-01-27: Pattern Variant Enhancements & Coalesce
+
+**Focus**: Number word variants, spaced punctuation, tinyId format fixes, coalesce feature
+
+**Key Accomplishments**:
+- Added number word variant generation for temporal phrases
+  - Bidirectional mapping: "7" ↔ "seven", "30" ↔ "thirty", etc.
+  - Handles common temporal numbers: 1-10, 12, 14, 24, 30, 60, 90
+- Added spaced punctuation variants: " - ", ": ", ", "
+- Fixed critical tinyId format mismatch bug across pipeline
+  - Root cause: strip_discover wrote space-separated, phrase_grouper expected pipe-separated
+  - Fix: All parsers now use `re.split(r'[\s|]+', ...)` for flexible format support
+  - Fixed in: phrase_grouper, phrase_family_analyzer, strip_discover, strip_phrases, flexible_pattern_matcher
+- Added `--coalesce-variants` mode for tinyId-aware pattern subsumption
+  - Removes shorter patterns when covered by longer ones with same tinyIds
+  - Outputs subsumption report showing which patterns were removed
+
+**Files Modified**:
+- `utils/pattern_variant_generator.py` - Number word and spaced punctuation variants
+- `utils/flexible_pattern_matcher.py` - Added `coalesce_variants_tsv()` function
+- `actions/strip_discover/cli.py` - Added `--coalesce-variants`, `--coalesce-report`
+- `actions/strip_discover/run.py` - Added coalesce mode handler
+- `actions/phrase_grouper/run.py` - Fixed tinyIds parsing
+- `logic/phrase_family_analyzer.py` - Fixed tinyIds counting
+- Multiple files - Consistent tinyId parsing with flexible format support
+
+**Planned Work**: Split strip_discover into focused commands
+- `strip_discover` - Core discovery only
+- `strip_analyze` - Analysis modes (false-negatives, conflicts)
+- `pattern_util` - TSV utilities (merge, coalesce)
+
+**Status**: Features implemented, testing pending
+
+---
+
 ### Session 2026-01-26c: Architecture Split & Phrase Grouper
 
 **Focus**: Split phrase_miner into dedicated instrument_miner action, added phrase_grouper for bottom-up family discovery
@@ -458,16 +493,21 @@ All functional and updated for lazy loading
 4. ☐ Test all actions on fresh Python environment
 
 ### Short Term (Medium Priority)
-5. ☐ Merge Repeats → main (after validation)
-6. ☐ Expand test coverage (core modules)
-7. ☐ Standardize CLI argument names
-8. ☐ Document legacy kmer_*.py files
+5. ☐ Test `--coalesce-variants` feature with real data
+6. ☐ Split `strip_discover` into focused commands:
+   - `strip_discover` - Core discovery only
+   - `strip_analyze` - Analysis modes (false-negatives, conflicts, supplementary import)
+   - `pattern_util` - TSV utilities (merge, coalesce)
+7. ☐ Merge Repeats → main (after validation)
+8. ☐ Expand test coverage (core modules)
+9. ☐ Standardize CLI argument names
+10. ☐ Document legacy kmer_*.py files
 
 ### Long Term (Lower Priority)
-9. ☐ Package for PyPI distribution
-10. ☐ Add CI/CD pipeline
-11. ☐ Comprehensive user guide
-12. ☐ Type checking with mypy
+11. ☐ Package for PyPI distribution
+12. ☐ Add CI/CD pipeline
+13. ☐ Comprehensive user guide
+14. ☐ Type checking with mypy
 
 ## Metrics
 

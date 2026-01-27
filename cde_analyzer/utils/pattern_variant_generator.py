@@ -36,6 +36,32 @@ CONTEXT_PREFIXES = [
 # Trailing punctuation that may vary
 TRAILING_PUNCT = ['.', ',', ';', ':']
 
+# Trailing punctuation with spaces (common in temporal phrases)
+TRAILING_PUNCT_WITH_SPACE = [' - ', ': ', ', ']
+
+# Number word mappings for temporal phrase variants (bidirectional)
+NUMBER_WORDS = {
+    '1': 'one',
+    '2': 'two',
+    '3': 'three',
+    '4': 'four',
+    '5': 'five',
+    '6': 'six',
+    '7': 'seven',
+    '8': 'eight',
+    '9': 'nine',
+    '10': 'ten',
+    '12': 'twelve',
+    '14': 'fourteen',
+    '24': 'twenty-four',
+    '30': 'thirty',
+    '60': 'sixty',
+    '90': 'ninety',
+}
+
+# Reverse mapping (word → digit)
+WORD_NUMBERS = {v: k for k, v in NUMBER_WORDS.items()}
+
 # Words that commonly have possessive variants in instrument names
 # Pattern: word → {word, word's, words} for handling extraction inconsistencies
 POSSESSIVE_WORDS = [
@@ -144,6 +170,7 @@ def generate_punctuation_variants(pattern: str) -> Set[str]:
 
     '(BTACT).' → {'(BTACT).', '(BTACT)'}
     '(BTACT)' → {'(BTACT)', '(BTACT).', '(BTACT),'}
+    'in the past 7 days' → {'in the past 7 days', 'in the past 7 days:', 'in the past 7 days - '}
 
     Args:
         pattern: Original pattern string
@@ -153,13 +180,63 @@ def generate_punctuation_variants(pattern: str) -> Set[str]:
     """
     variants = {pattern}
 
-    # Strip trailing punctuation to get base
+    # Strip trailing punctuation (both simple and spaced) to get base
     base = pattern.rstrip(''.join(TRAILING_PUNCT))
+    # Also strip spaced punctuation endings
+    for spaced_punct in TRAILING_PUNCT_WITH_SPACE:
+        if base.endswith(spaced_punct.rstrip()):  # e.g., ends with ' -' or ':'
+            base = base[:-len(spaced_punct.rstrip())]
+    base = base.rstrip()  # Clean up any trailing whitespace
     variants.add(base)
 
     # Add common trailing punctuation variants
     for punct in TRAILING_PUNCT:
         variants.add(base + punct)
+
+    # Add spaced punctuation variants (common in temporal phrases)
+    for spaced_punct in TRAILING_PUNCT_WITH_SPACE:
+        variants.add(base + spaced_punct)
+
+    return variants
+
+
+def generate_number_variants(pattern: str) -> Set[str]:
+    """
+    Generate variants with digit/word number substitutions.
+
+    'in the past 7 days' → {'in the past 7 days', 'in the past seven days'}
+    'in the past seven days' → {'in the past seven days', 'in the past 7 days'}
+
+    Handles common temporal numbers: 1-10, 12, 14, 24, 30, 60, 90
+
+    Args:
+        pattern: Original pattern string
+
+    Returns:
+        Set of variant patterns including original
+    """
+    variants = {pattern}
+
+    # Try digit → word substitutions
+    for digit, word in NUMBER_WORDS.items():
+        # Use word boundaries to avoid partial matches
+        # Match digit surrounded by non-digits (or start/end)
+        digit_pattern = re.compile(r'(?<!\d)' + re.escape(digit) + r'(?!\d)')
+        if digit_pattern.search(pattern):
+            # Replace digit with word
+            new_pattern = digit_pattern.sub(word, pattern)
+            variants.add(new_pattern)
+
+    # Try word → digit substitutions (case-insensitive)
+    pattern_lower = pattern.lower()
+    for word, digit in WORD_NUMBERS.items():
+        # Find word in pattern (case-insensitive, word boundaries)
+        word_pattern = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE)
+        match = word_pattern.search(pattern)
+        if match:
+            # Replace word with digit, preserving surrounding text
+            new_pattern = pattern[:match.start()] + digit + pattern[match.end():]
+            variants.add(new_pattern)
 
     return variants
 
@@ -319,12 +396,13 @@ def generate_all_variants(
     pattern: str,
     known_acronym_variants: Optional[Set[str]] = None,
     include_name_only: bool = True,
-    add_prefixes: bool = True
+    add_prefixes: bool = True,
+    expand_numbers: bool = True
 ) -> Set[str]:
     """
     Generate all variant combinations for a pattern.
 
-    Combines spacing, punctuation, prefix, possessive, and acronym variants.
+    Combines spacing, punctuation, prefix, possessive, acronym, and number variants.
     Optionally includes the bare instrument name for broader matching.
     Optionally adds context prefixes to patterns that don't have them.
 
@@ -336,6 +414,8 @@ def generate_all_variants(
         add_prefixes: If True, add context prefixes ("as part of", etc.) to
                      patterns that don't already have them. This ensures
                      patterns match both standalone and prefixed occurrences.
+        expand_numbers: If True, generate digit/word number variants
+                       (e.g., "7" ↔ "seven" for temporal phrases)
 
     Returns:
         Set of all variant patterns
@@ -361,13 +441,20 @@ def generate_all_variants(
             acronym_variants = generate_acronym_variants(poss_v, known_acronym_variants)
 
             for av in acronym_variants:
-                # Then spacing variants
-                spacing_variants = generate_spacing_variants(av)
+                # Then number variants (7 ↔ seven)
+                if expand_numbers:
+                    number_variants = generate_number_variants(av)
+                else:
+                    number_variants = {av}
 
-                for sv in spacing_variants:
-                    # Finally punctuation variants
-                    punct_variants = generate_punctuation_variants(sv)
-                    all_variants.update(punct_variants)
+                for nv in number_variants:
+                    # Then spacing variants
+                    spacing_variants = generate_spacing_variants(nv)
+
+                    for sv in spacing_variants:
+                        # Finally punctuation variants
+                        punct_variants = generate_punctuation_variants(sv)
+                        all_variants.update(punct_variants)
 
     # Optionally add just the instrument name
     if include_name_only:
@@ -392,7 +479,8 @@ def expand_pattern_set(
     patterns: Set[str],
     include_name_only: bool = True,
     collect_acronyms: bool = True,
-    add_prefixes: bool = True
+    add_prefixes: bool = True,
+    expand_numbers: bool = True
 ) -> Set[str]:
     """
     Expand a set of patterns by generating all variants for each.
@@ -406,6 +494,8 @@ def expand_pattern_set(
         collect_acronyms: Collect and cross-reference acronyms across patterns
         add_prefixes: Add context prefixes ("as part of", etc.) to patterns
                      that don't already have them
+        expand_numbers: If True, generate digit/word number variants
+                       (e.g., "7" ↔ "seven" for temporal phrases)
 
     Returns:
         Expanded set of all variant patterns
@@ -435,7 +525,8 @@ def expand_pattern_set(
             pattern,
             known_acronym_variants=known_acronyms,
             include_name_only=include_name_only,
-            add_prefixes=add_prefixes
+            add_prefixes=add_prefixes,
+            expand_numbers=expand_numbers
         )
         all_variants.update(variants)
 
@@ -448,7 +539,8 @@ def load_and_expand_patterns(
     column_name: str = 'full_match',
     expand_variants: bool = True,
     include_name_only: bool = True,
-    add_prefixes: bool = True
+    add_prefixes: bool = True,
+    expand_numbers: bool = True
 ) -> Set[str]:
     """
     Load patterns from TSV file and optionally expand with variants.
@@ -462,6 +554,8 @@ def load_and_expand_patterns(
         include_name_only: Include bare instrument names
         add_prefixes: Add context prefixes ("as part of", etc.) to patterns
                      that don't already have them
+        expand_numbers: If True, generate digit/word number variants
+                       (e.g., "7" ↔ "seven" for temporal phrases)
 
     Returns:
         Set of patterns (expanded if requested)
@@ -505,7 +599,8 @@ def load_and_expand_patterns(
             patterns,
             include_name_only=include_name_only,
             collect_acronyms=True,
-            add_prefixes=add_prefixes
+            add_prefixes=add_prefixes,
+            expand_numbers=expand_numbers
         )
 
     return patterns

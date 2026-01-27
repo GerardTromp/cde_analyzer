@@ -302,6 +302,43 @@ def _strip_single_model(
     return model_data
 
 
+# Debug counter for tinyId filtering diagnostics
+_debug_filter_stats = {"checked": 0, "passed": 0, "sample_ids": set()}
+
+
+def _strip_single_model_debug(
+    model_data: dict,
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]]
+) -> dict:
+    """Debug version that tracks filter statistics."""
+    global _debug_filter_stats
+    tiny_id = model_data.get("tinyId")
+
+    # Sample first 5 tinyIds for diagnostic
+    if len(_debug_filter_stats["sample_ids"]) < 5 and tiny_id:
+        _debug_filter_stats["sample_ids"].add(tiny_id)
+
+    for path, phrase, replace_with, allowed_ids in phrase_map:
+        _debug_filter_stats["checked"] += 1
+        if allowed_ids is not None and tiny_id not in allowed_ids:
+            continue
+        _debug_filter_stats["passed"] += 1
+        traverse_and_replace_phrase(model_data, path, phrase, replace_with, tiny_id)
+
+    return model_data
+
+
+def get_debug_filter_stats():
+    """Return current debug filter statistics."""
+    return _debug_filter_stats
+
+
+def reset_debug_filter_stats():
+    """Reset debug filter statistics."""
+    global _debug_filter_stats
+    _debug_filter_stats = {"checked": 0, "passed": 0, "sample_ids": set()}
+
+
 def _worker_init(phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]], model_class_name: str):
     """
     Initialize worker process with shared phrase_map.

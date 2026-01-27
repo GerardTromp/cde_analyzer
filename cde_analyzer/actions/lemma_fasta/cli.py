@@ -3,9 +3,14 @@
 #
 from utils.constants import MODEL_REGISTRY
 from argparse import ArgumentParser, BooleanOptionalAction
-from .run import run_action
-  
+
 help_text = "Extract fields as pseudo FASTA format"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = """Extract a desired subset of fields as for embedding 
 (extract_embed), but encode the "words" as uint16_t tokens to be used by 
 genomic repeat finder tools.
@@ -98,4 +103,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.lemma_fasta.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

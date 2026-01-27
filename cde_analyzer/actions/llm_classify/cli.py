@@ -4,10 +4,14 @@
 # CLI argument parser for LLM-based phrase classification.
 #
 from argparse import ArgumentParser, BooleanOptionalAction
-from .run import run_action
-
 
 help_text = "Classify phrases using multi-LLM queries"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = """Agentic LLM-based classification for phrase curation.
 
 Uses multiple LLM providers (Claude, OpenAI, Gemini) to classify phrases
@@ -139,4 +143,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.llm_classify.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

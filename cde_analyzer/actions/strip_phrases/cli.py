@@ -18,10 +18,15 @@ Example:
 """
 from argparse import ArgumentParser
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
 
 help_text = "Remove curated phrases from specific paths in CDE records"
 description_text = __doc__
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 
 
 def register_subparser(subparser: ArgumentParser):
@@ -45,9 +50,12 @@ def register_subparser(subparser: ArgumentParser):
     phrase_source.add_argument(
         "--patterns",
         "-p",
-        help="Path to discovered patterns TSV (from strip_discover). "
-             "Format: pattern<TAB>tinyIds<TAB>type<TAB>source_pattern. "
-             "Column matching is case-insensitive.",
+        help="Discovered patterns TSV (from strip_discover or curated merge). "
+             "Format: 'file.tsv' (uses 'pattern' column), "
+             "'file.tsv,column_name' (custom pattern column), or "
+             "'file.tsv,pattern_col,tinyids_col' (both custom). "
+             "Column matching is case-insensitive. "
+             "Excel-quoted fields are automatically unquoted.",
     )
     phrase_source.add_argument(
         "--phrases",
@@ -117,4 +125,8 @@ def register_subparser(subparser: ArgumentParser):
         help="Number of context lines before and after changes.",
     )
 
-    subparser.set_defaults(func=run_action)
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

@@ -2,12 +2,13 @@
 
 import csv
 import logging
+import re
 from argparse import Namespace
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 from dataclasses import dataclass
 
-from utils.file_utils import graceful_interrupt
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,10 @@ def run_action(args: Namespace):
     )
 
     # 1. Load phrases from TSV
-    logger.info(f"Loading phrases from {args.input}")
+    input_path = exit_if_missing(args.input, "Input file")
+    logger.info(f"Loading phrases from {input_path}")
     phrases = load_phrases_tsv(
-        args.input,
+        str(input_path),
         text_col=args.text_column,
         id_col=args.id_column,
         tinyid_col=args.tinyid_column,
@@ -187,7 +189,8 @@ def load_phrases_tsv(
 
             phrase_id = row.get(id_col, f"phrase_{len(phrases)}")
             tinyids_str = row.get(tinyid_col, "")
-            tinyids = set(tinyids_str.split("|")) if tinyids_str else set()
+            # Support both space-separated and pipe-separated formats (or mixed)
+            tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t) if tinyids_str else set()
 
             phrases.append(PhraseRecord(
                 phrase_id=phrase_id,

@@ -3,9 +3,14 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
 
 help_text = "Extract subset of fields from model for embedding text"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = """Extract a desired subset of fields and collapse repeated
 key:value pairs to key: 'value1;; value2;; value3,...'.
 
@@ -80,4 +85,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.extract_embed.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

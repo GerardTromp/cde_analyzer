@@ -1,6 +1,14 @@
 from argparse import ArgumentParser
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
+
+help_text = "Construct phrase models"
+description_text = "Incremental phrase builder for CDE analysis"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 
 
 def register_subparser(subparser: ArgumentParser):
@@ -24,4 +32,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.phrase_builder.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

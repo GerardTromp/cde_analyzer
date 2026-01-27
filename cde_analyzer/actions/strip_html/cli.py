@@ -3,9 +3,14 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
-    
+
 help_text = "Clean (strip) embedded HTML from JSON structure"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = "Clean and normalize string fields containing HTML in structured JSON via Pydantic models"
 
 
@@ -72,4 +77,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.strip_html.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

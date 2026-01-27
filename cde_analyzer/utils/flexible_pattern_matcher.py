@@ -851,7 +851,8 @@ def load_verbatim_tsv(
                 continue
 
             verbatim = parts[0]
-            tinyids = set(parts[1].split()) if parts[1] else set()
+            # Support both space-separated and pipe-separated formats (or mixed)
+            tinyids = set(t for t in re.split(r'[\s|]+', parts[1]) if t) if parts[1] else set()
             results.append((verbatim, tinyids))
 
     logger.info(f"Loaded {len(results)} verbatim patterns from {input_path}")
@@ -915,16 +916,18 @@ def merge_verbatim_tsv(
             if pattern_idx >= len(fields):
                 continue
 
-            pattern = fields[pattern_idx].strip()
+            # Strip Excel's auto-added quotes around fields containing commas
+            pattern = fields[pattern_idx].strip().strip('"')
             if not pattern:
                 continue
 
             # Parse tinyIds
+            # Support both space-separated and pipe-separated formats (or mixed)
             tinyids = set()
             if tinyids_idx is not None and tinyids_idx < len(fields):
-                tinyids_str = fields[tinyids_idx].strip()
+                tinyids_str = fields[tinyids_idx].strip().strip('"')
                 if tinyids_str:
-                    tinyids = set(tinyids_str.split())
+                    tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
 
             # Merge into existing set or create new entry
             if pattern in pattern_to_tinyids:
@@ -992,3 +995,156 @@ def merge_verbatim_cli(
     print(f"Output: {stats['output_rows']} unique patterns")
     print(f"Merged: {stats['merged_count']} duplicate patterns")
     print(f"Wrote:  {output_path}")
+
+
+def coalesce_variants_tsv(
+    input_path: str,
+    output_path: str,
+    pattern_column: str = "pattern",
+    tinyids_column: str = "tinyIds",
+    report_path: Optional[str] = None
+) -> Dict[str, int]:
+    """
+    Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
+
+    A shorter pattern is subsumed if:
+    1. It is a substring of one or more longer patterns
+    2. Its tinyIds are a subset of the union of those longer patterns' tinyIds
+
+    This eliminates redundant variants like:
+    - "in the past 7 days" (tinyIds: A B C)
+    - "in the past 7 days:" (tinyIds: A B)
+    - "in the past 7 days - " (tinyIds: C)
+
+    Since tinyIds {A,B,C} ⊆ {A,B} ∪ {C}, the base pattern is subsumed.
+
+    Args:
+        input_path: Path to input TSV file
+        output_path: Path to output TSV file (coalesced patterns)
+        pattern_column: Column name for patterns (default: 'pattern')
+        tinyids_column: Column name for tinyIds (default: 'tinyIds')
+        report_path: Optional path to write subsumption report TSV
+
+    Returns:
+        Dict with coalesce statistics:
+        - 'input_patterns': Number of input patterns
+        - 'output_patterns': Number of output patterns (after coalesce)
+        - 'subsumed_count': Number of patterns removed by subsumption
+        - 'subsumptions': List of (subsumed_pattern, covering_patterns) tuples
+    """
+    # Load all patterns with tinyIds
+    pattern_to_tinyids: Dict[str, Set[str]] = {}
+
+    with open(input_path, 'r', encoding='utf-8') as f:
+        header_line = f.readline().strip()
+        headers = header_line.split('\t')
+
+        try:
+            pattern_idx = headers.index(pattern_column)
+        except ValueError:
+            raise ValueError(
+                f"Pattern column '{pattern_column}' not found in {input_path}. "
+                f"Available columns: {', '.join(headers)}"
+            )
+
+        tinyids_idx = None
+        if tinyids_column in headers:
+            tinyids_idx = headers.index(tinyids_column)
+
+        for line in f:
+            line = line.rstrip('\n\r')
+            if not line:
+                continue
+
+            fields = line.split('\t')
+            if pattern_idx >= len(fields):
+                continue
+
+            pattern = fields[pattern_idx].strip().strip('"')
+            if not pattern:
+                continue
+
+            # Parse tinyIds
+            tinyids = set()
+            if tinyids_idx is not None and tinyids_idx < len(fields):
+                tinyids_str = fields[tinyids_idx].strip().strip('"')
+                if tinyids_str:
+                    tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
+
+            # Merge tinyIds if pattern already exists
+            if pattern in pattern_to_tinyids:
+                pattern_to_tinyids[pattern].update(tinyids)
+            else:
+                pattern_to_tinyids[pattern] = tinyids
+
+    input_patterns = len(pattern_to_tinyids)
+    logger.info(f"Loaded {input_patterns} unique patterns from {input_path}")
+
+    # Sort by length descending (longest first)
+    sorted_patterns = sorted(pattern_to_tinyids.keys(), key=len, reverse=True)
+
+    # Track which patterns are subsumed and by what
+    subsumed: Dict[str, List[str]] = {}  # subsumed_pattern -> list of covering patterns
+    kept_patterns: Set[str] = set()
+
+    # Process from longest to shortest
+    for pattern in sorted_patterns:
+        pattern_tinyids = pattern_to_tinyids[pattern]
+
+        # Check if this pattern is subsumed by any longer patterns we've kept
+        covering_patterns = []
+        covering_tinyids: Set[str] = set()
+
+        for longer in kept_patterns:
+            if pattern in longer:  # pattern is substring of longer
+                covering_patterns.append(longer)
+                covering_tinyids.update(pattern_to_tinyids[longer])
+
+        # If pattern's tinyIds are covered by the union of covering patterns' tinyIds
+        if covering_patterns and pattern_tinyids <= covering_tinyids:
+            subsumed[pattern] = covering_patterns
+            logger.debug(
+                f"Subsumed: '{pattern[:50]}...' ({len(pattern_tinyids)} tinyIds) "
+                f"covered by {len(covering_patterns)} longer patterns"
+            )
+        else:
+            kept_patterns.add(pattern)
+
+    # Write output (kept patterns only)
+    output_patterns = sorted(kept_patterns, key=len, reverse=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(f"{pattern_column}\t{tinyids_column}\n")
+        for pattern in output_patterns:
+            tinyids_str = ' '.join(sorted(pattern_to_tinyids[pattern]))
+            f.write(f"{pattern}\t{tinyids_str}\n")
+
+    # Write optional subsumption report
+    if report_path and subsumed:
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write("subsumed_pattern\ttinyIds\tcovering_patterns\tcovering_tinyIds_union\n")
+            for pattern, covers in sorted(subsumed.items(), key=lambda x: len(x[0])):
+                pattern_tids = ' '.join(sorted(pattern_to_tinyids[pattern]))
+                covers_str = ' | '.join(c[:60] for c in covers[:3])
+                if len(covers) > 3:
+                    covers_str += f" ... (+{len(covers)-3} more)"
+                # Calculate union of covering tinyIds
+                union_tids = set()
+                for c in covers:
+                    union_tids.update(pattern_to_tinyids[c])
+                union_str = ' '.join(sorted(union_tids))
+                f.write(f"{pattern}\t{pattern_tids}\t{covers_str}\t{union_str}\n")
+        logger.info(f"Wrote subsumption report to {report_path}")
+
+    stats = {
+        'input_patterns': input_patterns,
+        'output_patterns': len(kept_patterns),
+        'subsumed_count': len(subsumed),
+        'subsumptions': list(subsumed.items())
+    }
+
+    logger.info(
+        f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
+        f"({len(subsumed)} subsumed)"
+    )
+
+    return stats

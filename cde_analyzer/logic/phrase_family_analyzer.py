@@ -10,6 +10,7 @@ Uses trie-based data structures for efficient prefix/suffix matching.
 """
 
 import logging
+import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, List, Set, Tuple, Optional
@@ -234,7 +235,8 @@ class PhraseFamilyAnalyzer:
                     frequency = 1
 
                 tinyids_str = fields[tinyids_idx]
-                n_tinyids = len(tinyids_str.split('|')) if tinyids_str else 0
+                # Support both space-separated and pipe-separated formats (or mixed)
+                n_tinyids = len([t for t in re.split(r'[\s|]+', tinyids_str) if t]) if tinyids_str else 0
 
                 self.phrase_lemmas[phrase_id] = lemma_text
                 self.phrase_data[phrase_id] = (frequency, n_tinyids)
