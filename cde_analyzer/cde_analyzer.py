@@ -74,6 +74,11 @@ ACTION_REGISTRY = {
         "help": "Extract measurement instruments from CDE text fields",
         "description": "Detects instrument patterns from 'as part of <Instrument>' phrases",
     },
+    "phrase_grouper": {
+        "module": "actions.phrase_grouper.cli",
+        "help": "Bottom-up k-mer analysis for phrase family discovery",
+        "description": "Groups phrases by shared prefix, suffix, or infix patterns",
+    },
     "llm_classify": {
         "module": "actions.llm_classify.cli",
         "help": "Classify phrases using multi-LLM queries",
