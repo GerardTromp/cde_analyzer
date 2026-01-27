@@ -451,10 +451,10 @@ cdes.json (original)
 
 ## Related Documentation
 
-- [instrument_miner command](../commands/instrument_miner.md) - Dedicated instrument extraction
-- [phrase_miner command](../commands/phrase_miner.md) - General phrase mining
-- [phrase_grouper command](../commands/phrase_grouper.md) - Phrase family analysis
-- [strip_discover command](../commands/strip_discover.md) - Pattern discovery
-- [strip_phrases command](../commands/strip_phrases.md) - Pattern stripping
-- [diagnose_strip command](../commands/diagnose_strip.md) - Stripping diagnostics
+- [instrument_miner command](../help/instrument_miner.md) - Dedicated instrument extraction
+- [phrase_miner command](../help/phrase_miner.md) - General phrase mining
+- [phrase_grouper command](../help/phrase_grouper.md) - Phrase family analysis
+- [strip_discover command](../help/strip_discover.md) - Pattern discovery
+- [strip_phrases command](../help/strip_phrases.md) - Pattern stripping
+- [diagnose_strip command](../help/diagnose_strip.md) - Stripping diagnostics
 - [llm_classify command](../llm/llm_classify.md) - LLM-based classification

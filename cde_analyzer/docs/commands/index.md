@@ -2,14 +2,28 @@
 
 CDE Analyzer provides a suite of CLI commands for processing and analyzing Common Data Elements.
 
-## Phrase Detection
+## Instrument Extraction
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| [phrase_miner](phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | Stable |
+| [instrument_miner](../help/instrument_miner.md) | Extract measurement instruments from CDE text using anchor detection | Stable |
+
+## Phrase Detection & Analysis
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [phrase_miner](../help/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | Stable |
+| [phrase_grouper](../help/phrase_grouper.md) | Bottom-up k-mer analysis for phrase family discovery | New |
 | [phrase](../help/phrase.md) | Original phrase detection using n-gram counting | Stable |
 | [phrase_builder](../help/phrase_builder.md) | K-mer analysis for phrase identification | Stable |
-| [strip_phrases](../help/strip_phrases.md) | Remove detected phrases from data | Stable |
+
+## Pattern Stripping
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [strip_discover](../help/strip_discover.md) | Flexible regex discovery for pattern curation workflow | Stable |
+| [strip_phrases](../help/strip_phrases.md) | Remove detected phrases using exact string replacement | Stable |
+| [diagnose_strip](../help/diagnose_strip.md) | Diagnose remaining patterns after stripping | Stable |
 
 ## Data Cleaning
 

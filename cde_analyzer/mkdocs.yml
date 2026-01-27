@@ -13,16 +13,28 @@ nav:
   - Home: index.md
   - Commands:
     - Overview: commands/index.md
-    - phrase_miner: commands/phrase_miner.md
-    - phrase: help/phrase.md
-    - phrase_builder: help/phrase_builder.md
-    - strip_phrases: help/strip_phrases.md
-    - count: help/count.md
-    - extract_embed: help/extract_embed.md
-    - lemma_fasta: help/lemma_fasta.md
-    - subset: help/subset.md
-    - strip_html: help/strip.md
-    - fix_underscores: help/fix_underscores.md
+    - Instrument Extraction:
+      - instrument_miner: help/instrument_miner.md
+    - Phrase Detection:
+      - phrase_miner: help/phrase_miner.md
+      - phrase_grouper: help/phrase_grouper.md
+      - phrase: help/phrase.md
+      - phrase_builder: help/phrase_builder.md
+    - Pattern Stripping:
+      - strip_discover: help/strip_discover.md
+      - strip_phrases: help/strip_phrases.md
+      - diagnose_strip: help/diagnose_strip.md
+    - Data Cleaning:
+      - strip_html: help/strip.md
+      - fix_underscores: help/fix_underscores.md
+    - Analysis:
+      - count: help/count.md
+      - extract_embed: help/extract_embed.md
+    - Export & Filtering:
+      - lemma_fasta: help/lemma_fasta.md
+      - subset: help/subset.md
+  - Workflows:
+    - Instrument & Phrase Stripping: workflows/instrument-phrase-stripping-workflow.md
   - LLM Classification:
     - Overview: llm/index.md
     - llm_classify Command: llm/llm_classify.md
