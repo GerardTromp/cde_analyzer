@@ -4,89 +4,12 @@ import json
 import logging
 from argparse import Namespace
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List
 
 from CDE_Schema.CDE_Item import CDEItem
 from utils.file_utils import graceful_interrupt
 
 logger = logging.getLogger(__name__)
-
-
-def load_instrument_list(
-    spec: str,
-    expand_variants: bool = False,
-    include_name_only: bool = True
-) -> Set[str]:
-    """
-    Load instrument patterns from a TSV file for pre-masking.
-
-    Args:
-        spec: File specification in format 'filename' or 'filename,column_name'.
-              If column_name is omitted, defaults to 'full_match'.
-        expand_variants: If True, generate spelling/punctuation variants for better matching.
-                        Handles spacing around parentheses, trailing punctuation, prefix variations.
-        include_name_only: When expanding variants, also include bare instrument names
-                          without 'as part of' prefix for broader matching.
-
-    Returns:
-        Set of pattern strings to mask during tokenization.
-
-    Raises:
-        FileNotFoundError: If the specified file doesn't exist.
-        ValueError: If the specified column is not found in the file.
-    """
-    # Parse spec: "filename" or "filename,column"
-    if ',' in spec:
-        parts = spec.split(',', 1)
-        filepath = parts[0].strip()
-        column_name = parts[1].strip()
-    else:
-        filepath = spec.strip()
-        column_name = 'full_match'  # Default column
-
-    path = Path(filepath)
-    if not path.exists():
-        raise FileNotFoundError(f"Instrument list file not found: {filepath}")
-
-    patterns = set()
-    with path.open('r', encoding='utf-8') as f:
-        # Read header to find column index
-        header_line = f.readline().strip()
-        headers = header_line.split('\t')
-
-        try:
-            col_idx = headers.index(column_name)
-        except ValueError:
-            raise ValueError(
-                f"Column '{column_name}' not found in {filepath}. "
-                f"Available columns: {', '.join(headers)}"
-            )
-
-        # Read data rows
-        for line_num, line in enumerate(f, start=2):
-            line = line.strip()
-            if not line:
-                continue
-
-            fields = line.split('\t')
-            if col_idx < len(fields):
-                pattern = fields[col_idx].strip()
-                if pattern:
-                    patterns.add(pattern)
-
-    logger.info(f"Loaded {len(patterns)} base instrument patterns from {filepath} (column: {column_name})")
-
-    # Optionally expand variants (Option A)
-    if expand_variants:
-        from utils.pattern_variant_generator import expand_pattern_set
-        patterns = expand_pattern_set(
-            patterns,
-            include_name_only=include_name_only,
-            collect_acronyms=True
-        )
-        logger.info(f"Expanded to {len(patterns)} patterns with variants")
-
-    return patterns
 
 
 @graceful_interrupt
@@ -95,15 +18,13 @@ def run_action(args: Namespace):
     Main entry point for phrase_miner action.
     Loads data, executes mining pipeline, writes output.
 
-    Two-phase workflow supported:
-    - Phase 1 (--instruments-only): Extract instruments only for curation
-    - Phase 2 (normal): Full phrase mining, optionally with curated instrument list
+    For instrument extraction, use the dedicated `instrument_miner` action instead.
 
     Args:
         args: Parsed command-line arguments
     """
     # Lazy import heavy modules
-    from logic.phrase_miner import mine_phrases, extract_instruments_only, MinerConfig, Phrase
+    from logic.phrase_miner import mine_phrases, MinerConfig
     from logic.phrase_anchor_extend import extend_anchors
 
     # 1. Load data
@@ -132,63 +53,8 @@ def run_action(args: Namespace):
     # Subsumption filtering: disabled by default, enabled with --enable-subsumption
     enable_subsumption = getattr(args, 'enable_subsumption', False)
 
-    # Instrument extraction: disabled by default, enabled with --extract-instruments
-    extract_instruments = getattr(args, 'extract_instruments', False)
-    min_instrument_words = getattr(args, 'min_instrument_words', 3)
-    extract_abbreviation_only = getattr(args, 'extract_abbreviation_only', False)
-    extract_supplementary = getattr(args, 'extract_supplementary', False)
-
-    # Phase 1 mode: instruments only, skip phrase mining outputs
-    instruments_only = getattr(args, 'instruments_only', False)
-    if instruments_only:
-        extract_instruments = True  # --instruments-only implies --extract-instruments
-
-    # Load curated instrument list for pre-masking (Phase 2)
-    instrument_patterns = None
-    instrument_list_spec = getattr(args, 'instrument_list', None)
-    expand_variants = getattr(args, 'expand_variants', False)
-    include_name_only = getattr(args, 'include_name_only', True)
-
-    if instrument_list_spec:
-        try:
-            instrument_patterns = load_instrument_list(
-                instrument_list_spec,
-                expand_variants=expand_variants,
-                include_name_only=include_name_only
-            )
-        except FileNotFoundError as e:
-            logger.error(f"Instrument list error: {e}")
-            raise SystemExit(1)
-        except ValueError as e:
-            logger.error(f"Instrument list error: {e}")
-            raise SystemExit(1)
-
-    # Load additional instrument lists (e.g., curated 2-word instruments)
-    additional_lists = getattr(args, 'additional_instrument_lists', None)
-    if additional_lists:
-        if instrument_patterns is None:
-            instrument_patterns = set()
-        for spec in additional_lists:
-            try:
-                additional_patterns = load_instrument_list(
-                    spec,
-                    expand_variants=expand_variants,
-                    include_name_only=include_name_only
-                )
-                logger.info(f"Merging {len(additional_patterns)} patterns from {spec}")
-                instrument_patterns.update(additional_patterns)
-            except FileNotFoundError as e:
-                logger.error(f"Additional instrument list error: {e}")
-                raise SystemExit(1)
-            except ValueError as e:
-                logger.error(f"Additional instrument list error: {e}")
-                raise SystemExit(1)
-
     # Histogram output directory (only set if histograms enabled)
     histogram_output_dir = Path(args.output_dir) if args.histograms else None
-
-    # Context-aware masking (Option D)
-    context_aware_masking = getattr(args, 'context_aware_masking', False)
 
     config = MinerConfig(
         k_max=args.k_max,
@@ -203,87 +69,25 @@ def run_action(args: Namespace):
         use_aho_corasick=use_aho_corasick,
         generate_histograms=args.histograms,
         histogram_output_dir=histogram_output_dir,
-        extract_instruments=extract_instruments,
-        min_instrument_words=min_instrument_words,
-        extract_abbreviation_only=extract_abbreviation_only,
-        extract_supplementary=extract_supplementary,
-        instrument_patterns=instrument_patterns,
-        context_aware_masking=context_aware_masking,
+        extract_instruments=False,  # Instrument extraction disabled - use instrument_miner
+        min_instrument_words=3,
+        extract_abbreviation_only=False,
+        extract_supplementary=False,
+        instrument_patterns=None,
+        context_aware_masking=False,
     )
 
     # Log configuration
     logger.info(f"Configuration: k={args.k_min}-{args.k_max}, freq_min={args.freq_min}, "
                 f"min_tinyids={args.min_tinyids}")
-    if instruments_only:
-        logger.info("Phase 1 mode: extracting instruments only (phrase outputs disabled)")
-    if instrument_patterns:
-        masking_mode = "context-aware (Option D)" if context_aware_masking else "exact pattern (Option A)"
-        logger.info(f"Pre-masking {len(instrument_patterns)} instrument patterns using {masking_mode}")
     logger.info(f"Features: debruijn={'enabled' if not skip_debruijn else 'disabled'}, "
                 f"aho_corasick={'enabled' if use_aho_corasick else 'disabled'}, "
                 f"subsumption={'enabled' if enable_subsumption else 'disabled'}, "
-                f"anchor={'enabled' if not skip_anchor else 'disabled'}, "
-                f"instrument_extract={'enabled' if extract_instruments else 'disabled'}, "
-                f"abbrev_only={'enabled' if extract_abbreviation_only else 'disabled'}, "
-                f"supplementary={'enabled' if extract_supplementary else 'disabled'}")
+                f"anchor={'enabled' if not skip_anchor else 'disabled'}")
 
     # 3. Execute pipeline
-    if instruments_only:
-        # Phase 1: lightweight instrument extraction only
-        logger.info("Starting instrument extraction (phase 1)...")
-        instrument_catalog = extract_instruments_only(items, config)
-
-        # Early exit to output writing for instruments
-        output_dir = Path(args.output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        if instrument_catalog and instrument_catalog.instruments:
-            # Check if family detection is enabled
-            detect_families = getattr(args, 'detect_families', False)
-            family_summary = getattr(args, 'family_summary', False)
-            family_threshold = getattr(args, 'family_confidence_threshold', 0.7)
-
-            if detect_families:
-                # Use enhanced family-aware output
-                from logic.instrument_family_assigner import InstrumentFamilyAssigner
-
-                logger.info(f"Assigning instrument families (threshold: {family_threshold})...")
-                assigner = InstrumentFamilyAssigner(
-                    confidence_threshold=family_threshold,
-                    generate_family_summary=family_summary,
-                )
-                stats = assigner.assign_families(instrument_catalog)
-                outputs = assigner.write_all_outputs(instrument_catalog, output_dir)
-
-                logger.info(f"Family assignment: {stats.total_instruments} instruments, "
-                           f"{stats.families_detected} families, "
-                           f"{stats.needs_review_count} need review")
-                logger.info(f"Phase 1 complete with family detection. Output files:")
-                for output_type, path in outputs.items():
-                    logger.info(f"  - {output_type}: {path.name}")
-                logger.info(f"Curate instruments needing review, then run phase 2 with --instrument-list.")
-            else:
-                # Original behavior without family detection
-                instruments_count = write_instruments_tsv(
-                    instrument_catalog, output_dir / "instruments.tsv",
-                    min_tinyids=args.min_tinyids
-                )
-                logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
-
-                verbatim_count = write_instruments_verbatim_tsv(
-                    instrument_catalog, output_dir / "instruments_verbatim.tsv",
-                    min_tinyids=args.min_tinyids
-                )
-                logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
-                logger.info(f"Phase 1 complete. Curate instruments_verbatim.tsv, then run phase 2 with --instrument-list.")
-        else:
-            logger.warning("No instruments extracted. Check input data contains 'as part of' patterns.")
-
-        return 0  # Skip phrase mining
-
-    # Phase 2 (normal): full phrase mining pipeline
     logger.info("Starting phrase mining pipeline...")
-    phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog = mine_phrases(items, config)
+    phrases, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
     logger.info(f"Mined {len(phrases)} phrases (vocabulary size: {len(vocab)})")
 
     # Log verbatim tracker statistics
@@ -307,7 +111,7 @@ def run_action(args: Namespace):
         if extended_phrases:
             logger.info(f"Extended {len(extended_phrases)} phrases")
 
-    # 6. Write outputs (Phase 2 / normal mode - instruments-only returns early above)
+    # 6. Write outputs
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Get verbatim filtering options
@@ -329,43 +133,6 @@ def run_action(args: Namespace):
 
     if extended_phrases:
         write_extended_tsv(extended_phrases, output_dir / "extended.tsv", vocab)
-
-    # Write instruments.tsv and instruments_verbatim.tsv if instrument extraction was enabled
-    if instrument_catalog:
-        # Check if family detection is enabled
-        detect_families = getattr(args, 'detect_families', False)
-        family_summary = getattr(args, 'family_summary', False)
-        family_threshold = getattr(args, 'family_confidence_threshold', 0.7)
-
-        if detect_families:
-            # Use enhanced family-aware output
-            from logic.instrument_family_assigner import InstrumentFamilyAssigner
-
-            logger.info(f"Assigning instrument families (threshold: {family_threshold})...")
-            assigner = InstrumentFamilyAssigner(
-                confidence_threshold=family_threshold,
-                generate_family_summary=family_summary,
-            )
-            stats = assigner.assign_families(instrument_catalog)
-            outputs = assigner.write_all_outputs(instrument_catalog, output_dir)
-
-            logger.info(f"Family assignment: {stats.total_instruments} instruments, "
-                       f"{stats.families_detected} families, "
-                       f"{stats.needs_review_count} need review")
-        else:
-            # Original behavior without family detection
-            instruments_count = write_instruments_tsv(
-                instrument_catalog, output_dir / "instruments.tsv",
-                min_tinyids=args.min_tinyids
-            )
-            logger.info(f"Wrote {instruments_count} instruments to instruments.tsv (summary)")
-
-            # Write verbatim variants for curation (one row per exact instrument name form)
-            verbatim_count = write_instruments_verbatim_tsv(
-                instrument_catalog, output_dir / "instruments_verbatim.tsv",
-                min_tinyids=args.min_tinyids
-            )
-            logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
 
     # Log verbatim phrase statistics
     verbatim_count = sum(1 for p in phrases for occ in p.occurrences if occ.verbatim_text)
@@ -805,130 +572,3 @@ def write_verbatim_templates_tsv(phrases: List, path: Path, case_sensitive: bool
             templates_written += 1
 
     return templates_written
-
-
-def write_instruments_tsv(catalog, path: Path, min_tinyids: int = 2) -> int:
-    """
-    Write instruments.tsv with detected instrument patterns (summary view).
-
-    Columns:
-        instrument_id: Unique identifier (instrument_00001, etc.)
-        normalized_name: Lowercase name for grouping
-        canonical_name: Most common verbatim form
-        acronym: Extracted acronym(s) (pipe-separated if multiple)
-        frequency: Total occurrence count
-        n_tinyids: Distinct document count
-        tinyids: Pipe-separated document IDs
-        example_contexts: First 3 full match examples
-
-    Args:
-        catalog: InstrumentCatalog with detected instruments
-        path: Output file path
-        min_tinyids: Minimum distinct tinyIds to include (filter)
-
-    Returns:
-        Number of instruments written
-    """
-    instruments_written = 0
-
-    with path.open('w', encoding='utf-8') as f:
-        f.write("instrument_id\tnormalized_name\tcanonical_name\tacronym\t"
-                "frequency\tn_tinyids\ttinyids\texample_contexts\n")
-
-        for norm_name, matches in sorted(catalog.instruments.items()):
-            # Filter by minimum tinyId support
-            tinyids = {m.tinyId for m in matches if m.tinyId}
-            if len(tinyids) < min_tinyids:
-                continue
-
-            # Find most common verbatim form of instrument name
-            name_counts = {}
-            acronyms = set()
-            for m in matches:
-                name_counts[m.instrument_name] = name_counts.get(m.instrument_name, 0) + 1
-                if m.acronym:
-                    acronyms.add(m.acronym)
-
-            canonical = max(name_counts.items(), key=lambda x: x[1])[0]
-            acronym_str = "|".join(sorted(acronyms)) if acronyms else ""
-
-            # Example contexts (first 3 full matches)
-            examples = [m.full_match for m in matches[:3]]
-            examples_str = " | ".join(examples).replace('\t', ' ').replace('\n', ' ')
-
-            f.write(f"instrument_{instruments_written:05d}\t{norm_name}\t{canonical}\t"
-                   f"{acronym_str}\t{len(matches)}\t{len(tinyids)}\t"
-                   f"{'|'.join(sorted(tinyids))}\t{examples_str}\n")
-            instruments_written += 1
-
-    return instruments_written
-
-
-def write_instruments_verbatim_tsv(catalog, path: Path, min_tinyids: int = 2) -> int:
-    """
-    Write instruments_verbatim.tsv with one row per verbatim instrument name.
-
-    This EAV-style output is designed for human curation:
-    - Group by normalized_name to see all variants of an instrument
-    - verbatim_name: just the instrument name (for metadata)
-    - full_match: complete "as part of..." phrase (for masking in pass 2)
-    - Delete rows for false positives, keep good matches
-
-    Columns:
-        normalized_name: Lowercase name for grouping/sorting
-        acronym: Acronym(s) associated with this normalized name
-        verbatim_name: Exact instrument name only (for metadata)
-        full_match: Complete matched phrase including "as part of" (for masking)
-        frequency: How many times this exact form appears
-        n_tinyids: Distinct document count for this form
-        tinyids: Pipe-separated document IDs
-
-    Args:
-        catalog: InstrumentCatalog with detected instruments
-        path: Output file path
-        min_tinyids: Minimum distinct tinyIds for the normalized name (not per-variant)
-
-    Returns:
-        Number of verbatim variants written
-    """
-    variants_written = 0
-
-    with path.open('w', encoding='utf-8') as f:
-        f.write("normalized_name\tacronym\tverbatim_name\tfull_match\tfrequency\tn_tinyids\ttinyids\n")
-
-        for norm_name, matches in sorted(catalog.instruments.items()):
-            # Filter by minimum tinyId support at the normalized level
-            all_tinyids = {m.tinyId for m in matches if m.tinyId}
-            if len(all_tinyids) < min_tinyids:
-                continue
-
-            # Collect all acronyms for this normalized name
-            acronyms = {m.acronym for m in matches if m.acronym}
-            acronym_str = "|".join(sorted(acronyms)) if acronyms else ""
-
-            # Group matches by verbatim instrument_name, collecting full_match variants
-            verbatim_groups = {}
-            for m in matches:
-                vname = m.instrument_name
-                if vname not in verbatim_groups:
-                    verbatim_groups[vname] = {"count": 0, "tinyids": set(), "full_matches": set()}
-                verbatim_groups[vname]["count"] += 1
-                if m.tinyId:
-                    verbatim_groups[vname]["tinyids"].add(m.tinyId)
-                if m.full_match:
-                    verbatim_groups[vname]["full_matches"].add(m.full_match)
-
-            # Write one row per verbatim variant, sorted by frequency desc
-            for vname, data in sorted(verbatim_groups.items(), key=lambda x: -x[1]["count"]):
-                tinyids_str = "|".join(sorted(data["tinyids"]))
-                # Escape TSV special characters
-                vname_safe = vname.replace('\t', ' ').replace('\n', ' ').replace('\r', '')
-                # Use longest full_match as representative (includes most context)
-                full_matches = sorted(data["full_matches"], key=len, reverse=True)
-                full_match_safe = full_matches[0].replace('\t', ' ').replace('\n', ' ').replace('\r', '') if full_matches else ""
-
-                f.write(f"{norm_name}\t{acronym_str}\t{vname_safe}\t{full_match_safe}\t"
-                       f"{data['count']}\t{len(data['tinyids'])}\t{tinyids_str}\n")
-                variants_written += 1
-
-    return variants_written

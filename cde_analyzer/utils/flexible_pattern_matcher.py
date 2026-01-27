@@ -283,6 +283,11 @@ def make_flexible_regex(pattern: str) -> str:
             prev_was_optional = is_optional
             prev_was_version_keyword = False
 
+    # Add terminal boundary: match if followed by whitespace, punctuation, or end of string
+    # This allows both infix matches (mid-sentence) and suffix matches (end of sentence)
+    # Using lookahead with character class for common terminators
+    regex_parts.append(r'(?=[\s.,;:!?"\'()\[\]]|$)')
+
     return ''.join(regex_parts)
 
 
@@ -487,7 +492,10 @@ def make_core_name_regex(bare_name: str) -> str:
         # Allow any optional parenthesized acronym
         acronym_suffix = r'(?:\s*\([^\)]+\))?'
 
-    return core_regex + version_suffix + acronym_suffix
+    # Add terminal boundary for infix/suffix matching
+    terminal_boundary = r'(?=[\s.,;:!?"\'()\[\]]|$)'
+
+    return core_regex + version_suffix + acronym_suffix + terminal_boundary
 
 
 def compile_flexible_patterns(

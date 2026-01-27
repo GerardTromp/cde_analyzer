@@ -151,13 +151,20 @@ Strip family-level patterns (shorter patterns like "PROMIS", "Neuro-QOL") from t
 
 ### Step 4a: Discover Family Patterns
 
+> **⚠️ WARNING: Do NOT use `--expand-variants` for family patterns.**
+> Family names are short (e.g., "PROMIS", "Neuro-QOL") and variant expansion creates:
+> - Massive numbers of pattern variants
+> - Unresolvable ordering conflicts (short patterns contained in many others)
+> - High false positive rates due to pattern brevity
+>
+> Use exact matching only for family-level patterns.
+
 ```bash
 cde_analyzer strip_discover \
     -i cdes_no_instruments.json \
     -m CDE \
     -o discovered_families.tsv \
-    --pattern-list curated_families.tsv,pattern \
-    --expand-variants
+    --pattern-list curated_families.tsv,pattern
 ```
 
 ### Step 4b: Strip Family Patterns
@@ -266,13 +273,16 @@ Final stripping phase for non-instrument phrases.
 
 ### Step 6a: Discover Phrase Patterns
 
+> **⚠️ NOTE on `--expand-variants`**: Only use variant expansion for longer, specific phrases.
+> For short or generic phrases, variant expansion causes ordering conflicts and false positives.
+> When in doubt, run `--analyze-conflicts` first to assess containment relationships.
+
 ```bash
 cde_analyzer strip_discover \
     -i cdes_no_instruments.json \
     -m CDE \
     -o discovered_phrases.tsv \
-    --pattern-list curated_phrases.tsv,pattern \
-    --expand-variants
+    --pattern-list curated_phrases.tsv,pattern
 ```
 
 ### Step 6b: Strip Phrase Patterns
@@ -417,6 +427,7 @@ cdes.json (original)
 5. **Use `--trace-matching`**: Track what was stripped for debugging
 6. **Keep supplementary patterns in config**: Version-controlled, curator-editable
 7. **Document iteration decisions**: Note why patterns were added or parameters changed
+8. **Avoid `--expand-variants` for short patterns**: Family names and abbreviations are too short for variant expansion - creates unresolvable ordering conflicts and false positives
 
 ---
 

@@ -69,6 +69,11 @@ ACTION_REGISTRY = {
         "help": "Iterative k-mer phrase mining with de Bruijn extension",
         "description": "Detects repeated phrases using descending k-mer mining (k=25 to k=3)",
     },
+    "instrument_miner": {
+        "module": "actions.instrument_miner.cli",
+        "help": "Extract measurement instruments from CDE text fields",
+        "description": "Detects instrument patterns from 'as part of <Instrument>' phrases",
+    },
     "llm_classify": {
         "module": "actions.llm_classify.cli",
         "help": "Classify phrases using multi-LLM queries",
