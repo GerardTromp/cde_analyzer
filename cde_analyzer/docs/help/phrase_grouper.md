@@ -1,4 +1,4 @@
-# phrase_grouper
+# `phrase_grouper` Command
 
 Bottom-up k-mer analysis for discovering phrase families that share common patterns.
 

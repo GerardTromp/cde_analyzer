@@ -1,4 +1,4 @@
-# llm_classify
+# `llm_classify` Command
 
 Classify phrases using multi-LLM queries.
 

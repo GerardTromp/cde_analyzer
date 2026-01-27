@@ -1,4 +1,4 @@
-# strip_discover
+# `strip_discover` Command
 
 Flexible regex discovery for finding verbatim pattern occurrences in CDE text fields.
 

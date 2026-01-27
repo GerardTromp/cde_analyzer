@@ -1,4 +1,4 @@
-# diagnose_strip
+# `diagnose_strip` Command
 
 Diagnose remaining anchor patterns after stripping for iterative improvement.
 

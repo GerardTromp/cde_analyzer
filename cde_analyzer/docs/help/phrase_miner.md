@@ -1,4 +1,4 @@
-# phrase_miner Command
+# `phrase_miner` Command
 
 Advanced k-mer phrase mining with iterative descending detection.
 

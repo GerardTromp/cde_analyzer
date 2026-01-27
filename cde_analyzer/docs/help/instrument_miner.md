@@ -1,4 +1,4 @@
-# instrument_miner
+# `instrument_miner` Command
 
 Extract measurement instruments from CDE text fields using anchor-based pattern detection.
 
