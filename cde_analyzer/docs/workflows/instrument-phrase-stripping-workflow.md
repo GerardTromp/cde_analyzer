@@ -23,15 +23,14 @@ The workflow consists of 6 main phases with **two iterative refinement loops** p
 
 ## Phase 1: Instrument Discovery (Iterative)
 
-Extract instrument patterns from CDE text using `phrase_miner`. This phase includes an **iterative refinement loop** to improve coverage before proceeding.
+Extract instrument patterns from CDE text using `instrument_miner` (dedicated action for instrument extraction). This phase includes an **iterative refinement loop** to improve coverage before proceeding.
 
 ### Initial Run
 
 ```bash
-cde_analyzer phrase_miner \
+cde_analyzer instrument_miner \
     -i cdes.json \
     -o output/ \
-    --instruments-only \
     --extract-abbreviation-only \
     --extract-supplementary \
     --detect-families \
@@ -53,7 +52,7 @@ After each run, review coverage:
 1. **Review output**: Check `instruments.tsv` for missing instruments
 2. **Identify gaps**: Look for known instruments not detected
 3. **Update config**: Add missing patterns to `config/supplementary_patterns.yaml`
-4. **Re-run**: Execute `phrase_miner` again with updated config
+4. **Re-run**: Execute `instrument_miner` again with updated config
 5. **Repeat** until coverage is satisfactory
 
 ```yaml
@@ -253,12 +252,31 @@ Move to curation when:
 - Noise level is manageable
 - Important patterns are captured
 
+### Optional: Phrase Family Analysis
+
+Use `phrase_grouper` to analyze patterns in discovered phrases and identify families that share common prefixes, suffixes, or infixes:
+
+```bash
+cde_analyzer phrase_grouper \
+    -i output_phrases/verbatim_phrases.tsv \
+    -o phrase_families/ \
+    --k-min 3 \
+    --k-max 15
+```
+
+This helps identify:
+- **Prefix families**: Phrases starting with the same words (e.g., "In the past 7 days...")
+- **Suffix families**: Phrases ending with the same words
+- **Infix families**: Phrases sharing internal patterns
+
+Outputs: `families.tsv`, `phrase_assignments.tsv`, `family_members.tsv`
+
 ### Manual Curation
 
 Review `phrases.tsv` and `phrases_verbatim.tsv`:
 - Categorize phrases (some may be instrument-like patterns missed earlier)
 - Filter out noise
-- Group similar phrases
+- Group similar phrases (use `phrase_grouper` output to identify families)
 - Flag phrases that should go back to Phase 1 (instrument patterns)
 
 ### Output
@@ -433,8 +451,10 @@ cdes.json (original)
 
 ## Related Documentation
 
-- [phrase_miner command](../commands/phrase_miner.md)
-- [strip_discover command](../commands/strip_discover.md)
-- [strip_phrases command](../commands/strip_phrases.md)
-- [diagnose_strip command](../commands/diagnose_strip.md)
-- [llm_classify command](../llm/llm_classify.md)
+- [instrument_miner command](../commands/instrument_miner.md) - Dedicated instrument extraction
+- [phrase_miner command](../commands/phrase_miner.md) - General phrase mining
+- [phrase_grouper command](../commands/phrase_grouper.md) - Phrase family analysis
+- [strip_discover command](../commands/strip_discover.md) - Pattern discovery
+- [strip_phrases command](../commands/strip_phrases.md) - Pattern stripping
+- [diagnose_strip command](../commands/diagnose_strip.md) - Stripping diagnostics
+- [llm_classify command](../llm/llm_classify.md) - LLM-based classification

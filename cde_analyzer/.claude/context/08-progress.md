@@ -8,6 +8,46 @@
 
 ## Recent Work (Last 30 Days)
 
+### Session 2026-01-26c: Architecture Split & Phrase Grouper
+
+**Focus**: Split phrase_miner into dedicated instrument_miner action, added phrase_grouper for bottom-up family discovery
+
+**Key Accomplishments**:
+- Split `phrase_miner` into separate `instrument_miner` action
+  - Created `actions/instrument_miner/` (cli.py, run.py, __init__.py)
+  - Removed instrument-specific arguments from `phrase_miner`
+  - Cleaner separation of concerns: instruments vs general phrases
+- Added `phrase_grouper` action for bottom-up k-mer analysis
+  - Created `actions/phrase_grouper/` (cli.py, run.py, __init__.py)
+  - Created `logic/phrase_grouper.py` with three tree strategies:
+    - Prefix tree (trie): Groups by shared beginnings
+    - Suffix tree (reversed trie): Groups by shared endings
+    - Infix index (inverted index): Groups by shared internal patterns
+  - Stopword filtering to exclude low-content patterns
+  - Outputs: `families.tsv`, `phrase_assignments.tsv`, `family_members.tsv`
+- Bumped version to 0.4.0
+- Updated workflow documentation and SVG diagram
+
+**CLI Changes**:
+- New action: `instrument_miner` (dedicated instrument extraction)
+- New action: `phrase_grouper` (phrase family analysis)
+- `phrase_miner` no longer has `--instruments-only` (use `instrument_miner` instead)
+
+**Files Created**:
+- `actions/instrument_miner/__init__.py`, `cli.py`, `run.py`
+- `actions/phrase_grouper/__init__.py`, `cli.py`, `run.py`
+- `logic/phrase_grouper.py`
+
+**Files Modified**:
+- `cde_analyzer.py` (registered new actions)
+- `cde_analyzer/__version__.py` (0.3.0 → 0.4.0)
+- `docs/workflows/instrument-phrase-stripping-workflow.md` (updated for new actions)
+- `docs/workflows/instrument-phrase-stripping-workflow.svg` (updated diagram)
+
+**Status**: MILESTONE - Action architecture improved with dedicated commands
+
+---
+
 ### Session 2026-01-26b: Strip Discover Complete & False-Negative Reduction
 
 **Focus**: Completed strip_discover action, achieved 91% false-negative reduction

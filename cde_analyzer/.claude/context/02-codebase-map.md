@@ -56,7 +56,15 @@ cde_analyzer/
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
-│   ├── phrase_miner/        # Advanced k-mer phrase mining (NEW)
+│   ├── phrase_miner/        # Advanced k-mer phrase mining
+│   │   ├── __init__.py
+│   │   ├── cli.py
+│   │   └── run.py
+│   ├── instrument_miner/    # Dedicated instrument extraction (NEW)
+│   │   ├── __init__.py
+│   │   ├── cli.py
+│   │   └── run.py
+│   ├── phrase_grouper/      # Bottom-up phrase family analysis (NEW)
 │   │   ├── __init__.py
 │   │   ├── cli.py
 │   │   └── run.py
@@ -107,6 +115,7 @@ cde_analyzer/
 │   ├── phrase_builder.py    # Phrase construction logic
 │   ├── phrase_extractor.py  # Phrase detection logic (original)
 │   ├── phrase_miner.py      # Core k-mer mining algorithm (~430 lines)
+│   ├── phrase_grouper.py    # Bottom-up k-mer family discovery (NEW)
 │   ├── phrase_stripper.py   # Phrase removal logic
 │   ├── verbatim_discoverer.py # Verbatim pattern discovery (~300 lines)
 │   └── phrase_family_analyzer.py # Phrase family analysis
