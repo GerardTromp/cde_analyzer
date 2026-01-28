@@ -19,9 +19,9 @@ The layout of the codebase helps to illustrate the design concept.
 
 ### Scripts
 
-##### main script `cde_analyzer`
+##### main script `cde-analyzer`
 
-`cde_analyzer` is a wrapper script that requires `action` arguments. Each `action` can accept a variety of arguments that tune its behavior.
+`cde-analyzer` is a wrapper command that requires `action` arguments. Each `action` can accept a variety of arguments that tune its behavior.
 
 ##### Actions
 

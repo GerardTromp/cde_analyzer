@@ -11,14 +11,14 @@
 #   SF-36 → "36-Item Short Form Health Survey"
 #
 # Usage (single abbreviation):
-#   cde_analyzer workflow run workflows/abbreviation_expander.yaml \
+#   cde-analyzer workflow run workflows/abbreviation_expander.yaml \
 #       --set abbreviation=PROMIS \
 #       --set input_json=/path/to/cdes.json \
 #       --set output_dir=/path/to/expansion_output
 #
 # Usage (batch - shell loop):
 #   for abbrev in PROMIS PHQ SF-36 MDS-UPDRS; do
-#       cde_analyzer workflow run workflows/abbreviation_expander.yaml \
+#       cde-analyzer workflow run workflows/abbreviation_expander.yaml \
 #           --set abbreviation=$abbrev \
 #           --set input_json=cdes.json \
 #           --set output_dir=expansions/${abbrev}

@@ -11,7 +11,7 @@ The `phrase_builder` command performs k-mer (n-gram) analysis on CDE text fields
 ## Usage
 
 ```bash
-cde_analyzer phrase_builder -i INPUT -m MODEL -o OUTPUT
+cde-analyzer phrase_builder -i INPUT -m MODEL -o OUTPUT
 ```
 
 ## Arguments
@@ -50,7 +50,7 @@ The command produces:
 ## Example
 
 ```bash
-cde_analyzer phrase_builder \
+cde-analyzer phrase_builder \
     -i cdes_lemmatized.json \
     -m CDEItem \
     -o output/kmer_analysis

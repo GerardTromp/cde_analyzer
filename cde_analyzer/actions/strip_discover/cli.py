@@ -85,7 +85,9 @@ def register_subparser(subparser: ArgumentParser):
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
         help="Field paths to search for patterns "
-             "(default: definitions.*.definition designations.*.designation)",
+             "(default: definitions.*.definition designations.*.designation). "
+             "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
+             "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
     subparser.add_argument(
         "--expand-variants",
@@ -237,6 +239,16 @@ def register_subparser(subparser: ArgumentParser):
         metavar="FILE",
         help="Write subsumption report showing which patterns were removed and why.",
     )
+    subparser.add_argument(
+        "--min-prefix-tinyids",
+        type=int,
+        default=0,
+        help="Enable prefix extraction during coalesce: groups patterns by common prefix "
+             "and replaces them with the shortest prefix meeting this tinyId threshold. "
+             "Example: 'as part of Neuro-QOL Lower...' and 'as part of Neuro-QOL Upper...' "
+             "become 'as part of Neuro-QOL' if it covers enough tinyIds. "
+             "Use with --coalesce-variants. Default 0 = disabled.",
+    )
 
     # Abbreviation discovery mode
     subparser.add_argument(
@@ -246,8 +258,16 @@ def register_subparser(subparser: ArgumentParser):
         help="Discovery mode: extract abbreviations from instruments.tsv or instrument_families.tsv, "
              "then scan --input JSON for designation patterns using those abbreviations. "
              "Finds patterns like '[PROMIS]' (bracketed suffix) and 'PROMIS - ' (hyphen prefix). "
-             "These patterns are often missed by k-mer mining due to short length or variant forms. "
+             "For hyphen patterns, extracts common prefix patterns (e.g., 'PROMIS - Pain Interference') "
+             "rather than full designations. Use --min-pattern-tinyids to filter by document support. "
              "Requires --input (CDE JSON) and --output (TSV). The --model flag is optional.",
+    )
+    subparser.add_argument(
+        "--min-pattern-tinyids",
+        type=int,
+        default=2,
+        help="Minimum tinyIds for abbreviation prefix patterns to be output (default: 2). "
+             "Patterns with fewer tinyIds are filtered out. Use with --discover-abbreviations.",
     )
 
     def _lazy_run_action(args):

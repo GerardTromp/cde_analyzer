@@ -14,7 +14,7 @@
 #   - Pattern TSV from phrase_grouper family analysis
 #
 # Usage:
-#   cde_analyzer workflow run workflows/phrase_family_stripping.yaml \
+#   cde-analyzer workflow run workflows/phrase_family_stripping.yaml \
 #       --set family_name=temporal \
 #       --set input_json=/path/to/input.json \
 #       --set pattern_source=/path/to/family_patterns.tsv \
@@ -59,6 +59,7 @@ steps:
       pattern_list: "${pattern_source},${pattern_column}"
       expand_variants: "${expand_variants}"
       sort_order: "${sort_order}"
+      workers: "${workers}"
 
   - name: coalesce_patterns
     action: strip_discover
@@ -83,7 +84,7 @@ steps:
         4. Save as ${curated_tsv}
 
       When ready, resume with:
-        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
 
   - name: strip_family_patterns
     action: strip_phrases

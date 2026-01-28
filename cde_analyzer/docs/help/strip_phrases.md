@@ -9,7 +9,7 @@ The `strip_phrases` command processes CDE data and removes or replaces specified
 ## Usage
 
 ```bash
-cde_analyzer strip_phrases -i INPUT -m MODEL -p PHRASES -o OUTPUT [OPTIONS]
+cde-analyzer strip_phrases -i INPUT -m MODEL -p PHRASES -o OUTPUT [OPTIONS]
 ```
 
 ## Required Arguments
@@ -85,7 +85,7 @@ Paths use dot notation with wildcard support:
 Remove phrases from all CDE records:
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes_raw.json \
     -m CDEItem \
     -p phrases_to_remove.tsv \
@@ -97,7 +97,7 @@ cde_analyzer strip_phrases \
 See what changed:
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes_raw.json \
     -m CDEItem \
     -p phrases_to_remove.json \
@@ -108,7 +108,7 @@ cde_analyzer strip_phrases \
 ### Save Diff to File
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes_raw.json \
     -m CDEItem \
     -p phrases_to_remove.tsv \

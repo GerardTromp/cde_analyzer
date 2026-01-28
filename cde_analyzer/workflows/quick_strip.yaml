@@ -9,7 +9,7 @@
 #   - Testing pattern changes
 #
 # Usage:
-#   cde_analyzer workflow run workflows/quick_strip.yaml \
+#   cde-analyzer workflow run workflows/quick_strip.yaml \
 #       --set input_json=/path/to/input.json \
 #       --set patterns=/path/to/curated.tsv \
 #       --set output_json=/path/to/output.json

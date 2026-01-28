@@ -32,7 +32,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--id-file",
         # default=str,
-        help="File containing list of item IDs (tinyId) to exclude or extract (requires --exclude / --no-exclude).",
+        help="File containing list of item IDs (tinyId) to exclude or extract. "
+             "Use file:column format to specify column (e.g., 'data.csv:tinyId'). "
+             "Cells can contain multiple tinyIds (pipe, comma, or space separated).",
     )
     subparser.add_argument(
         "--id-type", default=None, help="The type of ID, e.g., tinyId (default=None)."

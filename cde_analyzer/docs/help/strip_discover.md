@@ -14,7 +14,7 @@ This separation allows human curation between discovery and stripping.
 ## Usage
 
 ```bash
-cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv --pattern-list patterns.tsv [options]
+cde-analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv --pattern-list patterns.tsv [options]
 ```
 
 ## Modes
@@ -24,7 +24,7 @@ cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv --pattern-list
 Find verbatim occurrences of patterns in CDE text:
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json -m CDE \
     -o discovered.tsv \
     --pattern-list instruments.tsv,full_match
@@ -35,7 +35,7 @@ cde_analyzer strip_discover \
 Detect pattern containment conflicts before stripping:
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     --pattern-list patterns.tsv \
     --analyze-conflicts conflicts.tsv
 ```
@@ -45,7 +45,7 @@ cde_analyzer strip_discover \
 Find remaining anchor patterns after stripping:
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cleaned.json \
     -o false_negatives.tsv \
     --analyze-false-negatives
@@ -56,7 +56,7 @@ cde_analyzer strip_discover \
 Deduplicate patterns with merged tinyId sets:
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     --merge-patterns curated.tsv \
     -o merged.tsv
 ```
@@ -66,9 +66,42 @@ cde_analyzer strip_discover \
 Add patterns to supplementary config:
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     --add-to-supplementary curated.tsv
 ```
+
+### Coalesce Mode
+
+Reduce pattern redundancy via subsumption analysis and prefix extraction:
+
+```bash
+cde-analyzer strip_discover \
+    --coalesce-variants discovered.tsv \
+    -o coalesced.tsv \
+    --coalesce-report subsumption_report.tsv \
+    --min-prefix-tinyids 5
+```
+
+**Coalesce performs two reduction phases**:
+
+1. **Subsumption Analysis**: Removes patterns where one is a substring of another with overlapping tinyIds
+2. **Prefix Extraction**: Groups patterns by common word prefix and replaces with shortest prefix meeting the tinyId threshold
+
+### Abbreviation Discovery Mode
+
+Find designation patterns using abbreviations from instruments.tsv:
+
+```bash
+cde-analyzer strip_discover \
+    --discover-abbreviations instruments.tsv \
+    -i cdes.json \
+    -o abbrev_patterns.tsv \
+    --min-pattern-tinyids 2
+```
+
+**Discovers two pattern types**:
+- **Bracketed suffix**: `[PROMIS]`, `[NHANES]`
+- **Hyphen prefix**: `PROMIS - Pain Interference`, `Neuro-QOL - Anxiety`
 
 ## Options
 
@@ -131,6 +164,21 @@ cde_analyzer strip_discover \
 | `--add-to-supplementary` | | Import curated TSV to `supplementary_patterns.yaml` |
 | `--supplementary-section` | `added_patterns` | YAML section name for imports |
 
+### Coalesce Mode
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--coalesce-variants` | | TSV file to coalesce (subsumption + prefix extraction) |
+| `--coalesce-report` | | Write subsumption/prefix report showing removed patterns |
+| `--min-prefix-tinyids` | `0` | Enable prefix extraction: groups patterns by common prefix and replaces with shortest prefix meeting this tinyId threshold. Default 0 = disabled. |
+
+### Abbreviation Discovery
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--discover-abbreviations` | | Extract abbreviations from instruments.tsv and scan for designation patterns |
+| `--min-pattern-tinyids` | `2` | Minimum tinyIds for abbreviation prefix patterns to be output |
+
 ### Merge Mode
 
 | Option | Default | Description |
@@ -155,7 +203,7 @@ The output TSV contains:
 ### Basic Discovery
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json -m CDE \
     -o discovered.tsv \
     --pattern-list instruments_verbatim.tsv,full_match
@@ -164,7 +212,7 @@ cde_analyzer strip_discover \
 ### With Variant Expansion
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json -m CDE \
     -o discovered.tsv \
     --pattern-list instruments_verbatim.tsv,full_match \
@@ -175,7 +223,7 @@ cde_analyzer strip_discover \
 ### Parallel Processing
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json -m CDE \
     -o discovered.tsv \
     --pattern-list patterns.tsv \
@@ -185,12 +233,12 @@ cde_analyzer strip_discover \
 ### Analyze Conflicts Before Stripping
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     --pattern-list discovered.tsv \
     --analyze-conflicts conflicts.tsv
 
 # Review conflicts.tsv, then strip
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes.json -m CDE \
     -o cleaned.json \
     --patterns discovered.tsv
@@ -200,7 +248,7 @@ cde_analyzer strip_phrases \
 
 ```bash
 # 1. Analyze what's left after stripping
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cleaned.json \
     -o false_negatives.tsv \
     --analyze-false-negatives
@@ -209,11 +257,49 @@ cde_analyzer strip_discover \
 # Set 'include' column to 'yes' for patterns to add
 
 # 3. Import to supplementary patterns
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     --add-to-supplementary false_negatives_curated.tsv
 
 # 4. Re-run instrument_miner with --extract-supplementary
 ```
+
+### Coalesce with Prefix Extraction
+
+```bash
+# Reduce 553 patterns to ~50 by extracting common prefixes
+cde-analyzer strip_discover \
+    --coalesce-variants discovered_instruments.tsv \
+    -o coalesced_instruments.tsv \
+    --coalesce-report subsumption_report.tsv \
+    --min-prefix-tinyids 5
+```
+
+**How prefix extraction works**:
+
+```
+Input patterns (3 patterns, overlapping tinyIds):
+  "as part of Neuro-QOL Lower Extremity Function" (15 tinyIds)
+  "as part of Neuro-QOL Upper Extremity Function" (12 tinyIds)
+  "as part of Neuro-QOL Anxiety" (8 tinyIds)
+
+With --min-prefix-tinyids=5:
+  Output: "as part of Neuro-QOL" (35 tinyIds, union of above)
+```
+
+### Abbreviation Pattern Discovery
+
+```bash
+# Find [PROMIS] and "PROMIS - ..." patterns
+cde-analyzer strip_discover \
+    --discover-abbreviations instruments.tsv \
+    -i cdes.json \
+    -o abbrev_patterns.tsv \
+    --min-pattern-tinyids 2
+```
+
+Catches patterns that k-mer mining misses:
+- `[PROMIS]` - bracketed suffix (often at end of designation)
+- `PROMIS - Pain Interference` - hyphen prefix patterns
 
 ## Workflow Integration
 

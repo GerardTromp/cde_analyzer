@@ -521,7 +521,8 @@ def discover_abbreviation_patterns(
     json_path: str,
     abbreviations: Set[str],
     output_path: str,
-    fields: List[str] = None
+    fields: List[str] = None,
+    min_pattern_tinyids: int = 2
 ) -> Dict[str, Dict]:
     """
     Discover designation patterns that use known abbreviations.
@@ -530,11 +531,16 @@ def discover_abbreviation_patterns(
     1. [ABBREV] - bracketed suffix (e.g., "[PROMIS]", "[Neuro-QOL]")
     2. ABBREV -  - hyphen prefix (e.g., "PROMIS - Pain Interference...")
 
+    For hyphen patterns, extracts common prefix patterns rather than full designations.
+    Groups designations by abbreviation and finds longest common prefixes that meet
+    the min_pattern_tinyids threshold.
+
     Args:
         json_path: Path to CDE JSON file.
         abbreviations: Set of abbreviations to search for.
         output_path: Path to write output TSV.
         fields: Field paths to search (default: designations.*.designation)
+        min_pattern_tinyids: Minimum tinyIds for a prefix pattern to be output (default: 2)
 
     Returns:
         Dict mapping pattern -> {count, tinyIds, type}
@@ -551,8 +557,8 @@ def discover_abbreviation_patterns(
     # Pattern 1: [ABBREV] at end or anywhere
     bracketed_regex = re.compile(rf'\[({abbrev_pattern})\]', re.IGNORECASE)
 
-    # Pattern 2: ABBREV -  at start of string
-    hyphen_regex = re.compile(rf'^({abbrev_pattern})\s+-\s+', re.IGNORECASE)
+    # Pattern 2: ABBREV -  at start of string (capture the rest too)
+    hyphen_regex = re.compile(rf'^({abbrev_pattern})\s+-\s+(.+)$', re.IGNORECASE)
 
     # Load JSON
     with open(json_path, encoding="utf-8") as f:
@@ -560,7 +566,8 @@ def discover_abbreviation_patterns(
 
     # Track discovered patterns
     bracketed_patterns: Dict[str, Dict] = defaultdict(lambda: {'count': 0, 'tinyIds': set(), 'abbrev': ''})
-    hyphen_patterns: Dict[str, Dict] = defaultdict(lambda: {'count': 0, 'tinyIds': set(), 'abbrev': ''})
+    # For hyphen patterns, group by abbreviation first to find common prefixes
+    hyphen_by_abbrev: Dict[str, List[Dict]] = defaultdict(list)
 
     # Scan each record
     for item in data:
@@ -579,12 +586,17 @@ def discover_abbreviation_patterns(
                 bracketed_patterns[designation]['tinyIds'].add(tiny_id)
                 bracketed_patterns[designation]['abbrev'] = match.group(1)
 
-            # Check for hyphen prefix pattern
+            # Check for hyphen prefix pattern - collect for prefix analysis
             match = hyphen_regex.match(designation)
             if match:
-                hyphen_patterns[designation]['count'] += 1
-                hyphen_patterns[designation]['tinyIds'].add(tiny_id)
-                hyphen_patterns[designation]['abbrev'] = match.group(1)
+                abbrev = match.group(1)
+                rest = match.group(2)  # Text after "ABBREV - "
+                hyphen_by_abbrev[abbrev.upper()].append({
+                    'full_text': designation,
+                    'abbrev': abbrev,
+                    'rest': rest,
+                    'tinyId': tiny_id
+                })
 
         # Also check definitions if in field list
         if "definitions.*.definition" in fields:
@@ -601,37 +613,112 @@ def discover_abbreviation_patterns(
 
                 match = hyphen_regex.match(definition)
                 if match:
-                    hyphen_patterns[definition]['count'] += 1
-                    hyphen_patterns[definition]['tinyIds'].add(tiny_id)
-                    hyphen_patterns[definition]['abbrev'] = match.group(1)
+                    abbrev = match.group(1)
+                    rest = match.group(2)
+                    hyphen_by_abbrev[abbrev.upper()].append({
+                        'full_text': definition,
+                        'abbrev': abbrev,
+                        'rest': rest,
+                        'tinyId': tiny_id
+                    })
+
+    # Extract common prefix patterns from hyphen patterns
+    hyphen_patterns: Dict[str, Dict] = {}
+
+    for abbrev_key, items in hyphen_by_abbrev.items():
+        if not items:
+            continue
+
+        # Get the canonical abbreviation form (from first item)
+        canonical_abbrev = items[0]['abbrev']
+
+        # Tokenize each "rest" portion and build prefix counts
+        prefix_tinyids: Dict[str, set] = defaultdict(set)
+
+        for item in items:
+            rest = item['rest']
+            tiny_id = item['tinyId']
+            tokens = rest.split()
+
+            # Build all prefixes from this designation
+            for i in range(1, len(tokens) + 1):
+                prefix = ' '.join(tokens[:i])
+                prefix_tinyids[prefix].add(tiny_id)
+
+        # Find longest prefixes that meet min_pattern_tinyids threshold
+        # Sort by length descending, then by tinyId count descending
+        sorted_prefixes = sorted(
+            prefix_tinyids.items(),
+            key=lambda x: (-len(x[0].split()), -len(x[1]))
+        )
+
+        # Greedy selection: pick longest prefixes that cover uncovered tinyIds
+        covered_tinyids: set = set()
+        selected_patterns = []
+
+        for prefix, tinyids in sorted_prefixes:
+            if len(tinyids) < min_pattern_tinyids:
+                continue
+
+            # Check if this prefix covers any new tinyIds
+            new_tinyids = tinyids - covered_tinyids
+            if new_tinyids:
+                pattern = f"{canonical_abbrev} - {prefix}"
+                selected_patterns.append({
+                    'pattern': pattern,
+                    'tinyIds': tinyids,
+                    'abbrev': canonical_abbrev,
+                    'count': len(tinyids)
+                })
+                covered_tinyids.update(tinyids)
+
+        # Add selected patterns
+        for p in selected_patterns:
+            hyphen_patterns[p['pattern']] = {
+                'count': p['count'],
+                'tinyIds': p['tinyIds'],
+                'abbrev': p['abbrev']
+            }
+
+        # Log uncovered items (singletons that don't meet threshold)
+        all_tinyids = {item['tinyId'] for item in items}
+        uncovered = all_tinyids - covered_tinyids
+        if uncovered:
+            logger.debug(f"{canonical_abbrev}: {len(uncovered)} tinyIds not covered by prefix patterns")
 
     # Write output TSV
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("pattern\ttinyIds\ttype\tabbreviation\tcount\n")
 
         # Write bracketed patterns (sorted by count descending)
+        # Filter by min_pattern_tinyids
         for pattern, info in sorted(bracketed_patterns.items(), key=lambda x: -x[1]['count']):
-            tinyids_str = ' '.join(sorted(info['tinyIds']))
-            f.write(f"{pattern}\t{tinyids_str}\t[ABBREV]\t{info['abbrev']}\t{info['count']}\n")
+            if len(info['tinyIds']) >= min_pattern_tinyids:
+                tinyids_str = ' '.join(sorted(info['tinyIds']))
+                f.write(f"{pattern}\t{tinyids_str}\t[ABBREV]\t{info['abbrev']}\t{info['count']}\n")
 
-        # Write hyphen patterns (sorted by count descending)
+        # Write hyphen prefix patterns (sorted by count descending)
         for pattern, info in sorted(hyphen_patterns.items(), key=lambda x: -x[1]['count']):
             tinyids_str = ' '.join(sorted(info['tinyIds']))
             f.write(f"{pattern}\t{tinyids_str}\tABBREV - \t{info['abbrev']}\t{info['count']}\n")
 
+    # Count output
+    bracketed_count = sum(1 for info in bracketed_patterns.values() if len(info['tinyIds']) >= min_pattern_tinyids)
+    logger.info(f"Wrote {bracketed_count + len(hyphen_patterns)} patterns to {output_path} "
+                f"(min_tinyids={min_pattern_tinyids})")
+
     # Summary by abbreviation
     abbrev_summary = defaultdict(lambda: {'bracketed': 0, 'hyphen': 0, 'tinyIds_b': set(), 'tinyIds_h': set()})
     for pattern, info in bracketed_patterns.items():
-        abbrev_summary[info['abbrev']]['bracketed'] += 1
-        abbrev_summary[info['abbrev']]['tinyIds_b'].update(info['tinyIds'])
+        if len(info['tinyIds']) >= min_pattern_tinyids:
+            abbrev_summary[info['abbrev']]['bracketed'] += 1
+            abbrev_summary[info['abbrev']]['tinyIds_b'].update(info['tinyIds'])
     for pattern, info in hyphen_patterns.items():
         abbrev_summary[info['abbrev']]['hyphen'] += 1
         abbrev_summary[info['abbrev']]['tinyIds_h'].update(info['tinyIds'])
 
-    logger.info(f"Wrote {len(bracketed_patterns) + len(hyphen_patterns)} patterns to {output_path}")
-
     return {
-        'bracketed_patterns': dict(bracketed_patterns),
+        'bracketed_patterns': {k: v for k, v in bracketed_patterns.items() if len(v['tinyIds']) >= min_pattern_tinyids},
         'hyphen_patterns': dict(hyphen_patterns),
         'abbrev_summary': dict(abbrev_summary)
     }
@@ -840,20 +927,27 @@ def run_action(args: Namespace):
         pattern_column = getattr(args, 'merge_pattern_column', 'pattern')
         tinyids_column = getattr(args, 'merge_tinyids_column', 'tinyIds')
         report_path = getattr(args, 'coalesce_report', None)
+        min_prefix_tinyids = getattr(args, 'min_prefix_tinyids', 0)
 
         logger.info(f"Coalesce mode: removing subsumed patterns from {coalesce_variants}")
+        if min_prefix_tinyids > 0:
+            logger.info(f"Prefix extraction enabled (min_tinyids={min_prefix_tinyids})")
+
         stats = coalesce_variants_tsv(
             coalesce_variants,
             args.output,
             pattern_column=pattern_column,
             tinyids_column=tinyids_column,
-            report_path=report_path
+            report_path=report_path,
+            min_prefix_tinyids=min_prefix_tinyids
         )
 
         print(f"\nCoalesce complete:")
         print(f"  Input:    {stats['input_patterns']} patterns")
         print(f"  Output:   {stats['output_patterns']} patterns")
         print(f"  Subsumed: {stats['subsumed_count']} patterns removed")
+        if stats.get('prefix_extracted_count', 0) > 0:
+            print(f"  Prefixes: {stats['prefix_extracted_count']} patterns → common stems")
         if report_path:
             print(f"  Report:   {report_path}")
         print(f"  Wrote:    {args.output}")
@@ -900,11 +994,13 @@ def run_action(args: Namespace):
 
         logger.info(f"Scanning {args.input} for abbreviation-based patterns...")
         field_paths = getattr(args, 'fields', ["designations.*.designation"])
+        min_tinyids = getattr(args, 'min_pattern_tinyids', 2)
         results = discover_abbreviation_patterns(
             args.input,
             abbreviations,
             args.output,
-            fields=field_paths
+            fields=field_paths,
+            min_pattern_tinyids=min_tinyids
         )
 
         # Print summary
@@ -915,9 +1011,10 @@ def run_action(args: Namespace):
         print(f"\nAbbreviation Pattern Discovery:")
         print(f"=" * 70)
         print(f"Abbreviations searched: {len(abbreviations)}")
+        print(f"Min tinyIds filter: {min_tinyids}")
         print(f"Patterns found:")
         print(f"  [ABBREV] suffix patterns: {n_bracketed}")
-        print(f"  ABBREV -  prefix patterns: {n_hyphen}")
+        print(f"  ABBREV -  prefix patterns (common prefixes): {n_hyphen}")
         print(f"  Total: {total}")
 
         # Summary by abbreviation

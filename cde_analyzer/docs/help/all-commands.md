@@ -8,14 +8,14 @@ Quick reference for all CDE Analyzer commands. For detailed documentation, see t
 
 ## Launcher
 
-The `cde_analyzer` script is a launcher that dispatches to individual commands. It does not perform any analysis itself.
+The `cde-analyzer` command is a launcher that dispatches to individual commands. It does not perform any analysis itself.
 
 ```bash
 # List all available commands
-cde_analyzer --help
+cde-analyzer --help
 
 # Get help for a specific command
-cde_analyzer <command> --help
+cde-analyzer <command> --help
 ```
 
 ---

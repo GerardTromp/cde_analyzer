@@ -13,7 +13,7 @@ The `phrase_grouper` action analyzes phrases to identify families based on share
 ## Usage
 
 ```bash
-cde_analyzer phrase_grouper -i verbatim_phrases.tsv -o phrase_families/ [options]
+cde-analyzer phrase_grouper -i verbatim_phrases.tsv -o phrase_families/ [options]
 ```
 
 ## Options
@@ -85,7 +85,7 @@ cde_analyzer phrase_grouper -i verbatim_phrases.tsv -o phrase_families/ [options
 ### Basic Usage
 
 ```bash
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i phrase_output/verbatim_phrases.tsv \
     -o phrase_families/
 ```
@@ -93,7 +93,7 @@ cde_analyzer phrase_grouper \
 ### Custom K-mer Range
 
 ```bash
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i verbatim_phrases.tsv \
     -o families/ \
     --k-min 3 \
@@ -103,7 +103,7 @@ cde_analyzer phrase_grouper \
 ### Prefix-Only Analysis
 
 ```bash
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i verbatim_phrases.tsv \
     -o prefix_families/ \
     --trees prefix \
@@ -113,7 +113,7 @@ cde_analyzer phrase_grouper \
 ### Filter Low-Content Patterns
 
 ```bash
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i verbatim_phrases.tsv \
     -o families/ \
     --min-content-words 2
@@ -168,10 +168,10 @@ Use after `phrase_miner` to analyze discovered phrases:
 
 ```bash
 # 1. Mine phrases
-cde_analyzer phrase_miner -i cdes.json -o phrase_output/
+cde-analyzer phrase_miner -i cdes.json -o phrase_output/
 
 # 2. Group into families
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i phrase_output/verbatim_phrases.tsv \
     -o phrase_families/
 ```

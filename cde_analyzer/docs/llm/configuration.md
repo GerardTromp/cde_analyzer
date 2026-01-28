@@ -76,7 +76,7 @@ chmod 600 ~/.cde_analyzer/llm_config.json
 Use `--config-file` to specify an alternative location:
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --config-file /path/to/custom_config.json
@@ -135,13 +135,13 @@ Set environment variables for each provider:
 
 ```bash
 # Single provider
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --api-keys "claude:sk-ant-api03-..."
 
 # Multiple providers
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --providers claude openai \
@@ -216,7 +216,7 @@ cde_analyzer llm_classify \
 Verify configuration without making API calls:
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --providers claude openai \

@@ -19,7 +19,7 @@ Genomic tools excel at finding repeated sequences in DNA/protein data. By encodi
 ## Usage
 
 ```bash
-cde_analyzer lemma_fasta --input INPUT -m MODEL -o OUTPUT [OPTIONS]
+cde-analyzer lemma_fasta --input INPUT -m MODEL -o OUTPUT [OPTIONS]
 ```
 
 ## Arguments
@@ -85,7 +85,7 @@ Where:
 ## Example
 
 ```bash
-cde_analyzer lemma_fasta \
+cde-analyzer lemma_fasta \
     --input cdes.json \
     -m CDEItem \
     -o output/cde_fasta \
@@ -133,7 +133,7 @@ The output can be processed by modified genomic tools:
 
 ## Workflow
 
-1. **Export to FASTA**: `cde_analyzer lemma_fasta ...`
+1. **Export to FASTA**: `cde-analyzer lemma_fasta ...`
 2. **Run repeat finder**: Modified genomic tool on FASTA output
 3. **Decode results**: Convert uint16 tokens back to words using vocabulary
 4. **Curate phrases**: Review and select phrases for removal

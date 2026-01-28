@@ -9,7 +9,7 @@ The `diagnose_strip` action analyzes cleaned JSON files to find patterns that we
 ## Usage
 
 ```bash
-cde_analyzer diagnose_strip -i cleaned.json -m CDE -o remaining.tsv [options]
+cde-analyzer diagnose_strip -i cleaned.json -m CDE -o remaining.tsv [options]
 ```
 
 ## Options
@@ -70,7 +70,7 @@ The output TSV contains:
 ### Basic Diagnosis
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv
@@ -79,7 +79,7 @@ cde_analyzer diagnose_strip \
 ### With Original Comparison
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv \
@@ -89,7 +89,7 @@ cde_analyzer diagnose_strip \
 ### Custom Anchors
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv \
@@ -99,7 +99,7 @@ cde_analyzer diagnose_strip \
 ### Generate Pattern Suggestions
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv \
@@ -109,7 +109,7 @@ cde_analyzer diagnose_strip \
 ### Filter Low-Frequency Patterns
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv \
@@ -122,22 +122,22 @@ Use `diagnose_strip` at the end of the stripping workflow to identify gaps:
 
 ```bash
 # 1. Extract instruments
-cde_analyzer instrument_miner -i cdes.json -o instruments/
+cde-analyzer instrument_miner -i cdes.json -o instruments/
 
 # 2. Discover patterns
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json -m CDE \
     -o discovered.tsv \
     --pattern-list instruments/instruments_verbatim.tsv
 
 # 3. Strip patterns
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes.json -m CDE \
     -o cleaned.json \
     --patterns discovered.tsv
 
 # 4. Diagnose what remains
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json \
     -m CDE \
     -o remaining.tsv \
@@ -170,7 +170,7 @@ added_patterns:
 Verify stripping completeness:
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json -m CDE \
     -o qa_report.tsv \
     --min-count 1
@@ -184,7 +184,7 @@ wc -l qa_report.tsv
 Compare before and after:
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json -m CDE \
     -o remaining.tsv \
     --original original.json
@@ -197,7 +197,7 @@ cde_analyzer diagnose_strip \
 Find new instrument patterns not in the original list:
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cleaned.json -m CDE \
     -o candidates.tsv \
     --suggest-patterns \

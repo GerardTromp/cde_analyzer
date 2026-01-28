@@ -187,27 +187,27 @@ After stripping, some patterns may remain. This loop recovers them:
 
 ```bash
 # 1. Mine instruments
-cde_analyzer instrument_miner -i cdes.json -o inst_output/ \
+cde-analyzer instrument_miner -i cdes.json -o inst_output/ \
     --detect-families --family-summary
 
 # 1b. Discover abbreviation-based patterns (catches [PROMIS], PROMIS - , etc.)
-cde_analyzer strip_discover --discover-abbreviations inst_output/instruments.tsv \
+cde-analyzer strip_discover --discover-abbreviations inst_output/instruments.tsv \
     -i cdes.json -o inst_output/abbrev_patterns.tsv
 
 # 2. Discover verbatim occurrences with variants
-cde_analyzer strip_discover -i cdes.json -m CDE \
+cde-analyzer strip_discover -i cdes.json -m CDE \
     -o discovered_inst.tsv -p inst_output/instruments.tsv \
     --additional-patterns inst_output/abbrev_patterns.tsv \
     --expand-variants --discover-bare-names
 
 # 3. Coalesce redundant variants
-cde_analyzer strip_discover --coalesce-variants discovered_inst.tsv \
+cde-analyzer strip_discover --coalesce-variants discovered_inst.tsv \
     -o coalesced_inst.tsv --coalesce-report coalesce_report.tsv
 
 # 4. [CURATOR REVIEW: edit coalesced_inst.tsv]
 
 # 5. Strip instruments from CDE JSON
-cde_analyzer strip_phrases -i cdes.json -m CDE \
+cde-analyzer strip_phrases -i cdes.json -m CDE \
     -o inst_stripped.json --patterns coalesced_inst.tsv
 ```
 
@@ -215,22 +215,22 @@ cde_analyzer strip_phrases -i cdes.json -m CDE \
 
 ```bash
 # 1. Mine phrases from instrument-stripped data
-cde_analyzer phrase_miner -i inst_stripped.json -o phrase_output/ \
+cde-analyzer phrase_miner -i inst_stripped.json -o phrase_output/ \
     --enable-subsumption --analyze-phrase-families
 
 # 2. Discover verbatim occurrences with variants
-cde_analyzer strip_discover -i inst_stripped.json -m CDE \
+cde-analyzer strip_discover -i inst_stripped.json -m CDE \
     -o discovered_phrases.tsv -p phrase_output/verbatim_phrases.tsv \
     --expand-variants
 
 # 3. Coalesce redundant variants
-cde_analyzer strip_discover --coalesce-variants discovered_phrases.tsv \
+cde-analyzer strip_discover --coalesce-variants discovered_phrases.tsv \
     -o coalesced_phrases.tsv --coalesce-report phrase_coalesce.tsv
 
 # 4. [CURATOR REVIEW: edit coalesced_phrases.tsv]
 
 # 5. Strip phrases from CDE JSON
-cde_analyzer strip_phrases -i inst_stripped.json -m CDE \
+cde-analyzer strip_phrases -i inst_stripped.json -m CDE \
     -o final_stripped.json --patterns coalesced_phrases.tsv
 ```
 
@@ -238,11 +238,11 @@ cde_analyzer strip_phrases -i inst_stripped.json -m CDE \
 
 ```bash
 # A. Diagnose remaining patterns
-cde_analyzer diagnose_strip -i final_stripped.json -m CDE \
+cde-analyzer diagnose_strip -i final_stripped.json -m CDE \
     -o remaining.tsv --suggest-patterns
 
 # OR analyze false negatives directly
-cde_analyzer strip_discover -i final_stripped.json \
+cde-analyzer strip_discover -i final_stripped.json \
     --analyze-false-negatives -o false_neg.tsv
 
 # A2. Search for known abbreviations (instruments only)
@@ -253,10 +253,10 @@ grep -E '(PROMIS|Neuro-QOL|MDS-UPDRS|PHQ|GAD) - ' inst_stripped.json
 # B. [CURATOR REVIEW: combine results, mark valid patterns]
 
 # C. After curator review, import to supplementary config
-cde_analyzer strip_discover --add-to-supplementary curated_fn.tsv
+cde-analyzer strip_discover --add-to-supplementary curated_fn.tsv
 
 # D. Re-mine with supplementary patterns
-cde_analyzer instrument_miner -i cdes.json -o inst_output/ \
+cde-analyzer instrument_miner -i cdes.json -o inst_output/ \
     --extract-supplementary
 ```
 

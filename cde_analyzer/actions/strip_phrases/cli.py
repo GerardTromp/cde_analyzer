@@ -69,7 +69,9 @@ def register_subparser(subparser: ArgumentParser):
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
         help="Field paths to strip phrases from "
-             "(default: definitions.*.definition designations.*.designation)",
+             "(default: definitions.*.definition designations.*.designation). "
+             "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
+             "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
     subparser.add_argument(
         "--sort-order",

@@ -5,7 +5,7 @@ Batch expand abbreviations to discover full instrument phrases.
 ## Synopsis
 
 ```bash
-cde_analyzer batch_expand_abbreviations \
+cde-analyzer batch_expand_abbreviations \
     -i <input.json> \
     --abbreviations <instruments.tsv> \
     -o <output_dir>
@@ -96,7 +96,7 @@ One row per abbreviation processed:
 
 ```bash
 # Run after instrument_miner
-cde_analyzer batch_expand_abbreviations \
+cde-analyzer batch_expand_abbreviations \
     -i cdes.json \
     --abbreviations phase1_output/instruments.tsv \
     -o phase1_output/abbreviation_expansions
@@ -106,7 +106,7 @@ cde_analyzer batch_expand_abbreviations \
 
 ```bash
 # More aggressive mining with longer phrases
-cde_analyzer batch_expand_abbreviations \
+cde-analyzer batch_expand_abbreviations \
     -i cdes.json \
     --abbreviations instruments.tsv \
     -o expansions/ \
@@ -119,7 +119,7 @@ cde_analyzer batch_expand_abbreviations \
 
 ```bash
 # Skip common false positives
-cde_analyzer batch_expand_abbreviations \
+cde-analyzer batch_expand_abbreviations \
     -i cdes.json \
     --abbreviations instruments.tsv \
     -o expansions/ \

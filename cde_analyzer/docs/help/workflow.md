@@ -5,32 +5,85 @@ YAML-based workflow orchestrator for CDE analysis pipelines.
 ## Synopsis
 
 ```bash
-cde_analyzer workflow run <workflow.yaml> [--set KEY=VALUE] [--dry-run]
-cde_analyzer workflow resume [--state-file FILE]
-cde_analyzer workflow status [--state-file FILE]
-cde_analyzer workflow list [--dir DIR]
+# List and copy templates (recommended first steps)
+cde-analyzer workflow list
+cde-analyzer workflow copy <workflow_name> [--as NAME] [--dest DIR]
+
+# Execute workflows
+cde-analyzer workflow run <workflow.yaml> [--set KEY=VALUE] [--dry-run]
+cde-analyzer workflow resume [--state-file FILE]
+cde-analyzer workflow status [--state-file FILE]
 ```
 
 ## Description
 
 The `workflow` command executes sequential pipelines defined in YAML files. It provides:
 
+- **Template management** - List and copy built-in workflow templates
 - **Variable substitution** - Environment variables, YAML defaults, and CLI overrides
 - **Human checkpoints** - Pause for curator review, resume later
 - **State persistence** - Track progress across sessions
 - **Dry-run mode** - Preview commands without executing
 
+## Recommended Workflow
+
+The built-in workflows in the codebase are templates. Copy them to your working directory before running to allow customization without modifying the codebase:
+
+```bash
+# 1. List available templates
+cde-analyzer workflow list
+
+# 2. Copy template to current directory
+cde-analyzer workflow copy instrument_detection
+
+# 3. Edit the copied file to customize variables/arguments
+#    (e.g., change input paths, output directory, parameters)
+
+# 4. Run your customized workflow
+cde-analyzer workflow run ./instrument_detection.yaml
+```
+
 ## Subcommands
+
+### list
+
+List available workflow templates.
+
+```bash
+cde-analyzer workflow list
+cde-analyzer workflow list --dir /path/to/workflows
+```
+
+Options:
+- `--dir DIR` - Directory to search for workflow files (default: built-in workflows/)
+
+### copy
+
+Copy a workflow template to the current directory for customization.
+
+```bash
+cde-analyzer workflow copy instrument_detection
+cde-analyzer workflow copy instrument_detection --as my_pipeline.yaml
+cde-analyzer workflow copy instrument_detection --dest ./pipelines/
+cde-analyzer workflow copy instrument_detection --force
+```
+
+Options:
+- `--as NAME` - Output filename (default: same as source)
+- `--dest DIR` - Destination directory (default: current directory)
+- `--force` - Overwrite existing file without prompting
+
+After copying, edit the workflow YAML to customize variables and arguments for your project.
 
 ### run
 
 Execute a workflow from a YAML file.
 
 ```bash
-cde_analyzer workflow run workflows/instrument_pipeline.yaml
-cde_analyzer workflow run workflows/instrument_pipeline.yaml --set input_json=/path/to/cdes.json
-cde_analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
-cde_analyzer workflow run workflows/instrument_pipeline.yaml --from-step coalesce_patterns
+cde-analyzer workflow run workflows/instrument_pipeline.yaml
+cde-analyzer workflow run workflows/instrument_pipeline.yaml --set input_json=/path/to/cdes.json
+cde-analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
+cde-analyzer workflow run workflows/instrument_pipeline.yaml --from-step coalesce_patterns
 ```
 
 Options:
@@ -44,8 +97,8 @@ Options:
 Resume a paused workflow after a checkpoint.
 
 ```bash
-cde_analyzer workflow resume
-cde_analyzer workflow resume --state-file /path/to/.workflow_state.json
+cde-analyzer workflow resume
+cde-analyzer workflow resume --state-file /path/to/.workflow_state.json
 ```
 
 Options:
@@ -57,25 +110,13 @@ Options:
 Show workflow execution status.
 
 ```bash
-cde_analyzer workflow status
-cde_analyzer workflow status --verbose
+cde-analyzer workflow status
+cde-analyzer workflow status --verbose
 ```
 
 Options:
 - `--state-file FILE` - Path to workflow state file
 - `--verbose` - Show detailed step information including variables
-
-### list
-
-List available workflow files.
-
-```bash
-cde_analyzer workflow list
-cde_analyzer workflow list --dir /path/to/workflows
-```
-
-Options:
-- `--dir DIR` - Directory to search for workflow files (default: workflows/)
 
 ## Workflow YAML Format
 
@@ -92,7 +133,7 @@ variables:
   instruments_tsv: "${output_dir}/instruments.tsv"
 
 steps:
-  # Action step - executes a cde_analyzer action
+  # Action step - executes a cde-analyzer action
   - name: mine_instruments
     action: instrument_miner
     args:
@@ -105,7 +146,7 @@ steps:
     checkpoint: true
     message: |
       Review ${output_dir}/coalesced.tsv
-      When ready, run: cde_analyzer workflow resume
+      When ready, run: cde-analyzer workflow resume
 
   # More action steps after checkpoint
   - name: strip_instruments
@@ -120,11 +161,23 @@ steps:
 
 Variables are resolved in this order (later overrides earlier):
 
-1. **Environment variables** - `$VAR` or `${VAR}`
-2. **YAML defaults** - Variables section in workflow file
-3. **CLI overrides** - `--set key=value` arguments
+1. **System variables** - Auto-detected (see below)
+2. **Environment variables** - `$VAR` or `${VAR}`
+3. **YAML defaults** - Variables section in workflow file
+4. **CLI overrides** - `--set key=value` arguments
 
 Default value syntax: `${VAR:-default}` uses "default" if VAR is not set.
+
+### Auto-Detected System Variables
+
+The following variables are automatically detected at runtime:
+
+| Variable | Description |
+|----------|-------------|
+| `${cpu_count}` | Total logical CPUs on the system |
+| `${workers}` | Recommended worker count (cpu_count - 1, min 1) |
+
+These can be overridden in the workflow YAML or via `--set workers=N`.
 
 ## State File
 
@@ -141,33 +194,42 @@ Workflow state is saved to `.workflow_state.json` in the state directory (defaul
 
 ```bash
 # Run with default paths
-cde_analyzer workflow run workflows/instrument_pipeline.yaml
+cde-analyzer workflow run workflows/instrument_pipeline.yaml
 
 # Run with custom paths
-cde_analyzer workflow run workflows/instrument_pipeline.yaml \
+cde-analyzer workflow run workflows/instrument_pipeline.yaml \
     --set input_json=/data/cdes.json \
     --set output_dir=/data/phase1_output
 
 # Preview without executing
-cde_analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
+cde-analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
 ```
 
 ### After Checkpoint
 
 ```bash
 # Check status
-cde_analyzer workflow status --state-file ./phase1_output/.workflow_state.json
+cde-analyzer workflow status --state-file ./phase1_output/.workflow_state.json
 
 # After curator review, resume
-cde_analyzer workflow resume --state-file ./phase1_output/.workflow_state.json
+cde-analyzer workflow resume --state-file ./phase1_output/.workflow_state.json
 ```
 
-## Built-in Workflows
+## Built-in Workflow Templates
 
-The `workflows/` directory contains pre-built pipelines:
+The codebase includes pre-built workflow templates. Use `workflow list` to see them, and `workflow copy` to copy them to your working directory for customization:
 
-- **instrument_pipeline.yaml** - Phase 1: Instrument mining and stripping
-- **phrase_pipeline.yaml** - Phase 2: Generic phrase mining and stripping
+| Template | Description |
+|----------|-------------|
+| `instrument_detection` | Full instrument detection with abbreviation expansion |
+| `instrument_major_only` | Major instruments only (sub-instruments removed), with deduplication |
+| `instrument_pipeline` | Phase 1: Basic instrument mining and stripping |
+| `phrase_pipeline` | Phase 2: Generic phrase mining and stripping |
+| `abbreviation_expander` | Standalone abbreviation expansion |
+| `temporal_stripping` | Temporal phrase stripping |
+| `phrase_family_stripping` | Phrase family stripping |
+| `quick_strip` | Quick strip with minimal steps |
+| `full_pipeline` | Complete multi-phase stripping pipeline |
 
 ## See Also
 

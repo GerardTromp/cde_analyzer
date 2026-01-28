@@ -82,7 +82,7 @@ def mine_phrases_from_subset(
 
     Returns list of phrase dicts with frequency info.
     """
-    from logic.phrase_miner import MinerConfig, mine_phrases_from_items
+    from logic.phrase_miner import MinerConfig, mine_phrases
 
     # Convert to CDEItem objects
     items = [CDEItem.model_validate(record) for record in subset]
@@ -108,8 +108,8 @@ def mine_phrases_from_subset(
         context_aware_masking=False,
     )
 
-    # Run mining
-    token_seqs, vocab, verbatim_tracker, _ = mine_phrases_from_items(items, config)
+    # Run mining - returns (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog)
+    _, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
 
     # Extract phrases from verbatim tracker
     phrases = []
@@ -240,12 +240,13 @@ def run_action(args: Namespace):
         })
 
     # 5. Write outputs
-    # All expansions TSV
+    # All expansions TSV - always write header for downstream compatibility
     expansions_path = output_dir / "expanded_phrases.tsv"
+    fieldnames = ["abbreviation", "expanded_phrase", "frequency", "n_tinyids", "tinyids"]
     with open(expansions_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
         if all_expansions:
-            writer = csv.DictWriter(f, fieldnames=all_expansions[0].keys(), delimiter='\t')
-            writer.writeheader()
             writer.writerows(all_expansions)
     logger.info(f"Wrote {len(all_expansions)} expanded phrases to {expansions_path}")
 

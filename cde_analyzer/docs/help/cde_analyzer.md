@@ -1,18 +1,18 @@
-# `cde_analyzer` Launcher
+# `cde-analyzer` Launcher
 
-The `cde_analyzer` script is the main entry point for all CDE Analyzer commands. It is a **launcher** that dispatches to specialized action modules - it does not perform any analysis itself.
+The `cde-analyzer` command is the main entry point for all CDE Analyzer commands. It is a **launcher** that dispatches to specialized action modules - it does not perform any analysis itself.
 
 ## Usage
 
 ```bash
 # List all available commands
-cde_analyzer --help
+cde-analyzer --help
 
 # Get help for a specific command
-cde_analyzer <command> --help
+cde-analyzer <command> --help
 
 # Run a command
-cde_analyzer <command> [options]
+cde-analyzer <command> [options]
 ```
 
 ## Available Commands
@@ -48,13 +48,13 @@ This design, inspired by git/pip, enables adding new commands without impacting 
 
 ```bash
 # Detect repeated phrases in CDE data
-cde_analyzer phrase-miner -i cdes.json -o output/
+cde-analyzer phrase-miner -i cdes.json -o output/
 
 # Extract subset of records
-cde_analyzer subset -i cdes.json -o subset.json -m CDE --id-file ids.txt
+cde-analyzer subset -i cdes.json -o subset.json -m CDE --id-file ids.txt
 
 # Strip HTML from fields
-cde_analyzer strip-html --input raw.json --output clean.json -m CDE
+cde-analyzer strip-html --input raw.json --output clean.json -m CDE
 ```
 
 ## See Also

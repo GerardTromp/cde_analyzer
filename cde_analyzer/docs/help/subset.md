@@ -23,12 +23,12 @@ The `subset` command filters CDE records and outputs a smaller, schema-compliant
 
 ```bash
 # tinyId filtering
-cde_analyzer subset -i INPUT -o OUTPUT -m MODEL --id-list ID1 ID2 ...
-cde_analyzer subset -i INPUT -o OUTPUT -m MODEL --id-file ids.txt
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --id-list ID1 ID2 ...
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --id-file ids.txt
 
 # Text filtering (NEW)
-cde_analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PROMIS"
-cde_analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PROMIS"
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 ```
 
 ## Arguments
@@ -73,21 +73,21 @@ cde_analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 
 ```bash
 # Include specific records from command line
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.json \
     -m CDE \
     --id-list abc123 def456 ghi789
 
 # Include from file
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.json \
     -m CDE \
     --id-file selected_ids.txt
 
 # Exclude specific records
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_cleaned.json \
     -m CDE \
@@ -99,14 +99,14 @@ cde_analyzer subset \
 
 ```bash
 # Find all CDEs containing "PROMIS"
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o promis_subset.json \
     -m CDE \
     --text-filter "PROMIS"
 
 # Search only in definitions
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o results.json \
     -m CDE \
@@ -114,7 +114,7 @@ cde_analyzer subset \
     --fields definition
 
 # Case-sensitive search
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o results.json \
     -m CDE \
@@ -122,7 +122,7 @@ cde_analyzer subset \
     --case-sensitive
 
 # Regex: find PHQ variants (PHQ-9, PHQ-2, PHQ-15)
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o phq_subset.json \
     -m CDE \
@@ -130,7 +130,7 @@ cde_analyzer subset \
     --regex
 
 # Exclude CDEs containing certain text
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o no_promis.json \
     -m CDE \
@@ -138,7 +138,7 @@ cde_analyzer subset \
     --exclude
 
 # Search in permissible values
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes.json \
     -o results.json \
     -m CDE \
@@ -150,7 +150,7 @@ cde_analyzer subset \
 
 ```bash
 # Output to TSV
-cde_analyzer subset \
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.tsv \
     -m CDE \

@@ -1002,7 +1002,8 @@ def coalesce_variants_tsv(
     output_path: str,
     pattern_column: str = "pattern",
     tinyids_column: str = "tinyIds",
-    report_path: Optional[str] = None
+    report_path: Optional[str] = None,
+    min_prefix_tinyids: int = 0
 ) -> Dict[str, int]:
     """
     Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
@@ -1018,18 +1019,27 @@ def coalesce_variants_tsv(
 
     Since tinyIds {A,B,C} ⊆ {A,B} ∪ {C}, the base pattern is subsumed.
 
+    When min_prefix_tinyids > 0, also extracts common prefix patterns:
+    - Groups patterns by their word-level common prefixes
+    - Finds longest prefixes meeting the min_prefix_tinyids threshold
+    - Replaces groups of patterns with their common prefix pattern
+    - Example: "as part of Neuro-QOL Lower..." and "as part of Neuro-QOL Upper..."
+      become "as part of Neuro-QOL" if that prefix covers enough tinyIds
+
     Args:
         input_path: Path to input TSV file
         output_path: Path to output TSV file (coalesced patterns)
         pattern_column: Column name for patterns (default: 'pattern')
         tinyids_column: Column name for tinyIds (default: 'tinyIds')
         report_path: Optional path to write subsumption report TSV
+        min_prefix_tinyids: Minimum tinyIds for prefix extraction (0 = disabled)
 
     Returns:
         Dict with coalesce statistics:
         - 'input_patterns': Number of input patterns
         - 'output_patterns': Number of output patterns (after coalesce)
         - 'subsumed_count': Number of patterns removed by subsumption
+        - 'prefix_extracted_count': Number of patterns replaced by prefixes
         - 'subsumptions': List of (subsumed_pattern, covering_patterns) tuples
     """
     # Load all patterns with tinyIds
@@ -1110,6 +1120,95 @@ def coalesce_variants_tsv(
         else:
             kept_patterns.add(pattern)
 
+    # Phase 2: Prefix extraction (if enabled)
+    prefix_extracted_count = 0
+    prefix_replacements: Dict[str, str] = {}  # original -> prefix pattern
+
+    if min_prefix_tinyids > 0 and kept_patterns:
+        logger.info(f"Extracting prefix patterns (min_tinyids={min_prefix_tinyids})...")
+
+        # Build prefix trie from kept patterns
+        # Each node tracks: tinyIds at this depth, patterns that pass through
+        from dataclasses import dataclass, field as dc_field
+        from typing import Set, Dict as TDict
+
+        @dataclass
+        class PrefixNode:
+            children: TDict[str, 'PrefixNode'] = dc_field(default_factory=dict)
+            tinyids: Set[str] = dc_field(default_factory=set)
+            patterns: Set[str] = dc_field(default_factory=set)  # original patterns passing through
+            depth: int = 0
+
+        root = PrefixNode()
+
+        # Insert all kept patterns into trie
+        for pattern in kept_patterns:
+            tokens = pattern.split()
+            node = root
+            for i, token in enumerate(tokens):
+                if token not in node.children:
+                    node.children[token] = PrefixNode(depth=i + 1)
+                node = node.children[token]
+                node.tinyids.update(pattern_to_tinyids[pattern])
+                node.patterns.add(pattern)
+
+        # Find deepest prefixes meeting threshold using greedy selection
+        # Traverse trie and collect candidate prefixes
+        candidates: List[Tuple[str, Set[str], Set[str]]] = []  # (prefix_pattern, tinyids, original_patterns)
+
+        def collect_prefixes(node: PrefixNode, path: List[str]):
+            if node.depth >= 2 and len(node.tinyids) >= min_prefix_tinyids:
+                prefix_pattern = ' '.join(path)
+                candidates.append((prefix_pattern, node.tinyids.copy(), node.patterns.copy()))
+
+            for token, child in node.children.items():
+                collect_prefixes(child, path + [token])
+
+        collect_prefixes(root, [])
+
+        # Sort by depth (longest first), then by tinyId count
+        candidates.sort(key=lambda x: (-len(x[0].split()), -len(x[1])))
+
+        # Greedy selection: longest prefixes that cover patterns
+        covered_patterns: Set[str] = set()
+        selected_prefixes: List[Tuple[str, Set[str], Set[str]]] = []
+
+        for prefix_pattern, tinyids, original_patterns in candidates:
+            # Only select if this prefix covers patterns not yet covered
+            uncovered = original_patterns - covered_patterns
+            if len(uncovered) >= 2:  # Must combine at least 2 patterns
+                # Check if all uncovered patterns meet threshold
+                combined_tinyids = set()
+                for p in uncovered:
+                    combined_tinyids.update(pattern_to_tinyids[p])
+
+                if len(combined_tinyids) >= min_prefix_tinyids:
+                    selected_prefixes.append((prefix_pattern, combined_tinyids, uncovered))
+                    covered_patterns.update(uncovered)
+
+        # Build replacement mapping and update kept_patterns
+        new_patterns_from_prefix: Dict[str, Set[str]] = {}  # prefix -> combined tinyIds
+
+        for prefix_pattern, combined_tinyids, original_patterns in selected_prefixes:
+            for orig in original_patterns:
+                if orig in kept_patterns:
+                    kept_patterns.remove(orig)
+                    prefix_replacements[orig] = prefix_pattern
+                    prefix_extracted_count += 1
+
+            # Merge tinyIds for the prefix pattern
+            if prefix_pattern not in new_patterns_from_prefix:
+                new_patterns_from_prefix[prefix_pattern] = set()
+            new_patterns_from_prefix[prefix_pattern].update(combined_tinyids)
+
+        # Add prefix patterns to kept_patterns and pattern_to_tinyids
+        for prefix_pattern, tinyids in new_patterns_from_prefix.items():
+            kept_patterns.add(prefix_pattern)
+            pattern_to_tinyids[prefix_pattern] = tinyids
+
+        logger.info(f"Prefix extraction: {prefix_extracted_count} patterns → "
+                    f"{len(new_patterns_from_prefix)} prefix patterns")
+
     # Write output (kept patterns only)
     output_patterns = sorted(kept_patterns, key=len, reverse=True)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -1118,33 +1217,43 @@ def coalesce_variants_tsv(
             tinyids_str = ' '.join(sorted(pattern_to_tinyids[pattern]))
             f.write(f"{pattern}\t{tinyids_str}\n")
 
-    # Write optional subsumption report
-    if report_path and subsumed:
+    # Write optional subsumption report (include prefix extractions)
+    if report_path:
         with open(report_path, 'w', encoding='utf-8') as f:
-            f.write("subsumed_pattern\ttinyIds\tcovering_patterns\tcovering_tinyIds_union\n")
+            f.write("type\toriginal_pattern\ttinyIds\treplacement\treplacement_tinyIds\n")
+
+            # Write subsumptions
             for pattern, covers in sorted(subsumed.items(), key=lambda x: len(x[0])):
-                pattern_tids = ' '.join(sorted(pattern_to_tinyids[pattern]))
+                pattern_tids = ' '.join(sorted(pattern_to_tinyids.get(pattern, set())))
                 covers_str = ' | '.join(c[:60] for c in covers[:3])
                 if len(covers) > 3:
                     covers_str += f" ... (+{len(covers)-3} more)"
                 # Calculate union of covering tinyIds
                 union_tids = set()
                 for c in covers:
-                    union_tids.update(pattern_to_tinyids[c])
+                    union_tids.update(pattern_to_tinyids.get(c, set()))
                 union_str = ' '.join(sorted(union_tids))
-                f.write(f"{pattern}\t{pattern_tids}\t{covers_str}\t{union_str}\n")
-        logger.info(f"Wrote subsumption report to {report_path}")
+                f.write(f"subsumed\t{pattern}\t{pattern_tids}\t{covers_str}\t{union_str}\n")
+
+            # Write prefix extractions
+            for orig, prefix in sorted(prefix_replacements.items(), key=lambda x: x[1]):
+                orig_tids = ' '.join(sorted(pattern_to_tinyids.get(orig, set())))
+                prefix_tids = ' '.join(sorted(pattern_to_tinyids.get(prefix, set())))
+                f.write(f"prefix\t{orig}\t{orig_tids}\t{prefix}\t{prefix_tids}\n")
+
+        logger.info(f"Wrote subsumption/prefix report to {report_path}")
 
     stats = {
         'input_patterns': input_patterns,
         'output_patterns': len(kept_patterns),
         'subsumed_count': len(subsumed),
+        'prefix_extracted_count': prefix_extracted_count,
         'subsumptions': list(subsumed.items())
     }
 
     logger.info(
         f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
-        f"({len(subsumed)} subsumed)"
+        f"({len(subsumed)} subsumed, {prefix_extracted_count} prefix-extracted)"
     )
 
     return stats

@@ -58,8 +58,10 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
-        help="Field paths to search for remaining patterns. "
-             "Default: definitions.*.definition designations.*.designation",
+        help="Field paths to search for remaining patterns "
+             "(default: definitions.*.definition designations.*.designation). "
+             "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
+             "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
 
     subparser.add_argument(

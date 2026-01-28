@@ -44,7 +44,8 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Field names to extract instruments from (default: designation definition)"
+        help="Field names to extract instruments from (default: designation definition). "
+             "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
     # Filtering

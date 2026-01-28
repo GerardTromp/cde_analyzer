@@ -49,7 +49,8 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Field names to extract phrases from (default: designation definition)"
+        help="Field names to extract phrases from (default: designation definition). "
+             "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
     # K-mer parameters

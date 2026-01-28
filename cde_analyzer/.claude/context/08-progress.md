@@ -8,6 +8,52 @@
 
 ## Recent Work (Last 30 Days)
 
+### Session 2026-01-27b: Instrument Detection Workflow Documentation
+
+**Focus**: Comprehensive documentation of the automated instrument detection pipeline
+
+**Key Accomplishments**:
+- Created `docs/workflows/instrument-detection-workflow.md` - Complete 4-phase workflow documentation
+  - Phase 1: Initial Mining (instrument_miner, batch_expand_abbreviations, discover_abbreviations)
+  - Phase 2: Discovery & Coalesce (discover_verbatim, coalesce with prefix extraction)
+  - Phase 3: Family Analysis & Final Coalesce (phrase_grouper, re-discover, final coalesce)
+  - Phase 4: Stripping & Verification (strip_phrases, diagnose_strip)
+- Created `docs/workflows/instrument-detection-workflow.svg` - Visual workflow diagram
+- Updated `docs/help/strip_discover.md` with:
+  - Coalesce mode documentation
+  - Abbreviation discovery mode documentation
+  - `--min-prefix-tinyids` parameter
+  - `--discover-abbreviations` parameter
+  - Examples for prefix extraction
+- Updated `mkdocs.yml` navigation:
+  - Added "Workflow Orchestration" section under Commands
+  - Split Workflows into conceptual (instrument-phrase-stripping) and specific (instrument-detection)
+- Updated `CLAUDE.md`:
+  - Added Instrument Detection Workflow to Recent Work section
+  - Documented Prefix Extraction feature
+  - Added instrument_detection.yaml to Built-in Workflows
+  - Updated Documentation references
+
+**Prefix Extraction Algorithm**:
+- Groups patterns by common word prefix (builds trie from tokens)
+- Replaces multiple patterns with shortest prefix meeting tinyId threshold
+- Example: "Neuro-QOL Lower Extremity..." + "Neuro-QOL Upper Extremity..." → "Neuro-QOL"
+- Dramatically reduces manual curation effort (553 patterns → ~50)
+
+**Files Created** (2):
+- `docs/workflows/instrument-detection-workflow.md` (comprehensive documentation)
+- `docs/workflows/instrument-detection-workflow.svg` (visual diagram)
+
+**Files Modified** (4):
+- `docs/help/strip_discover.md` (added coalesce and abbreviation discovery modes)
+- `mkdocs.yml` (updated navigation)
+- `CLAUDE.md` (updated current status and features)
+- `.claude/context/08-progress.md` (this file)
+
+**Status**: Documentation complete
+
+---
+
 ### Session 2026-01-27: Pattern Variant Enhancements & Coalesce
 
 **Focus**: Number word variants, spaced punctuation, tinyId format fixes, coalesce feature

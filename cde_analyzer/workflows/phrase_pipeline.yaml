@@ -11,7 +11,7 @@
 #   - Run instrument_pipeline.yaml first to get inst_stripped.json
 #
 # Usage:
-#   cde_analyzer workflow run workflows/phrase_pipeline.yaml \
+#   cde-analyzer workflow run workflows/phrase_pipeline.yaml \
 #       --set input_json=/path/to/inst_stripped.json \
 #       --set output_dir=/path/to/phase2_output
 
@@ -47,6 +47,7 @@ steps:
       output: "${discovered_tsv}"
       pattern_list: "${phrases_tsv}"
       expand_variants: true
+      workers: "${workers}"
 
   - name: coalesce_patterns
     action: strip_discover
@@ -71,7 +72,7 @@ steps:
         4. Save as ${curated_tsv}
 
       When ready, resume with:
-        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
 
   - name: strip_phrases
     action: strip_phrases
@@ -80,3 +81,4 @@ steps:
       model: CDE
       output: "${stripped_json}"
       patterns: "${curated_tsv}"
+      workers: "${workers}"

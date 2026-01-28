@@ -8,7 +8,7 @@
 #   - Run phrase_pipeline.yaml (Phase 2) OR have curated temporal patterns
 #
 # Usage:
-#   cde_analyzer workflow run workflows/temporal_stripping.yaml \
+#   cde-analyzer workflow run workflows/temporal_stripping.yaml \
 #       --set input_json=/path/to/inst_stripped.json \
 #       --set pattern_source=/path/to/pastNmerged.tsv \
 #       --set output_dir=/path/to/phase3_output
@@ -44,6 +44,7 @@ steps:
       pattern_list: "${pattern_source},${pattern_column}"
       expand_variants: true
       sort_order: length
+      workers: "${workers}"
 
   - name: coalesce_patterns
     action: strip_discover
@@ -74,7 +75,7 @@ steps:
         - Duration phrases
 
       When ready, resume with:
-        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
 
   - name: strip_temporal
     action: strip_phrases
@@ -84,4 +85,4 @@ steps:
       output: "${stripped_json}"
       patterns: "${curated_tsv},pattern"
       trace_matching: "${trace_tsv}"
-      workers: 12
+      workers: "${workers}"

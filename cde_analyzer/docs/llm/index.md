@@ -80,7 +80,7 @@ export OPENAI_API_KEY="sk-..."
 ### 2. Run phrase_miner
 
 ```bash
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
   --input cdes.json \
   --output-dir phrase_output
 ```
@@ -88,7 +88,7 @@ cde_analyzer phrase_miner \
 ### 3. Classify Phrases
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument \

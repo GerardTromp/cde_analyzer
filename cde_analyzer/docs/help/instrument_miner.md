@@ -9,7 +9,7 @@ The `instrument_miner` action detects instrument patterns from "as part of \<Ins
 ## Usage
 
 ```bash
-cde_analyzer instrument_miner -i cdes.json -o output/ [options]
+cde-analyzer instrument_miner -i cdes.json -o output/ [options]
 ```
 
 ## Options
@@ -67,7 +67,7 @@ cde_analyzer instrument_miner -i cdes.json -o output/ [options]
 ### Basic Extraction
 
 ```bash
-cde_analyzer instrument_miner \
+cde-analyzer instrument_miner \
     -i cdes.json \
     -o output/
 ```
@@ -75,7 +75,7 @@ cde_analyzer instrument_miner \
 ### Full Extraction with Family Detection
 
 ```bash
-cde_analyzer instrument_miner \
+cde-analyzer instrument_miner \
     -i cdes.json \
     -o output/ \
     --extract-abbreviation-only \
@@ -87,7 +87,7 @@ cde_analyzer instrument_miner \
 ### Custom Fields
 
 ```bash
-cde_analyzer instrument_miner \
+cde-analyzer instrument_miner \
     -i cdes.json \
     -o output/ \
     --fields designation definition valueDomain.permissibleValues.*.permissibleValue

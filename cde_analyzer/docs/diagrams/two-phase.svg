@@ -33,7 +33,7 @@
 
   <!-- Phase 1 command -->
   <rect x="50" y="110" width="310" height="35" class="box-phase1"/>
-  <text x="60" y="132" class="code">cde_analyzer phrase_miner -i data.json \</text>
+  <text x="60" y="132" class="code">cde-analyzer phrase_miner -i data.json \</text>
   <text x="80" y="142" class="code">-o output/ --instruments-only</text>
 
   <!-- Arrow -->
@@ -84,7 +84,7 @@
 
   <!-- Phase 2 command -->
   <rect x="50" y="330" width="400" height="35" class="box"/>
-  <text x="60" y="352" class="code">cde_analyzer phrase_miner -i data.json -o output/ \</text>
+  <text x="60" y="352" class="code">cde-analyzer phrase_miner -i data.json -o output/ \</text>
   <text x="80" y="362" class="code">--instrument-list instruments_verbatim.tsv,full_match</text>
 
   <!-- Arrow -->

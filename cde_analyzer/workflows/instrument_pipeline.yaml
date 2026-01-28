@@ -9,7 +9,7 @@
 # 6. Strip patterns from CDE JSON
 #
 # Usage:
-#   cde_analyzer workflow run workflows/instrument_pipeline.yaml \
+#   cde-analyzer workflow run workflows/instrument_pipeline.yaml \
 #       --set input_json=/path/to/cdes.json \
 #       --set output_dir=/path/to/output
 
@@ -46,6 +46,7 @@ steps:
       discover_abbreviations: "${instruments_tsv}"
       input: "${input_json}"
       output: "${abbrev_patterns}"
+      workers: "${workers}"
 
   - name: discover_verbatim
     action: strip_discover
@@ -58,6 +59,7 @@ steps:
         - "${abbrev_patterns}"
       expand_variants: true
       discover_bare_names: true
+      workers: "${workers}"
 
   - name: coalesce_patterns
     action: strip_discover
@@ -82,7 +84,7 @@ steps:
         4. Save as ${curated_tsv}
 
       When ready, resume with:
-        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
 
   - name: strip_instruments
     action: strip_phrases
@@ -91,3 +93,4 @@ steps:
       model: CDE
       output: "${stripped_json}"
       patterns: "${curated_tsv}"
+      workers: "${workers}"

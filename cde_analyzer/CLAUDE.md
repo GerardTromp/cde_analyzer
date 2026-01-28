@@ -36,15 +36,24 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- **Instrument Detection Workflow** - Complete 4-phase, 14-step automated pipeline
+  - YAML-based workflow with 3 curator checkpoints
+  - Comprehensive documentation: [docs/workflows/instrument-detection-workflow.md](docs/workflows/instrument-detection-workflow.md)
+  - SVG workflow diagram: [docs/workflows/instrument-detection-workflow.svg](docs/workflows/instrument-detection-workflow.svg)
+- **Prefix Extraction in Coalesce** (`--min-prefix-tinyids`)
+  - Groups patterns by common word prefix (e.g., "Neuro-QOL Lower...", "Neuro-QOL Upper..." → "Neuro-QOL")
+  - Dramatically reduces manual curation effort (553 patterns → ~50)
+- **Abbreviation Pattern Discovery** (`--discover-abbreviations`)
+  - Finds `[PROMIS]` bracketed suffix and `PROMIS - ...` hyphen prefix patterns
+  - Catches patterns missed by k-mer mining
 - Added `--coalesce-variants` mode for tinyId-aware pattern subsumption
 - Added number word variants (7↔seven) and spaced punctuation variants
 - Fixed tinyId format mismatch (space vs pipe separators) across pipeline
 - MILESTONE: False-negative reduction complete (500 → 46 patterns, 91% reduction)
 - Split strip_phrases into strip_discover + strip_phrases (separation of concerns)
 - Config-based supplementary patterns (`config/supplementary_patterns.yaml`)
-- False-negative analysis and supplementary import modes in strip_discover
 - Enhanced Instrument Detection with family grouping (two-tier ID system)
-- LLM classify action implementation (commit 10b7f13, 7344e83)
+- LLM classify action implementation
 - Multi-provider support: Claude, OpenAI, Gemini
 - Comprehensive MkDocs documentation
 
@@ -55,7 +64,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Actions (CLI Commands)
 
-The `cde_analyzer` wrapper script accepts action arguments:
+The `cde-analyzer` command accepts action arguments:
 
 1. **fix_underscores** - Fix Pydantic-incompatible field names (underscore prefix)
 2. **strip_html** - Remove HTML markup from CDE fields
@@ -72,9 +81,9 @@ The `cde_analyzer` wrapper script accepts action arguments:
 13. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
 14. **workflow** - YAML-based workflow orchestrator with checkpoints (NEW)
 
-**Usage**: `cde_analyzer <action> [arguments]`
+**Usage**: `cde-analyzer <action> [arguments]`
 
-**Help**: `cde_analyzer <action> --help` for action-specific options
+**Help**: `cde-analyzer <action> --help` for action-specific options
 
 ### phrase_miner Features (Advanced)
 The `phrase_miner` action provides sophisticated phrase detection:
@@ -86,11 +95,11 @@ The `phrase_miner` action provides sophisticated phrase detection:
 - Verbatim text recovery for original surface forms
 - Instrument extraction with family grouping (`--detect-families`)
 
-**Example**: `cde_analyzer phrase_miner -i cdes.json -o output/ --enable-subsumption`
+**Example**: `cde-analyzer phrase_miner -i cdes.json -o output/ --enable-subsumption`
 
 **Instrument Family Detection**:
 ```bash
-cde_analyzer phrase_miner -i cdes.json -o output/ --instruments-only --detect-families --family-summary
+cde-analyzer phrase_miner -i cdes.json -o output/ --instruments-only --detect-families --family-summary
 ```
 - Two-tier identification: `family_id` (e.g., "neuro-qol") + `instrument_id` (e.g., "neuro-qol-ability-participate-sra")
 - Pattern-based detection for 13 known families (neuro-qol, promis, mds-updrs, sf-health, beck, phq, etc.)
@@ -111,11 +120,11 @@ The `llm_classify` action provides LLM-based phrase classification:
 - `temporal` - Identify temporal patterns (recency, age ranges, durations)
 - `instrument_family` - Classify instruments into known families (Neuro-QOL, PROMIS, etc.)
 
-**Example**: `cde_analyzer llm_classify -i phrase_output/ -m instrument --providers claude openai`
+**Example**: `cde-analyzer llm_classify -i phrase_output/ -m instrument --providers claude openai`
 
 **Instrument Adjudication Mode**:
 ```bash
-cde_analyzer llm_classify --adjudicate-instruments instruments.tsv --adjudicate-threshold 0.7 -m instrument_family --providers claude
+cde-analyzer llm_classify --adjudicate-instruments instruments.tsv --adjudicate-threshold 0.7 -m instrument_family --providers claude
 ```
 - Resolves uncertain family assignments from pattern-based detection
 - Processes only instruments with `family_confidence < threshold`
@@ -128,7 +137,7 @@ Two-phase pattern stripping with curator review point:
 
 **Phase 1: Discovery** (`strip_discover`)
 ```bash
-cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv \
+cde-analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv \
     --pattern-list instruments.tsv --expand-variants --discover-bare-names
 ```
 - Loads patterns from TSV file
@@ -141,7 +150,7 @@ cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv \
 
 **Phase 2: Substitution** (`strip_phrases`)
 ```bash
-cde_analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
+cde-analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
     --patterns discovered.tsv --trace-matching trace.tsv
 ```
 - Reads curator-reviewed patterns TSV
@@ -151,7 +160,7 @@ cde_analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
 
 **False-Negative Analysis** (iterative improvement):
 ```bash
-cde_analyzer strip_discover -i cleaned.json -o false_negatives.tsv --analyze-false-negatives
+cde-analyzer strip_discover -i cleaned.json -o false_negatives.tsv --analyze-false-negatives
 ```
 - Analyzes remaining "as part of" patterns after stripping
 - Outputs curated TSV with suggested canonical names
@@ -159,14 +168,14 @@ cde_analyzer strip_discover -i cleaned.json -o false_negatives.tsv --analyze-fal
 
 **Supplementary Pattern Import**:
 ```bash
-cde_analyzer strip_discover --add-to-supplementary curated.tsv
+cde-analyzer strip_discover --add-to-supplementary curated.tsv
 ```
 - Imports curated patterns to `config/supplementary_patterns.yaml`
 - Re-run phrase_miner with `--extract-supplementary` to pick up new patterns
 
 **Abbreviation Pattern Discovery** (NEW):
 ```bash
-cde_analyzer strip_discover --discover-abbreviations instruments.tsv \
+cde-analyzer strip_discover --discover-abbreviations instruments.tsv \
     -i cdes.json -o abbrev_patterns.tsv
 ```
 - Extracts abbreviations from instruments.tsv (and instrument_families.tsv if present)
@@ -181,21 +190,21 @@ YAML-based pipeline execution with checkpoints for human review:
 
 ```bash
 # Run a workflow
-cde_analyzer workflow run workflows/instrument_pipeline.yaml
+cde-analyzer workflow run workflows/instrument_pipeline.yaml
 
 # Override variables
-cde_analyzer workflow run workflows/instrument_pipeline.yaml \
+cde-analyzer workflow run workflows/instrument_pipeline.yaml \
     --set input_json=/path/to/cdes.json \
     --set output_dir=/path/to/output
 
 # Resume after checkpoint
-cde_analyzer workflow resume --state-file ./output/.workflow_state.json
+cde-analyzer workflow resume --state-file ./output/.workflow_state.json
 
 # Check status
-cde_analyzer workflow status
+cde-analyzer workflow status
 
 # Preview without executing
-cde_analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
+cde-analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
 ```
 
 **Features**:
@@ -206,7 +215,13 @@ cde_analyzer workflow run workflows/instrument_pipeline.yaml --dry-run
 - Dry-run mode for command preview
 
 **Built-in Workflows** (`workflows/` directory):
-- `instrument_pipeline.yaml` - Phase 1: Instrument mining & stripping
+- `instrument_detection.yaml` - **Full 4-phase instrument detection pipeline** (recommended)
+  - Phase 1: Mining (instrument_miner, batch_expand_abbreviations, discover_abbreviations)
+  - Phase 2: Discovery & Coalesce (discover_verbatim, coalesce with prefix extraction)
+  - Phase 3: Family Analysis & Final Coalesce (phrase_grouper, re-discover, final coalesce)
+  - Phase 4: Stripping & Verification (strip_phrases, diagnose_strip)
+  - 3 checkpoints for curator review
+- `instrument_pipeline.yaml` - Phase 1: Basic instrument mining & stripping
 - `phrase_pipeline.yaml` - Phase 2: Generic phrase mining & stripping
 
 **Workflow YAML Format**:
@@ -427,7 +442,7 @@ Can easily be extended to support:
 
 ## Quick Reference
 
-**Entry Point**: [cde_analyzer.py](cde_analyzer.py) (or `cde_analyzer` executable)
+**Entry Point**: [cde_analyzer.py](cde_analyzer.py) (or `cde-analyzer` executable)
 
 **Core Engine**: [core/recursor.py](core/recursor.py) - 25 lines, handles all traversal
 
@@ -445,6 +460,9 @@ Can easily be extended to support:
 - [README.md](README.md) - User-facing overview
 - [docs/help/](docs/help/) - CLI command reference
 - [docs/llm/](docs/llm/) - LLM classification guide
+- [docs/workflows/](docs/workflows/) - Workflow documentation
+  - [instrument-detection-workflow.md](docs/workflows/instrument-detection-workflow.md) - **Detailed YAML workflow guide**
+  - [instrument-phrase-stripping-workflow.md](docs/workflows/instrument-phrase-stripping-workflow.md) - Conceptual workflow
 - [docs/workflow-diagram.md](docs/workflow-diagram.md) - Pipeline workflow (text)
 - [docs/diagrams/](docs/diagrams/) - SVG workflow diagrams for embedding
 - [.claude/context/](.claude/context/) - Comprehensive context for AI assistance

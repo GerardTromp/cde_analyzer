@@ -11,7 +11,7 @@ The `phrase_miner` action detects repeated multi-word phrases across CDE records
 ## Usage
 
 ```bash
-python cde_analyzer.py phrase_miner --input <file.json> [options]
+cde-analyzer phrase_miner --input <file.json> [options]
 ```
 
 ## Arguments
@@ -54,7 +54,7 @@ python cde_analyzer.py phrase_miner --input <file.json> [options]
 
 ```bash
 # Run with defaults
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output
 ```
@@ -63,7 +63,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Faster execution with k=10 to k=3
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --k-max 10 \
@@ -74,7 +74,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Lower frequency and support thresholds
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --freq-min 2 \
@@ -85,7 +85,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Extract from all text fields
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --fields designation definition valueMeaningName valueMeaningDefinition
@@ -95,7 +95,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Process exact text without lemmatization
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --no-lemmatize
@@ -105,7 +105,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Remove common English stopwords
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --remove-stopwords
@@ -115,7 +115,7 @@ python cde_analyzer.py phrase_miner \
 
 ```bash
 # Phase 1: Extract instruments only (for curation)
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir instrument_output \
   --instruments-only \
@@ -124,7 +124,7 @@ python cde_analyzer.py phrase_miner \
 # Curate instruments_verbatim.tsv (remove false positives)
 
 # Phase 2: Full phrase mining with curated instrument pre-masking
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
   --instrument-list instrument_output/instruments_verbatim.tsv \
@@ -139,7 +139,7 @@ The `--instrument-list` argument accepts:
 
 ```bash
 # Extract instruments with family grouping
-python cde_analyzer.py phrase_miner \
+cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir instrument_output \
   --instruments-only \

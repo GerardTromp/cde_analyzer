@@ -8,7 +8,7 @@
 # Each phase has a checkpoint for curator review.
 #
 # Usage:
-#   cde_analyzer workflow run workflows/full_pipeline.yaml \
+#   cde-analyzer workflow run workflows/full_pipeline.yaml \
 #       --set input_json=/path/to/raw_cdes.json \
 #       --set base_output=/path/to/output_root
 
@@ -63,6 +63,7 @@ steps:
       pattern_list: "${instruments_tsv}"
       expand_variants: true
       discover_bare_names: true
+      workers: "${workers}"
 
   - name: phase1_coalesce
     action: strip_discover
@@ -79,7 +80,7 @@ steps:
       Review: ${inst_coalesced}
       Save curated version as: ${inst_curated}
 
-      Resume: cde_analyzer workflow resume --state-file ${base_output}/.workflow_state.json
+      Resume: cde-analyzer workflow resume --state-file ${base_output}/.workflow_state.json
 
   - name: phase1_strip
     action: strip_phrases
@@ -89,7 +90,7 @@ steps:
       output: "${inst_stripped}"
       patterns: "${inst_curated}"
       trace_matching: "${phase1_dir}/trace.tsv"
-      workers: 12
+      workers: "${workers}"
 
   # ===== PHASE 2: Generic Phrase Stripping =====
   - name: phase2_mine_phrases
@@ -107,6 +108,7 @@ steps:
       output: "${phrase_discovered}"
       pattern_list: "${phrases_tsv}"
       expand_variants: true
+      workers: "${workers}"
 
   - name: phase2_coalesce
     action: strip_discover
@@ -123,7 +125,7 @@ steps:
       Review: ${phrase_coalesced}
       Save curated version as: ${phrase_curated}
 
-      Resume: cde_analyzer workflow resume --state-file ${base_output}/.workflow_state.json
+      Resume: cde-analyzer workflow resume --state-file ${base_output}/.workflow_state.json
 
   - name: phase2_strip
     action: strip_phrases
@@ -133,7 +135,7 @@ steps:
       output: "${phrase_stripped}"
       patterns: "${phrase_curated}"
       trace_matching: "${phase2_dir}/trace.tsv"
-      workers: 12
+      workers: "${workers}"
 
   - name: pipeline_complete
     checkpoint: true

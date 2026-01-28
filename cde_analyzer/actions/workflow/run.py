@@ -9,6 +9,7 @@ Executes YAML-defined workflows with:
 - Variable resolution (env → yaml → CLI)
 - Checkpoint/resume capability
 - State persistence
+- Auto-detected system variables (cpu_count, workers)
 """
 import json
 import logging
@@ -22,6 +23,26 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 logger = logging.getLogger(__name__)
+
+
+def get_system_variables() -> Dict[str, Any]:
+    """
+    Get auto-detected system variables for workflow execution.
+
+    Returns variables like:
+    - cpu_count: Total logical CPUs
+    - workers: Recommended worker count (cpu_count - 1, min 1)
+    """
+    import multiprocessing
+
+    cpu_count = multiprocessing.cpu_count()
+    # Leave one CPU free for OS/other tasks, minimum 1 worker
+    workers = max(1, cpu_count - 1)
+
+    return {
+        "cpu_count": cpu_count,
+        "workers": workers,
+    }
 
 
 class WorkflowError(Exception):
@@ -190,6 +211,8 @@ def execute_step(step: Dict, variables: Dict[str, Any], dry_run: bool = False) -
 
     Returns dict with execution result.
     """
+    import argparse
+
     step_name = step.get("name", "unnamed")
     action = step.get("action")
     args = step.get("args", {})
@@ -203,7 +226,7 @@ def execute_step(step: Dict, variables: Dict[str, Any], dry_run: bool = False) -
     print(f"\n{'='*70}")
     print(f"Step: {step_name}")
     print(f"Action: {action}")
-    print(f"Command: cde_analyzer {action} {' '.join(cli_args)}")
+    print(f"Command: cde-analyzer {action} {' '.join(cli_args)}")
     print(f"{'='*70}")
 
     if dry_run:
@@ -212,16 +235,26 @@ def execute_step(step: Dict, variables: Dict[str, Any], dry_run: bool = False) -
 
     # Import and execute the action
     try:
-        # Dynamic import of action module
-        action_module = __import__(
+        # Dynamic import of CLI module to get argparse registration
+        cli_module = __import__(
+            f"actions.{action}.cli",
+            fromlist=["register_subparser"]
+        )
+
+        # Dynamic import of run module
+        run_module = __import__(
             f"actions.{action}.run",
             fromlist=["run_action"]
         )
-        run_action = action_module.run_action
+        run_action = run_module.run_action
 
-        # Build args namespace
-        import argparse
-        args_ns = argparse.Namespace(**resolved_args)
+        # Create a parser and register the action's arguments
+        # This ensures we get proper default values
+        parser = argparse.ArgumentParser()
+        cli_module.register_subparser(parser)
+
+        # Parse the CLI args to get a proper Namespace with defaults
+        args_ns = parser.parse_args(cli_args)
 
         # Execute
         result = run_action(args_ns)
@@ -293,7 +326,7 @@ def run_workflow(
             for line in message.strip().split("\n"):
                 print(f"#   {line}")
             print(f"#")
-            print(f"# Resume with: cde_analyzer workflow resume")
+            print(f"# Resume with: cde-analyzer workflow resume")
             print(f"{'#'*70}")
 
             # Save state (skip in dry-run mode)
@@ -343,8 +376,10 @@ def cmd_run(args) -> int:
         print(f"Error: {e}")
         return 1
 
-    # Build variables: workflow defaults + CLI overrides
-    variables = dict(workflow.get("variables", {}))
+    # Build variables: system defaults → workflow defaults → CLI overrides
+    # System variables (cpu_count, workers) can be overridden by workflow or CLI
+    variables = get_system_variables()
+    variables.update(workflow.get("variables", {}))
 
     # Apply CLI overrides
     if args.overrides:
@@ -393,7 +428,7 @@ def cmd_resume(args) -> int:
 
     if not state.load():
         print(f"Error: No workflow state found at {args.state_file}")
-        print("Run a workflow first with: cde_analyzer workflow run <workflow.yaml>")
+        print("Run a workflow first with: cde-analyzer workflow run <workflow.yaml>")
         return 1
 
     if state.status == "completed":
@@ -454,9 +489,21 @@ def cmd_status(args) -> int:
     return 0
 
 
+def get_builtin_workflows_dir() -> Path:
+    """Get path to the built-in workflows directory in the package."""
+    # The workflows/ directory is at the package root level
+    package_root = Path(__file__).parent.parent.parent
+    return package_root / "workflows"
+
+
 def cmd_list(args) -> int:
     """Handle 'workflow list' command."""
     search_dir = Path(args.dir)
+
+    # If using default "workflows" and it doesn't exist locally,
+    # fall back to built-in workflows directory
+    if args.dir == "workflows" and not search_dir.exists():
+        search_dir = get_builtin_workflows_dir()
 
     if not search_dir.exists():
         print(f"Directory not found: {search_dir}")
@@ -469,7 +516,7 @@ def cmd_list(args) -> int:
         print(f"No workflow files found in {search_dir}/")
         return 0
 
-    print(f"Available workflows in {search_dir}/:\n")
+    print(f"Available workflow templates in {search_dir}/:\n")
     for path in sorted(yaml_files):
         try:
             with open(path, encoding="utf-8") as f:
@@ -486,6 +533,91 @@ def cmd_list(args) -> int:
         except Exception as e:
             print(f"  {path.name} (error: {e})")
 
+    print("To copy a workflow for customization:")
+    print("  cde-analyzer workflow copy <workflow_name>")
+
+    return 0
+
+
+def cmd_copy(args) -> int:
+    """Handle 'workflow copy' command."""
+    import shutil
+
+    workflow_name = args.workflow_name
+
+    # Normalize workflow name (add .yaml if missing)
+    if not workflow_name.endswith(('.yaml', '.yml')):
+        workflow_name = f"{workflow_name}.yaml"
+
+    # Look for the workflow in built-in workflows directory
+    builtin_dir = get_builtin_workflows_dir()
+    source_path = builtin_dir / workflow_name
+
+    # Also check for .yml extension
+    if not source_path.exists():
+        alt_name = workflow_name.replace('.yaml', '.yml')
+        alt_path = builtin_dir / alt_name
+        if alt_path.exists():
+            source_path = alt_path
+            workflow_name = alt_name
+
+    if not source_path.exists():
+        print(f"Workflow not found: {workflow_name}")
+        print(f"\nAvailable workflows:")
+        yaml_files = list(builtin_dir.glob("*.yaml")) + list(builtin_dir.glob("*.yml"))
+        for path in sorted(yaml_files):
+            print(f"  - {path.stem}")
+        return 1
+
+    # Determine output path
+    dest_dir = Path(args.dest)
+    output_name = args.output_name if args.output_name else workflow_name
+    if not output_name.endswith(('.yaml', '.yml')):
+        output_name = f"{output_name}.yaml"
+
+    dest_path = dest_dir / output_name
+
+    # Check if destination exists
+    if dest_path.exists() and not args.force:
+        print(f"File already exists: {dest_path}")
+        print("Use --force to overwrite, or --as to specify a different name.")
+        return 1
+
+    # Ensure destination directory exists
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy the file
+    shutil.copy2(source_path, dest_path)
+
+    # Load workflow to show info
+    try:
+        with open(dest_path, encoding="utf-8") as f:
+            workflow = yaml.safe_load(f)
+        name = workflow.get("name", "unnamed")
+        steps = len(workflow.get("steps", []))
+        variables = workflow.get("variables", {})
+    except Exception:
+        name = "unknown"
+        steps = 0
+        variables = {}
+
+    print(f"Copied workflow template to: {dest_path}")
+    print(f"\n  Name: {name}")
+    print(f"  Steps: {steps}")
+
+    if variables:
+        print(f"\n  Variables (customize in the YAML file):")
+        for key, value in variables.items():
+            # Truncate long values
+            value_str = str(value)[:50]
+            if len(str(value)) > 50:
+                value_str += "..."
+            print(f"    {key}: {value_str}")
+
+    print(f"\nNext steps:")
+    print(f"  1. Edit {dest_path} to customize variables and arguments")
+    print(f"  2. Run: cde-analyzer workflow run {dest_path}")
+
     return 0
 
 
@@ -494,13 +626,19 @@ def run_action(args) -> int:
     command = getattr(args, "workflow_command", None)
 
     if not command:
-        print("Usage: cde_analyzer workflow <command>")
+        print("Usage: cde-analyzer workflow <command>")
         print("\nCommands:")
+        print("  list     List available workflow templates")
+        print("  copy     Copy a template to current directory for customization")
         print("  run      Execute a workflow from YAML file")
         print("  resume   Resume workflow after checkpoint")
         print("  status   Show workflow execution status")
-        print("  list     List available workflow files")
-        print("\nRun 'cde_analyzer workflow <command> --help' for details.")
+        print("\nRecommended workflow:")
+        print("  1. List templates:    workflow list")
+        print("  2. Copy to work dir:  workflow copy <name>")
+        print("  3. Edit as needed")
+        print("  4. Run:               workflow run ./<name>.yaml")
+        print("\nRun 'cde-analyzer workflow <command> --help' for details.")
         return 1
 
     if command == "run":
@@ -511,6 +649,8 @@ def run_action(args) -> int:
         return cmd_status(args)
     elif command == "list":
         return cmd_list(args)
+    elif command == "copy":
+        return cmd_copy(args)
     else:
         print(f"Unknown command: {command}")
         return 1

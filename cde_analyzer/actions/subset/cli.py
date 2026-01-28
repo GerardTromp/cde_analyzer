@@ -59,7 +59,9 @@ def register_subparser(subparser: ArgumentParser):
     )
     subparser.add_argument(
         "--id-file",
-        help="File containing tinyIds (JSON, CSV, or TSV)."
+        help="File containing tinyIds (JSON, CSV, or TSV). "
+             "Use file:column format to specify column (e.g., 'data.csv:tinyId'). "
+             "Cells can contain multiple tinyIds (pipe, comma, or space separated)."
     )
 
     # Text-based filtering
@@ -72,8 +74,8 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Fields to search for text filter. Default: designation definition. "
-             "Supported: designation, definition, valueMeaningName, valueMeaningDefinition."
+        help="Fields to search for text filter (default: designation definition). "
+             "Also supports: valueMeaningName, valueMeaningDefinition"
     )
     subparser.add_argument(
         "--case-sensitive",

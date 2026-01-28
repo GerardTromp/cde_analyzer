@@ -28,7 +28,7 @@ Extract instrument patterns from CDE text using `instrument_miner` (dedicated ac
 ### Initial Run
 
 ```bash
-cde_analyzer instrument_miner \
+cde-analyzer instrument_miner \
     -i cdes.json \
     -o output/ \
     --extract-abbreviation-only \
@@ -82,7 +82,7 @@ Use the two-phase discover-first workflow to find verbatim occurrences and strip
 ### Step 2a: Discover Verbatim Patterns
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes.json \
     -m CDE \
     -o discovered_instruments.tsv \
@@ -94,7 +94,7 @@ cde_analyzer strip_discover \
 ### Step 2b: Strip Discovered Patterns
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes.json \
     -m CDE \
     -o cdes_no_instruments.json \
@@ -130,7 +130,7 @@ Review `instruments.tsv` and create `curated_families.tsv` containing:
 For instruments with `family_confidence < 0.7`:
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
     --adjudicate-instruments output/instruments.tsv \
     --adjudicate-threshold 0.7 \
     -m instrument_family \
@@ -159,7 +159,7 @@ Strip family-level patterns (shorter patterns like "PROMIS", "Neuro-QOL") from t
 > Use exact matching only for family-level patterns.
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes_no_instruments.json \
     -m CDE \
     -o discovered_families.tsv \
@@ -169,7 +169,7 @@ cde_analyzer strip_discover \
 ### Step 4b: Strip Family Patterns
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes_no_instruments.json \
     -m CDE \
     -o cdes_no_families.json \
@@ -191,7 +191,7 @@ Run phrase mining on instrument-stripped text to find non-instrument repeated ph
 ### Initial Run
 
 ```bash
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
     -i cdes_no_instruments.json \
     -o output_phrases/ \
     --enable-subsumption \
@@ -225,21 +225,21 @@ After each run, review coverage and quality:
 
 ```bash
 # More aggressive subsumption (fewer redundant phrases)
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
     -i cdes_no_instruments.json \
     -o output_phrases/ \
     --enable-subsumption \
     --subsumption-threshold 0.8
 
 # Focus on longer phrases
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
     -i cdes_no_instruments.json \
     -o output_phrases/ \
     --min-phrase-length 5 \
     --enable-anchor
 
 # Higher frequency threshold (more common phrases only)
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
     -i cdes_no_instruments.json \
     -o output_phrases/ \
     --min-frequency 10
@@ -257,7 +257,7 @@ Move to curation when:
 Use `phrase_grouper` to analyze patterns in discovered phrases and identify families that share common prefixes, suffixes, or infixes:
 
 ```bash
-cde_analyzer phrase_grouper \
+cde-analyzer phrase_grouper \
     -i output_phrases/verbatim_phrases.tsv \
     -o phrase_families/ \
     --k-min 3 \
@@ -296,7 +296,7 @@ Final stripping phase for non-instrument phrases.
 > When in doubt, run `--analyze-conflicts` first to assess containment relationships.
 
 ```bash
-cde_analyzer strip_discover \
+cde-analyzer strip_discover \
     -i cdes_no_instruments.json \
     -m CDE \
     -o discovered_phrases.tsv \
@@ -306,7 +306,7 @@ cde_analyzer strip_discover \
 ### Step 6b: Strip Phrase Patterns
 
 ```bash
-cde_analyzer strip_phrases \
+cde-analyzer strip_phrases \
     -i cdes_no_instruments.json \
     -m CDE \
     -o cdes_cleaned.json \
@@ -324,7 +324,7 @@ cde_analyzer strip_phrases \
 Use `diagnose_strip` to find remaining patterns and refine the entire workflow.
 
 ```bash
-cde_analyzer diagnose_strip \
+cde-analyzer diagnose_strip \
     -i cdes_cleaned.json \
     -m CDE \
     -o remaining.tsv \

@@ -33,8 +33,12 @@ nav:
     - Export & Filtering:
       - lemma_fasta: help/lemma_fasta.md
       - subset: help/subset.md
+    - Workflow Orchestration:
+      - workflow: help/workflow.md
+      - batch_expand_abbreviations: help/batch_expand_abbreviations.md
   - Workflows:
-    - Instrument & Phrase Stripping: workflows/instrument-phrase-stripping-workflow.md
+    - Overview (Conceptual): workflows/instrument-phrase-stripping-workflow.md
+    - Instrument Detection (YAML): workflows/instrument-detection-workflow.md
   - LLM Classification:
     - Overview: llm/index.md
     - llm_classify Command: llm/llm_classify.md

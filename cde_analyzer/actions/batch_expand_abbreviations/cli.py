@@ -58,7 +58,8 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Fields to search for abbreviations (default: designation definition)"
+        help="Fields to search for abbreviations (default: designation definition). "
+             "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
     # Phrase mining parameters
