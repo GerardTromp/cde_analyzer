@@ -148,5 +148,5 @@ CDE_Schema/LLM_Classification.py  # Data models
 
 ## See Also
 
-- [phrase_miner](../commands/phrase_miner.md) - Generate input for classification
+- [phrase_miner](../help/phrase_miner.md) - Generate input for classification
 - [Architecture](../architecture.md) - System design overview

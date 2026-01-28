@@ -437,4 +437,4 @@ class MinerConfig:
 
 - [Architecture Overview](../architecture.md)
 - [Data Models](../data-models.md)
-- [Checkpoint: Phase 1-3 Implementation](../../.claude/checkpoints/checkpoint-20260113-phrase-miner-phase1-3.md)
+- [phrase_miner Algorithm Documentation](../phrase_miner_logic.md)

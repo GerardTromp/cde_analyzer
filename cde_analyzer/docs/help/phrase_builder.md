@@ -6,7 +6,7 @@ Build and analyze repeated phrases using k-mer analysis.
 
 The `phrase_builder` command performs k-mer (n-gram) analysis on CDE text fields to identify repeated phrases across records. It generates frequency statistics and visualizations to help identify candidate phrases for curation and removal.
 
-> **Note**: For advanced phrase detection with masking and subsumption filtering, consider using the [`phrase_miner`](../commands/phrase_miner.md) command instead.
+> **Note**: For advanced phrase detection with masking and subsumption filtering, consider using the [`phrase_miner`](phrase_miner.md) command instead.
 
 ## Usage
 
@@ -116,6 +116,6 @@ This helps identify the frequency threshold for phrase curation - k-mers with hi
 
 ## See Also
 
-- [`phrase_miner`](../commands/phrase_miner.md) - Advanced phrase detection with iterative descent
+- [`phrase_miner`](phrase_miner.md) - Advanced phrase detection with iterative descent
 - [`phrase`](phrase.md) - Original phrase detection implementation
 - [`strip_phrases`](strip_phrases.md) - Remove detected phrases from data

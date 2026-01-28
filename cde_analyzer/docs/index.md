@@ -32,7 +32,7 @@ python cde_analyzer.py phrase-miner --help
 
 | Command | Description |
 |---------|-------------|
-| [phrase-miner](commands/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection |
+| [phrase-miner](help/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection |
 | [phrase](help/phrase.md) | Find repeated phrases (original implementation) |
 | [phrase-builder](help/phrase_builder.md) | K-mer analysis for phrase identification |
 | [strip-phrases](help/strip_phrases.md) | Remove curated phrases from CDE documents |

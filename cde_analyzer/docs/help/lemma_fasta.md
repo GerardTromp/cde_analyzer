@@ -143,4 +143,4 @@ The output can be processed by modified genomic tools:
 
 - [`extract_embed`](extract_embed.md) - Extract fields for transformer embeddings
 - [`phrase_builder`](phrase_builder.md) - K-mer analysis for phrase detection
-- [`phrase_miner`](../commands/phrase_miner.md) - Native phrase mining without genomic tools
+- [`phrase_miner`](phrase_miner.md) - Native phrase mining without genomic tools

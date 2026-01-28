@@ -397,5 +397,5 @@ occurrences.tsv ─┘    Query LLMs (parallel)
 
 - [Configuration](configuration.md) - API key setup
 - [Query Modules](query_modules.md) - Available classification modules
-- [phrase_miner](../commands/phrase_miner.md) - Generate input data
+- [phrase_miner](../help/phrase_miner.md) - Generate input data
 - [LLM Overview](index.md) - Module introduction

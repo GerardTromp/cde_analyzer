@@ -246,4 +246,4 @@ objects                Tokenize (NLTK)            - Count k-mers
 
 - [Data Models](data-models.md)
 - [Commands Overview](commands/index.md)
-- [phrase_miner Implementation](commands/phrase_miner.md)
+- [phrase_miner Implementation](help/phrase_miner.md)
