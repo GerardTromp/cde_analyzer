@@ -22,6 +22,8 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | Command | Description | Status |
 |---------|-------------|--------|
 | [strip_discover](../help/strip_discover.md) | Flexible regex discovery for pattern curation workflow | Stable |
+| [strip_analyze](../help/strip_analyze.md) | Pattern conflict and false-negative analysis | New |
+| [pattern_util](../help/pattern_util.md) | TSV utilities (merge, coalesce, import) | New |
 | [strip_phrases](../help/strip_phrases.md) | Remove detected phrases using exact string replacement | Stable |
 | [diagnose_strip](../help/diagnose_strip.md) | Diagnose remaining patterns after stripping | Stable |
 

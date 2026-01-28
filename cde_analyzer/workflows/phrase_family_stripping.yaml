@@ -62,7 +62,7 @@ steps:
       workers: "${workers}"
 
   - name: coalesce_patterns
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${discovered_tsv}"
       output: "${coalesced_tsv}"

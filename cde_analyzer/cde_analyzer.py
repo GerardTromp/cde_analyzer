@@ -49,6 +49,16 @@ ACTION_REGISTRY = {
         "help": "Discover instrument patterns in CDE text fields",
         "description": "Flexible regex discovery for pattern curation workflow",
     },
+    "strip_analyze": {
+        "module": "actions.strip_analyze.cli",
+        "help": "Analyze patterns for conflicts and false negatives",
+        "description": "Pattern analysis utilities for conflict detection and iterative improvement",
+    },
+    "pattern_util": {
+        "module": "actions.pattern_util.cli",
+        "help": "TSV pattern utilities (merge, coalesce, import)",
+        "description": "Manipulate pattern TSV files without CDE input",
+    },
     "lemma_fasta": {
         "module": "actions.lemma_fasta.cli",
         "help": "Create FASTA from lemma sequences",

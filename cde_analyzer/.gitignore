@@ -60,3 +60,6 @@ settings.local.json
 .claude/sessions/
 .claude/checkpoints/
 .claude/init_session.sh
+
+# MkDocs build output
+site/

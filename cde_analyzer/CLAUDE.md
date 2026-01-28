@@ -36,6 +36,10 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- **v0.4.2: Command Split** - Split `strip_discover` into three focused commands:
+  - `strip_discover` - Core pattern discovery only
+  - `strip_analyze` - Conflict analysis and false-negative detection
+  - `pattern_util` - TSV utilities (merge, coalesce, supplementary import)
 - **Instrument Detection Workflow** - Complete 4-phase, 14-step automated pipeline
   - YAML-based workflow with 3 curator checkpoints
   - Comprehensive documentation: [docs/workflows/instrument-detection-workflow.md](docs/workflows/instrument-detection-workflow.md)
@@ -50,7 +54,6 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 - Added number word variants (7↔seven) and spaced punctuation variants
 - Fixed tinyId format mismatch (space vs pipe separators) across pipeline
 - MILESTONE: False-negative reduction complete (500 → 46 patterns, 91% reduction)
-- Split strip_phrases into strip_discover + strip_phrases (separation of concerns)
 - Config-based supplementary patterns (`config/supplementary_patterns.yaml`)
 - Enhanced Instrument Detection with family grouping (two-tier ID system)
 - LLM classify action implementation
@@ -73,13 +76,15 @@ The `cde-analyzer` command accepts action arguments:
 5. **count** - Count structural elements and field occurrences
 6. **extract_embed** - Extract fields for transformer model embedding
 7. **strip_phrases** - Remove literal phrases at specified paths (substitution only)
-8. **strip_discover** - Discover instrument patterns in CDE text fields (discovery phase)
-9. **diagnose_strip** - Diagnose remaining patterns after stripping
-10. **lemma_fasta** - Create FASTA format from lemma sequences
-11. **phrase_builder** - Incremental phrase construction
-12. **subset** - Extract subsets using literal/regex/tinyID filters
-13. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
-14. **workflow** - YAML-based workflow orchestrator with checkpoints (NEW)
+8. **strip_discover** - Discover instrument patterns in CDE text fields (discovery only)
+9. **strip_analyze** - Pattern conflict and false-negative analysis (NEW v0.4.2)
+10. **pattern_util** - TSV utilities: merge, coalesce, supplementary import (NEW v0.4.2)
+11. **diagnose_strip** - Diagnose remaining patterns after stripping
+12. **lemma_fasta** - Create FASTA format from lemma sequences
+13. **phrase_builder** - Incremental phrase construction
+14. **subset** - Extract subsets using literal/regex/tinyID filters
+15. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
+16. **workflow** - YAML-based workflow orchestrator with checkpoints
 
 **Usage**: `cde-analyzer <action> [arguments]`
 
@@ -132,8 +137,8 @@ cde-analyzer llm_classify --adjudicate-instruments instruments.tsv --adjudicate-
 
 **Documentation**: See [docs/llm/](docs/llm/) for comprehensive guide.
 
-### strip_discover / strip_phrases Workflow
-Two-phase pattern stripping with curator review point:
+### Pattern Stripping Workflow (v0.4.2)
+Three-command workflow for pattern discovery, analysis, and stripping:
 
 **Phase 1: Discovery** (`strip_discover`)
 ```bash
@@ -143,47 +148,47 @@ cde-analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv \
 - Loads patterns from TSV file
 - Applies flexible regex matching to find verbatim occurrences
 - Outputs TSV with columns: `pattern`, `tinyIds`, `type`, `source_pattern`
-- Supports `--analyze-conflicts` for ordering diagnostics
-- Supports `--merge-patterns` to deduplicate curated files
 - Supports `--use-expected-tinyids` for filtered discovery
 - Supports `--discover-fails` for failure logging
+- Supports `--discover-abbreviations` for `[PROMIS]` and `PROMIS - ...` patterns
 
-**Phase 2: Substitution** (`strip_phrases`)
+**Phase 2: Coalesce** (`pattern_util`)
+```bash
+cde-analyzer pattern_util --coalesce-variants discovered.tsv \
+    -o coalesced.tsv --min-prefix-tinyids 3
+```
+- Removes patterns subsumed by longer patterns (tinyId-aware)
+- Extracts common prefixes to reduce pattern count (553 → ~50)
+- Also supports `--merge-patterns` for deduplication
+
+**Phase 3: Substitution** (`strip_phrases`)
 ```bash
 cde-analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
-    --patterns discovered.tsv --trace-matching trace.tsv
+    --patterns coalesced.tsv --trace-matching trace.tsv
 ```
 - Reads curator-reviewed patterns TSV
 - Applies exact string replacement (longest-first by default)
 - Supports parallel processing (`--workers`)
-- Supports legacy phrase map format (`--phrases`)
 
-**False-Negative Analysis** (iterative improvement):
+**Phase 4: Analysis** (`strip_analyze`)
 ```bash
-cde-analyzer strip_discover -i cleaned.json -o false_negatives.tsv --analyze-false-negatives
+# False-negative analysis
+cde-analyzer strip_analyze --analyze-false-negatives \
+    -i cleaned.json -o false_negatives.tsv
+
+# Conflict analysis (before stripping)
+cde-analyzer strip_analyze --analyze-conflicts report.tsv \
+    --pattern-list patterns.tsv
 ```
-- Analyzes remaining "as part of" patterns after stripping
-- Outputs curated TSV with suggested canonical names
-- Review and set `include` column to 'yes' for patterns to add
+- `--analyze-false-negatives`: Find remaining anchor patterns after stripping
+- `--analyze-conflicts`: Detect pattern containment issues
 
-**Supplementary Pattern Import**:
+**Supplementary Pattern Import** (`pattern_util`):
 ```bash
-cde-analyzer strip_discover --add-to-supplementary curated.tsv
+cde-analyzer pattern_util --add-to-supplementary curated.tsv
 ```
 - Imports curated patterns to `config/supplementary_patterns.yaml`
 - Re-run phrase_miner with `--extract-supplementary` to pick up new patterns
-
-**Abbreviation Pattern Discovery** (NEW):
-```bash
-cde-analyzer strip_discover --discover-abbreviations instruments.tsv \
-    -i cdes.json -o abbrev_patterns.tsv
-```
-- Extracts abbreviations from instruments.tsv (and instrument_families.tsv if present)
-- Scans input JSON for patterns using those abbreviations:
-  - `[ABBREV]` - bracketed suffix (e.g., `[PROMIS]`, `[NHANES]`)
-  - `ABBREV - ` - hyphen prefix (e.g., `PROMIS - Pain Interference...`)
-- Catches patterns missed by k-mer mining (too short, variant forms)
-- Use after initial instrument mining to catch edge cases
 
 ### Workflow Orchestrator (NEW)
 YAML-based pipeline execution with checkpoints for human review:
@@ -279,6 +284,7 @@ Current phrase detection uses:
 - `utils/instrument_family_patterns.py` (family detection regex patterns)
 - `utils/flexible_pattern_matcher.py` (flexible regex for discovery)
 - `utils/pattern_variant_generator.py` (spelling/punctuation variants)
+- `utils/pattern_tsv_utils.py` (shared TSV loading for pattern commands)
 - `utils/config_loader.py` (YAML config loading for supplementary patterns)
 - `utils/llm/` (LLM provider infrastructure)
 - `utils/query_modules/` (classification query modules including instrument_family)
@@ -415,11 +421,12 @@ See [.claude/CHECKPOINT_SYSTEM.md](.claude/CHECKPOINT_SYSTEM.md) for complete do
 6. Standardize CLI argument names (noted inconsistency in README)
 7. Document legacy kmer files explicitly
 8. Enhanced user documentation with examples
-9. **Split strip_discover** - CLI has grown too large (5+ modes). Planned split:
+9. ~~**Split strip_discover**~~ - **COMPLETED in v0.4.2**:
    - `strip_discover` - Core discovery only (pattern list → verbatim → TSV)
-   - `strip_analyze` - Analysis modes (false-negatives, conflicts, supplementary import)
-   - `pattern_util` - TSV utilities (merge, coalesce) - no CDE input needed
-   - **After split**: Regenerate workflow diagrams in `docs/diagrams/` (see `.claude/sessions/diagram-generation-process.md` for process)
+   - `strip_analyze` - Analysis modes (false-negatives, conflicts)
+   - `pattern_util` - TSV utilities (merge, coalesce, supplementary import)
+   - `utils/pattern_tsv_utils.py` - Shared TSV loading functions
+   - **TODO**: Regenerate workflow diagrams in `docs/diagrams/`
 
 ### Lower Priority
 9. Package for PyPI distribution

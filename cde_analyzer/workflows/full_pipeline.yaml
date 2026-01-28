@@ -66,7 +66,7 @@ steps:
       workers: "${workers}"
 
   - name: phase1_coalesce
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${inst_discovered}"
       output: "${inst_coalesced}"
@@ -111,7 +111,7 @@ steps:
       workers: "${workers}"
 
   - name: phase2_coalesce
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${phrase_discovered}"
       output: "${phrase_coalesced}"

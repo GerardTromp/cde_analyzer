@@ -125,6 +125,66 @@ options:
 
 ---
 
+### `strip_analyze` Command
+
+Pattern conflict and false-negative analysis.
+
+```bash
+usage: strip_analyze [-h] [-i INPUT] [-o OUTPUT] [-p PATTERN_LIST]
+                     [--analyze-conflicts FILE] [--sort-order {length,file,alpha}]
+                     [--analyze-false-negatives] [--fn-anchor STRING]
+                     [--expand-variants] [--include-name-only]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input INPUT     Cleaned JSON for false-negative analysis
+  -o, --output OUTPUT   Output TSV file
+  -p, --pattern-list    Pattern TSV for conflict analysis
+  --analyze-conflicts F Output file for conflict report
+  --sort-order ORDER    Pattern order: length, file, alpha (default: length)
+  --analyze-false-negatives
+                        Analyze remaining anchor patterns
+  --fn-anchor STRING    Anchor phrase (default: "as part of")
+  --expand-variants     Generate variants for conflict analysis
+  --include-name-only   Include bare names (default: True)
+```
+
+---
+
+### `pattern_util` Command
+
+TSV pattern utilities (merge, coalesce, import).
+
+```bash
+usage: pattern_util [-h] [-o OUTPUT]
+                    [--merge-patterns FILE] [--merge-pattern-column COL]
+                    [--merge-tinyids-column COL]
+                    [--coalesce-variants FILE] [--coalesce-report FILE]
+                    [--min-prefix-tinyids N]
+                    [--add-to-supplementary FILE] [--supplementary-section NAME]
+
+options:
+  -h, --help            show this help message and exit
+  -o, --output OUTPUT   Output TSV file (required for merge/coalesce)
+  --merge-patterns FILE Merge duplicate patterns, combine tinyIds
+  --merge-pattern-column COL
+                        Column for patterns (default: pattern)
+  --merge-tinyids-column COL
+                        Column for tinyIds (default: tinyIds)
+  --coalesce-variants FILE
+                        Remove subsumed patterns (tinyId-aware)
+  --coalesce-report FILE
+                        Write subsumption report
+  --min-prefix-tinyids N
+                        Enable prefix extraction (0 = disabled)
+  --add-to-supplementary FILE
+                        Import patterns to supplementary_patterns.yaml
+  --supplementary-section NAME
+                        YAML section name (default: added_patterns)
+```
+
+---
+
 ## Analysis
 
 ### `count` Command

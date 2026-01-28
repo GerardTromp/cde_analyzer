@@ -77,7 +77,7 @@ steps:
   # After removing sub-instrument details, many patterns become identical
   # e.g., "PROMIS Pain 8a" and "PROMIS Pain 8b" both become "PROMIS Pain"
   - name: merge_duplicates
-    action: strip_discover
+    action: pattern_util
     args:
       merge_patterns: "${curated_patterns}"
       output: "${merged_tsv}"
@@ -99,7 +99,7 @@ steps:
 
   # Step 3: Coalesce patterns via subsumption analysis
   - name: coalesce_patterns
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${discovered_tsv}"
       output: "${coalesced_tsv}"
@@ -157,7 +157,7 @@ steps:
 
   # Step 7: Final coalesce with subsumption
   - name: final_coalesce
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${final_discovered}"
       output: "${final_coalesced}"

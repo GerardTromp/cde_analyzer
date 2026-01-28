@@ -15,13 +15,10 @@ Primary Workflow:
 5. Optionally discover bare names (--discover-bare-names)
 6. Write discovered patterns TSV to --output
 
-Iterative Improvement Workflow:
-1. Run primary workflow to discover and strip patterns
-2. Use --analyze-false-negatives on cleaned output to find remaining patterns
-3. Review output TSV and set 'include' column to 'yes' for patterns to add
-4. Use --add-to-supplementary to import curated patterns to config
-5. Re-run phrase_miner with --extract-supplementary to pick up new patterns
-6. Repeat until false negatives are acceptable
+Related Commands:
+- strip_analyze: Pattern conflict and false-negative analysis
+- pattern_util: TSV utilities (merge, coalesce, supplementary import)
+- strip_phrases: Apply stripping with curated patterns
 
 Output format:
   pattern<TAB>tinyIds<TAB>type<TAB>source_pattern
@@ -46,22 +43,21 @@ def _get_run_action():
 
 
 def register_subparser(subparser: ArgumentParser):
-    # Core arguments (required for most modes, validated per-mode in run.py)
+    # Core arguments (required for discovery mode)
     subparser.add_argument(
-        "--input", "-i", help="Path to input JSON file (CDE records or cleaned JSON for analysis)."
+        "--input", "-i", help="Path to input JSON file (CDE records)."
     )
     subparser.add_argument(
         "--model",
         "-m",
         choices=MODEL_REGISTRY.keys(),
-        help="Top-level Pydantic model name for parsing the input JSON. "
-             "Required for discovery mode, not needed for --analyze-false-negatives.",
+        help="Top-level Pydantic model name for parsing the input JSON.",
     )
     subparser.add_argument(
-        "--output", "-o", help="Path to output TSV file. Required for discovery and analysis modes."
+        "--output", "-o", help="Path to output TSV file."
     )
 
-    # Pattern source (required for discovery mode, not needed for analysis modes)
+    # Pattern source (required for discovery mode)
     subparser.add_argument(
         "--pattern-list",
         "-p",
@@ -133,7 +129,7 @@ def register_subparser(subparser: ArgumentParser):
         type=int,
         default=1,
         help="Number of parallel workers for discovery. "
-             "Use 0 for auto-detect with headroom (n-1 CPUs for ≤10 cores, n-2 for >10). "
+             "Use 0 for auto-detect with headroom (n-1 CPUs for <=10 cores, n-2 for >10). "
              "Use 1 for sequential (default). "
              "Positive values override to use exactly N workers. "
              "Auto-detects optimal dimension: texts vs patterns.",
@@ -147,107 +143,6 @@ def register_subparser(subparser: ArgumentParser):
         help="Write patterns that failed to match to TSV file. "
              "Format: original_pattern<TAB>regex<TAB>expected_tinyIds. "
              "Useful for diagnosis of regex issues.",
-    )
-    subparser.add_argument(
-        "--analyze-conflicts",
-        type=str,
-        metavar="FILE",
-        help="Analysis mode: detect pattern containment conflicts that affect stripping order. "
-             "Finds cases where pattern A is contained in pattern B, meaning order matters. "
-             "Outputs TSV report with: short_pattern, long_pattern, relationship (prefix/suffix/interior), "
-             "position, remainder, and recommendations. Exits after analysis (no discovery performed). "
-             "Use to review patterns before stripping.",
-    )
-    subparser.add_argument(
-        "--sort-order",
-        choices=["length", "file", "alpha"],
-        default="length",
-        help="Pattern processing order for conflict analysis: 'length' (longest-first, default), "
-             "'file' (preserve TSV file order), 'alpha' (alphabetical).",
-    )
-
-    # False-negative analysis
-    subparser.add_argument(
-        "--analyze-false-negatives",
-        action="store_true",
-        help="Analysis mode: analyze remaining 'as part of' patterns in -i/--input JSON. "
-             "Extracts patterns not fully stripped, counts occurrences, suggests candidates "
-             "for supplementary_patterns.yaml. Outputs report to --output (TSV format) "
-             "and displays summary to terminal. Exits after analysis (no discovery performed).",
-    )
-    subparser.add_argument(
-        "--fn-anchor",
-        type=str,
-        default="as part of",
-        help="Anchor phrase to search for in false-negative analysis (default: 'as part of').",
-    )
-
-    # Supplementary pattern import
-    subparser.add_argument(
-        "--add-to-supplementary",
-        type=str,
-        metavar="CURATED_TSV",
-        help="Import mode: add patterns from curated TSV to supplementary_patterns.yaml. "
-             "TSV must have 'pattern' and 'name' columns. Optional 'acronym' column. "
-             "Patterns are added to 'added_patterns' section. File is deleted after import. "
-             "Use after reviewing --analyze-false-negatives output.",
-    )
-    subparser.add_argument(
-        "--supplementary-section",
-        type=str,
-        default="added_patterns",
-        help="YAML section name for imported patterns (default: 'added_patterns').",
-    )
-
-    # Merge utility
-    subparser.add_argument(
-        "--merge-patterns",
-        type=str,
-        metavar="FILE",
-        help="Merge mode: read curated TSV, combine rows with identical patterns, "
-             "merge their tinyId sets, and write deduplicated output to --output. "
-             "When specified, ignores other options and just performs the merge.",
-    )
-    subparser.add_argument(
-        "--merge-pattern-column",
-        type=str,
-        default="pattern",
-        help="Column name for patterns in merge mode (default: 'pattern').",
-    )
-    subparser.add_argument(
-        "--merge-tinyids-column",
-        type=str,
-        default="tinyIds",
-        help="Column name for tinyIds in merge mode (default: 'tinyIds').",
-    )
-
-    # Coalesce utility (tinyId-aware subsumption)
-    subparser.add_argument(
-        "--coalesce-variants",
-        type=str,
-        metavar="FILE",
-        help="Coalesce mode: remove shorter patterns subsumed by longer ones. "
-             "A pattern is subsumed if it's a substring of longer pattern(s) AND "
-             "its tinyIds are covered by the union of those longer patterns' tinyIds. "
-             "Example: 'in the past 7 days' is subsumed by 'in the past 7 days:' and "
-             "'in the past 7 days - ' if all tinyIds are covered. "
-             "Writes coalesced patterns to --output.",
-    )
-    subparser.add_argument(
-        "--coalesce-report",
-        type=str,
-        metavar="FILE",
-        help="Write subsumption report showing which patterns were removed and why.",
-    )
-    subparser.add_argument(
-        "--min-prefix-tinyids",
-        type=int,
-        default=0,
-        help="Enable prefix extraction during coalesce: groups patterns by common prefix "
-             "and replaces them with the shortest prefix meeting this tinyId threshold. "
-             "Example: 'as part of Neuro-QOL Lower...' and 'as part of Neuro-QOL Upper...' "
-             "become 'as part of Neuro-QOL' if it covers enough tinyIds. "
-             "Use with --coalesce-variants. Default 0 = disabled.",
     )
 
     # Abbreviation discovery mode

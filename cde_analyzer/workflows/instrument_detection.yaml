@@ -174,7 +174,7 @@ steps:
   # Prefix extraction groups patterns like "as part of Neuro-QOL Lower..."
   # and "as part of Neuro-QOL Upper..." into "as part of Neuro-QOL"
   - name: coalesce_patterns
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${discovered_tsv}"
       output: "${coalesced_tsv}"
@@ -249,7 +249,7 @@ steps:
 
   # Step 11: Final coalesce with subsumption + prefix extraction
   - name: final_coalesce
-    action: strip_discover
+    action: pattern_util
     args:
       coalesce_variants: "${final_discovered}"
       output: "${final_coalesced}"
