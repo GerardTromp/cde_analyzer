@@ -1,0 +1,87 @@
+# Workflow: Temporal Pattern Stripping (Phase 3a)
+#
+# Strips temporal phrases like "past 7 days", "in the last week", etc.
+# Uses phrase family patterns discovered from phrase_grouper output.
+#
+# Prerequisites:
+#   - Run instrument_pipeline.yaml (Phase 1) first
+#   - Run phrase_pipeline.yaml (Phase 2) OR have curated temporal patterns
+#
+# Usage:
+#   cde_analyzer workflow run workflows/temporal_stripping.yaml \
+#       --set input_json=/path/to/inst_stripped.json \
+#       --set pattern_source=/path/to/pastNmerged.tsv \
+#       --set output_dir=/path/to/phase3_output
+
+name: temporal_stripping
+description: Phase 3a - Strip temporal patterns (pastN, recency, duration phrases)
+
+variables:
+  # Input: usually output from Phase 1 or 2
+  input_json: "${TEMPORAL_INPUT:-cde_all_07_no-instrument-full.json}"
+  output_dir: "${OUTPUT_DIR:-./phase3_temporal}"
+
+  # Pattern source - TSV with temporal patterns
+  # Can be from phrase_grouper family analysis or manual curation
+  pattern_source: "${PATTERN_SOURCE:-phrase_families/pastNmerged.tsv}"
+  pattern_column: "${PATTERN_COLUMN:-pattern}"
+
+  # Intermediate files
+  discovered_tsv: "${output_dir}/temporal_discovered.tsv"
+  coalesced_tsv: "${output_dir}/temporal_coalesced.tsv"
+  coalesce_report: "${output_dir}/temporal_subsumption_report.tsv"
+  curated_tsv: "${output_dir}/temporal_curated.tsv"
+  stripped_json: "${output_dir}/no_temporal.json"
+  trace_tsv: "${output_dir}/temporal_trace.tsv"
+
+steps:
+  - name: discover_temporal_patterns
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${pattern_source},${pattern_column}"
+      expand_variants: true
+      sort_order: length
+
+  - name: coalesce_patterns
+    action: strip_discover
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+
+  - name: curator_review
+    checkpoint: true
+    message: |
+      Temporal pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (patterns to strip)
+        - ${coalesce_report} (subsumption details)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives (non-temporal matches)
+        3. Verify temporal patterns are complete
+        4. Save as ${curated_tsv}
+
+      Common temporal patterns to verify:
+        - "past N days/weeks/months/years"
+        - "in the last N..."
+        - "within the past..."
+        - Duration phrases
+
+      When ready, resume with:
+        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  - name: strip_temporal
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${curated_tsv},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: 12

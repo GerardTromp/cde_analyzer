@@ -1,0 +1,256 @@
+# Workflow: Instrument Detection Pipeline (Full Automated)
+#
+# Complete multi-stage instrument detection workflow with automatic
+# abbreviation expansion:
+#
+#   Phase 1: Initial Mining
+#     1. Mine instruments (abbreviation-only + supplementary patterns)
+#     2. Batch expand abbreviations to discover extended phrases
+#
+#   Phase 2: Discovery & Coalesce
+#     3. Discover verbatim occurrences (instruments + expanded phrases)
+#     4. Coalesce patterns (subsumption analysis)
+#     5. [CHECKPOINT] Curator review
+#
+#   Phase 3: Family Analysis
+#     6. Family discovery (phrase_grouper)
+#     7. Re-discover with curated patterns
+#     8. Final coalesce with subsumption
+#     9. [CHECKPOINT] Final review
+#
+#   Phase 4: Stripping & Verification
+#     10. Strip instruments from CDE JSON
+#     11. Sanity check (diagnose remaining anchor patterns)
+#
+# Usage:
+#   cde_analyzer workflow run workflows/instrument_detection.yaml \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/phase1_output
+
+name: instrument_detection
+description: Full instrument detection with automatic abbreviation expansion
+
+variables:
+  # Primary input
+  input_json: "${CDE_INPUT:-cdes.json}"
+  output_dir: "${OUTPUT_DIR:-./phase1_output}"
+
+  # Phase 1: Mining outputs
+  instruments_tsv: "${output_dir}/instruments.tsv"
+  instruments_verbatim: "${output_dir}/instruments_verbatim.tsv"
+  families_tsv: "${output_dir}/instrument_families.tsv"
+
+  # Abbreviation expansion outputs
+  expansions_dir: "${output_dir}/abbreviation_expansions"
+  expanded_phrases: "${expansions_dir}/expanded_phrases.tsv"
+
+  # Phase 2: Discovery outputs
+  discovered_tsv: "${output_dir}/discovered_instruments.tsv"
+  failed_patterns: "${output_dir}/failed_patterns.tsv"
+
+  # Phase 3: Coalesce outputs
+  coalesced_tsv: "${output_dir}/coalesced_instruments.tsv"
+  coalesce_report: "${output_dir}/subsumption_report.tsv"
+
+  # Curator output
+  curated_tsv: "${output_dir}/curated_instruments.tsv"
+
+  # Phase 4: Family grouper outputs
+  families_dir: "${output_dir}/families"
+
+  # Phase 5: Final discovery/coalesce
+  final_discovered: "${output_dir}/final_discovered.tsv"
+  final_coalesced: "${output_dir}/final_coalesced.tsv"
+  final_subsumption: "${output_dir}/final_subsumption.tsv"
+
+  # Phase 6: Sanity check
+  sanity_check: "${output_dir}/sanity_check.tsv"
+
+  # Final output
+  stripped_json: "${output_dir}/no_instruments.json"
+  trace_tsv: "${output_dir}/strip_trace.tsv"
+
+steps:
+  # =========================================================================
+  # PHASE 1: Initial Mining
+  # =========================================================================
+
+  # Step 1: Mine instruments from "as part of" patterns
+  - name: mine_instruments
+    action: instrument_miner
+    args:
+      input: "${input_json}"
+      output_dir: "${output_dir}/"
+      extract_abbreviation_only: true
+      extract_supplementary: true
+      detect_families: true
+      family_summary: true
+
+  # Step 2: Batch expand abbreviations to discover extended phrases
+  # e.g., PROMIS → "Patient-Reported Outcome Measure Information System"
+  - name: expand_abbreviations
+    action: batch_expand_abbreviations
+    args:
+      input: "${input_json}"
+      abbreviations: "${instruments_tsv}"
+      acronym_column: "acronym"
+      output_dir: "${expansions_dir}"
+      fields:
+        - designation
+        - definition
+      k_max: 15
+      k_min: 3
+      min_tinyids: 2
+      top_phrases: 10
+      min_subset_size: 3
+
+  # =========================================================================
+  # PHASE 2: Discovery & Coalesce
+  # =========================================================================
+
+  # Step 3: Discover verbatim occurrences
+  # Combines instrument patterns with expanded phrases
+  - name: discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${instruments_verbatim},full_match,tinyids"
+      additional_patterns:
+        - "${expanded_phrases},expanded_phrase"
+      expand_variants: true
+      discover_bare_names: true
+      discover_fails: "${failed_patterns}"
+
+  # Step 4: Coalesce patterns via subsumption analysis
+  - name: coalesce_patterns
+    action: strip_discover
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+
+  # Step 5: Curator review checkpoint
+  - name: initial_review
+    checkpoint: true
+    message: |
+      PHASE 2 COMPLETE: Initial instrument pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (discovered patterns after subsumption)
+        - ${coalesce_report} (subsumption details)
+        - ${failed_patterns} (patterns that didn't match)
+        - ${expansions_dir}/expansion_summary.tsv (abbreviation expansion results)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives (accidental matches)
+        3. Verify expanded phrases are correct instrument names
+        4. Check ${failed_patterns} for patterns that should have matched
+        5. Save reviewed version as ${curated_tsv}
+
+      When ready, resume with:
+        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 3: Family Analysis & Final Coalesce
+  # =========================================================================
+
+  # Step 6: Family discovery using phrase_grouper
+  - name: family_discovery
+    action: phrase_grouper
+    args:
+      input: "${curated_tsv}"
+      output_dir: "${families_dir}"
+      text_column: "pattern"
+      tinyid_column: "tinyids"
+      min_family_size: 3
+      trees:
+        - prefix
+        - suffix
+
+  # Step 7: Re-discover with curated patterns for final verbatim forms
+  - name: final_discover
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${final_discovered}"
+      pattern_list: "${curated_tsv},pattern,tinyids"
+      expand_variants: true
+      sort_order: length
+
+  # Step 8: Final coalesce with subsumption (within tinyId sets)
+  - name: final_coalesce
+    action: strip_discover
+    args:
+      coalesce_variants: "${final_discovered}"
+      output: "${final_coalesced}"
+      coalesce_report: "${final_subsumption}"
+
+  # Step 9: Pre-strip review checkpoint
+  - name: final_review
+    checkpoint: true
+    message: |
+      PHASE 3 COMPLETE: Final instrument pattern review before stripping.
+
+      Files to review:
+        - ${final_coalesced} (final patterns to strip)
+        - ${final_subsumption} (subsumption analysis - verify no sub-phrases missed)
+        - ${families_dir}/ (family assignments)
+
+      Actions:
+        1. Review ${final_subsumption} to verify subsumption is complete
+        2. Verify family assignments are correct
+        3. Confirm pattern list is complete
+
+      When ready, resume with:
+        cde_analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 4: Stripping & Verification
+  # =========================================================================
+
+  # Step 10: Strip instruments from CDE JSON
+  - name: strip_instruments
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${final_coalesced},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: 12
+
+  # Step 11: Sanity check - diagnose any remaining anchor patterns
+  # This verifies we didn't miss any instruments
+  - name: sanity_check
+    action: diagnose_strip
+    args:
+      input: "${stripped_json}"
+      model: CDE
+      output: "${sanity_check}"
+      min_count: 2
+      suggest_patterns: true
+
+  # Completion checkpoint
+  - name: pipeline_complete
+    checkpoint: true
+    message: |
+      INSTRUMENT DETECTION PIPELINE COMPLETE!
+
+      Outputs:
+        - ${stripped_json} (CDE JSON with instruments stripped)
+        - ${trace_tsv} (detailed matching trace)
+        - ${families_dir}/ (instrument family analysis)
+        - ${expansions_dir}/ (abbreviation expansion results)
+
+      Quality Assurance:
+        - ${sanity_check} shows remaining "as part of" patterns
+        - If patterns found with count >= 2, consider adding to curated.tsv
+        - Re-run workflow from step 7 if patterns added
+
+      Next steps:
+        - Run phrase_pipeline.yaml with ${stripped_json} as input
+        - Or run full_pipeline.yaml for complete multi-phase stripping

@@ -1,0 +1,43 @@
+# Workflow: Quick Strip (Pre-curated Patterns)
+#
+# Simplified workflow when patterns are already curated.
+# Skips discovery and coalesce phases - goes straight to stripping.
+#
+# Use when:
+#   - Patterns already reviewed and saved as curated TSV
+#   - Re-running strip with modified patterns
+#   - Testing pattern changes
+#
+# Usage:
+#   cde_analyzer workflow run workflows/quick_strip.yaml \
+#       --set input_json=/path/to/input.json \
+#       --set patterns=/path/to/curated.tsv \
+#       --set output_json=/path/to/output.json
+
+name: quick_strip
+description: Direct stripping with pre-curated patterns (no discovery phase)
+
+variables:
+  # Input/output
+  input_json: "${STRIP_INPUT:-input.json}"
+  output_json: "${STRIP_OUTPUT:-stripped.json}"
+  output_dir: "${OUTPUT_DIR:-.}"
+
+  # Pattern configuration
+  patterns: "${PATTERNS:-curated.tsv}"
+  pattern_column: "${PATTERN_COLUMN:-pattern}"
+
+  # Processing options
+  workers: "${WORKERS:-12}"
+  trace_matching: "${output_dir}/strip_trace.tsv"
+
+steps:
+  - name: strip_patterns
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${output_json}"
+      patterns: "${patterns},${pattern_column}"
+      trace_matching: "${trace_matching}"
+      workers: "${workers}"

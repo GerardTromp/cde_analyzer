@@ -4,18 +4,25 @@
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
 
-help_text = "Extract a subset of CDE records by tinyId"
+help_text = "Extract a subset of CDE records by tinyId or text content"
 
 
 def _get_run_action():
     """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
     from .run import run_action
     return run_action
-description_text = """Filter CDE or Form records by a list of tinyIds and output
+
+
+description_text = """Filter CDE or Form records by tinyId list or text content and output
 a smaller, schema-compliant JSON file. Useful for:
   - Creating focused datasets for specific analyses
   - Reducing file size for faster processing
   - Isolating records of interest from large CDE exports
+  - Extracting records containing specific text patterns (e.g., instrument abbreviations)
+
+Two filtering modes:
+  1. tinyId filtering: --id-list or --id-file (include/exclude specific records)
+  2. Text filtering: --text-filter with --fields (search for text in specific fields)
 """
 
 
@@ -55,12 +62,37 @@ def register_subparser(subparser: ArgumentParser):
         help="File containing tinyIds (JSON, CSV, or TSV)."
     )
 
+    # Text-based filtering
+    subparser.add_argument(
+        "--text-filter",
+        help="Text pattern to search for in specified fields. "
+             "Records containing this text will be included (or excluded with --exclude)."
+    )
+    subparser.add_argument(
+        "--fields", "-f",
+        nargs="+",
+        default=["designation", "definition"],
+        help="Fields to search for text filter. Default: designation definition. "
+             "Supported: designation, definition, valueMeaningName, valueMeaningDefinition."
+    )
+    subparser.add_argument(
+        "--case-sensitive",
+        action="store_true",
+        help="Make text filter case-sensitive (default: case-insensitive)."
+    )
+    subparser.add_argument(
+        "--regex",
+        action="store_true",
+        help="Treat --text-filter as a regular expression pattern."
+    )
+
     # Include/Exclude mode
     subparser.add_argument(
         "--exclude",
         action=BooleanOptionalAction,
         default=False,
-        help="Exclude matching tinyIds (--exclude) or include them (--no-exclude, default)."
+        help="Exclude matching records (--exclude) or include them (--no-exclude, default). "
+             "Works with both tinyId and text filtering."
     )
 
     subparser.set_defaults(
