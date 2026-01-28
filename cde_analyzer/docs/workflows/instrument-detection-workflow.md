@@ -11,9 +11,11 @@ The `instrument_detection` workflow is a 4-phase, 14-step pipeline that automati
 | Phase | Steps | Purpose | Checkpoint |
 |-------|-------|---------|------------|
 | 1 | 1-3 | Initial Mining | Optional |
-| 2 | 4-6 | Discovery & Coalesce | **Yes** - initial_review |
-| 3 | 7-11 | Family Analysis & Final Coalesce | **Yes** - final_review |
+| 2 | 4-6 | Discovery, Coalesce & Recall | **Yes** - initial_review |
+| 3 | 7-11 | Family Analysis, Final Coalesce & Recall | **Yes** - final_review |
 | 4 | 12-13 | Stripping & Verification | **Yes** - pipeline_complete |
+
+**Recall Tracking**: When `recall_patterns` is set, conditional recall analysis steps run after each coalesce phase, generating a markdown report with per-family recall and iteration gains.
 
 ---
 
@@ -209,6 +211,29 @@ Output with min_prefix_tinyids=2:
 - `coalesced_instruments.tsv` - Reduced pattern set
 - `subsumption_report.tsv` - Details of which patterns were subsumed or coalesced
 
+### Step 5b: Recall Analysis (Optional)
+
+**Action**: `recall_analyze` (conditional on `recall_patterns`)
+
+```yaml
+- name: recall_phase2
+  action: recall_analyze
+  condition: "${recall_patterns}"
+  args:
+    input: "${input_json}"
+    model: CDE
+    pattern_file: "${recall_patterns}"
+    pipeline_output: "${coalesced_tsv}"
+    pipeline_tinyid_column: "${recall_tinyid_column}"
+    output: "${recall_phase2_tsv}"
+    markdown_report: "${recall_report_md}"
+    markdown_detail: "${recall_phase2_md}"
+    report_version: "phase-2-coalesced"
+    min_recall: 0.7
+```
+
+**Purpose**: Compare pipeline output against ground truth patterns to measure recall. Only runs when `recall_patterns` variable is set. Generates a markdown report with per-family recall breakdown.
+
 ### Step 6: Initial Review Checkpoint
 
 ```yaml
@@ -322,6 +347,30 @@ Analyze phrase families, re-discover patterns with curated list, and perform fin
 
 **Purpose**: Final subsumption and prefix extraction.
 
+### Step 10b: Recall Analysis (Optional)
+
+**Action**: `recall_analyze` (conditional on `recall_patterns`)
+
+```yaml
+- name: recall_phase3
+  action: recall_analyze
+  condition: "${recall_patterns}"
+  args:
+    input: "${input_json}"
+    model: CDE
+    pattern_file: "${recall_patterns}"
+    pipeline_output: "${final_coalesced}"
+    pipeline_tinyid_column: "${recall_tinyid_column}"
+    output: "${recall_phase3_tsv}"
+    markdown_report: "${recall_report_md}"
+    markdown_detail: "${recall_phase3_md}"
+    report_version: "phase-3-final"
+    previous_report: "${recall_phase2_tsv}"
+    min_recall: 0.8
+```
+
+**Purpose**: Compare Phase 3 recall against Phase 2 baseline using `--previous-report`. Reports iteration gains and flags diminishing returns. The recall report markdown (`recall_report.md`) accumulates version history across phases.
+
 ### Step 11: Final Review Checkpoint
 
 ```yaml
@@ -414,6 +463,8 @@ Apply final stripping and verify completeness.
 | `input_json` | `${CDE_INPUT:-cdes.json}` | Input CDE JSON file |
 | `output_dir` | `${OUTPUT_DIR:-./phase1_output}` | Output directory |
 | `workers` | `0` (auto-detect) | Parallel worker count |
+| `recall_patterns` | *(empty)* | Ground truth pattern file for recall tracking. When set, enables conditional `recall_phase2` and `recall_phase3` steps. |
+| `recall_tinyid_column` | `tinyids` | Column name for tinyIds in recall pattern file |
 
 ### Derived Variables
 
@@ -433,6 +484,9 @@ All intermediate files are derived from `output_dir`:
 | `final_discovered` | `${output_dir}/final_discovered.tsv` | Final discovery |
 | `final_coalesced` | `${output_dir}/final_coalesced.tsv` | Final patterns |
 | `stripped_json` | `${output_dir}/no_instruments.json` | Output JSON |
+| `recall_report_md` | `${output_dir}/recall_report.md` | Recall summary report |
+| `recall_phase2_tsv` | `${output_dir}/recall_phase2.tsv` | Phase 2 recall metrics |
+| `recall_phase3_tsv` | `${output_dir}/recall_phase3.tsv` | Phase 3 recall metrics |
 
 ---
 
@@ -614,6 +668,8 @@ cdes.json (input)
     │         │                     │
     │         │              ├─[coalesce_patterns]──→ coalesced_instruments.tsv
     │         │              │                              │
+    │         │              ├─[recall_phase2]──→ recall_phase2.tsv (optional)
+    │         │              │                              │
     │         │              │                        [CHECKPOINT: initial_review]
     │         │              │                              │
     │         │              │                        curated_instruments.tsv (manual)
@@ -625,6 +681,8 @@ cdes.json (input)
     │         │              ├─[final_discover]──→ final_discovered.tsv
     │         │              │
     │         │              ├─[final_coalesce]──→ final_coalesced.tsv
+    │         │              │                          │
+    │         │              ├─[recall_phase3]──→ recall_phase3.tsv (optional)
     │         │              │                          │
     │         │              │                    [CHECKPOINT: final_review]
     │         │              │                          │

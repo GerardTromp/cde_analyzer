@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1600" width="900" height="1600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1720" width="900" height="1720">
   <defs>
     <style>
       .title { font: bold 20px sans-serif; fill: #1a1a1a; }
@@ -12,11 +12,13 @@
       .phase-box { stroke-width: 2; rx: 8; }
       .step-box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 4; }
       .checkpoint-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 4; }
+      .recall-box { fill: #f0f9ff; stroke: #0ea5e9; stroke-width: 1.5; stroke-dasharray: 4,2; rx: 4; }
       .input-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 8; }
       .output-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; rx: 8; }
       .file-label { font: italic 9px sans-serif; fill: #6b7280; }
       .action-label { font: bold 9px monospace; fill: #7c3aed; }
       .checkpoint-label { font: bold 10px sans-serif; fill: #b45309; }
+      .recall-label { font: bold 9px sans-serif; fill: #0369a1; }
     </style>
     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#666666"/>
@@ -28,7 +30,7 @@
 
   <!-- Title -->
   <text x="450" y="30" text-anchor="middle" class="title">Instrument Detection Workflow (instrument_detection.yaml)</text>
-  <text x="450" y="50" text-anchor="middle" class="step-text">4 Phases | 13 Steps | 3 Checkpoints</text>
+  <text x="450" y="50" text-anchor="middle" class="step-text">4 Phases | 13 Steps | 3 Checkpoints | Optional Recall Tracking</text>
 
   <!-- Input Box -->
   <rect x="300" y="70" width="300" height="45" class="input-box"/>
@@ -77,7 +79,7 @@
   <path d="M450,380 L450,410" class="arrow"/>
 
   <!-- ========== PHASE 2: Discovery & Coalesce ========== -->
-  <rect x="50" y="410" width="800" height="275" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
+  <rect x="50" y="410" width="800" height="320" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
   <rect x="50" y="410" width="800" height="28" fill="#16a34a" class="phase-box" style="stroke: #16a34a;"/>
   <text x="450" y="428" text-anchor="middle" class="phase-title">PHASE 2: DISCOVERY &amp; COALESCE (Steps 4-6)</text>
 
@@ -97,144 +99,169 @@
   <rect x="80" y="522" width="740" height="48" class="step-box"/>
   <text x="95" y="540" class="step-num">5</text>
   <text x="115" y="540" class="step-title">Coalesce Patterns (Subsumption + Prefix Extraction)</text>
-  <text x="420" y="540" class="action-label">strip_discover --coalesce-variants</text>
+  <text x="420" y="540" class="action-label">pattern_util</text>
   <text x="95" y="557" class="step-text">--min-prefix-tinyids 2 -> Groups "Neuro-QOL Lower..." + "Neuro-QOL Upper..." -> "Neuro-QOL"</text>
   <text x="680" y="560" class="file-label">coalesced_instruments.tsv</text>
 
+  <!-- Arrow -->
+  <path d="M450,570 L450,585" class="arrow-dashed"/>
+
+  <!-- Step 5b: Recall Phase 2 (optional) -->
+  <rect x="200" y="585" width="500" height="35" class="recall-box"/>
+  <text x="215" y="603" class="recall-label">5b</text>
+  <text x="240" y="603" class="step-title">Recall Analysis (optional)</text>
+  <text x="400" y="603" class="action-label">recall_analyze</text>
+  <text x="540" y="603" class="step-text">condition: recall_patterns</text>
+  <text x="620" y="614" class="file-label">recall_phase2.tsv</text>
+
   <!-- Arrow to Checkpoint -->
-  <path d="M450,570 L450,592" class="arrow"/>
+  <path d="M450,620 L450,640" class="arrow"/>
 
   <!-- Checkpoint: Initial Review -->
-  <rect x="150" y="592" width="600" height="70" class="checkpoint-box"/>
-  <text x="175" y="612" class="checkpoint-label">CHECKPOINT: initial_review</text>
-  <text x="175" y="630" class="step-text">Review: coalesced_instruments.tsv, subsumption_report.tsv, failed_patterns.tsv</text>
-  <text x="175" y="648" class="step-text">Action: Remove false positives, save as curated_instruments.tsv</text>
-  <text x="680" y="650" class="file-label">curated_instruments.tsv</text>
+  <rect x="150" y="640" width="600" height="70" class="checkpoint-box"/>
+  <text x="175" y="660" class="checkpoint-label">CHECKPOINT: initial_review</text>
+  <text x="175" y="678" class="step-text">Review: coalesced_instruments.tsv, subsumption_report.tsv, failed_patterns.tsv</text>
+  <text x="175" y="696" class="step-text">Action: Remove false positives, save as curated_instruments.tsv</text>
+  <text x="680" y="698" class="file-label">curated_instruments.tsv</text>
 
   <!-- Arrow to Phase 3 -->
-  <path d="M450,685 L450,715" class="arrow"/>
+  <path d="M450,730 L450,760" class="arrow"/>
 
   <!-- ========== PHASE 3: Family Analysis & Final Coalesce ========== -->
-  <rect x="50" y="715" width="800" height="340" fill="#fef3c7" class="phase-box" style="stroke: #f59e0b;"/>
-  <rect x="50" y="715" width="800" height="28" fill="#f59e0b" class="phase-box" style="stroke: #f59e0b;"/>
-  <text x="450" y="733" text-anchor="middle" class="phase-title">PHASE 3: FAMILY ANALYSIS &amp; FINAL COALESCE (Steps 7-11)</text>
+  <rect x="50" y="760" width="800" height="395" fill="#fef3c7" class="phase-box" style="stroke: #f59e0b;"/>
+  <rect x="50" y="760" width="800" height="28" fill="#f59e0b" class="phase-box" style="stroke: #f59e0b;"/>
+  <text x="450" y="778" text-anchor="middle" class="phase-title">PHASE 3: FAMILY ANALYSIS &amp; FINAL COALESCE (Steps 7-11)</text>
 
   <!-- Step 7: Family Discovery -->
-  <rect x="80" y="755" width="740" height="42" class="step-box"/>
-  <text x="95" y="773" class="step-num">7</text>
-  <text x="115" y="773" class="step-title">Family Discovery (Prefix/Suffix Trees)</text>
-  <text x="340" y="773" class="action-label">phrase_grouper</text>
-  <text x="95" y="788" class="step-text">--trees prefix suffix --min-family-size 3</text>
-  <text x="700" y="788" class="file-label">families/</text>
+  <rect x="80" y="800" width="740" height="42" class="step-box"/>
+  <text x="95" y="818" class="step-num">7</text>
+  <text x="115" y="818" class="step-title">Family Discovery (Prefix/Suffix Trees)</text>
+  <text x="340" y="818" class="action-label">phrase_grouper</text>
+  <text x="95" y="833" class="step-text">--trees prefix suffix --min-family-size 3</text>
+  <text x="700" y="833" class="file-label">families/</text>
 
   <!-- Arrow -->
-  <path d="M450,797 L450,812" class="arrow"/>
+  <path d="M450,842 L450,857" class="arrow"/>
 
   <!-- Step 8: Discover Abbreviations Final -->
-  <rect x="80" y="812" width="740" height="42" class="step-box"/>
-  <text x="95" y="830" class="step-num">8</text>
-  <text x="115" y="830" class="step-title">Re-Discover Abbreviation Patterns</text>
-  <text x="340" y="830" class="action-label">strip_discover --discover-abbreviations</text>
-  <text x="95" y="845" class="step-text">Lower threshold to catch additional patterns</text>
-  <text x="665" y="845" class="file-label">abbrev_patterns_final.tsv</text>
+  <rect x="80" y="857" width="740" height="42" class="step-box"/>
+  <text x="95" y="875" class="step-num">8</text>
+  <text x="115" y="875" class="step-title">Re-Discover Abbreviation Patterns</text>
+  <text x="340" y="875" class="action-label">strip_discover --discover-abbreviations</text>
+  <text x="95" y="890" class="step-text">Lower threshold to catch additional patterns</text>
+  <text x="665" y="890" class="file-label">abbrev_patterns_final.tsv</text>
 
   <!-- Arrow -->
-  <path d="M450,854 L450,869" class="arrow"/>
+  <path d="M450,899 L450,914" class="arrow"/>
 
   <!-- Step 9: Final Discover -->
-  <rect x="80" y="869" width="740" height="42" class="step-box"/>
-  <text x="95" y="887" class="step-num">9</text>
-  <text x="115" y="887" class="step-title">Final Discovery</text>
-  <text x="230" y="887" class="action-label">strip_discover</text>
-  <text x="95" y="902" class="step-text">Curated patterns + abbrev_patterns_final -> final_discovered.tsv</text>
-  <text x="685" y="902" class="file-label">final_discovered.tsv</text>
+  <rect x="80" y="914" width="740" height="42" class="step-box"/>
+  <text x="95" y="932" class="step-num">9</text>
+  <text x="115" y="932" class="step-title">Final Discovery</text>
+  <text x="230" y="932" class="action-label">strip_discover</text>
+  <text x="95" y="947" class="step-text">Curated patterns + abbrev_patterns_final -> final_discovered.tsv</text>
+  <text x="685" y="947" class="file-label">final_discovered.tsv</text>
 
   <!-- Arrow -->
-  <path d="M450,911 L450,926" class="arrow"/>
+  <path d="M450,956 L450,971" class="arrow"/>
 
   <!-- Step 10: Final Coalesce -->
-  <rect x="80" y="926" width="740" height="42" class="step-box"/>
-  <text x="95" y="944" class="step-num">10</text>
-  <text x="120" y="944" class="step-title">Final Coalesce</text>
-  <text x="235" y="944" class="action-label">strip_discover --coalesce-variants</text>
-  <text x="95" y="959" class="step-text">Final subsumption + prefix extraction</text>
-  <text x="685" y="959" class="file-label">final_coalesced.tsv</text>
-
-  <!-- Arrow to Checkpoint -->
-  <path d="M450,968 L450,988" class="arrow"/>
-
-  <!-- Checkpoint: Final Review -->
-  <rect x="150" y="988" width="600" height="50" class="checkpoint-box"/>
-  <text x="175" y="1008" class="checkpoint-label">CHECKPOINT: final_review</text>
-  <text x="175" y="1026" class="step-text">Review: final_coalesced.tsv, final_subsumption.tsv, families/</text>
-
-  <!-- Arrow to Phase 4 -->
-  <path d="M450,1055 L450,1085" class="arrow"/>
-
-  <!-- ========== PHASE 4: Stripping & Verification ========== -->
-  <rect x="50" y="1085" width="800" height="220" fill="#fdf2f8" class="phase-box" style="stroke: #db2777;"/>
-  <rect x="50" y="1085" width="800" height="28" fill="#db2777" class="phase-box" style="stroke: #db2777;"/>
-  <text x="450" y="1103" text-anchor="middle" class="phase-title">PHASE 4: STRIPPING &amp; VERIFICATION (Steps 12-13)</text>
-
-  <!-- Step 12: Strip Instruments -->
-  <rect x="80" y="1125" width="740" height="48" class="step-box"/>
-  <text x="95" y="1143" class="step-num">12</text>
-  <text x="120" y="1143" class="step-title">Strip Instruments from CDE JSON</text>
-  <text x="340" y="1143" class="action-label">strip_phrases</text>
-  <text x="95" y="1160" class="step-text">--patterns final_coalesced.tsv --trace-matching strip_trace.tsv --workers 0</text>
-  <text x="690" y="1163" class="file-label">no_instruments.json</text>
+  <rect x="80" y="971" width="740" height="42" class="step-box"/>
+  <text x="95" y="989" class="step-num">10</text>
+  <text x="120" y="989" class="step-title">Final Coalesce</text>
+  <text x="235" y="989" class="action-label">pattern_util</text>
+  <text x="95" y="1004" class="step-text">Final subsumption + prefix extraction</text>
+  <text x="685" y="1004" class="file-label">final_coalesced.tsv</text>
 
   <!-- Arrow -->
-  <path d="M450,1173 L450,1190" class="arrow"/>
+  <path d="M450,1013 L450,1028" class="arrow-dashed"/>
 
-  <!-- Step 13: Sanity Check -->
-  <rect x="80" y="1190" width="740" height="42" class="step-box"/>
-  <text x="95" y="1208" class="step-num">13</text>
-  <text x="120" y="1208" class="step-title">Sanity Check (Diagnose Remaining Patterns)</text>
-  <text x="395" y="1208" class="action-label">diagnose_strip</text>
-  <text x="95" y="1223" class="step-text">--min-count 2 --suggest-patterns -> Verify no instruments remain</text>
-  <text x="700" y="1223" class="file-label">sanity_check.tsv</text>
+  <!-- Step 10b: Recall Phase 3 (optional) -->
+  <rect x="200" y="1028" width="500" height="35" class="recall-box"/>
+  <text x="215" y="1046" class="recall-label">10b</text>
+  <text x="248" y="1046" class="step-title">Recall Analysis (optional)</text>
+  <text x="410" y="1046" class="action-label">recall_analyze</text>
+  <text x="540" y="1046" class="step-text">--previous-report recall_phase2.tsv</text>
+  <text x="620" y="1057" class="file-label">recall_phase3.tsv</text>
 
   <!-- Arrow to Checkpoint -->
-  <path d="M450,1232 L450,1252" class="arrow"/>
+  <path d="M450,1063 L450,1083" class="arrow"/>
+
+  <!-- Checkpoint: Final Review -->
+  <rect x="150" y="1083" width="600" height="55" class="checkpoint-box"/>
+  <text x="175" y="1103" class="checkpoint-label">CHECKPOINT: final_review</text>
+  <text x="175" y="1121" class="step-text">Review: final_coalesced.tsv, final_subsumption.tsv, families/, recall_report.md</text>
+
+  <!-- Arrow to Phase 4 -->
+  <path d="M450,1155 L450,1185" class="arrow"/>
+
+  <!-- ========== PHASE 4: Stripping & Verification ========== -->
+  <rect x="50" y="1185" width="800" height="220" fill="#fdf2f8" class="phase-box" style="stroke: #db2777;"/>
+  <rect x="50" y="1185" width="800" height="28" fill="#db2777" class="phase-box" style="stroke: #db2777;"/>
+  <text x="450" y="1203" text-anchor="middle" class="phase-title">PHASE 4: STRIPPING &amp; VERIFICATION (Steps 12-13)</text>
+
+  <!-- Step 12: Strip Instruments -->
+  <rect x="80" y="1225" width="740" height="48" class="step-box"/>
+  <text x="95" y="1243" class="step-num">12</text>
+  <text x="120" y="1243" class="step-title">Strip Instruments from CDE JSON</text>
+  <text x="340" y="1243" class="action-label">strip_phrases</text>
+  <text x="95" y="1260" class="step-text">--patterns final_coalesced.tsv --trace-matching strip_trace.tsv --workers 0</text>
+  <text x="690" y="1263" class="file-label">no_instruments.json</text>
+
+  <!-- Arrow -->
+  <path d="M450,1273 L450,1290" class="arrow"/>
+
+  <!-- Step 13: Sanity Check -->
+  <rect x="80" y="1290" width="740" height="42" class="step-box"/>
+  <text x="95" y="1308" class="step-num">13</text>
+  <text x="120" y="1308" class="step-title">Sanity Check (Diagnose Remaining Patterns)</text>
+  <text x="395" y="1308" class="action-label">diagnose_strip</text>
+  <text x="95" y="1323" class="step-text">--min-count 2 --suggest-patterns -> Verify no instruments remain</text>
+  <text x="700" y="1323" class="file-label">sanity_check.tsv</text>
+
+  <!-- Arrow to Checkpoint -->
+  <path d="M450,1332 L450,1352" class="arrow"/>
 
   <!-- Checkpoint: Pipeline Complete -->
-  <rect x="150" y="1252" width="600" height="45" class="checkpoint-box"/>
-  <text x="175" y="1272" class="checkpoint-label">CHECKPOINT: pipeline_complete</text>
-  <text x="175" y="1288" class="step-text">Review sanity_check.tsv - if patterns found, add to curated.tsv and re-run</text>
+  <rect x="150" y="1352" width="600" height="45" class="checkpoint-box"/>
+  <text x="175" y="1372" class="checkpoint-label">CHECKPOINT: pipeline_complete</text>
+  <text x="175" y="1388" class="step-text">Review sanity_check.tsv - if patterns found, add to curated.tsv and re-run</text>
 
   <!-- Arrow to Output -->
-  <path d="M450,1305 L450,1340" class="arrow"/>
+  <path d="M450,1405 L450,1440" class="arrow"/>
 
   <!-- Output Box -->
-  <rect x="250" y="1340" width="400" height="60" class="output-box"/>
-  <text x="450" y="1362" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
-  <text x="450" y="1378" text-anchor="middle" class="file-label">no_instruments.json</text>
-  <text x="450" y="1392" text-anchor="middle" class="step-text">(instruments stripped, ready for phrase mining)</text>
+  <rect x="250" y="1440" width="400" height="60" class="output-box"/>
+  <text x="450" y="1462" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
+  <text x="450" y="1478" text-anchor="middle" class="file-label">no_instruments.json</text>
+  <text x="450" y="1492" text-anchor="middle" class="step-text">(instruments stripped, ready for phrase mining)</text>
 
   <!-- Legend Box -->
-  <rect x="50" y="1430" width="800" height="140" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1" rx="4"/>
-  <text x="70" y="1455" class="step-title">LEGEND</text>
+  <rect x="50" y="1530" width="800" height="160" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1" rx="4"/>
+  <text x="70" y="1555" class="step-title">LEGEND</text>
 
   <!-- Legend Items -->
-  <rect x="70" y="1470" width="60" height="20" class="step-box"/>
-  <text x="140" y="1485" class="step-text">Action Step</text>
+  <rect x="70" y="1570" width="60" height="20" class="step-box"/>
+  <text x="140" y="1585" class="step-text">Action Step</text>
 
-  <rect x="250" y="1470" width="60" height="20" class="checkpoint-box"/>
-  <text x="320" y="1485" class="step-text">Checkpoint (human review)</text>
+  <rect x="250" y="1570" width="60" height="20" class="checkpoint-box"/>
+  <text x="320" y="1585" class="step-text">Checkpoint (human review)</text>
 
-  <rect x="500" y="1470" width="60" height="20" class="input-box"/>
-  <text x="570" y="1485" class="step-text">Input</text>
+  <rect x="500" y="1570" width="60" height="20" class="input-box"/>
+  <text x="570" y="1585" class="step-text">Input</text>
 
-  <rect x="680" y="1470" width="60" height="20" class="output-box"/>
-  <text x="750" y="1485" class="step-text">Output</text>
+  <rect x="680" y="1570" width="60" height="20" class="output-box"/>
+  <text x="750" y="1585" class="step-text">Output</text>
 
-  <text x="70" y="1520" class="action-label">action_name</text>
-  <text x="180" y="1520" class="step-text">= cde-analyzer action command</text>
+  <rect x="70" y="1600" width="60" height="20" class="recall-box"/>
+  <text x="140" y="1615" class="step-text">Recall Analysis (optional, conditional)</text>
 
-  <text x="70" y="1545" class="file-label">filename.tsv</text>
-  <text x="180" y="1545" class="step-text">= Output file generated by step</text>
+  <text x="70" y="1645" class="action-label">action_name</text>
+  <text x="180" y="1645" class="step-text">= cde-analyzer action command</text>
 
-  <text x="500" y="1520" class="step-text">Checkpoints pause workflow for curator review.</text>
-  <text x="500" y="1545" class="step-text">Resume with: cde-analyzer workflow resume</text>
+  <text x="70" y="1665" class="file-label">filename.tsv</text>
+  <text x="180" y="1665" class="step-text">= Output file generated by step</text>
+
+  <text x="500" y="1645" class="step-text">Checkpoints pause workflow for curator review.</text>
+  <text x="500" y="1665" class="step-text">Recall steps run only when recall_patterns is set.</text>
 </svg>

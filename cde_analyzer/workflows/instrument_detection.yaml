@@ -79,6 +79,17 @@ variables:
   stripped_json: "${output_dir}/no_instruments.json"
   trace_tsv: "${output_dir}/strip_trace.tsv"
 
+  # Recall analysis (optional - provide ground truth patterns for tracking)
+  # Set recall_patterns to enable recall tracking across phases
+  recall_patterns: "${RECALL_PATTERNS:-}"
+  recall_tinyid_column: "${RECALL_TINYID_COLUMN:-tinyids}"
+  recall_report_tsv: "${output_dir}/recall_report.tsv"
+  recall_report_md: "${output_dir}/recall_report.md"
+  recall_phase2_tsv: "${output_dir}/recall_phase2.tsv"
+  recall_phase2_md: "${output_dir}/recall_phase2_detail.md"
+  recall_phase3_tsv: "${output_dir}/recall_phase3.tsv"
+  recall_phase3_md: "${output_dir}/recall_phase3_detail.md"
+
 steps:
   # =========================================================================
   # PHASE 1: Initial Mining
@@ -181,6 +192,22 @@ steps:
       coalesce_report: "${coalesce_report}"
       min_prefix_tinyids: 2
 
+  # Step 6b: Recall analysis for Phase 2 (optional - requires recall_patterns)
+  - name: recall_phase2
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${input_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${coalesced_tsv}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_phase2_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_phase2_md}"
+      report_version: "phase-2-coalesced"
+      min_recall: 0.7
+
   # Step 7: Curator review checkpoint
   - name: initial_review
     checkpoint: true
@@ -193,6 +220,7 @@ steps:
         - ${failed_patterns} (patterns that didn't match)
         - ${abbrev_patterns} (abbreviation-based designation patterns)
         - ${expansions_dir}/expansion_summary.tsv (abbreviation expansion results)
+        - ${recall_report_md} (recall analysis - if ground truth provided)
 
       Actions:
         1. Open ${coalesced_tsv} in spreadsheet
@@ -244,7 +272,6 @@ steps:
       additional_patterns:
         - "${output_dir}/abbrev_patterns_final.tsv,pattern"
       expand_variants: true
-      sort_order: length
       workers: "${workers}"
 
   # Step 11: Final coalesce with subsumption + prefix extraction
@@ -255,6 +282,24 @@ steps:
       output: "${final_coalesced}"
       coalesce_report: "${final_subsumption}"
       min_prefix_tinyids: 2
+
+  # Step 11b: Recall analysis for Phase 3 (optional - requires recall_patterns)
+  # Compares against Phase 2 recall to show improvement
+  - name: recall_phase3
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${input_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${final_coalesced}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_phase3_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_phase3_md}"
+      report_version: "phase-3-final"
+      previous_report: "${recall_phase2_tsv}"
+      min_recall: 0.8
 
   # Step 12: Pre-strip review checkpoint
   - name: final_review
@@ -267,6 +312,7 @@ steps:
         - ${final_subsumption} (subsumption analysis - verify no sub-phrases missed)
         - ${output_dir}/abbrev_patterns_final.tsv (Phase 3 abbreviation patterns)
         - ${families_dir}/ (family assignments)
+        - ${recall_report_md} (recall comparison: Phase 2 → Phase 3)
 
       Actions:
         1. Review ${final_subsumption} to verify subsumption is complete
@@ -304,6 +350,17 @@ steps:
       min_count: 2
       suggest_patterns: true
 
+  # Step 15: Generate recall report (optional - requires RECALL_PATTERNS)
+  # Compares ground truth patterns against final discovered patterns
+  # Run manually if you have a ground truth pattern file:
+  #   cde-analyzer recall_analyze -i ${input_json} -m CDE \
+  #       --pattern-file <ground_truth.txt> \
+  #       --pipeline-output ${final_coalesced} \
+  #       --pipeline-tinyid-column tinyids \
+  #       -o ${recall_report_tsv} \
+  #       --markdown-report ${recall_report_md} \
+  #       --report-version final
+
   # Completion checkpoint
   - name: pipeline_complete
     checkpoint: true
@@ -320,6 +377,23 @@ steps:
         - ${sanity_check} shows remaining "as part of" patterns
         - If patterns found with count >= 2, consider adding to curated.tsv
         - Re-run workflow from step 7 if patterns added
+
+      Recall Analysis (optional):
+        If you have ground truth patterns to verify recall, run:
+          cde-analyzer recall_analyze -i ${input_json} -m CDE \
+              --pattern-file <ground_truth_patterns.txt> \
+              --pipeline-output ${final_coalesced} \
+              --pipeline-tinyid-column tinyids \
+              -o ${recall_report_tsv} \
+              --markdown-report ${recall_report_md} \
+              --report-version final \
+              --min-recall 0.9
+
+        The markdown report (${recall_report_md}) provides:
+          - Summary with overall recall metrics
+          - Per-family recall breakdown with status indicators
+          - Missing tinyIds for curation
+          - Version history for tracking iteration improvements
 
       Next steps:
         - Run phrase_pipeline.yaml with ${stripped_json} as input

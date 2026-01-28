@@ -109,7 +109,9 @@ def discover_verbatim_from_models(
     output_path: Optional[str] = None,
     fails_output_path: Optional[str] = None,
     pattern_to_expected_tinyids: Optional[Dict[str, Set[str]]] = None,
-    n_workers: int = 1
+    n_workers: int = 1,
+    allow_abbrev_variants: bool = False,
+    allow_embedded_abbrev: bool = False,
 ) -> Dict[str, Set[str]]:
     """
     Discover verbatim phrase occurrences from Pydantic models.
@@ -124,6 +126,10 @@ def discover_verbatim_from_models(
             tinyIds for filtered discovery. When provided, each pattern is only
             searched in texts from its expected tinyIds.
         n_workers: Number of parallel workers (0=auto, 1=sequential)
+        allow_abbrev_variants: If True, abbreviation parentheticals match variants
+            e.g., (PHQ) will also match (PHQ-9), (PHQ-15), etc.
+        allow_embedded_abbrev: If True, allow optional abbreviations between words
+            e.g., "Scale Long" can match "Scale (GDS) Long"
 
     Returns:
         Dict mapping verbatim_phrase → set of tinyIds
@@ -134,7 +140,11 @@ def discover_verbatim_from_models(
 
     # Compile flexible patterns
     logger.info(f"Compiling {len(source_patterns)} flexible patterns...")
-    compiled = compile_flexible_patterns(source_patterns)
+    compiled = compile_flexible_patterns(
+        source_patterns,
+        allow_abbrev_variants=allow_abbrev_variants,
+        allow_embedded_abbrev=allow_embedded_abbrev,
+    )
 
     # Discover verbatim occurrences
     if pattern_to_expected_tinyids:

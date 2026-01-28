@@ -27,8 +27,8 @@ variables:
   patterns: "${PATTERNS:-curated.tsv}"
   pattern_column: "${PATTERN_COLUMN:-pattern}"
 
-  # Processing options
-  workers: "${WORKERS:-12}"
+  # Processing options (0 = auto-detect with headroom)
+  workers: 0
   trace_matching: "${output_dir}/strip_trace.tsv"
 
 steps:

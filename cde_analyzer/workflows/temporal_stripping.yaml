@@ -21,6 +21,9 @@ variables:
   input_json: "${TEMPORAL_INPUT:-cde_all_07_no-instrument-full.json}"
   output_dir: "${OUTPUT_DIR:-./phase3_temporal}"
 
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
   # Pattern source - TSV with temporal patterns
   # Can be from phrase_grouper family analysis or manual curation
   pattern_source: "${PATTERN_SOURCE:-phrase_families/pastNmerged.tsv}"

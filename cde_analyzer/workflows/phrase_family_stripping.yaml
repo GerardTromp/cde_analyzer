@@ -39,7 +39,8 @@ variables:
   # Processing options
   expand_variants: "${EXPAND_VARIANTS:-true}"
   sort_order: "${SORT_ORDER:-length}"
-  workers: "${WORKERS:-12}"
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
 
   # Intermediate files (auto-named by family)
   discovered_tsv: "${output_dir}/${family_name}_discovered.tsv"

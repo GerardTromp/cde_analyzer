@@ -43,6 +43,10 @@ REQUIRED_WORDS = {"part", "based", "field"}
 # Version-like keywords that precede version numbers
 VERSION_KEYWORDS = {"version", "ver", "v"}
 
+# Optional embedded abbreviation pattern for insertion between words
+# Matches: nothing OR whitespace-(ABBREV)-whitespace OR whitespace-(ABBREV-N)-whitespace
+EMBEDDED_ABBREV_OPTIONAL = r'(?:\s*\([A-Z]+(?:-\d+)?\)\s*)?'
+
 
 def get_optimal_workers(n_workers: int = 0) -> int:
     """
@@ -183,7 +187,11 @@ def _make_flexible_word_regex(word: str, is_optional: bool = False, include_foll
         return escaped
 
 
-def make_flexible_regex(pattern: str) -> str:
+def make_flexible_regex(
+    pattern: str,
+    allow_abbrev_variants: bool = False,
+    allow_embedded_abbrev: bool = False,
+) -> str:
     """
     Convert a pattern to a flexible case-insensitive regex.
 
@@ -194,8 +202,15 @@ def make_flexible_regex(pattern: str) -> str:
     - Hyphens can match hyphen, space, or nothing
     - Prepositions (to, for, in, etc.) are optional when not in anchor
 
+    Enhanced rules (when enabled):
+    - allow_abbrev_variants: (ABC) matches (ABC), (ABC-1), (ABC-2), etc.
+    - allow_embedded_abbrev: Allows optional parenthetical abbreviations between words
+      e.g., "Scale Long" can match "Scale (GDS) Long"
+
     Args:
         pattern: Original pattern string
+        allow_abbrev_variants: If True, abbreviation parentheticals match variants
+        allow_embedded_abbrev: If True, allow optional abbreviations between words
 
     Returns:
         Regex pattern string (compile with re.IGNORECASE)
@@ -206,6 +221,9 @@ def make_flexible_regex(pattern: str) -> str:
 
         'Risk Factor Questionnaire (RFQ)' →
             r'Risk\\s+Factor\\s+Questionnaire\\s*\\(RFQ\\)'
+
+        'Patient Health Questionnaire (PHQ)' with allow_abbrev_variants=True →
+            r'Patient\\s+Health\\s+Questionnaire\\s*\\(PHQ(?:-\\d+)?\\)'
     """
     if not pattern:
         return ''
@@ -239,7 +257,21 @@ def make_flexible_regex(pattern: str) -> str:
                 # Skip spacing if previous token was optional (already included)
                 if i > 0 and not prev_was_optional:
                     regex_parts.append(r'\s*')
-                regex_parts.append(r'\(' + _escape_for_regex(inner) + r'\)')
+
+                # Enhanced: Check if this is an abbreviation-style parenthetical
+                # Pattern: all caps, possibly followed by hyphen and digits (e.g., PHQ, PHQ-9)
+                if allow_abbrev_variants and re.match(r'^[A-Z]+(?:-\d+)?$', inner):
+                    # Extract base abbreviation (letters before any hyphen-number)
+                    base_match = re.match(r'^([A-Z]+)', inner)
+                    if base_match:
+                        base_abbrev = base_match.group(1)
+                        # Generate pattern that matches: (PHQ), (PHQ-9), (PHQ-15), etc.
+                        regex_parts.append(rf'\({re.escape(base_abbrev)}(?:-\d+)?\)')
+                    else:
+                        regex_parts.append(r'\(' + _escape_for_regex(inner) + r'\)')
+                else:
+                    regex_parts.append(r'\(' + _escape_for_regex(inner) + r'\)')
+
                 prev_was_optional = False
                 prev_was_version_keyword = False
                 continue
@@ -249,7 +281,12 @@ def make_flexible_regex(pattern: str) -> str:
             # spacing between words in the remainder (i > 0)
             # Skip if previous token was optional (spacing is in the optional group)
             if i > 0 and not prev_was_optional:
-                regex_parts.append(r'\s+')
+                if allow_embedded_abbrev:
+                    # Allow optional parenthetical abbreviation between words
+                    # e.g., "Scale Long" can match "Scale (GDS) Long"
+                    regex_parts.append(r'\s+' + EMBEDDED_ABBREV_OPTIONAL)
+                else:
+                    regex_parts.append(r'\s+')
 
             # Check if this is a version keyword
             if token_lower in VERSION_KEYWORDS:
@@ -499,13 +536,19 @@ def make_core_name_regex(bare_name: str) -> str:
 
 
 def compile_flexible_patterns(
-    patterns: List[str]
+    patterns: List[str],
+    allow_abbrev_variants: bool = False,
+    allow_embedded_abbrev: bool = False,
 ) -> List[Tuple[str, re.Pattern]]:
     """
     Compile a list of patterns into flexible regex patterns.
 
     Args:
         patterns: List of pattern strings
+        allow_abbrev_variants: If True, abbreviation parentheticals match variants
+            e.g., (PHQ) will also match (PHQ-9), (PHQ-15), etc.
+        allow_embedded_abbrev: If True, allow optional abbreviations between words
+            e.g., "Scale Long" can match "Scale (GDS) Long"
 
     Returns:
         List of (original_pattern, compiled_regex) tuples
@@ -514,7 +557,11 @@ def compile_flexible_patterns(
 
     for pattern in patterns:
         try:
-            regex_str = make_flexible_regex(pattern)
+            regex_str = make_flexible_regex(
+                pattern,
+                allow_abbrev_variants=allow_abbrev_variants,
+                allow_embedded_abbrev=allow_embedded_abbrev,
+            )
             if regex_str:
                 compiled_re = re.compile(regex_str, re.IGNORECASE)
                 compiled.append((pattern, compiled_re))
@@ -1003,7 +1050,8 @@ def coalesce_variants_tsv(
     pattern_column: str = "pattern",
     tinyids_column: str = "tinyIds",
     report_path: Optional[str] = None,
-    min_prefix_tinyids: int = 0
+    min_prefix_tinyids: int = 0,
+    min_parent_tinyids: int = 0
 ) -> Dict[str, int]:
     """
     Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
@@ -1033,6 +1081,9 @@ def coalesce_variants_tsv(
         tinyids_column: Column name for tinyIds (default: 'tinyIds')
         report_path: Optional path to write subsumption report TSV
         min_prefix_tinyids: Minimum tinyIds for prefix extraction (0 = disabled)
+        min_parent_tinyids: Minimum parent tinyId count threshold (0 = disabled).
+            When > 0, patterns whose parent_tinyid_count < threshold are dropped.
+            Requires parent_phrase and parent_tinyid_count columns in input.
 
     Returns:
         Dict with coalesce statistics:
@@ -1042,8 +1093,11 @@ def coalesce_variants_tsv(
         - 'prefix_extracted_count': Number of patterns replaced by prefixes
         - 'subsumptions': List of (subsumed_pattern, covering_patterns) tuples
     """
-    # Load all patterns with tinyIds
+    # Load all patterns with tinyIds and optional parent info
     pattern_to_tinyids: Dict[str, Set[str]] = {}
+    pattern_to_parent: Dict[str, str] = {}
+    pattern_to_parent_count: Dict[str, int] = {}
+    has_parent_columns = False
 
     with open(input_path, 'r', encoding='utf-8') as f:
         header_line = f.readline().strip()
@@ -1060,6 +1114,15 @@ def coalesce_variants_tsv(
         tinyids_idx = None
         if tinyids_column in headers:
             tinyids_idx = headers.index(tinyids_column)
+
+        # Detect parent columns
+        parent_idx = None
+        parent_count_idx = None
+        if 'parent_phrase' in headers:
+            parent_idx = headers.index('parent_phrase')
+            has_parent_columns = True
+        if 'parent_tinyid_count' in headers:
+            parent_count_idx = headers.index('parent_tinyid_count')
 
         for line in f:
             line = line.rstrip('\n\r')
@@ -1081,6 +1144,19 @@ def coalesce_variants_tsv(
                 if tinyids_str:
                     tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
 
+            # Parse parent info
+            if parent_idx is not None and parent_idx < len(fields):
+                parent_val = fields[parent_idx].strip().strip('"')
+                if parent_val:
+                    pattern_to_parent[pattern] = parent_val
+            if parent_count_idx is not None and parent_count_idx < len(fields):
+                count_val = fields[parent_count_idx].strip()
+                if count_val:
+                    try:
+                        pattern_to_parent_count[pattern] = int(count_val)
+                    except ValueError:
+                        pass
+
             # Merge tinyIds if pattern already exists
             if pattern in pattern_to_tinyids:
                 pattern_to_tinyids[pattern].update(tinyids)
@@ -1088,6 +1164,23 @@ def coalesce_variants_tsv(
                 pattern_to_tinyids[pattern] = tinyids
 
     input_patterns = len(pattern_to_tinyids)
+
+    # Apply parent tinyId threshold filter
+    parent_filtered_count = 0
+    if min_parent_tinyids > 0 and has_parent_columns:
+        patterns_to_remove = []
+        for pattern in pattern_to_tinyids:
+            parent_count = pattern_to_parent_count.get(pattern, 0)
+            if parent_count < min_parent_tinyids:
+                patterns_to_remove.append(pattern)
+        for pattern in patterns_to_remove:
+            del pattern_to_tinyids[pattern]
+            parent_filtered_count += 1
+        if parent_filtered_count:
+            logger.info(
+                f"Parent threshold filter: removed {parent_filtered_count} patterns "
+                f"with parent_tinyid_count < {min_parent_tinyids}"
+            )
     logger.info(f"Loaded {input_patterns} unique patterns from {input_path}")
 
     # Sort by length descending (longest first)
@@ -1209,13 +1302,28 @@ def coalesce_variants_tsv(
         logger.info(f"Prefix extraction: {prefix_extracted_count} patterns → "
                     f"{len(new_patterns_from_prefix)} prefix patterns")
 
+    # For prefix-extracted patterns, propagate parent info from constituent patterns
+    if has_parent_columns and prefix_replacements:
+        for orig, prefix in prefix_replacements.items():
+            if orig in pattern_to_parent and prefix not in pattern_to_parent:
+                pattern_to_parent[prefix] = pattern_to_parent[orig]
+                pattern_to_parent_count[prefix] = pattern_to_parent_count.get(orig, 0)
+
     # Write output (kept patterns only)
     output_patterns = sorted(kept_patterns, key=len, reverse=True)
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(f"{pattern_column}\t{tinyids_column}\n")
+        header = f"{pattern_column}\t{tinyids_column}"
+        if has_parent_columns:
+            header += "\tparent_phrase\tparent_tinyid_count"
+        f.write(header + "\n")
         for pattern in output_patterns:
             tinyids_str = ' '.join(sorted(pattern_to_tinyids[pattern]))
-            f.write(f"{pattern}\t{tinyids_str}\n")
+            row = f"{pattern}\t{tinyids_str}"
+            if has_parent_columns:
+                parent = pattern_to_parent.get(pattern, "")
+                parent_count = pattern_to_parent_count.get(pattern, "")
+                row += f"\t{parent}\t{parent_count}"
+            f.write(row + "\n")
 
     # Write optional subsumption report (include prefix extractions)
     if report_path:
@@ -1248,12 +1356,14 @@ def coalesce_variants_tsv(
         'output_patterns': len(kept_patterns),
         'subsumed_count': len(subsumed),
         'prefix_extracted_count': prefix_extracted_count,
+        'parent_filtered_count': parent_filtered_count,
         'subsumptions': list(subsumed.items())
     }
 
+    parent_info = f", {parent_filtered_count} parent-filtered" if parent_filtered_count else ""
     logger.info(
         f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
-        f"({len(subsumed)} subsumed, {prefix_extracted_count} prefix-extracted)"
+        f"({len(subsumed)} subsumed, {prefix_extracted_count} prefix-extracted{parent_info})"
     )
 
     return stats

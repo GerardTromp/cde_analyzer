@@ -23,6 +23,9 @@ variables:
   input_json: "${PHRASE_INPUT:-inst_stripped.json}"
   output_dir: "${OUTPUT_DIR:-./phase2_output}"
 
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
   # Intermediate files
   phrases_tsv: "${output_dir}/verbatim_phrases.tsv"
   discovered_tsv: "${output_dir}/discovered.tsv"
@@ -30,6 +33,23 @@ variables:
   coalesce_report: "${output_dir}/coalesce_report.tsv"
   curated_tsv: "${output_dir}/curated.tsv"
   stripped_json: "${output_dir}/final_stripped.json"
+  trace_tsv: "${output_dir}/strip_trace.tsv"
+
+  # Parent phrase tracking (propagates generic phrase info through pipeline)
+  parent_column: "lemma_text"
+  min_parent_tinyids: "${MIN_PARENT_TINYIDS:-20}"
+
+  # Recall analysis (optional - provide ground truth patterns for tracking)
+  # recall_source_json: original (pre-strip) JSON for ground truth matching
+  # Defaults to input_json if not set; override when input_json is already stripped
+  recall_source_json: "${RECALL_SOURCE_JSON:-${input_json}}"
+  recall_patterns: "${RECALL_PATTERNS:-}"
+  recall_tinyid_column: "${RECALL_TINYID_COLUMN:-tinyids}"
+  recall_report_md: "${output_dir}/recall_report.md"
+  recall_coalesced_tsv: "${output_dir}/recall_coalesced.tsv"
+  recall_coalesced_md: "${output_dir}/recall_coalesced_detail.md"
+  recall_stripped_tsv: "${output_dir}/recall_stripped.tsv"
+  recall_stripped_md: "${output_dir}/recall_stripped_detail.md"
 
 steps:
   - name: mine_phrases
@@ -45,9 +65,10 @@ steps:
       input: "${input_json}"
       model: CDE
       output: "${discovered_tsv}"
-      pattern_list: "${phrases_tsv}"
+      pattern_list: "${phrases_tsv},verbatim_text"
       expand_variants: true
       workers: "${workers}"
+      parent_column: "${parent_column}"
 
   - name: coalesce_patterns
     action: pattern_util
@@ -55,6 +76,23 @@ steps:
       coalesce_variants: "${discovered_tsv}"
       output: "${coalesced_tsv}"
       coalesce_report: "${coalesce_report}"
+      min_prefix_tinyids: 2
+      min_parent_tinyids: "${min_parent_tinyids}"
+
+  - name: recall_coalesced
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${recall_source_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${coalesced_tsv}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_coalesced_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_coalesced_md}"
+      report_version: "coalesced"
+      min_recall: 0.7
 
   - name: curator_review
     checkpoint: true
@@ -64,6 +102,7 @@ steps:
       Files to review:
         - ${coalesced_tsv} (patterns to strip)
         - ${coalesce_report} (subsumption details)
+        - ${recall_report_md} (recall analysis, if recall_patterns set)
 
       Actions:
         1. Open ${coalesced_tsv} in spreadsheet
@@ -80,5 +119,22 @@ steps:
       input: "${input_json}"
       model: CDE
       output: "${stripped_json}"
-      patterns: "${curated_tsv}"
+      patterns: "${curated_tsv},pattern"
+      trace_matching: "${trace_tsv}"
       workers: "${workers}"
+
+  - name: recall_stripped
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${recall_source_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${curated_tsv}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_stripped_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_stripped_md}"
+      report_version: "post-strip"
+      previous_report: "${recall_coalesced_tsv}"
+      min_recall: 0.8

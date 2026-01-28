@@ -88,6 +88,22 @@ def register_subparser(subparser: ArgumentParser):
         help="Treat --text-filter as a regular expression pattern."
     )
 
+    # Multi-pattern filtering from file (like grep -f)
+    subparser.add_argument(
+        "--pattern-file", "-F",
+        help="File containing regex patterns (one per line). "
+             "Like grep -E -f, matches records against any pattern. "
+             "Format: 'pattern' or 'pattern<TAB>label' for grouping."
+    )
+    subparser.add_argument(
+        "--match-report",
+        help="Output file for detailed match report (TSV with tinyId, matched patterns, labels)."
+    )
+    subparser.add_argument(
+        "--tinyid-report",
+        help="Output file listing matched tinyIds only (one per line, for pipeline chaining)."
+    )
+
     # Include/Exclude mode
     subparser.add_argument(
         "--exclude",

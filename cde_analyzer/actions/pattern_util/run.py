@@ -187,10 +187,13 @@ def run_action(args: Namespace):
         tinyids_column = getattr(args, 'merge_tinyids_column', 'tinyIds')
         report_path = getattr(args, 'coalesce_report', None)
         min_prefix_tinyids = getattr(args, 'min_prefix_tinyids', 0)
+        min_parent_tinyids = getattr(args, 'min_parent_tinyids', 0)
 
         logger.info(f"Coalesce mode: removing subsumed patterns from {coalesce_variants}")
         if min_prefix_tinyids > 0:
             logger.info(f"Prefix extraction enabled (min_tinyids={min_prefix_tinyids})")
+        if min_parent_tinyids > 0:
+            logger.info(f"Parent threshold filter enabled (min_parent_tinyids={min_parent_tinyids})")
 
         stats = coalesce_variants_tsv(
             coalesce_variants,
@@ -198,7 +201,8 @@ def run_action(args: Namespace):
             pattern_column=pattern_column,
             tinyids_column=tinyids_column,
             report_path=report_path,
-            min_prefix_tinyids=min_prefix_tinyids
+            min_prefix_tinyids=min_prefix_tinyids,
+            min_parent_tinyids=min_parent_tinyids
         )
 
         print(f"\nCoalesce complete:")
@@ -207,6 +211,8 @@ def run_action(args: Namespace):
         print(f"  Subsumed: {stats['subsumed_count']} patterns removed")
         if stats.get('prefix_extracted_count', 0) > 0:
             print(f"  Prefixes: {stats['prefix_extracted_count']} patterns -> common stems")
+        if stats.get('parent_filtered_count', 0) > 0:
+            print(f"  Parent filter: {stats['parent_filtered_count']} patterns below threshold")
         if report_path:
             print(f"  Report:   {report_path}")
         print(f"  Wrote:    {args.output}")

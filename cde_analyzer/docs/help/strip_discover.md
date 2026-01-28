@@ -92,6 +92,12 @@ cde-analyzer strip_discover \
 |--------|---------|-------------|
 | `--workers`, `-w` | `1` | Parallel workers. `0` = auto-detect with headroom |
 
+### Parent Phrase Tracking
+
+| Option | Description |
+|--------|-------------|
+| `--parent-column COLUMN` | Column in `--pattern-list` TSV containing the parent (generic) phrase. Adds `parent_phrase` and `parent_tinyid_count` columns to output. Used with `phrase_pipeline.yaml` to propagate generic phrase coverage through the pipeline. |
+
 ### Diagnostics
 
 | Option | Description |
@@ -115,6 +121,8 @@ The output TSV contains:
 | `tinyIds` | Space-separated list of document IDs |
 | `type` | Pattern type: `prefix` or `bare` |
 | `source_pattern` | Original pattern that generated this match |
+| `parent_phrase` | *(optional)* Parent generic phrase (when `--parent-column` used) |
+| `parent_tinyid_count` | *(optional)* Unique tinyIds across all verbatim variants of the parent |
 
 ## Examples
 
@@ -137,6 +145,22 @@ cde-analyzer strip_discover \
     --expand-variants \
     --discover-bare-names
 ```
+
+### With Parent Phrase Tracking
+
+```bash
+cde-analyzer strip_discover \
+    -i cdes.json -m CDE \
+    -o discovered.tsv \
+    --pattern-list verbatim_phrases.tsv,verbatim_text \
+    --expand-variants \
+    --parent-column lemma_text
+```
+
+Adds `parent_phrase` and `parent_tinyid_count` columns to discovered.tsv. The parent
+tinyId count aggregates unique tinyIds across all verbatim variants sharing the same
+generic (lemmatized) parent phrase. Used by downstream `--min-parent-tinyids` filtering
+in `pattern_util` coalesce.
 
 ### Parallel Processing
 

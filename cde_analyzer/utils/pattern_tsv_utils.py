@@ -43,6 +43,35 @@ def find_column_index(headers: List[str], column_name: str) -> int:
     raise ValueError(f"Column '{column_name}' not found (case-insensitive)")
 
 
+def find_column_name(headers: List[str], column_name: str) -> str:
+    """
+    Find actual column header name with case-insensitive matching.
+
+    Like find_column_index but returns the header string itself,
+    useful with csv.DictReader where you need the exact key.
+
+    Args:
+        headers: List of column header names from TSV file.
+        column_name: Target column name to find.
+
+    Returns:
+        The actual header string that matched.
+
+    Raises:
+        ValueError: If no matching column is found.
+    """
+    if column_name in headers:
+        return column_name
+
+    column_lower = column_name.lower()
+    for header in headers:
+        if header.lower() == column_lower:
+            logger.debug(f"Column '{column_name}' matched as '{header}' (case-insensitive)")
+            return header
+
+    raise ValueError(f"Column '{column_name}' not found (case-insensitive)")
+
+
 def load_pattern_list(
     spec: str,
     expand_variants: bool = False,
@@ -234,3 +263,89 @@ def load_pattern_list_with_tinyids(
     )
 
     return patterns_list, pattern_to_tinyids
+
+
+def load_parent_mapping(
+    spec: str,
+    pattern_column: str,
+    parent_column: str,
+    tinyids_column: str = "tinyids"
+) -> Tuple[Dict[str, str], Dict[str, int]]:
+    """
+    Load parent phrase mapping and aggregated parent tinyId counts from a TSV.
+
+    For each pattern (verbatim), maps it to its parent (generic) phrase.
+    Aggregates tinyIds across all verbatim variants sharing the same parent
+    to compute parent_tinyid_count.
+
+    Args:
+        spec: File spec (just the filepath portion, or 'file,col' format).
+        pattern_column: Column with the pattern (e.g., 'verbatim_text').
+        parent_column: Column with the parent phrase (e.g., 'lemma_text').
+        tinyids_column: Column with tinyIds for aggregation.
+
+    Returns:
+        Tuple of:
+        - Dict mapping pattern -> parent phrase
+        - Dict mapping parent phrase -> total unique tinyId count
+    """
+    # Parse filepath from spec
+    parts = spec.split(',')
+    filepath = parts[0]
+
+    if not Path(filepath).exists():
+        raise FileNotFoundError(f"File not found: {filepath}")
+
+    pattern_to_parent: Dict[str, str] = {}
+    parent_to_tinyids: Dict[str, Set[str]] = {}
+
+    with open(filepath, encoding="utf-8") as f:
+        header_line = f.readline().strip()
+        headers = header_line.split('\t')
+
+        pattern_idx = find_column_index(headers, pattern_column)
+        parent_idx = find_column_index(headers, parent_column)
+
+        tinyids_idx = None
+        try:
+            tinyids_idx = find_column_index(headers, tinyids_column)
+        except ValueError:
+            logger.debug(f"tinyIds column '{tinyids_column}' not found in parent mapping")
+
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            fields = line.split('\t')
+            if pattern_idx >= len(fields) or parent_idx >= len(fields):
+                continue
+
+            pattern = fields[pattern_idx].strip().strip('"')
+            parent = fields[parent_idx].strip().strip('"')
+            if not pattern or not parent:
+                continue
+
+            pattern_to_parent[pattern] = parent
+
+            # Aggregate tinyIds by parent
+            if parent not in parent_to_tinyids:
+                parent_to_tinyids[parent] = set()
+            if tinyids_idx is not None and tinyids_idx < len(fields):
+                tinyids_str = fields[tinyids_idx].strip().strip('"')
+                if tinyids_str:
+                    parent_to_tinyids[parent].update(
+                        t for t in re.split(r'[\s|]+', tinyids_str) if t
+                    )
+
+    # Convert to counts
+    parent_to_count: Dict[str, int] = {
+        parent: len(tids) for parent, tids in parent_to_tinyids.items()
+    }
+
+    logger.info(
+        f"Loaded parent mapping: {len(pattern_to_parent)} patterns → "
+        f"{len(parent_to_count)} parents from {filepath}"
+    )
+
+    return pattern_to_parent, parent_to_count

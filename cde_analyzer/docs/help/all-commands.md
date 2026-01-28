@@ -177,6 +177,8 @@ options:
                         Write subsumption report
   --min-prefix-tinyids N
                         Enable prefix extraction (0 = disabled)
+  --min-parent-tinyids N
+                        Filter by parent phrase tinyId count (0 = disabled)
   --add-to-supplementary FILE
                         Import patterns to supplementary_patterns.yaml
   --supplementary-section NAME

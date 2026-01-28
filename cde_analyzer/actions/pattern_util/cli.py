@@ -96,6 +96,15 @@ def register_subparser(subparser: ArgumentParser):
              "become 'as part of Neuro-QOL' if it covers enough tinyIds. "
              "Use with --coalesce-variants. Default 0 = disabled.",
     )
+    subparser.add_argument(
+        "--min-parent-tinyids",
+        type=int,
+        default=0,
+        help="Filter patterns by parent phrase tinyId count during coalesce. "
+             "Drops patterns whose parent_tinyid_count < this threshold. "
+             "Requires input TSV with parent_phrase and parent_tinyid_count columns "
+             "(produced by strip_discover --parent-column). Default 0 = disabled.",
+    )
 
     # Supplementary pattern import mode
     subparser.add_argument(

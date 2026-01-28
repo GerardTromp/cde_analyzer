@@ -55,6 +55,8 @@ dmypy.json
 # Project specific
 test*
 settings.local.json
+nul
+.workflow_state.json
 
 # Claude checkpoint system
 .claude/sessions/

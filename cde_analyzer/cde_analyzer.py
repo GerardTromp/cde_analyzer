@@ -109,6 +109,16 @@ ACTION_REGISTRY = {
         "help": "Batch expand abbreviations to discover full instrument phrases",
         "description": "Iterate over abbreviations, subset CDEs, and mine phrases to discover extended names",
     },
+    "recall_analyze": {
+        "module": "actions.recall_analyze.cli",
+        "help": "Analyze recall and detect false negatives by instrument family",
+        "description": "Compare source data matches against pipeline output to identify gaps",
+    },
+    "pipeline_report": {
+        "module": "actions.pipeline_report.cli",
+        "help": "Generate markdown summary reports for pipeline execution",
+        "description": "Create human-readable reports with phase summaries and key metrics",
+    },
     # "depth": {...}
     # "quality": {...}
 }

@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Set
 
 from utils.logger import logging
 from utils.file_utils import exit_if_missing, graceful_interrupt
-from utils.pattern_tsv_utils import load_pattern_list, load_pattern_list_with_tinyids
+from utils.pattern_tsv_utils import load_pattern_list, load_pattern_list_with_tinyids, load_parent_mapping
 from pydantic import ValidationError
 from utils.constants import MODEL_REGISTRY
 
@@ -501,9 +501,29 @@ def run_action(args: Namespace):
     fails_output = getattr(args, 'discover_fails', None)
     discover_bare_names = getattr(args, 'discover_bare_names', False)
     n_workers = getattr(args, 'workers', 1)
+    allow_abbrev_variants = getattr(args, 'allow_abbrev_variants', False)
+    allow_embedded_abbrev = getattr(args, 'allow_embedded_abbrev', False)
 
     # Track source patterns for output
     source_patterns: Dict[str, str] = {}
+
+    # Load parent phrase mapping if --parent-column is set
+    parent_column = getattr(args, 'parent_column', None)
+    pattern_to_parent: Dict[str, str] = {}
+    parent_to_count: Dict[str, int] = {}
+    if parent_column:
+        try:
+            # Parse the pattern column from the spec
+            parts = args.pattern_list.split(',')
+            pattern_col = parts[1] if len(parts) >= 2 else "full_match"
+            pattern_to_parent, parent_to_count = load_parent_mapping(
+                args.pattern_list,
+                pattern_column=pattern_col,
+                parent_column=parent_column,
+            )
+        except (FileNotFoundError, ValueError) as e:
+            logger.warning(f"Could not load parent mapping: {e}")
+            parent_column = None
 
     # Detect if input patterns have anchors or are bare names
     bare_name_pairs_from_input = extract_bare_instrument_names(patterns)
@@ -523,7 +543,9 @@ def run_action(args: Namespace):
             output_path=None,
             fails_output_path=fails_output,
             pattern_to_expected_tinyids=pattern_to_expected_tinyids,
-            n_workers=n_workers
+            n_workers=n_workers,
+            allow_abbrev_variants=allow_abbrev_variants,
+            allow_embedded_abbrev=allow_embedded_abbrev,
         )
 
         if not verbatim_map:
@@ -575,7 +597,9 @@ def run_action(args: Namespace):
                     output_path=None,
                     fails_output_path=fails_output,
                     pattern_to_expected_tinyids=None,  # No filtering for generated patterns
-                    n_workers=n_workers
+                    n_workers=n_workers,
+                    allow_abbrev_variants=allow_abbrev_variants,
+                    allow_embedded_abbrev=allow_embedded_abbrev,
                 )
 
                 # Track source (the bare name) for prefixed patterns
@@ -613,7 +637,9 @@ def run_action(args: Namespace):
                 output_path=None,
                 fails_output_path=fails_output,
                 pattern_to_expected_tinyids=pattern_to_expected_tinyids,
-                n_workers=n_workers
+                n_workers=n_workers,
+                allow_abbrev_variants=allow_abbrev_variants,
+                allow_embedded_abbrev=allow_embedded_abbrev,
             )
 
             if not verbatim_map:
@@ -621,22 +647,45 @@ def run_action(args: Namespace):
 
     # Combine results and write output
     # Write prefixed patterns first, then bare names
+    has_parent = bool(parent_column and pattern_to_parent)
     with open(args.output, "w", encoding="utf-8") as f:
-        f.write("pattern\ttinyIds\ttype\tsource_pattern\n")
+        header = "pattern\ttinyIds\ttype\tsource_pattern"
+        if has_parent:
+            header += "\tparent_phrase\tparent_tinyid_count"
+        f.write(header + "\n")
+
+        def _lookup_parent(verbatim: str) -> str:
+            """Look up parent phrase for a discovered verbatim pattern."""
+            if not has_parent:
+                return ""
+            # Direct match
+            if verbatim in pattern_to_parent:
+                parent = pattern_to_parent[verbatim]
+                count = parent_to_count.get(parent, 0)
+                return f"\t{parent}\t{count}"
+            # Try via source_pattern (the input pattern that generated this discovery)
+            source = source_patterns.get(verbatim, "")
+            if source and source in pattern_to_parent:
+                parent = pattern_to_parent[source]
+                count = parent_to_count.get(parent, 0)
+                return f"\t{parent}\t{count}"
+            return "\t\t"
 
         # Write prefixed patterns (sorted by length descending)
         prefixed_sorted = sorted(verbatim_map.items(), key=lambda x: len(x[0]), reverse=True)
         for verbatim, tinyids in prefixed_sorted:
             tinyids_str = " ".join(sorted(tinyids))
             source = source_patterns.get(verbatim, "")
-            f.write(f"{verbatim}\t{tinyids_str}\tprefix\t{source}\n")
+            parent_suffix = _lookup_parent(verbatim)
+            f.write(f"{verbatim}\t{tinyids_str}\tprefix\t{source}{parent_suffix}\n")
 
         # Write bare name patterns (sorted by length descending)
         bare_sorted = sorted(bare_verbatim_map.items(), key=lambda x: len(x[0]), reverse=True)
         for verbatim, tinyids in bare_sorted:
             tinyids_str = " ".join(sorted(tinyids))
             source = source_patterns.get(verbatim, "")
-            f.write(f"{verbatim}\t{tinyids_str}\tbare\t{source}\n")
+            parent_suffix = _lookup_parent(verbatim)
+            f.write(f"{verbatim}\t{tinyids_str}\tbare\t{source}{parent_suffix}\n")
 
     total_patterns = len(verbatim_map) + len(bare_verbatim_map)
     print(f"\nDiscovery complete:")

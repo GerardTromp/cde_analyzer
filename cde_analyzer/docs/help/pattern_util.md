@@ -10,7 +10,8 @@ cde-analyzer pattern_util --merge-patterns FILE -o OUTPUT.tsv
 
 # Coalesce patterns (remove subsumed)
 cde-analyzer pattern_util --coalesce-variants FILE -o OUTPUT.tsv \
-    [--coalesce-report REPORT.tsv] [--min-prefix-tinyids N]
+    [--coalesce-report REPORT.tsv] [--min-prefix-tinyids N] \
+    [--min-parent-tinyids N]
 
 # Import patterns to supplementary config
 cde-analyzer pattern_util --add-to-supplementary CURATED.tsv
@@ -85,6 +86,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 | `-o, --output FILE` | Output coalesced TSV file (required) |
 | `--coalesce-report FILE` | Optional report showing removed patterns |
 | `--min-prefix-tinyids N` | Enable prefix extraction (0 = disabled) |
+| `--min-parent-tinyids N` | Filter by parent phrase tinyId count (0 = disabled). Drops patterns whose `parent_tinyid_count` < N. Requires input TSV with `parent_phrase` and `parent_tinyid_count` columns (produced by `strip_discover --parent-column`). |
 
 ### Import Options
 

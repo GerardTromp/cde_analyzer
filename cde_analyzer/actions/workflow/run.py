@@ -339,6 +339,16 @@ def run_workflow(
 
             return 0  # Success - checkpoint reached
 
+        # Check conditional execution
+        condition = step.get("condition")
+        if condition is not None:
+            resolved = resolve_variables(str(condition), variables).strip()
+            if not resolved:
+                print(f"  Skipping '{step_name}' (condition not met)")
+                if not dry_run:
+                    state.mark_step_completed(step_name, {"status": "skipped"})
+                continue
+
         # Execute action step
         result = execute_step(step, variables, dry_run=dry_run)
 

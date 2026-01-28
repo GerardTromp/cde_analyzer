@@ -114,6 +114,20 @@ def register_subparser(subparser: ArgumentParser):
              "like 'SF-12' that appear without 'as part of' prefix.",
     )
     subparser.add_argument(
+        "--allow-abbrev-variants",
+        action="store_true",
+        help="Enable abbreviation variant matching in flexible regex. "
+             "Patterns like '(PHQ)' will also match '(PHQ-9)', '(PHQ-15)', etc. "
+             "Useful for instruments with numbered variants.",
+    )
+    subparser.add_argument(
+        "--allow-embedded-abbrev",
+        action="store_true",
+        help="Allow embedded abbreviation parentheticals between words. "
+             "Patterns like 'Scale Long' will match 'Scale (GDS) Long'. "
+             "Useful for instruments where abbreviations are inserted mid-name.",
+    )
+    subparser.add_argument(
         "--use-expected-tinyids",
         action="store_true",
         help="Use tinyIds from pattern list to filter discovery scope. "
@@ -133,6 +147,18 @@ def register_subparser(subparser: ArgumentParser):
              "Use 1 for sequential (default). "
              "Positive values override to use exactly N workers. "
              "Auto-detects optimal dimension: texts vs patterns.",
+    )
+
+    # Parent phrase tracking
+    subparser.add_argument(
+        "--parent-column",
+        type=str,
+        metavar="COLUMN",
+        help="Column name in --pattern-list TSV that contains the parent (generic) phrase. "
+             "When set, discovered.tsv will include 'parent_phrase' and 'parent_tinyid_count' "
+             "columns. The parent tinyId count is aggregated across all verbatim variants "
+             "sharing the same parent. Use with phrase_pipeline to track which generic phrase "
+             "generated each verbatim pattern (e.g., --parent-column lemma_text).",
     )
 
     # Diagnostics

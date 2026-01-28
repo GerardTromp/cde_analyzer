@@ -36,6 +36,12 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- **v0.5.0: Parent Phrase Tracking & Recall Analysis**
+  - `strip_discover --parent-column` propagates generic phrase info through pipeline
+  - `pattern_util --min-parent-tinyids` filters low-coverage patterns during coalesce
+  - `recall_analyze` integrated into both `instrument_detection.yaml` and `phrase_pipeline.yaml`
+  - Conditional workflow steps (`condition:` in YAML) skip recall when no ground truth provided
+  - Phrase pipeline validated on scheuermann02 (98.9% recall) and scheuermann03
 - **v0.4.2: Command Split** - Split `strip_discover` into three focused commands:
   - `strip_discover` - Core pattern discovery only
   - `strip_analyze` - Conflict analysis and false-negative detection

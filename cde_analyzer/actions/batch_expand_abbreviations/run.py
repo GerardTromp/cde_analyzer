@@ -82,6 +82,7 @@ def mine_phrases_from_subset(
 
     Returns list of phrase dicts with frequency info.
     """
+    from collections import Counter
     from logic.phrase_miner import MinerConfig, mine_phrases
 
     # Convert to CDEItem objects
@@ -109,21 +110,32 @@ def mine_phrases_from_subset(
     )
 
     # Run mining - returns (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog)
-    _, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
+    phrase_objects, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
 
-    # Extract phrases from verbatim tracker
+    # Extract verbatim info from Phrase objects
     phrases = []
-    if verbatim_tracker and verbatim_tracker.phrase_to_verbatim:
-        for phrase_key, verbatim_info in verbatim_tracker.phrase_to_verbatim.items():
-            # Get the most common verbatim form
-            if verbatim_info.verbatim_forms:
-                top_form = max(verbatim_info.verbatim_forms.items(), key=lambda x: x[1])
-                phrases.append({
-                    "phrase": top_form[0],
-                    "frequency": verbatim_info.total_count,
-                    "n_tinyids": len(verbatim_info.tinyids),
-                    "tinyids": "|".join(sorted(verbatim_info.tinyids)[:10]),  # Limit for output
-                })
+    for phrase_obj in phrase_objects:
+        # Collect verbatim forms from occurrences
+        verbatim_counts: Counter = Counter()
+        tinyids: Set[str] = set()
+
+        for occ in phrase_obj.occurrences:
+            if occ.verbatim_text:
+                verbatim_counts[occ.verbatim_text] += 1
+            tinyids.add(occ.tinyId)
+
+        # Get the most common verbatim form, or fall back to lemma text
+        if verbatim_counts:
+            top_form = verbatim_counts.most_common(1)[0][0]
+        else:
+            top_form = phrase_obj.text
+
+        phrases.append({
+            "phrase": top_form,
+            "frequency": phrase_obj.frequency,
+            "n_tinyids": len(tinyids),
+            "tinyids": "|".join(sorted(tinyids)[:10]),  # Limit for output
+        })
 
     # Sort by frequency descending
     phrases.sort(key=lambda x: (-x["frequency"], -x["n_tinyids"]))

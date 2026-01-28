@@ -22,6 +22,8 @@ nav:
       - phrase_builder: help/phrase_builder.md
     - Pattern Stripping:
       - strip_discover: help/strip_discover.md
+      - strip_analyze: help/strip_analyze.md
+      - pattern_util: help/pattern_util.md
       - strip_phrases: help/strip_phrases.md
       - diagnose_strip: help/diagnose_strip.md
     - Data Cleaning:
