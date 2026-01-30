@@ -93,6 +93,20 @@ def register_subparser(subparser: ArgumentParser):
              "Positive values override to use exactly N workers.",
     )
 
+    # Remnant detection
+    subparser.add_argument(
+        "--detect-remnants",
+        action="store_true",
+        help="After stripping, scan output for post-strip artifacts "
+             "(orphan articles, floating punctuation, excess whitespace, etc.).",
+    )
+    subparser.add_argument(
+        "--remnant-report",
+        type=str,
+        metavar="FILE",
+        help="Write detailed remnant report TSV to FILE. Implies --detect-remnants.",
+    )
+
     # Diagnostics
     subparser.add_argument(
         "--trace-matching",

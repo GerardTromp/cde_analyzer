@@ -326,6 +326,21 @@ def run_action(args: Namespace):
         f.write(json.dumps(cleaned_json, indent=2))
     logger.info(f"Wrote cleaned output to {args.output}")
 
+    # Optional remnant detection
+    remnant_report = getattr(args, 'remnant_report', None)
+    detect_remnants_flag = getattr(args, 'detect_remnants', False) or remnant_report
+    if detect_remnants_flag:
+        from logic.remnant_detector import detect_remnants, summarize_remnants, write_remnant_report, affected_records
+        field_paths_for_remnants = getattr(args, 'fields', ["definitions.*.definition", "designations.*.designation"])
+        remnants = detect_remnants(cleaned, field_paths_for_remnants)
+        summary = summarize_remnants(remnants)
+        logger.info(f"Remnant detection: {len(remnants)} artifacts in {affected_records(remnants)} records")
+        for rtype, count in summary.items():
+            logger.info(f"  {rtype}: {count}")
+        if remnant_report:
+            write_remnant_report(remnants, remnant_report)
+            logger.info(f"Remnant report written to {remnant_report}")
+
     # Optional diff output
     if args.diff or args.diff_output or args.summary:
         original_json = [item.model_dump(mode="json") for item in parsed]

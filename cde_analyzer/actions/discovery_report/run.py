@@ -54,6 +54,13 @@ PHRASE_SUBSUMPTION_FILES = [
     "coalesce_report.tsv",
 ]
 
+# Remnant report files to look for (label, relative_path)
+REMNANT_FILES = [
+    ("Naive (length-first)", "remnants_naive.tsv"),
+    ("Smart (graph-ordered)", "remnants_smart.tsv"),
+    ("Strip", "remnants.tsv"),  # single-mode fallback
+]
+
 
 # ---------------------------------------------------------------------------
 # File metrics (adapted from pipeline_report)
@@ -142,6 +149,28 @@ def _get_step_metrics(output_dir: str, rel_path: str, tinyid_col: Optional[str])
 # ---------------------------------------------------------------------------
 # Subsumption summary
 # ---------------------------------------------------------------------------
+
+def _parse_remnant_report(tsv_path: str) -> Dict[str, int]:
+    """Parse a remnants TSV and return counts by remnant_type."""
+    counts: Counter = Counter()
+    path = Path(tsv_path)
+    if not path.exists():
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            header = f.readline().strip().split("\t")
+            try:
+                type_idx = find_column_index(header, "remnant_type")
+            except ValueError:
+                return {}
+            for line in f:
+                parts = line.strip().split("\t")
+                if len(parts) > type_idx and parts[type_idx].strip():
+                    counts[parts[type_idx].strip()] += 1
+    except Exception:
+        return {}
+    return dict(counts.most_common())
+
 
 def _parse_subsumption_report(tsv_path: str) -> Counter:
     """Count subsumption actions by type from a coalesce report TSV."""
@@ -331,6 +360,52 @@ def _generate_report(
             if total_rows > len(survivors):
                 lines.append(f"\n*Showing {len(survivors)} of {total_rows} survivors.*")
             lines.append("")
+
+    # -- Remnant summary --
+    remnant_data: List[Tuple[str, Dict[str, int]]] = []
+    for label, rel_path in REMNANT_FILES:
+        full = str(Path(output_dir) / rel_path)
+        counts = _parse_remnant_report(full)
+        if counts:
+            remnant_data.append((label, counts))
+    # Also check compare/ subdirectory
+    for label, rel_path in REMNANT_FILES[:2]:  # naive and smart only
+        full = str(Path(output_dir) / "compare" / rel_path)
+        counts = _parse_remnant_report(full)
+        if counts and (label, counts) not in remnant_data:
+            remnant_data.append((f"{label} (compare)", counts))
+
+    if remnant_data:
+        lines.append("## Remnant Analysis")
+        lines.append("")
+        if len(remnant_data) == 1:
+            label, counts = remnant_data[0]
+            total = sum(counts.values())
+            lines.append(f"**{label}**: {total:,} remnants detected")
+            lines.append("")
+            lines.append("| Remnant Type | Count |")
+            lines.append("|-------------|------:|")
+            for rtype, count in counts.items():
+                lines.append(f"| {rtype} | {count:,} |")
+            lines.append(f"| **Total** | **{total:,}** |")
+        else:
+            # Collect all remnant types across all runs
+            all_types: List[str] = []
+            for _, counts in remnant_data:
+                for t in counts:
+                    if t not in all_types:
+                        all_types.append(t)
+
+            header_cols = ["Remnant Type"] + [label for label, _ in remnant_data]
+            lines.append("| " + " | ".join(header_cols) + " |")
+            lines.append("|" + "|".join("------:" for _ in header_cols) + "|")
+            for rtype in all_types:
+                vals = [str(counts.get(rtype, 0)) for _, counts in remnant_data]
+                lines.append(f"| {rtype} | " + " | ".join(vals) + " |")
+            totals = [str(sum(counts.values())) for _, counts in remnant_data]
+            lines.append(f"| **Total** | " + " | ".join(f"**{t}**" for t in totals) + " |")
+
+        lines.append("")
 
     # -- Version history --
     lines.append("---")
