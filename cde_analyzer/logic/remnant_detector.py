@@ -99,6 +99,150 @@ _REMNANT_PATTERNS = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Post-strip cleanup rules (applied iteratively until stable)
+# ---------------------------------------------------------------------------
+
+def _clean_text_once(text: str) -> str:
+    """Apply one pass of cleanup rules. Returns cleaned text."""
+    s = text
+
+    # Remove empty parens/brackets: "()" "[]"
+    s = re.sub(r'\(\s*\)', '', s)
+    s = re.sub(r'\[\s*\]', '', s)
+
+    # Remove leading punctuation: ", foo" -> "foo"
+    s = re.sub(r'^\s*[,;:\-]+\s*', '', s)
+
+    # Remove trailing punctuation preceded by space: "foo ," -> "foo"
+    s = re.sub(r'\s+[,;:.]+\s*$', '', s)
+
+    # Remove floating punctuation: "foo , bar" -> "foo bar"
+    s = re.sub(r'(?<=\s)[,;:\-]{1,3}(?=\s)', ' ', s)
+
+    # Remove orphan articles before punctuation: "the ," -> ","
+    s = re.sub(r'\b(the|a|an)\s*([,.\-;:)])', r'\2', s, flags=re.IGNORECASE)
+
+    # Remove trailing orphan articles: "foo the" -> "foo"
+    s = re.sub(r'\s+(the|a|an)\s*$', '', s, flags=re.IGNORECASE)
+
+    # Remove leading articles followed by punctuation: "the , foo" -> "foo"
+    s = re.sub(r'^\s*(the|a|an)\s*[,.\-;:]\s*', '', s, flags=re.IGNORECASE)
+
+    # Remove orphan prepositions before trailing punctuation: "of." -> ""
+    s = re.sub(r'\b(of|for|in|on|at|by|to)\s*[,.\-;:)]\s*$', '', s, flags=re.IGNORECASE)
+
+    # Remove trailing orphan prepositions: "foo of" -> "foo"
+    s = re.sub(r'\s+(of|for|in|on|at|by|to)\s*$', '', s, flags=re.IGNORECASE)
+
+    # Remove dangling possessive 's: "foo 's bar" -> "foo bar"
+    s = re.sub(r"(?<=\s)'?s\b", '', s)
+
+    # Remove double punctuation: ",," -> ","
+    s = re.sub(r'([,;:])\1+', r'\1', s)
+
+    # Collapse excess whitespace
+    s = re.sub(r'  +', ' ', s)
+
+    # Strip leading/trailing whitespace
+    s = s.strip()
+
+    return s
+
+
+def clean_text(text: str, max_passes: int = 5) -> str:
+    """
+    Apply iterative cleanup to remove post-strip artifacts.
+
+    Runs cleanup rules in a loop until the text stabilizes or max_passes reached.
+    """
+    s = text
+    for _ in range(max_passes):
+        cleaned = _clean_text_once(s)
+        if cleaned == s:
+            break
+        s = cleaned
+    return s
+
+
+def clean_records(
+    data: List[dict],
+    field_paths: Optional[List[str]] = None,
+) -> int:
+    """
+    Clean post-strip artifacts from JSON records in-place.
+
+    Args:
+        data: List of record dicts (modified in place).
+        field_paths: Dot-separated field paths with wildcard support.
+
+    Returns:
+        Number of fields modified.
+    """
+    if field_paths is None:
+        field_paths = [
+            "definitions.*.definition",
+            "designations.*.designation",
+        ]
+
+    modified_count = 0
+
+    for record in data:
+        for field_path in field_paths:
+            parts = field_path.split('.')
+            modified_count += _clean_at_path(record, parts)
+
+    logger.info(f"Cleaned {modified_count} fields across {len(data)} records")
+    return modified_count
+
+
+def _clean_at_path(obj: Any, parts: List[str]) -> int:
+    """
+    Recursively navigate to fields and apply clean_text in-place.
+
+    Returns number of fields modified.
+    """
+    if not parts:
+        return 0
+
+    key = parts[0]
+    rest = parts[1:]
+    modified = 0
+
+    if key == '*':
+        if isinstance(obj, list):
+            for item in obj:
+                if rest:
+                    modified += _clean_at_path(item, rest)
+    elif isinstance(obj, dict):
+        if key in obj:
+            if not rest:
+                # Leaf: apply cleanup
+                if isinstance(obj[key], str) and obj[key].strip():
+                    cleaned = clean_text(obj[key])
+                    if cleaned != obj[key]:
+                        obj[key] = cleaned
+                        modified += 1
+            else:
+                modified += _clean_at_path(obj[key], rest)
+    elif isinstance(obj, list):
+        try:
+            idx = int(key)
+            if 0 <= idx < len(obj):
+                if not rest:
+                    if isinstance(obj[idx], str) and obj[idx].strip():
+                        cleaned = clean_text(obj[idx])
+                        if cleaned != obj[idx]:
+                            obj[idx] = cleaned
+                            modified += 1
+                else:
+                    modified += _clean_at_path(obj[idx], rest)
+        except ValueError:
+            pass
+
+    return modified
+
+
 def _extract_at_path(obj: Any, parts: List[str]) -> List[tuple]:
     """
     Extract (value, realized_path) pairs at a dotted path with wildcard support.

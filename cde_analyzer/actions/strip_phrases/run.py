@@ -320,19 +320,29 @@ def run_action(args: Namespace):
         close_trace_file()
         logger.info(f"Trace file written to {trace_file}")
 
+    # Convert to JSON dicts for output
+    cleaned_json = [item.model_dump(mode="json") for item in cleaned]
+
+    # Optional post-strip cleanup
+    clean_remnants_flag = getattr(args, 'clean_remnants', False)
+    if clean_remnants_flag:
+        from logic.remnant_detector import clean_records
+        field_paths_for_clean = getattr(args, 'fields', ["definitions.*.definition", "designations.*.designation"])
+        modified = clean_records(cleaned_json, field_paths_for_clean)
+        logger.info(f"Post-strip cleanup: {modified} fields cleaned")
+
     # Write output
     with open(args.output, "w", encoding="utf-8", newline="") as f:
-        cleaned_json = [item.model_dump(mode="json") for item in cleaned]
         f.write(json.dumps(cleaned_json, indent=2))
     logger.info(f"Wrote cleaned output to {args.output}")
 
-    # Optional remnant detection
+    # Optional remnant detection (runs after cleanup if both are enabled)
     remnant_report = getattr(args, 'remnant_report', None)
     detect_remnants_flag = getattr(args, 'detect_remnants', False) or remnant_report
     if detect_remnants_flag:
-        from logic.remnant_detector import detect_remnants, summarize_remnants, write_remnant_report, affected_records
+        from logic.remnant_detector import detect_remnants_from_json, summarize_remnants, write_remnant_report, affected_records
         field_paths_for_remnants = getattr(args, 'fields', ["definitions.*.definition", "designations.*.designation"])
-        remnants = detect_remnants(cleaned, field_paths_for_remnants)
+        remnants = detect_remnants_from_json(cleaned_json, field_paths_for_remnants)
         summary = summarize_remnants(remnants)
         logger.info(f"Remnant detection: {len(remnants)} artifacts in {affected_records(remnants)} records")
         for rtype, count in summary.items():
@@ -343,9 +353,7 @@ def run_action(args: Namespace):
 
     # Optional diff output
     if args.diff or args.diff_output or args.summary:
-        original_json = [item.model_dump(mode="json") for item in parsed]
-        cleaned_json = [item.model_dump(mode="json") for item in cleaned]
-        original_json = json.dumps(original_json, indent=2)
+        original_json = json.dumps([item.model_dump(mode="json") for item in parsed], indent=2)
         cleaned_json = json.dumps(cleaned_json, indent=2)
 
         print_json_diff(

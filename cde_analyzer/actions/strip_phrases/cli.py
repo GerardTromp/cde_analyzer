@@ -106,6 +106,13 @@ def register_subparser(subparser: ArgumentParser):
         metavar="FILE",
         help="Write detailed remnant report TSV to FILE. Implies --detect-remnants.",
     )
+    subparser.add_argument(
+        "--clean-remnants",
+        action="store_true",
+        help="After stripping, apply iterative cleanup to fix post-strip artifacts "
+             "(remove orphan articles, floating punctuation, excess whitespace, etc.). "
+             "Modifies the output JSON in-place before writing.",
+    )
 
     # Diagnostics
     subparser.add_argument(
