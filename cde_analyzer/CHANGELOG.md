@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-01-29
+
+### Added
+- New action: `discovery_report` — generates markdown pipeline summary reports
+  - Per-step metrics (row counts, tinyId coverage, subsumption stats)
+  - Sanity check survivor census (instrument pipeline)
+  - Version history tracking across iterations
+- `pattern_util --field-analysis` — enrich patterns TSV with per-field counts and field_profile
+- `pattern_util --min-field-count`, `--min-tokens`, `--exclude-patterns` — field analysis filters
+- `pattern_util --emit-def-variants` — emit definition-form variants (without trailing separator)
+- `pattern_util --split-tiers` — split coalesced output into tier-1/tier-2 by token count
+- `pattern_util --rollup-subset-tinyids` — tinyId-subset rollup during coalesce
+- `pattern_util --group-hierarchy` — assign group/sub_group labels by shared prefix
+- `strip_discover --min-bare-words` — filter short bare instrument names
+- `strip_discover --discover-abbreviations` — abbreviation-based designation pattern discovery
+- Two-pass stripping in instrument pipeline (tier-1 long patterns, then tier-2 short fragments)
+- Recall analysis steps integrated into both pipeline workflows
+- Documentation: `docs/extensions_v0.5.x.md`, `docs/lessons_learned_20260129.md`
+
+### Changed
+- `coalesce_variants_tsv()` now trims anchor phrases by default (disable with `--no-trim-anchors`)
+- `extract_bare_instrument_names()` accepts `min_words` parameter
+- Rollup-subset now requires substring match (prevents unrelated pattern subsumption)
+- Roll-down logic requires minimum 2-word base (prevents single-word false positives)
+- `instrument_detection.yaml` — added emit-def-variants, split-tiers, two-pass stripping, discovery_report
+- `phrase_pipeline.yaml` — added field analysis filters, parent phrase tracking, discovery_report
+
 ## [Unreleased]
 
 ### Added

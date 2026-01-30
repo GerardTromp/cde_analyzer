@@ -55,7 +55,7 @@ def load_discovered_patterns(
     spec: str,
     pattern_column: str = "pattern",
     tinyids_column: str = "tinyIds"
-) -> List[Tuple[str, Optional[Set[str]]]]:
+) -> List[Tuple[str, Optional[Set[str]], str]]:
     """
     Load discovered patterns from TSV file (output of strip_discover).
 
@@ -69,8 +69,9 @@ def load_discovered_patterns(
         tinyids_column: Default column name for tinyIds (default: 'tinyIds').
 
     Returns:
-        List of (pattern, tinyIds) tuples in file order.
+        List of (pattern, tinyIds, replace_with) tuples in file order.
         tinyIds is a set of tinyId strings, or None if not specified.
+        replace_with is the replacement string (default "" if no column present).
 
     Raises:
         FileNotFoundError: If the specified file doesn't exist.
@@ -114,6 +115,16 @@ def load_discovered_patterns(
         except ValueError:
             logger.debug(f"tinyIds column '{tinyids_column}' not found, applying to all records")
 
+        # replace_with column is optional
+        replace_idx = None
+        try:
+            replace_idx = find_column_index(headers, "replace_with")
+        except ValueError:
+            pass  # no replace_with column — default to ""
+
+        if replace_idx is not None:
+            logger.info("Found 'replace_with' column — using per-pattern replacements")
+
         for line in f:
             line = line.strip()
             if not line:
@@ -137,14 +148,19 @@ def load_discovered_patterns(
                     # Split on whitespace or pipe, filter empty strings
                     tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
 
-            patterns_list.append((pattern, tinyids))
+            # Parse replace_with if column exists
+            replace_with = ""
+            if replace_idx is not None and replace_idx < len(fields):
+                replace_with = fields[replace_idx].strip().strip('"')
+
+            patterns_list.append((pattern, tinyids, replace_with))
 
     logger.info(f"Loaded {len(patterns_list)} patterns from {filepath}")
     return patterns_list
 
 
 def patterns_to_phrase_map(
-    patterns: List[Tuple[str, Optional[Set[str]]]],
+    patterns: List[Tuple[str, Optional[Set[str]], str]],
     field_paths: List[str],
     replace_with: str = "",
     sort_order: str = "length"
@@ -153,9 +169,10 @@ def patterns_to_phrase_map(
     Convert a list of patterns to phrase_map format.
 
     Args:
-        patterns: List of (pattern, tinyIds) tuples.
+        patterns: List of (pattern, tinyIds, replace_with) tuples.
         field_paths: List of field paths to apply stripping to.
-        replace_with: Replacement string (default: empty string to remove).
+        replace_with: Default replacement string (used when per-pattern
+                      replace_with is empty). Default: empty string to remove.
         sort_order: Pattern ordering strategy:
                     - "length": longest-first (handles nested patterns)
                     - "file": preserve input order (curator control)
@@ -176,13 +193,22 @@ def patterns_to_phrase_map(
         order_desc = "alphabetical"
 
     phrase_map = []
-    for pattern, tinyids in sorted_patterns:
+    has_per_pattern = any(len(p) > 2 and p[2] for p in sorted_patterns)
+    for entry in sorted_patterns:
+        pattern = entry[0]
+        tinyids = entry[1]
+        per_pattern_replace = entry[2] if len(entry) > 2 else ""
+        # Use per-pattern replace_with if present, otherwise fall back to global
+        effective_replace = per_pattern_replace if per_pattern_replace else replace_with
         for path in field_paths:
-            phrase_map.append((path, pattern, replace_with, tinyids))
+            phrase_map.append((path, pattern, effective_replace, tinyids))
 
-    unique_patterns = len(set(p for p, _ in patterns))
+    unique_patterns = len(set(p[0] for p in patterns))
     logger.info(f"Created phrase map: {unique_patterns} patterns x {len(field_paths)} paths = {len(phrase_map)} entries")
     logger.info(f"Pattern order: {order_desc}")
+    if has_per_pattern:
+        replace_count = sum(1 for p in patterns if len(p) > 2 and p[2])
+        logger.info(f"Per-pattern replacements: {replace_count} patterns have custom replace_with values")
     return phrase_map
 
 
@@ -222,11 +248,11 @@ def run_action(args: Namespace):
             raise SystemExit(1)
 
         # Diagnostic: summarize what was loaded
-        patterns_with_tinyids = sum(1 for _, tids in patterns if tids is not None)
+        patterns_with_tinyids = sum(1 for p in patterns if p[1] is not None)
         all_tinyids = set()
-        for _, tids in patterns:
-            if tids:
-                all_tinyids.update(tids)
+        for p in patterns:
+            if p[1]:
+                all_tinyids.update(p[1])
         logger.info(f"Patterns summary: {len(patterns)} total, {patterns_with_tinyids} with tinyId restrictions")
         logger.info(f"  Unique tinyIds referenced: {len(all_tinyids)}")
         if patterns:
@@ -248,7 +274,7 @@ def run_action(args: Namespace):
             sample_tid = next(iter(overlap))
             logger.info(f"  DEBUG: Sampling overlapping tinyId '{sample_tid}'")
             # Find which pattern(s) reference this tinyId
-            for pattern_text, tids in patterns:
+            for pattern_text, tids, *_ in patterns:
                 if tids and sample_tid in tids:
                     logger.info(f"    Pattern for this tinyId: '{pattern_text[:60]}'")
             # Find the record with this tinyId and check its text

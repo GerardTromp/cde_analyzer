@@ -119,6 +119,11 @@ ACTION_REGISTRY = {
         "help": "Generate markdown summary reports for pipeline execution",
         "description": "Create human-readable reports with phase summaries and key metrics",
     },
+    "discovery_report": {
+        "module": "actions.discovery_report.cli",
+        "help": "Generate markdown summary reports for discovery pipelines",
+        "description": "Summarize pipeline steps with pattern counts, tinyId coverage, and subsumption stats",
+    },
     # "depth": {...}
     # "quality": {...}
 }

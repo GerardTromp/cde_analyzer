@@ -326,6 +326,63 @@ class InstrumentFamilyAssigner:
 
         logger.info(f"Wrote enhanced verbatim instruments to {output_path}")
 
+    def _write_curated_tsv(
+        self,
+        catalog: InstrumentCatalog,
+        output_path: Path,
+    ) -> None:
+        """
+        Write simplified curated TSV with 4 columns for curator review.
+
+        Columns:
+            instrument_id: Sequential identifier for the instrument
+            pattern: The full_match text (renamed for direct use by strip_discover)
+            family_full_match: Full match with family name substituted
+            tinyids: Pipe-separated document IDs
+
+        Args:
+            catalog: InstrumentCatalog with family assignments
+            output_path: Path to output TSV file
+        """
+        fieldnames = ["instrument_id", "pattern", "family_full_match", "tinyids"]
+
+        # Reuse the same verbatim grouping logic
+        verbatim_groups: Dict[str, Dict] = {}
+
+        for normalized_name, matches in catalog.instruments.items():
+            for match in matches:
+                verbatim_key = (normalized_name, match.instrument_name)
+                if verbatim_key not in verbatim_groups:
+                    family_full_match = match.full_match
+                    if match.family_display_name and match.instrument_name:
+                        family_full_match = match.full_match.replace(
+                            match.instrument_name,
+                            match.family_display_name
+                        )
+                    verbatim_groups[verbatim_key] = {
+                        "instrument_id": match.instrument_id,
+                        "full_match": match.full_match,
+                        "family_full_match": family_full_match,
+                        "tinyids": set(),
+                    }
+                if match.tinyId:
+                    verbatim_groups[verbatim_key]["tinyids"].add(match.tinyId)
+
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+            writer.writeheader()
+
+            for verbatim_key, data in sorted(verbatim_groups.items()):
+                tinyids = sorted(data["tinyids"])
+                writer.writerow({
+                    "instrument_id": data["instrument_id"] or "",
+                    "pattern": data["full_match"],
+                    "family_full_match": data["family_full_match"],
+                    "tinyids": "|".join(tinyids),
+                })
+
+        logger.info(f"Wrote curated file to {output_path}")
+
     def write_families_summary_tsv(
         self,
         catalog: InstrumentCatalog,
@@ -406,6 +463,18 @@ class InstrumentFamilyAssigner:
             families_path = output_dir / "instrument_families.tsv"
             self.write_families_summary_tsv(catalog, families_path)
             outputs["instrument_families"] = families_path
+
+        # Simplified curated files for two diverging workflows:
+        #   curated_fullmatch.tsv - full instrument substitution (pattern = full_match)
+        #   curated.tsv           - identical initially; curator edits for family-level stripping
+        # Both have 4 columns: instrument_id, pattern, family_full_match, tinyids
+        curated_fullmatch_path = output_dir / "curated_fullmatch.tsv"
+        self._write_curated_tsv(catalog, curated_fullmatch_path)
+        outputs["curated_fullmatch"] = curated_fullmatch_path
+
+        curated_path = output_dir / "curated.tsv"
+        self._write_curated_tsv(catalog, curated_path)
+        outputs["curated"] = curated_path
 
         # Write stats JSON
         stats_path = output_dir / "family_assignment_stats.json"

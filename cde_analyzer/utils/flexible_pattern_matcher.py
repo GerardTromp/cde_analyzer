@@ -420,26 +420,35 @@ def extract_bare_instrument_name(pattern: str) -> Optional[str]:
 
 
 def extract_bare_instrument_names(
-    patterns: List[str]
+    patterns: List[str],
+    min_words: int = 0
 ) -> List[Tuple[str, str]]:
     """
     Extract bare instrument names from a list of patterns.
 
     Args:
         patterns: List of pattern strings (e.g., from instrument list)
+        min_words: Minimum word count for bare names (0 = no filter).
+                   Filters short fragments like "Score" that cause false positives.
 
     Returns:
         List of (original_pattern, bare_name) tuples for patterns that had anchors
     """
     results = []
     seen_names = set()
+    filtered_count = 0
 
     for pattern in patterns:
         bare_name = extract_bare_instrument_name(pattern)
         if bare_name and bare_name not in seen_names:
+            if min_words > 0 and len(bare_name.split()) < min_words:
+                filtered_count += 1
+                continue
             results.append((pattern, bare_name))
             seen_names.add(bare_name)
 
+    if filtered_count:
+        logger.info(f"Filtered {filtered_count} bare names with < {min_words} words")
     logger.info(f"Extracted {len(results)} unique bare instrument names from {len(patterns)} patterns")
     return results
 
@@ -1051,7 +1060,10 @@ def coalesce_variants_tsv(
     tinyids_column: str = "tinyIds",
     report_path: Optional[str] = None,
     min_prefix_tinyids: int = 0,
-    min_parent_tinyids: int = 0
+    min_parent_tinyids: int = 0,
+    rollup_subset_tinyids: bool = False,
+    trim_anchors: bool = True,
+    emit_def_variants: bool = False
 ) -> Dict[str, int]:
     """
     Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
@@ -1183,6 +1195,63 @@ def coalesce_variants_tsv(
             )
     logger.info(f"Loaded {input_patterns} unique patterns from {input_path}")
 
+    # Phase 0: Anchor trimming (default on)
+    # Patterns containing anchor phrases ("as part of", "based on", etc.) are
+    # trimmed to the bare instrument name. Content preceding the anchor is
+    # CDE-specific text, not part of the instrument name. Discovery is intended
+    # to find patterns without anchors.
+    anchor_trimmed_count = 0
+    anchor_trimmed_map: Dict[str, str] = {}  # original -> bare_name
+
+    if trim_anchors:
+        # Build regex to find anchors anywhere in pattern (case-insensitive)
+        anchor_re = re.compile(
+            r'(?:^|.*?\b)(' +
+            '|'.join(re.escape(a) for a in sorted(ANCHOR_PREFIXES, key=len, reverse=True)) +
+            r')\s+',
+            re.IGNORECASE
+        )
+
+        patterns_to_trim = list(pattern_to_tinyids.keys())
+        for pattern in patterns_to_trim:
+            # First try prefix-only extraction (handles "as part of the X")
+            bare_name = extract_bare_instrument_name(pattern)
+            if not bare_name or bare_name == pattern:
+                # Try mid-pattern anchor: "content, as part of the X"
+                m = anchor_re.search(pattern)
+                if m:
+                    remainder = pattern[m.end():].strip()
+                    if remainder:
+                        # Strip optional leading article
+                        words = remainder.split(None, 1)
+                        if words and words[0].lower() in OPTIONAL_ARTICLES and len(words) > 1:
+                            bare_name = words[1].strip()
+                        else:
+                            bare_name = remainder
+
+            if bare_name and bare_name != pattern:
+                tinyids = pattern_to_tinyids.pop(pattern)
+                anchor_trimmed_map[pattern] = bare_name
+                anchor_trimmed_count += 1
+
+                # Merge tinyIds if bare name already exists
+                if bare_name in pattern_to_tinyids:
+                    pattern_to_tinyids[bare_name].update(tinyids)
+                else:
+                    pattern_to_tinyids[bare_name] = tinyids
+
+                # Propagate parent info
+                if pattern in pattern_to_parent and bare_name not in pattern_to_parent:
+                    pattern_to_parent[bare_name] = pattern_to_parent[pattern]
+                    if pattern in pattern_to_parent_count:
+                        pattern_to_parent_count[bare_name] = pattern_to_parent_count[pattern]
+
+        if anchor_trimmed_count:
+            logger.info(
+                f"Anchor trimming: {anchor_trimmed_count} patterns trimmed to bare names "
+                f"({len(pattern_to_tinyids)} unique patterns remain)"
+            )
+
     # Sort by length descending (longest first)
     sorted_patterns = sorted(pattern_to_tinyids.keys(), key=len, reverse=True)
 
@@ -1212,6 +1281,117 @@ def coalesce_variants_tsv(
             )
         else:
             kept_patterns.add(pattern)
+
+    # Phase 1b: Reverse subsumption (roll-down)
+    # Removes LONG patterns that are greedy expansions of shorter base patterns.
+    # If a shorter pattern is a text substring of a longer one AND the longer
+    # pattern's tinyIds ⊆ shorter pattern's tinyIds, the long one is noise from
+    # expansion gobbling adjacent text. Remove it.
+    reverse_subsumed: Dict[str, str] = {}  # long_pattern -> shorter_base
+
+    if rollup_subset_tinyids and kept_patterns:
+        logger.info("Phase 1b: Reverse subsumption (roll-down greedy expansions)...")
+        # Process longest first so we can remove them
+        sorted_desc = sorted(kept_patterns, key=len, reverse=True)
+
+        for long_pattern in sorted_desc:
+            if long_pattern not in kept_patterns:
+                continue
+            long_tinyids = pattern_to_tinyids[long_pattern]
+
+            # Find any shorter kept pattern that is a substring of this long pattern
+            # and whose tinyIds fully cover the long pattern's tinyIds
+            best_base = None
+            for shorter in kept_patterns:
+                if shorter == long_pattern:
+                    continue
+                if len(shorter) >= len(long_pattern):
+                    continue
+                if shorter in long_pattern and long_tinyids <= pattern_to_tinyids[shorter]:
+                    # Skip single-word bases — generic words like "Scale" or "Score"
+                    # shouldn't roll down specific multi-word instrument patterns
+                    if len(shorter.split()) < 2:
+                        continue
+                    # Skip if long pattern contains a parenthesized abbreviation
+                    # that the shorter base doesn't contain — the (ABBREV) suffix
+                    # is structurally important for designation-level stripping
+                    import re as _re
+                    paren_match = _re.search(r'\([A-Z][A-Za-z0-9-]+\)', long_pattern)
+                    if paren_match and paren_match.group() not in shorter:
+                        continue
+                    # Prefer the longest shorter base (most specific)
+                    if best_base is None or len(shorter) > len(best_base):
+                        best_base = shorter
+
+            if best_base:
+                reverse_subsumed[long_pattern] = best_base
+                logger.debug(
+                    f"Roll-down: '{long_pattern[:60]}' ({len(long_tinyids)} tinyIds) "
+                    f"→ '{best_base[:60]}' ({len(pattern_to_tinyids[best_base])} tinyIds)"
+                )
+
+        # Remove rolled-down patterns
+        for pattern in reverse_subsumed:
+            kept_patterns.discard(pattern)
+
+        if reverse_subsumed:
+            logger.info(f"Reverse subsumption: removed {len(reverse_subsumed)} greedy expansions")
+
+    # Phase 1.5: TinyId-subset rollup (if enabled)
+    # Removes short patterns whose tinyIds are a strict subset of a longer pattern's tinyIds,
+    # but ONLY when the short pattern is a text substring of the covering pattern.
+    # This prevents rolling up variant names (e.g., "Name (ABBREV) -" vs "Name Scale (ABBREV) -").
+    rollup_count = 0
+    rollup_map: Dict[str, str] = {}  # rolled_up_pattern -> covering_pattern
+
+    if rollup_subset_tinyids and kept_patterns:
+        logger.info("Phase 1.5: TinyId-subset rollup for short patterns...")
+        # Sort kept patterns by word count ascending (process shortest first)
+        sorted_by_words = sorted(kept_patterns, key=lambda p: len(p.split()))
+
+        for pattern in sorted_by_words:
+            pattern_tinyids = pattern_to_tinyids[pattern]
+            pattern_words = len(pattern.split())
+
+            # Skip if already removed or if pattern has many tinyIds (likely legitimate)
+            if pattern not in kept_patterns:
+                continue
+
+            # Find any single longer pattern that fully covers this pattern's tinyIds
+            # AND contains this pattern as a text substring
+            best_cover = None
+            best_cover_len = 0
+
+            for candidate in kept_patterns:
+                if candidate == pattern:
+                    continue
+                candidate_words = len(candidate.split())
+                # Covering pattern must be strictly longer (by word count)
+                if candidate_words <= pattern_words:
+                    continue
+                # Short pattern must be a text substring of covering pattern
+                if pattern not in candidate:
+                    continue
+                candidate_tinyids = pattern_to_tinyids[candidate]
+                if pattern_tinyids <= candidate_tinyids:  # strict subset
+                    if candidate_words > best_cover_len:
+                        best_cover = candidate
+                        best_cover_len = candidate_words
+
+            if best_cover:
+                rollup_map[pattern] = best_cover
+                rollup_count += 1
+                logger.debug(
+                    f"Rollup: '{pattern}' ({len(pattern_tinyids)} tinyIds) "
+                    f"→ '{best_cover[:60]}' ({len(pattern_to_tinyids[best_cover])} tinyIds)"
+                )
+
+        # Remove rolled-up patterns from kept set
+        for pattern in rollup_map:
+            kept_patterns.discard(pattern)
+
+        if rollup_count:
+            logger.info(f"TinyId-subset rollup: removed {rollup_count} short patterns")
 
     # Phase 2: Prefix extraction (if enabled)
     prefix_extracted_count = 0
@@ -1309,16 +1489,81 @@ def coalesce_variants_tsv(
                 pattern_to_parent[prefix] = pattern_to_parent[orig]
                 pattern_to_parent_count[prefix] = pattern_to_parent_count.get(orig, 0)
 
-    # Write output (kept patterns only)
-    output_patterns = sorted(kept_patterns, key=len, reverse=True)
+    # Phase 3: Emit definition-form variants (if enabled)
+    # Patterns ending with " -" or " - " are designation-specific (e.g.,
+    # "Center for Epidemiologic Studies-Depression Scale (CES-D) -").
+    # Definitions use the same instrument name without the trailing separator
+    # (e.g., "...Scale (CES-D)."). Emit both forms so stripping matches both fields.
+    def_variant_count = 0
+
+    if emit_def_variants and kept_patterns:
+        logger.info("Emitting definition-form variants (stripping trailing ' -' / ' - ')...")
+        new_variants: Dict[str, Set[str]] = {}
+        for pattern in list(kept_patterns):
+            stripped = pattern.rstrip()
+            variant = None
+            if stripped.endswith(' -'):
+                variant = stripped[:-2].rstrip()
+            elif stripped.endswith(' - '):
+                variant = stripped[:-3].rstrip()
+
+            if variant and variant not in kept_patterns and variant not in new_variants:
+                new_variants[variant] = pattern_to_tinyids[pattern].copy()
+                def_variant_count += 1
+                logger.debug(
+                    f"Def variant: '{pattern[:60]}' → '{variant[:60]}'"
+                )
+
+        # Add variants to kept set and tinyId map
+        for variant, tinyids in new_variants.items():
+            kept_patterns.add(variant)
+            if variant in pattern_to_tinyids:
+                pattern_to_tinyids[variant].update(tinyids)
+            else:
+                pattern_to_tinyids[variant] = tinyids
+            # Propagate parent info from the dash-form
+            # (parent info is inherited from the original pattern)
+
+        if def_variant_count:
+            logger.info(f"Definition variants: {def_variant_count} new patterns added")
+
+    # Compute group_key for each kept pattern
+    # Group key = longest shared word prefix with any other kept pattern (min 2 words)
+    # Falls back to first 2 words if no shared prefix found
+    pattern_group_keys: Dict[str, str] = {}
+    kept_list = sorted(kept_patterns)
+    for pattern in kept_list:
+        tokens = pattern.split()
+        best_prefix_len = 0
+        for other in kept_list:
+            if other == pattern:
+                continue
+            other_tokens = other.split()
+            common = 0
+            for a, b in zip(tokens, other_tokens):
+                if a == b:
+                    common += 1
+                else:
+                    break
+            if common > best_prefix_len:
+                best_prefix_len = common
+        if best_prefix_len >= 2:
+            pattern_group_keys[pattern] = ' '.join(tokens[:best_prefix_len])
+        else:
+            # Use first 2 words (or full pattern if shorter)
+            pattern_group_keys[pattern] = ' '.join(tokens[:min(2, len(tokens))])
+
+    # Write output (kept patterns only), sorted by group_key then pattern
+    output_patterns = sorted(kept_patterns, key=lambda p: (pattern_group_keys.get(p, ''), p))
     with open(output_path, 'w', encoding='utf-8') as f:
-        header = f"{pattern_column}\t{tinyids_column}"
+        header = f"group_key\t{pattern_column}\t{tinyids_column}"
         if has_parent_columns:
             header += "\tparent_phrase\tparent_tinyid_count"
         f.write(header + "\n")
         for pattern in output_patterns:
+            group_key = pattern_group_keys.get(pattern, "")
             tinyids_str = ' '.join(sorted(pattern_to_tinyids[pattern]))
-            row = f"{pattern}\t{tinyids_str}"
+            row = f"{group_key}\t{pattern}\t{tinyids_str}"
             if has_parent_columns:
                 parent = pattern_to_parent.get(pattern, "")
                 parent_count = pattern_to_parent_count.get(pattern, "")
@@ -1349,21 +1594,45 @@ def coalesce_variants_tsv(
                 prefix_tids = ' '.join(sorted(pattern_to_tinyids.get(prefix, set())))
                 f.write(f"prefix\t{orig}\t{orig_tids}\t{prefix}\t{prefix_tids}\n")
 
-        logger.info(f"Wrote subsumption/prefix report to {report_path}")
+            # Write reverse subsumption (roll-down) entries
+            for long_pat, base in sorted(reverse_subsumed.items(), key=lambda x: x[0]):
+                long_tids = ' '.join(sorted(pattern_to_tinyids.get(long_pat, set())))
+                base_tids = ' '.join(sorted(pattern_to_tinyids.get(base, set())))
+                f.write(f"roll-down\t{long_pat}\t{long_tids}\t{base}\t{base_tids}\n")
 
+            # Write rollup entries
+            for orig, cover in sorted(rollup_map.items(), key=lambda x: x[0]):
+                orig_tids = ' '.join(sorted(pattern_to_tinyids.get(orig, set())))
+                cover_tids = ' '.join(sorted(pattern_to_tinyids.get(cover, set())))
+                f.write(f"rollup\t{orig}\t{orig_tids}\t{cover}\t{cover_tids}\n")
+
+            # Write anchor trimming entries
+            for orig, bare in sorted(anchor_trimmed_map.items(), key=lambda x: x[0]):
+                f.write(f"anchor-trim\t{orig}\t\t{bare}\t\n")
+
+        logger.info(f"Wrote subsumption/prefix/rollup report to {report_path}")
+
+    reverse_count = len(reverse_subsumed)
     stats = {
         'input_patterns': input_patterns,
         'output_patterns': len(kept_patterns),
         'subsumed_count': len(subsumed),
+        'reverse_subsumed_count': reverse_count,
         'prefix_extracted_count': prefix_extracted_count,
+        'rollup_count': rollup_count,
         'parent_filtered_count': parent_filtered_count,
+        'anchor_trimmed_count': anchor_trimmed_count,
+        'def_variant_count': def_variant_count,
         'subsumptions': list(subsumed.items())
     }
 
+    anchor_info = f", {anchor_trimmed_count} anchor-trimmed" if anchor_trimmed_count else ""
+    reverse_info = f", {reverse_count} roll-down" if reverse_count else ""
+    rollup_info = f", {rollup_count} rolled-up" if rollup_count else ""
     parent_info = f", {parent_filtered_count} parent-filtered" if parent_filtered_count else ""
     logger.info(
         f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
-        f"({len(subsumed)} subsumed, {prefix_extracted_count} prefix-extracted{parent_info})"
+        f"({len(subsumed)} subsumed{anchor_info}{reverse_info}, {prefix_extracted_count} prefix-extracted{rollup_info}{parent_info})"
     )
 
     return stats

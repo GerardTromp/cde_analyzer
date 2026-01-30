@@ -114,6 +114,14 @@ def register_subparser(subparser: ArgumentParser):
              "like 'SF-12' that appear without 'as part of' prefix.",
     )
     subparser.add_argument(
+        "--min-bare-words",
+        type=int,
+        default=2,
+        help="Minimum word count for bare instrument names (default: 2). "
+             "Filters out short fragments like 'Score' that produce false positives "
+             "during bare-name discovery. Only applies with --discover-bare-names.",
+    )
+    subparser.add_argument(
         "--allow-abbrev-variants",
         action="store_true",
         help="Enable abbreviation variant matching in flexible regex. "

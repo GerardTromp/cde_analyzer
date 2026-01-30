@@ -1,0 +1,96 @@
+# Workflow: 5-Way Branching Strip Pipeline
+#
+# Produces 5 stripped JSON outputs from curated instrument and phrase patterns:
+#   1. inst_full_stripped.json  — instruments fully removed
+#   2. inst_sub_stripped.json   — instrument group prefix removed, suffix retained
+#   3. phrase_stripped.json     — phrases removed (no instrument stripping)
+#   4. both_full_stripped.json  — full instrument + phrase removal
+#   5. both_sub_stripped.json   — sub-group instrument + phrase removal
+#
+# Prerequisites:
+#   - Curated instrument patterns processed through --generate-strip-patterns
+#     to produce {inst_patterns_base}_full.tsv and {inst_patterns_base}_sub.tsv
+#   - Curated phrase patterns TSV
+#
+# Usage:
+#   cde-analyzer workflow run workflows/branching_strip.yaml \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/output \
+#       --set inst_patterns_base=/path/to/inst_patterns \
+#       --set phrase_patterns=/path/to/curated_phrases.tsv
+
+name: branching_strip
+description: "5-way branching strip: full/sub instrument × with/without phrases"
+
+variables:
+  input_json: "${INPUT_JSON}"
+  output_dir: "${OUTPUT_DIR}"
+  model: "${MODEL:-CDE}"
+  workers: 0
+
+  # Instrument pattern files (from --generate-strip-patterns)
+  # Base path without _full.tsv / _sub.tsv suffix
+  inst_patterns_base: "${INST_PATTERNS_BASE}"
+  inst_patterns_full: "${inst_patterns_base}_full.tsv"
+  inst_patterns_sub: "${inst_patterns_base}_sub.tsv"
+
+  # Phrase patterns (curated TSV with pattern + tinyIds columns)
+  phrase_patterns: "${PHRASE_PATTERNS}"
+
+  # Output files
+  inst_full_json: "${output_dir}/inst_full_stripped.json"
+  inst_sub_json: "${output_dir}/inst_sub_stripped.json"
+  phrase_json: "${output_dir}/phrase_stripped.json"
+  both_full_json: "${output_dir}/both_full_stripped.json"
+  both_sub_json: "${output_dir}/both_sub_stripped.json"
+
+steps:
+  # Branch 1: Full instrument removal
+  - name: strip_inst_full
+    action: strip_phrases
+    args:
+      patterns: "${inst_patterns_full},pattern"
+      input: "${input_json}"
+      model: "${model}"
+      output: "${inst_full_json}"
+      workers: "${workers}"
+
+  # Branch 2: Sub-group instrument removal (suffix retained)
+  - name: strip_inst_sub
+    action: strip_phrases
+    args:
+      patterns: "${inst_patterns_sub},pattern"
+      input: "${input_json}"
+      model: "${model}"
+      output: "${inst_sub_json}"
+      workers: "${workers}"
+
+  # Branch 3: Phrase-only removal (no instrument stripping)
+  - name: strip_phrase_only
+    action: strip_phrases
+    args:
+      patterns: "${phrase_patterns},pattern"
+      input: "${input_json}"
+      model: "${model}"
+      output: "${phrase_json}"
+      workers: "${workers}"
+
+  # Branch 4: Full instrument + phrases
+  - name: strip_both_full
+    action: strip_phrases
+    args:
+      patterns: "${phrase_patterns},pattern"
+      input: "${inst_full_json}"
+      model: "${model}"
+      output: "${both_full_json}"
+      workers: "${workers}"
+
+  # Branch 5: Sub-group instrument + phrases
+  - name: strip_both_sub
+    action: strip_phrases
+    args:
+      patterns: "${phrase_patterns},pattern"
+      input: "${inst_sub_json}"
+      model: "${model}"
+      output: "${both_sub_json}"
+      workers: "${workers}"

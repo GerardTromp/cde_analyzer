@@ -23,6 +23,91 @@ from utils.constants import MODEL_REGISTRY
 logger = logging.getLogger(__name__)
 
 
+def compute_field_distribution(
+    parsed_models: list,
+    verbatim_map: Dict[str, Set[str]],
+    field_paths: List[str],
+) -> Dict[str, Dict[str, Set[str]]]:
+    """
+    Compute per-field tinyId distribution for discovered verbatim patterns.
+
+    For each discovered verbatim pattern, determines which field paths it appears
+    in for each tinyId. This enables field-aware curation (e.g., patterns that
+    appear only in definitions vs only in designations).
+
+    Args:
+        parsed_models: List of parsed Pydantic models (CDEItem instances)
+        verbatim_map: Dict mapping verbatim pattern -> set of tinyIds
+        field_paths: Field paths searched (e.g., ["definitions.*.definition", ...])
+
+    Returns:
+        Dict mapping verbatim -> {field_short_name -> set of tinyIds}
+        Field short names are derived from the last path segment (e.g., "definition").
+    """
+    from logic.verbatim_discoverer import _extract_at_path
+
+    if not verbatim_map:
+        return {}
+
+    # Build field short names from paths
+    field_short_names = {}
+    for fp in field_paths:
+        field_short_names[fp] = fp.rsplit('.', 1)[-1]
+
+    # Collect all tinyIds that need checking
+    all_tinyids = set()
+    for tids in verbatim_map.values():
+        all_tinyids.update(tids)
+
+    # Build tinyId -> {field_path -> [texts]} index (only for relevant tinyIds)
+    tid_field_texts: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
+    for model in parsed_models:
+        tid = getattr(model, 'tinyId', None)
+        if not tid or tid not in all_tinyids:
+            continue
+        model_dict = model.model_dump(mode="python")
+        for fp in field_paths:
+            texts = _extract_at_path(model_dict, fp.split('.'))
+            for text in texts:
+                if text and isinstance(text, str):
+                    tid_field_texts[tid][fp].append(text)
+
+    # For each verbatim pattern, check which fields it appears in per tinyId
+    result: Dict[str, Dict[str, Set[str]]] = {}
+    for verbatim, tinyids in verbatim_map.items():
+        regex = re.compile(re.escape(verbatim), re.IGNORECASE)
+        field_dist: Dict[str, Set[str]] = {field_short_names[fp]: set() for fp in field_paths}
+
+        for tid in tinyids:
+            if tid not in tid_field_texts:
+                continue
+            for fp in field_paths:
+                short = field_short_names[fp]
+                for text in tid_field_texts[tid].get(fp, []):
+                    if regex.search(text):
+                        field_dist[short].add(tid)
+                        break
+
+        result[verbatim] = field_dist
+
+    logger.info(f"Computed field distribution for {len(result)} verbatim patterns")
+    return result
+
+
+def _field_profile(field_dist: Dict[str, Set[str]]) -> str:
+    """Classify field distribution as def-only, desig-only, both-all, or mixed."""
+    def_tids = field_dist.get("definition", set())
+    desig_tids = field_dist.get("designation", set())
+    if def_tids and not desig_tids:
+        return "def-only"
+    elif desig_tids and not def_tids:
+        return "desig-only"
+    elif def_tids == desig_tids:
+        return "both-all"
+    else:
+        return "mixed"
+
+
 def write_discovered_patterns_tsv(
     verbatim_map: Dict[str, Set[str]],
     output_path: str,
@@ -67,7 +152,7 @@ def extract_abbreviations_from_instruments(
     """
     abbreviations = set()
 
-    # Read instruments.tsv - look for 'acronym' column
+    # Read instruments.tsv - look for 'acronym' column, with family_display_name fallback
     if Path(instruments_path).exists():
         with open(instruments_path, encoding="utf-8") as f:
             header_line = f.readline().strip()
@@ -80,6 +165,13 @@ def extract_abbreviations_from_instruments(
                     acronym_idx = i
                     break
 
+            # Find family_display_name column (fallback when acronym is empty)
+            display_name_idx = -1
+            for i, h in enumerate(headers):
+                if h == 'family_display_name':
+                    display_name_idx = i
+                    break
+
             if acronym_idx >= 0:
                 for line in f:
                     line = line.strip()
@@ -87,9 +179,25 @@ def extract_abbreviations_from_instruments(
                         continue
                     fields = line.split('\t')
                     if acronym_idx < len(fields):
-                        acronym = fields[acronym_idx].strip().strip('"')
-                        if acronym and len(acronym) >= 2:
-                            abbreviations.add(acronym)
+                        acronym_raw = fields[acronym_idx].strip().strip('"')
+                        # Handle pipe-separated multiple acronyms (e.g. "SF-12|SF-36")
+                        acronyms_found = False
+                        if acronym_raw:
+                            for acronym in re.split(r'[|,]', acronym_raw):
+                                acronym = acronym.strip()
+                                if acronym and len(acronym) >= 2:
+                                    abbreviations.add(acronym)
+                                    acronyms_found = True
+                        if not acronyms_found and display_name_idx >= 0 and display_name_idx < len(fields):
+                            # Fallback: use family_display_name if it looks like an abbreviation
+                            # Must contain consecutive uppercase or uppercase+hyphen (e.g. "Neuro-QOL", "PROMIS", "SF-36")
+                            # Excludes generic names like "Other Instrument", "Rome Criteria"
+                            display_name = fields[display_name_idx].strip().strip('"')
+                            if (display_name
+                                    and len(display_name) >= 2
+                                    and len(display_name.split()) <= 3
+                                    and re.search(r'[A-Z]{2,}|[A-Z][a-z]+-[A-Z]', display_name)):
+                                abbreviations.add(display_name)
 
         logger.info(f"Extracted {len(abbreviations)} abbreviations from {instruments_path}")
 
@@ -167,6 +275,20 @@ def discover_abbreviation_patterns(
     # Pattern 2: ABBREV -  at start of string (capture the rest too)
     hyphen_regex = re.compile(rf'^({abbrev_pattern})\s+-\s+(.+)$', re.IGNORECASE)
 
+    # Pattern 3: (ABBREV) - ... or ...Name (ABBREV) - ... (known abbreviations)
+    # Matches designations containing a parenthesized abbreviation followed by " - "
+    # e.g., "(Neuro-Qol) - Rest during day..." or "Sexual Compulsivity (SCS) - ..."
+    paren_hyphen_regex = re.compile(
+        rf'^(.*?\(({abbrev_pattern})\))\s+-\s+(.+)$', re.IGNORECASE
+    )
+
+    # Pattern 4: Open-ended (ANYABBREV) - scan for abbreviations NOT in the known set
+    # Catches instruments like CHAT, GDS that aren't in instruments.tsv
+    # Matches: "Name (ABBREV) - suffix" where ABBREV is 2+ chars with uppercase
+    open_paren_regex = re.compile(
+        r'^(.*?\(([A-Z][A-Za-z0-9-]{1,})\))\s+-\s+(.+)$'
+    )
+
     # Load JSON
     with open(json_path, encoding="utf-8") as f:
         data = json.load(f)
@@ -175,6 +297,8 @@ def discover_abbreviation_patterns(
     bracketed_patterns: Dict[str, Dict] = defaultdict(lambda: {'count': 0, 'tinyIds': set(), 'abbrev': ''})
     # For hyphen patterns, group by abbreviation first to find common prefixes
     hyphen_by_abbrev: Dict[str, List[Dict]] = defaultdict(list)
+    # For (ABBREV) - patterns, group by prefix for prefix analysis
+    paren_by_prefix: Dict[str, List[Dict]] = defaultdict(list)
 
     # Scan each record
     for item in data:
@@ -204,6 +328,34 @@ def discover_abbreviation_patterns(
                     'rest': rest,
                     'tinyId': tiny_id
                 })
+
+            # Check for (ABBREV) - pattern (known abbreviations)
+            # e.g., "(Neuro-Qol) - Rest during day..." or "Sexual Compulsivity (SCS) - ..."
+            match = paren_hyphen_regex.match(designation)
+            if match:
+                prefix = match.group(1)  # Everything up to and including (ABBREV)
+                abbrev = match.group(2)  # The abbreviation inside parens
+                rest = match.group(3)    # Text after " - "
+                paren_by_prefix[prefix].append({
+                    'full_text': designation,
+                    'abbrev': abbrev,
+                    'rest': rest,
+                    'tinyId': tiny_id
+                })
+            else:
+                # Check for (ANYABBREV) - pattern (unknown abbreviations)
+                # Catches instruments not in instruments.tsv (e.g., CHAT, GDS)
+                match = open_paren_regex.match(designation)
+                if match:
+                    prefix = match.group(1)
+                    abbrev = match.group(2)
+                    rest = match.group(3)
+                    paren_by_prefix[prefix].append({
+                        'full_text': designation,
+                        'abbrev': abbrev,
+                        'rest': rest,
+                        'tinyId': tiny_id
+                    })
 
         # Also check definitions if in field list
         if "definitions.*.definition" in fields:
@@ -293,6 +445,25 @@ def discover_abbreviation_patterns(
         if uncovered:
             logger.debug(f"{canonical_abbrev}: {len(uncovered)} tinyIds not covered by prefix patterns")
 
+    # Process (ABBREV) - patterns: group by prefix and emit patterns
+    paren_patterns: Dict[str, Dict] = {}
+
+    for prefix_key, items in paren_by_prefix.items():
+        if not items:
+            continue
+
+        # Collect all tinyIds for this prefix
+        all_tinyids = {item['tinyId'] for item in items}
+
+        if len(all_tinyids) >= min_pattern_tinyids:
+            abbrev = items[0]['abbrev']
+            # The pattern is the prefix itself (e.g., "(Neuro-Qol)" or "Sexual Compulsivity (SCS)")
+            paren_patterns[prefix_key] = {
+                'count': len(all_tinyids),
+                'tinyIds': all_tinyids,
+                'abbrev': abbrev
+            }
+
     # Write output TSV
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("pattern\ttinyIds\ttype\tabbreviation\tcount\n")
@@ -309,13 +480,19 @@ def discover_abbreviation_patterns(
             tinyids_str = ' '.join(sorted(info['tinyIds']))
             f.write(f"{pattern}\t{tinyids_str}\tABBREV - \t{info['abbrev']}\t{info['count']}\n")
 
+        # Write (ABBREV) - patterns (sorted by count descending)
+        for pattern, info in sorted(paren_patterns.items(), key=lambda x: -x[1]['count']):
+            tinyids_str = ' '.join(sorted(info['tinyIds']))
+            f.write(f"{pattern}\t{tinyids_str}\t(ABBREV) - \t{info['abbrev']}\t{info['count']}\n")
+
     # Count output
     bracketed_count = sum(1 for info in bracketed_patterns.values() if len(info['tinyIds']) >= min_pattern_tinyids)
-    logger.info(f"Wrote {bracketed_count + len(hyphen_patterns)} patterns to {output_path} "
+    total_patterns = bracketed_count + len(hyphen_patterns) + len(paren_patterns)
+    logger.info(f"Wrote {total_patterns} patterns to {output_path} "
                 f"(min_tinyids={min_pattern_tinyids})")
 
     # Summary by abbreviation
-    abbrev_summary = defaultdict(lambda: {'bracketed': 0, 'hyphen': 0, 'tinyIds_b': set(), 'tinyIds_h': set()})
+    abbrev_summary = defaultdict(lambda: {'bracketed': 0, 'hyphen': 0, 'paren': 0, 'tinyIds_b': set(), 'tinyIds_h': set(), 'tinyIds_p': set()})
     for pattern, info in bracketed_patterns.items():
         if len(info['tinyIds']) >= min_pattern_tinyids:
             abbrev_summary[info['abbrev']]['bracketed'] += 1
@@ -323,10 +500,14 @@ def discover_abbreviation_patterns(
     for pattern, info in hyphen_patterns.items():
         abbrev_summary[info['abbrev']]['hyphen'] += 1
         abbrev_summary[info['abbrev']]['tinyIds_h'].update(info['tinyIds'])
+    for pattern, info in paren_patterns.items():
+        abbrev_summary[info['abbrev']]['paren'] += 1
+        abbrev_summary[info['abbrev']]['tinyIds_p'].update(info['tinyIds'])
 
     return {
         'bracketed_patterns': {k: v for k, v in bracketed_patterns.items() if len(v['tinyIds']) >= min_pattern_tinyids},
         'hyphen_patterns': dict(hyphen_patterns),
+        'paren_patterns': dict(paren_patterns),
         'abbrev_summary': dict(abbrev_summary)
     }
 
@@ -378,7 +559,8 @@ def run_action(args: Namespace):
         # Print summary
         n_bracketed = len(results['bracketed_patterns'])
         n_hyphen = len(results['hyphen_patterns'])
-        total = n_bracketed + n_hyphen
+        n_paren = len(results.get('paren_patterns', {}))
+        total = n_bracketed + n_hyphen + n_paren
 
         print(f"\nAbbreviation Pattern Discovery:")
         print(f"=" * 70)
@@ -387,16 +569,24 @@ def run_action(args: Namespace):
         print(f"Patterns found:")
         print(f"  [ABBREV] suffix patterns: {n_bracketed}")
         print(f"  ABBREV -  prefix patterns (common prefixes): {n_hyphen}")
+        print(f"  (ABBREV) -  prefix patterns: {n_paren}")
         print(f"  Total: {total}")
 
         # Summary by abbreviation
         if results['abbrev_summary']:
             print(f"\nBy abbreviation:")
             for abbrev, info in sorted(results['abbrev_summary'].items(),
-                                        key=lambda x: -(x[1]['bracketed'] + x[1]['hyphen'])):
-                if info['bracketed'] or info['hyphen']:
-                    tinyids_count = len(info['tinyIds_b'] | info['tinyIds_h'])
-                    print(f"  {abbrev}: [{abbrev}]={info['bracketed']}, {abbrev} - ={info['hyphen']} ({tinyids_count} tinyIds)")
+                                        key=lambda x: -(x[1]['bracketed'] + x[1]['hyphen'] + x[1].get('paren', 0))):
+                if info['bracketed'] or info['hyphen'] or info.get('paren', 0):
+                    tinyids_count = len(info['tinyIds_b'] | info['tinyIds_h'] | info.get('tinyIds_p', set()))
+                    parts = []
+                    if info['bracketed']:
+                        parts.append(f"[{abbrev}]={info['bracketed']}")
+                    if info['hyphen']:
+                        parts.append(f"{abbrev} - ={info['hyphen']}")
+                    if info.get('paren', 0):
+                        parts.append(f"({abbrev}) - ={info['paren']}")
+                    print(f"  {abbrev}: {', '.join(parts)} ({tinyids_count} tinyIds)")
 
         print(f"\nWrote: {args.output}")
         print(f"\nTo include these patterns in stripping:")
@@ -526,7 +716,8 @@ def run_action(args: Namespace):
             parent_column = None
 
     # Detect if input patterns have anchors or are bare names
-    bare_name_pairs_from_input = extract_bare_instrument_names(patterns)
+    min_bare_words = getattr(args, 'min_bare_words', 2)
+    bare_name_pairs_from_input = extract_bare_instrument_names(patterns, min_words=min_bare_words)
     input_has_anchors = len(bare_name_pairs_from_input) > 0
 
     verbatim_map: Dict[str, Set[str]] = {}
@@ -645,6 +836,15 @@ def run_action(args: Namespace):
             if not verbatim_map:
                 logger.warning("No verbatim patterns discovered")
 
+    # Compute field distribution for all discovered patterns
+    logger.info("Computing field distribution for discovered patterns...")
+    all_verbatim = dict(verbatim_map)
+    all_verbatim.update(bare_verbatim_map)
+    field_dist = compute_field_distribution(parsed, all_verbatim, field_paths)
+
+    # Derive field column names from field_paths
+    field_col_names = [fp.rsplit('.', 1)[-1] for fp in field_paths]
+
     # Combine results and write output
     # Write prefixed patterns first, then bare names
     has_parent = bool(parent_column and pattern_to_parent)
@@ -652,6 +852,10 @@ def run_action(args: Namespace):
         header = "pattern\ttinyIds\ttype\tsource_pattern"
         if has_parent:
             header += "\tparent_phrase\tparent_tinyid_count"
+        # Add field distribution columns
+        for col in field_col_names:
+            header += f"\t{col}_count"
+        header += "\tfield_profile"
         f.write(header + "\n")
 
         def _lookup_parent(verbatim: str) -> str:
@@ -671,13 +875,24 @@ def run_action(args: Namespace):
                 return f"\t{parent}\t{count}"
             return "\t\t"
 
+        def _field_suffix(verbatim: str) -> str:
+            """Build field distribution columns for a verbatim pattern."""
+            dist = field_dist.get(verbatim, {})
+            parts = []
+            for col in field_col_names:
+                parts.append(str(len(dist.get(col, set()))))
+            profile = _field_profile(dist) if dist else ""
+            parts.append(profile)
+            return "\t" + "\t".join(parts)
+
         # Write prefixed patterns (sorted by length descending)
         prefixed_sorted = sorted(verbatim_map.items(), key=lambda x: len(x[0]), reverse=True)
         for verbatim, tinyids in prefixed_sorted:
             tinyids_str = " ".join(sorted(tinyids))
             source = source_patterns.get(verbatim, "")
             parent_suffix = _lookup_parent(verbatim)
-            f.write(f"{verbatim}\t{tinyids_str}\tprefix\t{source}{parent_suffix}\n")
+            fields_suffix = _field_suffix(verbatim)
+            f.write(f"{verbatim}\t{tinyids_str}\tprefix\t{source}{parent_suffix}{fields_suffix}\n")
 
         # Write bare name patterns (sorted by length descending)
         bare_sorted = sorted(bare_verbatim_map.items(), key=lambda x: len(x[0]), reverse=True)
@@ -685,7 +900,8 @@ def run_action(args: Namespace):
             tinyids_str = " ".join(sorted(tinyids))
             source = source_patterns.get(verbatim, "")
             parent_suffix = _lookup_parent(verbatim)
-            f.write(f"{verbatim}\t{tinyids_str}\tbare\t{source}{parent_suffix}\n")
+            fields_suffix = _field_suffix(verbatim)
+            f.write(f"{verbatim}\t{tinyids_str}\tbare\t{source}{parent_suffix}{fields_suffix}\n")
 
     total_patterns = len(verbatim_map) + len(bare_verbatim_map)
     print(f"\nDiscovery complete:")

@@ -105,6 +105,170 @@ def register_subparser(subparser: ArgumentParser):
              "Requires input TSV with parent_phrase and parent_tinyid_count columns "
              "(produced by strip_discover --parent-column). Default 0 = disabled.",
     )
+    subparser.add_argument(
+        "--no-trim-anchors",
+        action="store_true",
+        help="Disable anchor trimming during coalesce. By default, patterns containing "
+             "anchor phrases ('as part of', 'based on', etc.) are trimmed to the bare "
+             "instrument name, since discovery is intended to find patterns without anchors. "
+             "Content preceding the anchor (CDE-specific text) is removed and tinyIds merged. "
+             "Use this flag to preserve full anchor-containing patterns.",
+    )
+    subparser.add_argument(
+        "--rollup-subset-tinyids",
+        action="store_true",
+        help="Enable tinyId-subset rollup during coalesce. After text-based subsumption, "
+             "removes short patterns whose tinyIds are a strict subset of a longer pattern's "
+             "tinyIds, even when the short pattern is not a text substring. "
+             "Example: 'Score -' (1 tinyId) rolled up into 'CES-D total score' (5 tinyIds) "
+             "because the tinyId set is fully covered. "
+             "Only rolls up patterns that are shorter (by word count) than their covering pattern.",
+    )
+
+    subparser.add_argument(
+        "--emit-def-variants",
+        action="store_true",
+        help="Emit definition-form variants during coalesce. For each pattern ending "
+             "with ' -' (designation separator), also emits the pattern without it. "
+             "Definitions use instrument names without trailing separators "
+             "(e.g., '...Scale (CES-D).' vs '...Scale (CES-D) - question'). "
+             "Without this flag, designation-only patterns miss definition matches.",
+    )
+
+    subparser.add_argument(
+        "--split-tiers",
+        type=int,
+        metavar="MIN_TOKENS",
+        default=0,
+        help="Split coalesced output into two tiers by token count. "
+             "Tier-1 (>=MIN_TOKENS tokens) written to --output. "
+             "Tier-2 (<MIN_TOKENS tokens) written to {output_base}_short.tsv. "
+             "Use with --coalesce-variants for two-pass stripping: "
+             "strip long instrument patterns first, then short fragments. "
+             "Default 0 = disabled (single output file).",
+    )
+
+    # Group hierarchy mode
+    subparser.add_argument(
+        "--group-hierarchy",
+        type=str,
+        metavar="FILE",
+        help="Group hierarchy mode: assign group/sub_group labels to patterns. "
+             "Groups patterns by shared prefix, strips trailing delimiters to get "
+             "clean group names (e.g., 'PROMIS -' → 'PROMIS'). "
+             "Input TSV must have 'pattern' and 'tinyIds' columns. "
+             "Writes enriched output with group, sub_group, suffix columns to --output.",
+    )
+    subparser.add_argument(
+        "--min-tinyids",
+        type=int,
+        default=0,
+        help="Filter: drop patterns with fewer than N tinyIds before grouping. "
+             "Removes noise patterns that appear on very few CDEs. "
+             "This is the base minimum; if --min-tinyids-scale is set, the effective "
+             "threshold is: base + floor(scale * sqrt(corpus_size)). "
+             "Use with --group-hierarchy. Default 0 = disabled.",
+    )
+    subparser.add_argument(
+        "--min-tinyids-scale",
+        type=float,
+        default=0.0,
+        help="Scale factor for adaptive tinyId threshold: "
+             "effective_min = min_tinyids + floor(scale * sqrt(N)), where N is the "
+             "total unique tinyIds (corpus size). Incidental groupings increase as "
+             "sqrt(N), so this adjusts the noise floor proportionally. "
+             "Use with --group-hierarchy. Default 0.0 = disabled (use fixed --min-tinyids only).",
+    )
+
+    # Generate strip pattern files from hierarchy
+    subparser.add_argument(
+        "--generate-strip-patterns",
+        type=str,
+        metavar="FILE",
+        help="Generate strip-ready pattern files from a group-hierarchy TSV. "
+             "Produces two files: {output}_full.tsv (full removal) and "
+             "{output}_sub.tsv (group prefix removed, suffix retained). "
+             "Both files are ready for use with strip_phrases --patterns.",
+    )
+
+    # Semantic grouping mode
+    subparser.add_argument(
+        "--group-semantic",
+        type=str,
+        metavar="FILE",
+        help="Semantic grouping mode: group patterns by shared prefix spans, "
+             "trimming boundaries using SpaCy POS tagging to avoid overshooting "
+             "into content-bearing tokens. Input TSV must have 'pattern' and "
+             "'tinyIds' columns. Writes grouped output to --output with "
+             "group_prefix, group_size, group_tinyid_count columns.",
+    )
+    subparser.add_argument(
+        "--min-group-size",
+        type=int,
+        default=2,
+        help="Minimum patterns per semantic group (default: 2).",
+    )
+    subparser.add_argument(
+        "--min-prefix-words",
+        type=int,
+        default=2,
+        help="Minimum words in shared prefix to form a group (default: 2).",
+    )
+    subparser.add_argument(
+        "--no-temporal-implied",
+        action="store_true",
+        help="Disable generation of implied-ONE temporal variants. By default, "
+             "for each temporal group with an explicit quantifier (e.g., 'In the past 7 days'), "
+             "an implied-ONE form is also emitted (e.g., 'In the past day'). "
+             "These catch singular temporal frames that exist on different CDE records. "
+             "Use this flag to suppress that behavior.",
+    )
+
+    # Field analysis mode
+    subparser.add_argument(
+        "--field-analysis",
+        type=str,
+        metavar="FILE",
+        help="Field analysis mode: enrich a patterns TSV with per-field tinyId counts. "
+             "Adds def_count, desig_count, and field_profile columns by scanning the "
+             "source JSON specified via --input. Requires --input and --model.",
+    )
+    subparser.add_argument(
+        "--input", "-i",
+        type=str,
+        help="Path to CDE JSON file (required for --field-analysis).",
+    )
+    subparser.add_argument(
+        "--model", "-m",
+        type=str,
+        default="CDE",
+        help="Model type for parsing JSON (default: CDE). See MODEL_REGISTRY.",
+    )
+    subparser.add_argument(
+        "--fields",
+        type=str,
+        nargs="+",
+        default=["definitions.*.definition", "designations.*.designation"],
+        help="Field paths to scan (default: definitions.*.definition designations.*.designation).",
+    )
+    subparser.add_argument(
+        "--min-field-count",
+        type=int,
+        default=0,
+        help="Filter: drop patterns below this count in BOTH fields. Default 0 = disabled.",
+    )
+    subparser.add_argument(
+        "--min-tokens",
+        type=int,
+        default=0,
+        help="Filter: drop patterns with fewer than N tokens. Default 0 = disabled.",
+    )
+    subparser.add_argument(
+        "--exclude-patterns",
+        type=str,
+        metavar="FILE",
+        help="Filter: remove patterns matching entries in this file (one per line or TSV with 'pattern' column).",
+    )
 
     # Supplementary pattern import mode
     subparser.add_argument(

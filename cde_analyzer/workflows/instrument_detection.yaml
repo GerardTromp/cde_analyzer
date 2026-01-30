@@ -72,6 +72,11 @@ variables:
   final_coalesced: "${output_dir}/final_coalesced.tsv"
   final_subsumption: "${output_dir}/final_subsumption.tsv"
 
+  # Two-pass stripping: tier-1 (long instrument patterns) then tier-2 (short fragments)
+  final_coalesced_short: "${output_dir}/final_coalesced_short.tsv"
+  tier1_stripped_json: "${output_dir}/tier1_stripped.json"
+  tier1_trace_tsv: "${output_dir}/tier1_strip_trace.tsv"
+
   # Phase 6: Sanity check
   sanity_check: "${output_dir}/sanity_check.tsv"
 
@@ -178,6 +183,7 @@ steps:
         - "${abbrev_patterns},pattern"
       expand_variants: true
       discover_bare_names: true
+      min_bare_words: 2
       discover_fails: "${failed_patterns}"
       workers: "${workers}"
 
@@ -191,6 +197,7 @@ steps:
       output: "${coalesced_tsv}"
       coalesce_report: "${coalesce_report}"
       min_prefix_tinyids: 2
+      rollup_subset_tinyids: true
 
   # Step 6b: Recall analysis for Phase 2 (optional - requires recall_patterns)
   - name: recall_phase2
@@ -275,6 +282,10 @@ steps:
       workers: "${workers}"
 
   # Step 11: Final coalesce with subsumption + prefix extraction
+  # emit_def_variants: for patterns ending with " -", also emit without it
+  #   so definitions get matched (they don't have the " - " separator)
+  # split_tiers: split output into tier-1 (>=3 tokens, instruments) and
+  #   tier-2 (<3 tokens, fragments like "Scale", "past") for two-pass stripping
   - name: final_coalesce
     action: pattern_util
     args:
@@ -282,6 +293,9 @@ steps:
       output: "${final_coalesced}"
       coalesce_report: "${final_subsumption}"
       min_prefix_tinyids: 2
+      rollup_subset_tinyids: true
+      emit_def_variants: true
+      split_tiers: 3
 
   # Step 11b: Recall analysis for Phase 3 (optional - requires recall_patterns)
   # Compares against Phase 2 recall to show improvement
@@ -308,7 +322,8 @@ steps:
       PHASE 3 COMPLETE: Final instrument pattern review before stripping.
 
       Files to review:
-        - ${final_coalesced} (final patterns to strip)
+        - ${final_coalesced} (tier-1: long instrument patterns to strip first)
+        - ${final_coalesced_short} (tier-2: short fragments stripped after tier-1)
         - ${final_subsumption} (subsumption analysis - verify no sub-phrases missed)
         - ${output_dir}/abbrev_patterns_final.tsv (Phase 3 abbreviation patterns)
         - ${families_dir}/ (family assignments)
@@ -327,15 +342,30 @@ steps:
   # PHASE 4: Stripping & Verification
   # =========================================================================
 
-  # Step 13: Strip instruments from CDE JSON
-  # Uses ${workers} which is auto-detected from CPU count
-  - name: strip_instruments
+  # Step 13a: Strip tier-1 (long instrument patterns, >=3 tokens)
+  # These are the high-confidence instrument name patterns. Stripping them
+  # first prevents short fragment patterns (tier-2) from damaging instrument
+  # names that the long patterns would have matched.
+  - name: strip_tier1
     action: strip_phrases
     args:
       input: "${input_json}"
       model: CDE
-      output: "${stripped_json}"
+      output: "${tier1_stripped_json}"
       patterns: "${final_coalesced},pattern"
+      trace_matching: "${tier1_trace_tsv}"
+      workers: "${workers}"
+
+  # Step 13b: Strip tier-2 (short fragment patterns, <3 tokens)
+  # Applied to tier-1 stripped output. Fragments like "Scale", "past" now
+  # only match residual text, not text inside already-removed instrument names.
+  - name: strip_tier2
+    action: strip_phrases
+    args:
+      input: "${tier1_stripped_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${final_coalesced_short},pattern"
       trace_matching: "${trace_tsv}"
       workers: "${workers}"
 
@@ -350,7 +380,16 @@ steps:
       min_count: 2
       suggest_patterns: true
 
-  # Step 15: Generate recall report (optional - requires RECALL_PATTERNS)
+  # Step 15: Discovery report — summarize pipeline metrics
+  - name: discovery_report
+    action: discovery_report
+    args:
+      output_dir: "${output_dir}"
+      pipeline: instrument
+      output: "${output_dir}/discovery_report.md"
+      input_json: "${input_json}"
+
+  # Step 16: Generate recall report (optional - requires RECALL_PATTERNS)
   # Compares ground truth patterns against final discovered patterns
   # Run manually if you have a ground truth pattern file:
   #   cde-analyzer recall_analyze -i ${input_json} -m CDE \

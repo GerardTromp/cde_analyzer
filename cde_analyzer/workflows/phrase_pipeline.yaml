@@ -4,8 +4,9 @@
 # 1. Mine phrases from instrument-stripped JSON
 # 2. Discover verbatim occurrences with variants
 # 3. Coalesce redundant patterns
-# 4. [CHECKPOINT] Human curator review
-# 5. Strip patterns from CDE JSON
+# 4. Field analysis — enrich with per-field counts, apply filters
+# 5. [CHECKPOINT] Human curator review
+# 6. Strip patterns from CDE JSON
 #
 # Prerequisites:
 #   - Run instrument_pipeline.yaml first to get inst_stripped.json
@@ -31,6 +32,7 @@ variables:
   discovered_tsv: "${output_dir}/discovered.tsv"
   coalesced_tsv: "${output_dir}/coalesced.tsv"
   coalesce_report: "${output_dir}/coalesce_report.tsv"
+  field_enriched_tsv: "${output_dir}/coalesced_fields.tsv"
   curated_tsv: "${output_dir}/curated.tsv"
   stripped_json: "${output_dir}/final_stripped.json"
   trace_tsv: "${output_dir}/strip_trace.tsv"
@@ -38,6 +40,11 @@ variables:
   # Parent phrase tracking (propagates generic phrase info through pipeline)
   parent_column: "lemma_text"
   min_parent_tinyids: "${MIN_PARENT_TINYIDS:-20}"
+
+  # Field analysis filters
+  min_field_count: "${MIN_FIELD_COUNT:-6}"
+  min_tokens: "${MIN_TOKENS:-3}"
+  exclude_patterns: "${EXCLUDE_PATTERNS:-}"
 
   # Recall analysis (optional - provide ground truth patterns for tracking)
   # recall_source_json: original (pre-strip) JSON for ground truth matching
@@ -79,6 +86,17 @@ steps:
       min_prefix_tinyids: 2
       min_parent_tinyids: "${min_parent_tinyids}"
 
+  - name: field_analysis
+    action: pattern_util
+    args:
+      field_analysis: "${coalesced_tsv}"
+      input: "${input_json}"
+      model: CDE
+      output: "${field_enriched_tsv}"
+      min_field_count: "${min_field_count}"
+      min_tokens: "${min_tokens}"
+      exclude_patterns: "${exclude_patterns}"
+
   - name: recall_coalesced
     action: recall_analyze
     condition: "${recall_patterns}"
@@ -86,7 +104,7 @@ steps:
       input: "${recall_source_json}"
       model: CDE
       pattern_file: "${recall_patterns}"
-      pipeline_output: "${coalesced_tsv}"
+      pipeline_output: "${field_enriched_tsv}"
       pipeline_tinyid_column: "${recall_tinyid_column}"
       output: "${recall_coalesced_tsv}"
       markdown_report: "${recall_report_md}"
@@ -100,12 +118,12 @@ steps:
       Phrase pattern curation required.
 
       Files to review:
-        - ${coalesced_tsv} (patterns to strip)
+        - ${field_enriched_tsv} (patterns with field counts, filtered)
         - ${coalesce_report} (subsumption details)
         - ${recall_report_md} (recall analysis, if recall_patterns set)
 
       Actions:
-        1. Open ${coalesced_tsv} in spreadsheet
+        1. Open ${field_enriched_tsv} in spreadsheet
         2. Remove false positives (accidental phrase matches)
         3. Verify coverage is complete
         4. Save as ${curated_tsv}
@@ -122,6 +140,14 @@ steps:
       patterns: "${curated_tsv},pattern"
       trace_matching: "${trace_tsv}"
       workers: "${workers}"
+
+  - name: discovery_report
+    action: discovery_report
+    args:
+      output_dir: "${output_dir}"
+      pipeline: phrase
+      output: "${output_dir}/discovery_report.md"
+      input_json: "${input_json}"
 
   - name: recall_stripped
     action: recall_analyze

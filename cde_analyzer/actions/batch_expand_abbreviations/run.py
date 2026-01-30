@@ -33,6 +33,9 @@ def load_abbreviations(tsv_path: str, column: str = "acronym") -> List[str]:
             available = ', '.join(reader.fieldnames)
             raise ValueError(f"Column '{column}' not found. Available: {available}")
 
+        # Check for family_display_name fallback column
+        has_display_name = 'family_display_name' in (reader.fieldnames or [])
+
         for row in reader:
             value = row.get(column, "").strip()
             if value:
@@ -41,6 +44,16 @@ def load_abbreviations(tsv_path: str, column: str = "acronym") -> List[str]:
                     abbrev = abbrev.strip()
                     if abbrev and len(abbrev) >= 2:  # Skip single-char abbreviations
                         abbreviations.add(abbrev)
+            elif has_display_name:
+                # Fallback: use family_display_name if it looks like an abbreviation
+                # Must contain consecutive uppercase or uppercase+hyphen (e.g. "Neuro-QOL", "PROMIS")
+                import re
+                display_name = row.get('family_display_name', "").strip()
+                if (display_name
+                        and len(display_name) >= 2
+                        and len(display_name.split()) <= 3
+                        and re.search(r'[A-Z]{2,}|[A-Z][a-z]+-[A-Z]', display_name)):
+                    abbreviations.add(display_name)
 
     return sorted(abbreviations)
 
