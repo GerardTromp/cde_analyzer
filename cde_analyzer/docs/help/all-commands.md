@@ -107,15 +107,27 @@ options:
 Remove curated phrases from specific paths in CDE documents.
 
 ```bash
-usage: strip_phrases [-h] -i INPUT -m MODEL -p PHRASES -o OUTPUT
+usage: strip_phrases [-h] -i INPUT -m MODEL -o OUTPUT
+                     {-p PATTERNS | --phrases FILE}
+                     [-f FIELDS ...] [--sort-order {length,file,alpha}]
+                     [-w WORKERS] [--detect-remnants] [--remnant-report FILE]
+                     [--clean-remnants] [--trace-matching FILE]
                      [-d] [--diff-output FILE] [-c] [--summary] [-C N]
 
 options:
   -h, --help            show this help message and exit
   -i, --input INPUT     Path to input JSON file
   -m, --model MODEL     Pydantic model (CDE, Form)
-  -p, --phrases FILE    Path to phrases file (JSON, CSV, or TSV)
   -o, --output OUTPUT   Path to output JSON file
+  -p, --patterns FILE   Discovered patterns TSV (from strip_discover)
+  --phrases FILE        Legacy phrase map (JSON, CSV, or TSV)
+  -f, --fields FIELDS   Field paths to strip (default: definitions, designations)
+  --sort-order ORDER    Pattern order: length, file, alpha (default: length)
+  -w, --workers N       Parallel workers (0=auto, 1=sequential, N=exact)
+  --detect-remnants     Scan output for post-strip artifacts
+  --remnant-report FILE Write remnant report TSV
+  --clean-remnants      Apply iterative cleanup to fix artifacts
+  --trace-matching FILE Write pattern matching trace TSV
   -d, --diff            Show diff between original and cleaned JSON
   --diff-output FILE    Write diff information to a file
   -c, --color           Colorize diff output
@@ -153,24 +165,28 @@ options:
 
 ### `pattern_util` Command
 
-TSV pattern utilities (merge, coalesce, import).
+TSV pattern utilities (merge, coalesce, field analysis, import).
 
 ```bash
 usage: pattern_util [-h] [-o OUTPUT]
                     [--merge-patterns FILE] [--merge-pattern-column COL]
                     [--merge-tinyids-column COL]
                     [--coalesce-variants FILE] [--coalesce-report FILE]
-                    [--min-prefix-tinyids N]
+                    [--min-prefix-tinyids N] [--min-parent-tinyids N]
+                    [--no-trim-anchors] [--rollup-subset-tinyids]
+                    [--emit-def-variants] [--split-tiers MIN_TOKENS]
+                    [--field-analysis FILE] [-i INPUT] [-m MODEL]
+                    [--fields FIELDS ...] [--min-field-count N]
+                    [--min-tokens N] [--exclude-patterns FILE]
+                    [--group-hierarchy FILE] [--min-tinyids N]
+                    [--group-semantic FILE] [--min-group-size N]
+                    [--generate-strip-patterns FILE]
                     [--add-to-supplementary FILE] [--supplementary-section NAME]
 
 options:
   -h, --help            show this help message and exit
-  -o, --output OUTPUT   Output TSV file (required for merge/coalesce)
+  -o, --output OUTPUT   Output TSV file (required for most modes)
   --merge-patterns FILE Merge duplicate patterns, combine tinyIds
-  --merge-pattern-column COL
-                        Column for patterns (default: pattern)
-  --merge-tinyids-column COL
-                        Column for tinyIds (default: tinyIds)
   --coalesce-variants FILE
                         Remove subsumed patterns (tinyId-aware)
   --coalesce-report FILE
@@ -179,10 +195,25 @@ options:
                         Enable prefix extraction (0 = disabled)
   --min-parent-tinyids N
                         Filter by parent phrase tinyId count (0 = disabled)
+  --no-trim-anchors     Disable anchor trimming during coalesce
+  --rollup-subset-tinyids
+                        Enable tinyId-subset rollup
+  --emit-def-variants   Emit definition-form variants
+  --split-tiers N       Split output by token count threshold
+  --field-analysis FILE Enrich patterns with per-field counts
+  -i, --input FILE      CDE JSON for field analysis
+  -m, --model MODEL     Model for JSON parsing (default: CDE)
+  --min-field-count N   Filter patterns below N in both fields
+  --min-tokens N        Filter patterns with fewer than N tokens
+  --exclude-patterns FILE
+                        Remove patterns matching exclusion file
+  --group-hierarchy FILE
+                        Assign group/sub_group labels by prefix
+  --group-semantic FILE Semantic grouping with POS boundary detection
+  --generate-strip-patterns FILE
+                        Generate strip-ready files from hierarchy
   --add-to-supplementary FILE
                         Import patterns to supplementary_patterns.yaml
-  --supplementary-section NAME
-                        YAML section name (default: added_patterns)
 ```
 
 ---
@@ -329,6 +360,27 @@ options:
   --id-list IDS         List of tinyIds to include or exclude
   --id-file FILE        File containing tinyIds (JSON, CSV, or TSV)
   --exclude             Exclude matching tinyIds (default: include)
+```
+
+---
+
+## Reporting
+
+### `discovery_report` Command
+
+Generate markdown pipeline summary reports.
+
+```bash
+usage: discovery_report [-h] -d OUTPUT_DIR -p {instrument,phrase}
+                        -o OUTPUT [--version LABEL] [-i INPUT_JSON]
+
+options:
+  -h, --help            show this help message and exit
+  -d, --output-dir DIR  Pipeline output directory to scan
+  -p, --pipeline TYPE   Pipeline type: instrument, phrase
+  -o, --output FILE     Markdown report output path
+  --version LABEL       Version label for iteration tracking
+  -i, --input-json FILE Original input JSON (for record count)
 ```
 
 ---

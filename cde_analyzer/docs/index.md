@@ -9,8 +9,10 @@ A Python CLI tool for parsing and analyzing Common Data Elements (CDEs) from the
 CDE Analyzer provides a suite of commands for:
 
 - **Phrase Detection**: Find repeated multi-word phrases across CDE records
+- **Pattern Stripping**: Remove boilerplate phrases with automated remnant cleanup
 - **Data Cleaning**: Fix field names, strip HTML markup
 - **Analysis**: Count structural elements and field occurrences
+- **Reporting**: Generate pipeline summary reports with remnant analysis
 - **Export**: Extract fields for embedding models, generate FASTA format
 
 ## Quick Start
@@ -35,7 +37,8 @@ python cde_analyzer.py phrase-miner --help
 | [phrase-miner](help/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection |
 | [phrase](help/phrase.md) | Find repeated phrases (original implementation) |
 | [phrase-builder](help/phrase_builder.md) | K-mer analysis for phrase identification |
-| [strip-phrases](help/strip_phrases.md) | Remove curated phrases from CDE documents |
+| [strip-phrases](help/strip_phrases.md) | Remove curated phrases with remnant cleanup |
+| [discovery-report](help/discovery_report.md) | Generate pipeline summary reports |
 | [count](help/count.md) | Count structural elements and field occurrences |
 | [strip-html](help/strip.md) | Remove HTML markup from CDE fields |
 | [fix-underscores](help/fix_underscores.md) | Fix Pydantic-incompatible field names |

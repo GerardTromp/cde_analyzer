@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" width="800" height="900">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1050" width="800" height="1050">
   <defs>
     <style>
       .title { font: bold 18px sans-serif; fill: #1a1a1a; }
@@ -12,7 +12,9 @@
       .subworkflow-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 4; stroke-dasharray: 5,3; }
       .input-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 8; }
       .output-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; rx: 8; }
+      .report-box { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 4; }
       .file-label { font: italic 10px sans-serif; fill: #6b7280; }
+      .detail-text { font: 10px sans-serif; fill: #666666; }
     </style>
     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#666666"/>
@@ -52,7 +54,7 @@
   <!-- Arrow -->
   <path d="M400,300 L400,320" class="arrow"/>
 
-  <!-- Phase 1 Step 5: Strip -->
+  <!-- Phase 1 Step: Strip -->
   <rect x="80" y="320" width="640" height="55" class="step-box"/>
   <text x="100" y="340" class="step-title">2. Strip Instruments</text>
   <text x="100" y="360" class="step-text">strip_phrases -i cdes.json -m CDE -o inst_stripped.json --patterns curated.tsv</text>
@@ -62,7 +64,7 @@
   <path d="M400,430 L400,470" class="arrow"/>
 
   <!-- Phase 2 Box -->
-  <rect x="50" y="470" width="700" height="300" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
+  <rect x="50" y="470" width="700" height="350" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
   <rect x="50" y="470" width="700" height="30" fill="#16a34a" class="phase-box" style="stroke: #16a34a;"/>
   <text x="400" y="490" text-anchor="middle" class="phase-title">PHASE 2: GENERIC PHRASE STRIPPING</text>
 
@@ -83,17 +85,27 @@
   <!-- Arrow -->
   <path d="M400,640 L400,660" class="arrow"/>
 
-  <!-- Phase 2 Step 5: Strip -->
-  <rect x="80" y="660" width="640" height="55" class="step-box"/>
-  <text x="100" y="680" class="step-title">2. Strip Phrases</text>
+  <!-- Phase 2 Step: Strip with cleanup -->
+  <rect x="80" y="660" width="640" height="70" class="step-box"/>
+  <text x="100" y="680" class="step-title">2. Strip Phrases + Cleanup</text>
   <text x="100" y="700" class="step-text">strip_phrases -i inst_stripped.json -m CDE -o final.json --patterns curated.tsv</text>
-  <text x="600" y="705" class="file-label">final_stripped.json</text>
+  <text x="100" y="715" class="step-text">    --clean-remnants --detect-remnants --remnant-report remnants.tsv</text>
+  <text x="600" y="720" class="file-label">final_stripped.json</text>
+
+  <!-- Arrow to Reporting -->
+  <path d="M400,820 L400,855" class="arrow"/>
+
+  <!-- Reporting Box -->
+  <rect x="100" y="855" width="600" height="80" class="report-box"/>
+  <text x="120" y="880" class="step-title">REPORTING</text>
+  <text x="120" y="900" class="step-text">discovery_report --output-dir output/ --pipeline phrase -o report.md</text>
+  <text x="120" y="920" class="detail-text">Generates: pipeline summary, remnant analysis, version history</text>
 
   <!-- Arrow to Output -->
-  <path d="M400,770 L400,810" class="arrow"/>
+  <path d="M400,935 L400,960" class="arrow"/>
 
   <!-- Output Box -->
-  <rect x="250" y="810" width="300" height="50" class="output-box"/>
-  <text x="400" y="832" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
-  <text x="400" y="848" text-anchor="middle" class="step-text">(instruments &amp; phrases removed)</text>
+  <rect x="250" y="960" width="300" height="50" class="output-box"/>
+  <text x="400" y="982" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
+  <text x="400" y="998" text-anchor="middle" class="step-text">(instruments &amp; phrases removed)</text>
 </svg>

@@ -27,6 +27,12 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | [strip_phrases](../help/strip_phrases.md) | Remove detected phrases using exact string replacement | Stable |
 | [diagnose_strip](../help/diagnose_strip.md) | Diagnose remaining patterns after stripping | Stable |
 
+## Reporting
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [discovery_report](../help/discovery_report.md) | Generate markdown pipeline summary with remnant analysis | New |
+
 ## Data Cleaning
 
 | Command | Description | Status |
