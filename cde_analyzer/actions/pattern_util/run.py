@@ -132,6 +132,76 @@ def add_patterns_to_supplementary(
     return added_count
 
 
+def _run_to_minimal(args, input_path: str) -> int:
+    """
+    Normalize any pattern TSV to minimal 2-column format: pattern<TAB>tinyIds
+
+    Auto-detects column names and normalizes tinyId separator to pipe (|).
+    """
+    import re
+    from utils.file_utils import exit_if_missing
+    from utils.pattern_tsv_utils import find_column_index
+
+    output_path = getattr(args, 'output', None)
+    if not output_path:
+        logger.error("--output is required for --to-minimal")
+        raise SystemExit(1)
+
+    exit_if_missing(input_path, "Patterns TSV")
+
+    rows = []  # (pattern, tinyids_normalized)
+    with open(input_path, encoding="utf-8") as f:
+        header_line = f.readline().strip()
+        headers = header_line.split('\t')
+
+        # Auto-detect pattern column
+        pattern_idx = find_column_index(headers, 'pattern')
+
+        # Auto-detect tinyIds column (try multiple variations)
+        tinyids_idx = None
+        for name in ['tinyIds', 'tinyids', 'tinyId', 'tinyid']:
+            try:
+                tinyids_idx = find_column_index(headers, name)
+                break
+            except ValueError:
+                continue
+        if tinyids_idx is None:
+            logger.error("Could not find tinyIds column (tried: tinyIds, tinyids, tinyId, tinyid)")
+            raise SystemExit(1)
+
+        for line in f:
+            line = line.rstrip('\n').rstrip('\r')
+            if not line.strip():
+                continue
+            fields = line.split('\t')
+            pattern = fields[pattern_idx].strip().strip('"') if pattern_idx < len(fields) else ""
+            tinyids_str = fields[tinyids_idx].strip().strip('"') if tinyids_idx < len(fields) else ""
+
+            if not pattern:
+                continue
+
+            # Normalize separator: split on space or pipe, rejoin with pipe
+            tinyids_list = [t for t in re.split(r'[\s|]+', tinyids_str) if t]
+            tinyids_normalized = "|".join(tinyids_list)
+
+            rows.append((pattern, tinyids_normalized))
+
+    logger.info(f"Loaded {len(rows)} patterns from {input_path}")
+
+    # Write minimal output
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("pattern\ttinyIds\n")
+        for pattern, tinyids in rows:
+            f.write(f"{pattern}\t{tinyids}\n")
+
+    print(f"\nNormalized to minimal format:")
+    print(f"  Input:  {input_path}")
+    print(f"  Output: {output_path} ({len(rows)} patterns)")
+    print(f"  Format: pattern<TAB>tinyIds (pipe-separated)")
+
+    return 0
+
+
 def _load_exclusion_set(exclude_path: str) -> set:
     """Load exclusion patterns from a file (one per line, or TSV with 'pattern' column)."""
     exclusions = set()
@@ -781,9 +851,258 @@ def _run_group_semantic(args, input_path: str) -> int:
     return 0
 
 
+def _run_generate_proxies(args, input_path: str) -> int:
+    """
+    Generate semantic proxies for patterns using an LLM.
+
+    Reads a patterns TSV, looks up sample CDE contexts from the source JSON,
+    queries an LLM for a 1-3 word semantic proxy per pattern, and writes an
+    enriched TSV with replace_with and proxy_reasoning columns.
+
+    This is a wireframe for evaluating whether semantic substitution
+    produces meaningful proxies before building a full pipeline.
+    """
+    import asyncio
+    import json
+    import re
+    from pathlib import Path
+    from utils.file_utils import exit_if_missing
+    from utils.constants import MODEL_REGISTRY
+    from pydantic import ValidationError
+
+    output_path = getattr(args, 'output', None)
+    input_json = getattr(args, 'input', None)
+    if not output_path:
+        logger.error("--output is required for --generate-proxies")
+        raise SystemExit(1)
+    if not input_json:
+        logger.error("--input (CDE JSON) is required for --generate-proxies")
+        raise SystemExit(1)
+
+    exit_if_missing(input_path, "Patterns TSV")
+    exit_if_missing(input_json, "Input JSON")
+
+    provider_name = getattr(args, 'provider', 'claude')
+    llm_model = getattr(args, 'llm_model', None)
+    config_file = getattr(args, 'config_file', None)
+    api_keys = getattr(args, 'api_keys', None)
+    context_window = getattr(args, 'context_window', 150)
+    max_contexts = getattr(args, 'max_contexts', 3)
+    dry_run = getattr(args, 'dry_run', False)
+    model_name = getattr(args, 'model', 'CDE')
+    field_paths = getattr(args, 'fields',
+                          ["definitions.*.definition", "designations.*.designation"])
+
+    # --- Load patterns TSV ---
+    rows = []  # (fields_list, pattern, tinyids_set)
+    with open(input_path, encoding="utf-8") as f:
+        header_line = f.readline().strip()
+        headers = header_line.split('\t')
+
+        from utils.pattern_tsv_utils import find_column_index
+        pattern_idx = find_column_index(headers, 'pattern')
+        tinyids_idx = find_column_index(headers, 'tinyIds')
+
+        for line in f:
+            line = line.rstrip('\n').rstrip('\r')
+            if not line.strip():
+                continue
+            fields = line.split('\t')
+            pattern = fields[pattern_idx].strip().strip('"') if pattern_idx < len(fields) else ""
+            tinyids_str = fields[tinyids_idx].strip().strip('"') if tinyids_idx < len(fields) else ""
+            tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
+            rows.append((fields, pattern, tinyids))
+
+    logger.info(f"Loaded {len(rows)} patterns from {input_path}")
+
+    # --- Load CDE JSON for context ---
+    model_class = MODEL_REGISTRY[model_name]
+    with open(input_json, encoding="utf-8") as f:
+        data = json.load(f)
+
+    try:
+        parsed = [model_class.model_validate(obj) for obj in data]
+    except ValidationError as e:
+        for error in e.errors():
+            logger.error(f"{error['type']}: {error['msg']} at {error['loc']}")
+        raise SystemExit(1)
+
+    logger.info(f"Loaded {len(parsed)} CDE records from {input_json}")
+
+    # Build tinyId -> record lookup
+    tid_to_record = {}
+    for rec in parsed:
+        if hasattr(rec, 'tinyId') and rec.tinyId:
+            tid_to_record[rec.tinyId] = rec
+
+    # --- Extract contexts per pattern ---
+    from logic.verbatim_discoverer import _extract_at_path
+
+    def _get_contexts(pattern: str, tinyids: set) -> str:
+        """Find sample CDE texts containing this pattern."""
+        contexts = []
+        # Search in tinyId-restricted records first, fall back to all records
+        search_records = [tid_to_record[t] for t in tinyids if t in tid_to_record] if tinyids else parsed
+        for rec in search_records[:20]:  # limit search scope
+            rec_dict = rec.model_dump(mode="json")
+            for fp in field_paths:
+                parts = fp.split('.')
+                texts = _extract_at_path(rec_dict, parts)
+                for text in texts:
+                    idx = text.lower().find(pattern.lower())
+                    if idx >= 0:
+                        start = max(0, idx - context_window)
+                        end = min(len(text), idx + len(pattern) + context_window)
+                        snippet = text[start:end]
+                        # Mark the pattern in context
+                        field_label = fp.rsplit('.', 1)[-1]
+                        contexts.append(f"  [{field_label}] ...{snippet}...")
+                        if len(contexts) >= max_contexts:
+                            break
+                if len(contexts) >= max_contexts:
+                    break
+            if len(contexts) >= max_contexts:
+                break
+        return "\n".join(contexts) if contexts else "(no context found)"
+
+    # --- Build query module and LLM provider ---
+    from utils.query_modules import get_module
+    module = get_module("semantic_proxy")
+    system_prompt = module.build_system_prompt()
+    user_template = module.build_user_prompt_template()
+
+    if dry_run:
+        # Show prompts for first 3 patterns without calling LLM
+        print("\n=== DRY RUN: Showing prompts (no LLM calls) ===\n")
+        print(f"System prompt ({len(system_prompt)} chars):")
+        print(system_prompt[:500] + "...\n")
+        for i, (fields_list, pattern, tinyids) in enumerate(rows[:3]):
+            context_text = _get_contexts(pattern, tinyids)
+            user_prompt = user_template.format(
+                phrase_text=pattern,
+                context_section=f"Sample CDE contexts:\n{context_text}",
+            )
+            print(f"--- Pattern {i+1}: '{pattern[:60]}' ---")
+            print(user_prompt)
+            print()
+        print(f"(Showing 3 of {len(rows)} patterns)")
+        return 0
+
+    # --- Resolve LLM config and create provider ---
+    from utils.llm import resolve_config, create_provider
+
+    config_file_path = Path(config_file) if config_file else None
+    llm_config = resolve_config(
+        requested_providers=[provider_name],
+        config_file_path=config_file_path,
+        cli_api_keys=api_keys,
+    )
+
+    provider_config = llm_config.get_providers()[0]
+    if llm_model:
+        provider_config.model = llm_model
+
+    provider = create_provider(provider_config)
+    logger.info(f"Using {provider.provider_name} (model: {provider.model_id})")
+
+    # --- Query LLM for each pattern ---
+    from CDE_Schema.LLM_Classification import PhraseContext
+
+    results = []  # list of (proxy, confidence, reasoning)
+
+    async def _query_one(pattern: str, tinyids: set) -> tuple:
+        context_text = _get_contexts(pattern, tinyids)
+        phrase = PhraseContext(
+            phrase_text=pattern,
+            verbatim_forms=[pattern],
+            field_contexts=[],
+            frequency=len(tinyids),
+            n_tinyids=len(tinyids),
+        )
+
+        responses = await provider.classify_batch(
+            phrases=[phrase],
+            system_prompt=system_prompt,
+            user_prompt_template=user_template.replace(
+                "{context_section}",
+                f"Sample CDE contexts:\n{context_text}",
+            ),
+            categories=module.output_categories,
+        )
+        if responses:
+            resp = responses[0]
+            # The "category" field holds the raw LLM text for proxy modules
+            proxy, confidence, reasoning = module.parse_response(
+                resp.raw_response if hasattr(resp, 'raw_response') and resp.raw_response
+                else f'{{"proxy": "{resp.category}", "confidence": {resp.confidence}, "reasoning": "{resp.reasoning}"}}'
+            )
+            return proxy, confidence, reasoning
+        return "", 0.0, "No response from LLM"
+
+    async def _run_all():
+        for i, (fields_list, pattern, tinyids) in enumerate(rows):
+            if not pattern:
+                results.append(("", 0.0, ""))
+                continue
+            print(f"  [{i+1}/{len(rows)}] {pattern[:60]}...", end="", flush=True)
+            try:
+                proxy, confidence, reasoning = await _query_one(pattern, tinyids)
+                results.append((proxy, confidence, reasoning))
+                print(f" -> '{proxy}' ({confidence:.2f})")
+            except Exception as e:
+                logger.warning(f"LLM error for pattern '{pattern[:40]}': {e}")
+                results.append(("", 0.0, f"ERROR: {e}"))
+                print(f" -> ERROR: {e}")
+
+    print(f"\nGenerating proxies for {len(rows)} patterns...")
+    asyncio.run(_run_all())
+
+    # --- Write output TSV ---
+    # Remove existing replace_with/proxy_reasoning columns if re-running
+    proxy_cols = {"replace_with", "proxy_reasoning", "proxy_confidence"}
+    clean_header_indices = [i for i, h in enumerate(headers) if h not in proxy_cols]
+    clean_headers = [headers[i] for i in clean_header_indices]
+    out_headers = clean_headers + ["replace_with", "proxy_confidence", "proxy_reasoning"]
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\t".join(out_headers) + "\n")
+        for idx, (fields_list, pattern, tinyids) in enumerate(rows):
+            clean_fields = [fields_list[i] if i < len(fields_list) else ""
+                            for i in clean_header_indices]
+            proxy, confidence, reasoning = results[idx] if idx < len(results) else ("", 0.0, "")
+            # Escape tabs in reasoning
+            reasoning_clean = reasoning.replace('\t', ' ').replace('\n', ' ')
+            row = clean_fields + [proxy, f"{confidence:.2f}", reasoning_clean]
+            f.write("\t".join(row) + "\n")
+
+    # Summary
+    successful = sum(1 for p, c, r in results if p)
+    high_conf = sum(1 for p, c, r in results if p and c >= 0.7)
+    print(f"\nProxy generation complete:")
+    print(f"  Input:      {len(rows)} patterns")
+    print(f"  Proxied:    {successful} ({successful*100//max(len(rows),1)}%)")
+    print(f"  High-conf:  {high_conf} (>= 0.7)")
+    print(f"  Wrote:      {output_path}")
+    print(f"\nNext steps:")
+    print(f"  1. Review {output_path} — edit replace_with column as needed")
+    print(f"  2. Apply: cde-analyzer strip_phrases -i INPUT.json --patterns {output_path} --clean-remnants --diff -o OUTPUT.json")
+
+    return 0
+
+
 @graceful_interrupt
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
+
+    # Check for to-minimal mode first (simple normalization)
+    to_minimal = getattr(args, 'to_minimal', None)
+    if to_minimal:
+        return _run_to_minimal(args, to_minimal)
+
+    # Check for generate-proxies mode (requires LLM)
+    generate_proxies = getattr(args, 'generate_proxies', None)
+    if generate_proxies:
+        return _run_generate_proxies(args, generate_proxies)
 
     # Check for add-to-supplementary mode first (standalone)
     add_to_supplementary = getattr(args, 'add_to_supplementary', None)
@@ -957,8 +1276,9 @@ def run_action(args: Namespace):
         return 0
 
     # No mode specified
-    logger.error("No mode specified. Use --merge-patterns, --coalesce-variants, --group-hierarchy, --generate-strip-patterns, or --add-to-supplementary.")
+    logger.error("No mode specified. Use --to-minimal, --merge-patterns, --coalesce-variants, --group-hierarchy, --generate-strip-patterns, --generate-proxies, or --add-to-supplementary.")
     print("\nUsage:")
+    print("  cde-analyzer pattern_util --to-minimal FILE -o OUTPUT")
     print("  cde-analyzer pattern_util --merge-patterns FILE -o OUTPUT")
     print("  cde-analyzer pattern_util --coalesce-variants FILE -o OUTPUT")
     print("  cde-analyzer pattern_util --group-hierarchy FILE -o OUTPUT")

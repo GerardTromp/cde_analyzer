@@ -101,9 +101,11 @@ def load_pattern_list(
     """
     # Parse spec: "file.tsv" or "file.tsv,column_name" or "file.tsv,column_name,tinyids_col"
     parts = spec.split(',')
+    explicit_column = False
     if len(parts) >= 2:
         filepath = parts[0]
         column_name = parts[1]
+        explicit_column = True
     else:
         filepath = spec
         column_name = "full_match"
@@ -122,10 +124,28 @@ def load_pattern_list(
         try:
             col_idx = find_column_index(headers, column_name)
         except ValueError:
-            raise ValueError(
-                f"Column '{column_name}' not found in {filepath}. "
-                f"Available columns: {', '.join(headers)}"
-            )
+            # Try fallback column names only if no explicit column was specified
+            if not explicit_column:
+                # Standard fallbacks: full_match → pattern
+                fallback_names = ["pattern"] if column_name == "full_match" else []
+                for fallback in fallback_names:
+                    try:
+                        col_idx = find_column_index(headers, fallback)
+                        logger.info(f"Column '{column_name}' not found, using fallback '{fallback}'")
+                        column_name = fallback
+                        break
+                    except ValueError:
+                        continue
+                else:
+                    raise ValueError(
+                        f"Column '{column_name}' not found in {filepath}. "
+                        f"Available columns: {', '.join(headers)}"
+                    )
+            else:
+                raise ValueError(
+                    f"Column '{column_name}' not found in {filepath}. "
+                    f"Available columns: {', '.join(headers)}"
+                )
 
         for line in f:
             line = line.strip()
@@ -188,14 +208,17 @@ def load_pattern_list_with_tinyids(
     """
     # Parse spec
     parts = spec.split(',')
+    explicit_pattern_column = False
     if len(parts) == 1:
         filepath = parts[0]
     elif len(parts) == 2:
         filepath, pattern_column = parts
+        explicit_pattern_column = True
     elif len(parts) >= 3:
         filepath = parts[0]
         pattern_column = parts[1]
         tinyids_column = parts[2]
+        explicit_pattern_column = True
     else:
         filepath = spec
 
@@ -213,10 +236,27 @@ def load_pattern_list_with_tinyids(
         try:
             pattern_idx = find_column_index(headers, pattern_column)
         except ValueError:
-            raise ValueError(
-                f"Pattern column '{pattern_column}' not found in {filepath}. "
-                f"Available columns: {', '.join(headers)}"
-            )
+            # Try fallback column names only if no explicit column was specified
+            if not explicit_pattern_column:
+                fallback_names = ["pattern"] if pattern_column == "full_match" else []
+                for fallback in fallback_names:
+                    try:
+                        pattern_idx = find_column_index(headers, fallback)
+                        logger.info(f"Pattern column '{pattern_column}' not found, using fallback '{fallback}'")
+                        pattern_column = fallback
+                        break
+                    except ValueError:
+                        continue
+                else:
+                    raise ValueError(
+                        f"Pattern column '{pattern_column}' not found in {filepath}. "
+                        f"Available columns: {', '.join(headers)}"
+                    )
+            else:
+                raise ValueError(
+                    f"Pattern column '{pattern_column}' not found in {filepath}. "
+                    f"Available columns: {', '.join(headers)}"
+                )
 
         # tinyIds column is optional
         tinyids_idx = None

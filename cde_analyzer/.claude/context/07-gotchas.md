@@ -442,9 +442,73 @@ chmod +x cde_analyzer.py
 - JSON keys should be descriptive
 - Include units/context in output
 
+## Parallelization Gotchas
+
+### 24. Global State in Multiprocessing Workers
+**Issue**: Global variables don't share state across ProcessPoolExecutor workers
+
+**Context**: The `strip_phrases` action uses multiprocessing for parallel phrase stripping. Initially, match logging (tracking which patterns matched) forced sequential mode because global `_match_log` state isn't shared across workers.
+
+**Why This Happens**:
+- `ProcessPoolExecutor` forks worker processes with isolated memory spaces
+- Each worker gets its own copy of global variables after fork
+- Modifications in workers are invisible to the main process and other workers
+
+**Solution Pattern**: Per-worker collection with main process aggregation
+```python
+def _worker_process_chunk(chunk_with_indices):
+    """Worker collects data locally and returns it."""
+    global _match_log
+    _match_log = []  # Reset per chunk (workers may be reused)
+
+    for data in data_list:
+        processed = process_item(data)  # Populates _match_log
+        results.append(processed)
+
+    # Return collected data alongside results
+    return chunk_idx, results, list(_match_log)
+
+# Main process aggregates after all workers complete
+all_matches = []
+for future in as_completed(futures):
+    chunk_idx, processed, matches = future.result()
+    all_matches.extend(matches)
+```
+
+**Key Points**:
+1. Workers can maintain independent state — this is a feature, not a bug
+2. Reset per-chunk state at start (workers may be reused)
+3. Extend return tuple to include data needing aggregation
+4. Aggregate in main process after parallel completion
+
+**Impact**: Match logging (`--match-log`, `--match-summary`) now works with parallel execution. Only trace file output (`--trace-matching`) requires sequential mode because it needs streaming file writes.
+
+**See**: `.claude/analysis/parallel-match-logging.md` for full implementation details.
+
+---
+
+### 25. Trace Files vs Batch Logging
+**Issue**: Streaming output to files cannot be parallelized without temp file merging
+
+**Context**: `strip_phrases` has two diagnostic modes:
+- `--trace-matching FILE`: Streams detailed per-match output during processing
+- `--match-log FILE`: Writes batch summary after all processing completes
+
+**Difference**:
+- **Streaming** (trace): Must write during processing, requires either sequential execution or temp files per worker with post-hoc merge
+- **Batch** (match log): Only needs final data, can collect in memory and write once at end
+
+**Current Behavior**:
+- `--trace-matching` forces sequential (`workers=1`) with warning message
+- `--match-log` and `--match-summary` work with parallel execution
+
+**Recommendation**: For new diagnostic features, prefer batch aggregation over streaming when possible. Batch aggregation parallelizes cleanly; streaming requires temp file management.
+
+---
+
 ## Future Gotchas
 
-### 24. API Schema Evolution
+### 26. API Schema Evolution
 **Issue**: NLM CDE API may change schema
 
 **Impact**:
@@ -457,7 +521,7 @@ chmod +x cde_analyzer.py
 - Versioning strategy
 - Backward compatibility considerations
 
-### 25. Python Version Sunset
+### 27. Python Version Sunset
 **Issue**: Python 3.7 end-of-life
 
 **Impact**:

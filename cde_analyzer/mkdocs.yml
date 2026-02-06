@@ -32,6 +32,10 @@ nav:
     - Analysis:
       - count: help/count.md
       - extract_embed: help/extract_embed.md
+    - Reporting:
+      - discovery_report: help/discovery_report.md
+      - pipeline_report: help/pipeline_report.md
+      - recall_analyze: help/recall_analyze.md
     - Export & Filtering:
       - lemma_fasta: help/lemma_fasta.md
       - subset: help/subset.md
@@ -54,6 +58,7 @@ nav:
     - Architecture: architecture.md
     - Data Models: data-models.md
     - Phrase Miner Logic: phrase_miner_logic.md
+    - Curation Guide: curation-guide.md
     - Contributing: contributing.md
 
 # Theme

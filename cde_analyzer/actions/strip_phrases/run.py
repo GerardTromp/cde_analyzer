@@ -16,11 +16,162 @@ from typing import Dict, List, Optional, Set, Tuple
 from utils.logger import logging
 from utils.file_utils import exit_if_missing, graceful_interrupt
 from pydantic import ValidationError
-from logic.phrase_stripper import load_phrase_map, strip_phrases, set_trace_file, close_trace_file
+from logic.phrase_stripper import (
+    load_phrase_map, strip_phrases, set_trace_file, close_trace_file,
+    init_match_log, write_match_log, close_match_log, get_match_log
+)
 from utils.diff_utils import print_json_diff
 from utils.constants import MODEL_REGISTRY
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Anchor expansion for cleaner stripping (prefixes and suffixes)
+# ---------------------------------------------------------------------------
+# Import from remnant_detector to keep anchor lists in sync
+from logic.remnant_detector import ANCHOR_PHRASE_REMNANTS, TRAILING_SUFFIX_REMNANTS
+
+# Built-in defaults (used as fallback if no config found)
+DEFAULT_PREFIXES = [f"{anchor} " for anchor in ANCHOR_PHRASE_REMNANTS]
+DEFAULT_SUFFIXES = [f" {suffix}" for suffix in TRAILING_SUFFIX_REMNANTS]
+
+
+def load_anchor_expansions() -> Tuple[List[str], List[str]]:
+    """
+    Load anchor expansion configuration from YAML files.
+
+    Loading priority (later extends earlier):
+      1. Built-in defaults
+      2. Global config: config/anchor_expansions.yaml
+      3. Local override: ./anchor_expansions.yaml in working directory
+
+    Returns:
+        Tuple of (prefixes, suffixes) lists with leading/trailing spaces.
+    """
+    import os
+    try:
+        import yaml
+    except ImportError:
+        logger.warning("PyYAML not installed, using built-in defaults for anchor expansion")
+        return DEFAULT_PREFIXES, DEFAULT_SUFFIXES
+
+    prefixes = list(DEFAULT_PREFIXES)
+    suffixes = list(DEFAULT_SUFFIXES)
+
+    # Find config directory relative to this file
+    this_dir = Path(__file__).parent.parent.parent  # actions/strip_phrases -> cde_analyzer
+    global_config = this_dir / "config" / "anchor_expansions.yaml"
+    local_config = Path.cwd() / "anchor_expansions.yaml"
+
+    configs_loaded = []
+
+    for config_path in [global_config, local_config]:
+        if config_path.exists():
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                if config:
+                    # Extend (add to) existing lists
+                    if 'prefixes' in config and config['prefixes']:
+                        new_prefixes = [f"{p} " if not p.endswith(' ') else p
+                                       for p in config['prefixes']]
+                        # Add only new ones (avoid duplicates)
+                        for p in new_prefixes:
+                            if p not in prefixes:
+                                prefixes.append(p)
+                    if 'suffixes' in config and config['suffixes']:
+                        new_suffixes = [f" {s}" if not s.startswith(' ') else s
+                                       for s in config['suffixes']]
+                        for s in new_suffixes:
+                            if s not in suffixes:
+                                suffixes.append(s)
+                    configs_loaded.append(str(config_path))
+            except Exception as e:
+                logger.warning(f"Error loading {config_path}: {e}")
+
+    if configs_loaded:
+        logger.info(f"Loaded anchor expansions from: {', '.join(configs_loaded)}")
+    else:
+        logger.debug("Using built-in anchor expansion defaults")
+
+    return prefixes, suffixes
+
+
+def expand_patterns_with_anchors(
+    patterns: List[Tuple[str, Optional[Set[str]], str]],
+    anchor_prefixes: Optional[List[str]] = None,
+    anchor_suffixes: Optional[List[str]] = None,
+) -> List[Tuple[str, Optional[Set[str]], str, str]]:
+    """
+    Expand patterns with anchor prefixes and suffixes for cleaner stripping.
+
+    For each base pattern, generates variants with:
+      - prefix + pattern + suffix (all combinations)
+      - prefix + pattern (no suffix)
+      - pattern + suffix (no prefix)
+      - pattern (bare)
+
+    Expanded variants are sorted longest-first by the caller, so the most
+    complete match wins (anchor context gets stripped along with the pattern).
+
+    Args:
+        patterns: List of (pattern, tinyIds, replace_with) tuples.
+        anchor_prefixes: Optional list of prefixes (with trailing space).
+                         Default: loaded from config files.
+        anchor_suffixes: Optional list of suffixes (with leading space).
+                         Default: loaded from config files.
+
+    Returns:
+        List of (pattern, tinyIds, replace_with, source_pattern) tuples.
+        source_pattern indicates the original pattern (for logging).
+    """
+    # Load from config if not provided
+    if anchor_prefixes is None or anchor_suffixes is None:
+        loaded_prefixes, loaded_suffixes = load_anchor_expansions()
+        if anchor_prefixes is None:
+            anchor_prefixes = loaded_prefixes
+        if anchor_suffixes is None:
+            anchor_suffixes = loaded_suffixes
+
+    expanded = []
+    seen = set()  # Avoid duplicate expanded patterns
+
+    for pattern, tinyids, replace_with in patterns:
+        # Generate all combinations: prefix + pattern + suffix
+        for prefix in anchor_prefixes:
+            for suffix in anchor_suffixes:
+                expanded_pattern = prefix + pattern + suffix
+                if expanded_pattern not in seen:
+                    seen.add(expanded_pattern)
+                    expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+
+        # Generate prefix + pattern (no suffix)
+        for prefix in anchor_prefixes:
+            expanded_pattern = prefix + pattern
+            if expanded_pattern not in seen:
+                seen.add(expanded_pattern)
+                expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+
+        # Generate pattern + suffix (no prefix)
+        for suffix in anchor_suffixes:
+            expanded_pattern = pattern + suffix
+            if expanded_pattern not in seen:
+                seen.add(expanded_pattern)
+                expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+
+        # Include the bare pattern
+        if pattern not in seen:
+            seen.add(pattern)
+            expanded.append((pattern, tinyids, replace_with, pattern))
+
+    n_prefixes = len(anchor_prefixes)
+    n_suffixes = len(anchor_suffixes)
+    logger.info(
+        f"Anchor expansion: {len(patterns)} base patterns -> "
+        f"{len(expanded)} total ({n_prefixes} prefixes x {n_suffixes} suffixes + combinations)"
+    )
+    return expanded
 
 
 def find_column_index(headers: List[str], column_name: str) -> int:
@@ -159,17 +310,90 @@ def load_discovered_patterns(
     return patterns_list
 
 
+def load_verbatim_strip_patterns() -> List[Tuple[str, Optional[Set[str]], str]]:
+    """
+    Load verbatim strip patterns from config files.
+
+    These are pre-curated patterns that escape the discovery logic and should
+    be stripped directly. Useful for building a reusable library of known
+    patterns that recur across datasets.
+
+    Loading priority (later extends earlier):
+      1. Global config: config/verbatim_strip_patterns.yaml
+      2. Local override: ./verbatim_strip_patterns.yaml
+
+    Returns:
+        List of (pattern, tinyIds, replace_with) tuples.
+        tinyIds is always None (applies to all records).
+    """
+    try:
+        from utils.config_loader import load_verbatim_strip_patterns as load_from_config
+        raw_patterns = load_from_config()
+    except ImportError as e:
+        logger.warning(f"Config loader not available: {e}")
+        return []
+
+    if not raw_patterns:
+        return []
+
+    # Convert (pattern, replace_with) to (pattern, tinyIds, replace_with) format
+    # tinyIds is None = applies to all records
+    patterns = [(pattern, None, replace_with) for pattern, replace_with in raw_patterns]
+    logger.info(f"Loaded {len(patterns)} verbatim strip patterns from config")
+    return patterns
+
+
+def merge_pattern_lists(
+    *pattern_lists: List[Tuple[str, Optional[Set[str]], str]]
+) -> List[Tuple[str, Optional[Set[str]], str]]:
+    """
+    Merge multiple pattern lists, deduplicating by pattern text.
+
+    Later lists take precedence for duplicate patterns (replace_with value).
+
+    Args:
+        pattern_lists: Variable number of pattern lists to merge.
+
+    Returns:
+        Merged list of (pattern, tinyIds, replace_with) tuples.
+    """
+    seen = {}  # pattern_text -> (pattern, tinyIds, replace_with)
+
+    for plist in pattern_lists:
+        for pattern, tinyids, replace_with in plist:
+            if pattern in seen:
+                # Merge tinyIds (union) if both have them
+                existing = seen[pattern]
+                if existing[1] is not None and tinyids is not None:
+                    merged_tids = existing[1] | tinyids
+                elif tinyids is not None:
+                    merged_tids = tinyids
+                else:
+                    merged_tids = existing[1]
+                # Later replace_with takes precedence (unless empty)
+                merged_replace = replace_with if replace_with else existing[2]
+                seen[pattern] = (pattern, merged_tids, merged_replace)
+            else:
+                seen[pattern] = (pattern, tinyids, replace_with)
+
+    merged = list(seen.values())
+    logger.debug(f"Merged {sum(len(pl) for pl in pattern_lists)} patterns -> {len(merged)} unique")
+    return merged
+
+
 def patterns_to_phrase_map(
-    patterns: List[Tuple[str, Optional[Set[str]], str]],
+    patterns: List[Tuple],
     field_paths: List[str],
     replace_with: str = "",
     sort_order: str = "length"
-) -> List[Tuple[str, str, str, Optional[Set[str]]]]:
+) -> Tuple[List[Tuple[str, str, str, Optional[Set[str]]]], Dict[str, str]]:
     """
     Convert a list of patterns to phrase_map format.
 
     Args:
-        patterns: List of (pattern, tinyIds, replace_with) tuples.
+        patterns: List of tuples in one of two formats:
+                  - (pattern, tinyIds, replace_with) - standard format
+                  - (pattern, tinyIds, replace_with, source_pattern) - expanded format
         field_paths: List of field paths to apply stripping to.
         replace_with: Default replacement string (used when per-pattern
                       replace_with is empty). Default: empty string to remove.
@@ -179,7 +403,9 @@ def patterns_to_phrase_map(
                     - "alpha": alphabetical (reproducibility)
 
     Returns:
-        List of (path, phrase, replace, tinyIds) tuples.
+        Tuple of:
+        - List of (path, phrase, replace, tinyIds) tuples.
+        - Dict mapping expanded pattern -> source pattern (for logging).
     """
     # Order patterns according to specified strategy
     if sort_order == "length":
@@ -193,23 +419,81 @@ def patterns_to_phrase_map(
         order_desc = "alphabetical"
 
     phrase_map = []
+    source_map = {}  # Maps expanded pattern -> source pattern for logging
     has_per_pattern = any(len(p) > 2 and p[2] for p in sorted_patterns)
+
     for entry in sorted_patterns:
         pattern = entry[0]
         tinyids = entry[1]
         per_pattern_replace = entry[2] if len(entry) > 2 else ""
+        # Track source pattern if present (4th element from expansion)
+        source_pattern = entry[3] if len(entry) > 3 else pattern
+        source_map[pattern] = source_pattern
+
         # Use per-pattern replace_with if present, otherwise fall back to global
         effective_replace = per_pattern_replace if per_pattern_replace else replace_with
         for path in field_paths:
             phrase_map.append((path, pattern, effective_replace, tinyids))
 
     unique_patterns = len(set(p[0] for p in patterns))
+    unique_sources = len(set(source_map.values()))
     logger.info(f"Created phrase map: {unique_patterns} patterns x {len(field_paths)} paths = {len(phrase_map)} entries")
+    if unique_sources < unique_patterns:
+        logger.info(f"  ({unique_sources} base patterns with anchor expansions)")
     logger.info(f"Pattern order: {order_desc}")
     if has_per_pattern:
         replace_count = sum(1 for p in patterns if len(p) > 2 and p[2])
         logger.info(f"Per-pattern replacements: {replace_count} patterns have custom replace_with values")
-    return phrase_map
+
+    return phrase_map, source_map
+
+
+def write_match_summary(match_log: list, filepath: str):
+    """
+    Write aggregated pattern match summary as TSV.
+
+    Args:
+        match_log: List of match log entries from get_match_log().
+        filepath: Output TSV file path.
+
+    Output columns:
+        - source_pattern: The base pattern (before anchor expansion)
+        - match_count: Number of times this pattern was matched
+        - unique_records: Number of unique tinyIds affected
+    """
+    from collections import Counter
+
+    if not match_log:
+        logger.warning("No match log entries to summarize")
+        return
+
+    # Aggregate by source_pattern
+    pattern_counts = Counter()
+    pattern_tinyids = {}  # source_pattern -> set of tinyIds
+
+    for entry in match_log:
+        source = entry.get('source_pattern', entry.get('matched_pattern', ''))
+        tinyid = entry.get('tinyId', '')
+
+        pattern_counts[source] += 1
+
+        if source not in pattern_tinyids:
+            pattern_tinyids[source] = set()
+        if tinyid:
+            pattern_tinyids[source].add(tinyid)
+
+    # Sort by count descending
+    sorted_patterns = sorted(pattern_counts.items(), key=lambda x: -x[1])
+
+    import csv
+    with open(filepath, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f, delimiter='\t')
+        writer.writerow(['source_pattern', 'match_count', 'unique_records'])
+        for pattern, count in sorted_patterns:
+            unique_count = len(pattern_tinyids.get(pattern, set()))
+            writer.writerow([pattern, count, unique_count])
+
+    logger.info(f"Wrote match summary: {len(sorted_patterns)} patterns to {filepath}")
 
 
 @graceful_interrupt
@@ -290,11 +574,29 @@ def run_action(args: Namespace):
 
         field_paths = getattr(args, 'fields', ["definitions.*.definition", "designations.*.designation"])
         sort_order = getattr(args, 'sort_order', 'length')
-        phrase_map = patterns_to_phrase_map(patterns, field_paths, sort_order=sort_order)
+
+        # Merge verbatim strip patterns from config (default: enabled)
+        use_verbatim = getattr(args, 'verbatim_patterns', True)
+        if use_verbatim:
+            verbatim = load_verbatim_strip_patterns()
+            if verbatim:
+                original_count = len(patterns)
+                patterns = merge_pattern_lists(patterns, verbatim)
+                added = len(patterns) - original_count
+                if added > 0:
+                    logger.info(f"Added {added} new patterns from verbatim config")
+
+        # Optional anchor expansion (default: enabled)
+        expand_anchors = getattr(args, 'expand_anchors', True)
+        if expand_anchors:
+            patterns = expand_patterns_with_anchors(patterns)
+
+        phrase_map, source_map = patterns_to_phrase_map(patterns, field_paths, sort_order=sort_order)
 
     else:
         # Legacy phrase map mode
         phrase_map = load_phrase_map(args.phrases)
+        source_map = {}  # No source tracking for legacy mode
         logger.info(f"Loaded {len(phrase_map)} phrase map entries from {args.phrases}")
 
     # Enable trace output if requested
@@ -303,22 +605,46 @@ def run_action(args: Namespace):
         set_trace_file(trace_file)
         logger.info(f"Writing matching trace to {trace_file}")
 
+    # Enable match log if requested (full audit trail or summary)
+    match_log_file = getattr(args, 'match_log', None)
+    match_summary_file = getattr(args, 'match_summary', None)
+    logging_enabled = match_log_file or match_summary_file
+    if logging_enabled:
+        init_match_log(source_map)
+        if match_log_file:
+            logger.info(f"Match logging enabled -> {match_log_file}")
+        if match_summary_file:
+            logger.info(f"Match summary enabled -> {match_summary_file}")
+
     # Apply phrase stripping
     n_workers = getattr(args, 'workers', 1)
 
-    # Force sequential when trace is enabled (trace file handle not shared across processes)
+    # Force sequential only for trace file (writes to single file, can't parallelize)
+    # Match logging now supports parallel execution with per-worker aggregation
     if trace_file and n_workers != 1:
-        logger.warning(f"Trace enabled: forcing sequential processing (workers=1 instead of {n_workers})")
+        logger.warning(f"Trace file enabled: forcing sequential processing (workers=1 instead of {n_workers})")
         n_workers = 1
 
     logger.info(f"Stripping phrases from {len(parsed)} records (workers={n_workers})...")
-    cleaned = strip_phrases(parsed, phrase_map, n_workers=n_workers)
+    cleaned = strip_phrases(
+        parsed, phrase_map, n_workers=n_workers,
+        source_map=source_map, logging_enabled=logging_enabled
+    )
     logger.info("Phrase stripping complete")
 
     # Close trace file if open
     if trace_file:
         close_trace_file()
         logger.info(f"Trace file written to {trace_file}")
+
+    # Write match log and/or summary if enabled
+    if logging_enabled:
+        match_log_data = get_match_log()
+        if match_log_file:
+            write_match_log(match_log_file)
+        if match_summary_file:
+            write_match_summary(match_log_data, match_summary_file)
+        close_match_log()
 
     # Convert to JSON dicts for output
     cleaned_json = [item.model_dump(mode="json") for item in cleaned]

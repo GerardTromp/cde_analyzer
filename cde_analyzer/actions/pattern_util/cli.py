@@ -270,6 +270,70 @@ def register_subparser(subparser: ArgumentParser):
         help="Filter: remove patterns matching entries in this file (one per line or TSV with 'pattern' column).",
     )
 
+    # Semantic proxy generation mode (wireframe)
+    subparser.add_argument(
+        "--generate-proxies",
+        type=str,
+        metavar="FILE",
+        help="Generate semantic proxies for patterns using an LLM. "
+             "Reads a patterns TSV (with pattern and tinyIds columns), "
+             "looks up sample CDE contexts from --input JSON, queries the LLM "
+             "for a 1-3 word semantic proxy per pattern, and writes an enriched "
+             "TSV with replace_with and proxy_reasoning columns to --output. "
+             "Requires --input, --model, and --provider.",
+    )
+    subparser.add_argument(
+        "--provider",
+        type=str,
+        default="claude",
+        choices=["claude", "openai", "google"],
+        help="LLM provider for proxy generation (default: claude).",
+    )
+    subparser.add_argument(
+        "--llm-model",
+        type=str,
+        help="LLM model identifier (e.g., claude-sonnet-4-20250514). "
+             "Uses provider default if not specified.",
+    )
+    subparser.add_argument(
+        "--config-file",
+        type=str,
+        help="Path to LLM config file (default: ~/.cde_analyzer/llm_config.json).",
+    )
+    subparser.add_argument(
+        "--api-keys",
+        nargs="+",
+        help="API keys in format 'provider:key'.",
+    )
+    subparser.add_argument(
+        "--context-window",
+        type=int,
+        default=150,
+        help="Characters of surrounding text to include as context (default: 150).",
+    )
+    subparser.add_argument(
+        "--max-contexts",
+        type=int,
+        default=3,
+        help="Maximum CDE contexts to show per pattern (default: 3).",
+    )
+    subparser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show prompts without calling LLM (for debugging).",
+    )
+
+    # Normalize to minimal format
+    subparser.add_argument(
+        "--to-minimal",
+        type=str,
+        metavar="FILE",
+        help="Normalize mode: extract pattern and tinyIds columns from any pattern TSV "
+             "and write a minimal 2-column TSV (pattern, tinyIds) suitable for merging. "
+             "Auto-detects column names (pattern/tinyIds/tinyids) and normalizes tinyId "
+             "separator to pipe (|). Writes to --output.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

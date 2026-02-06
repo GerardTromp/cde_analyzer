@@ -114,6 +114,38 @@ def register_subparser(subparser: ArgumentParser):
              "Modifies the output JSON in-place before writing.",
     )
 
+    # Anchor expansion (improves stripping by matching with context)
+    subparser.add_argument(
+        "--expand-anchors",
+        dest="expand_anchors",
+        action="store_true",
+        default=True,
+        help="Expand patterns with anchor prefixes (e.g., 'as part of the X'). "
+             "Enables cleaner stripping by matching longer context. Default: enabled.",
+    )
+    subparser.add_argument(
+        "--no-expand-anchors",
+        dest="expand_anchors",
+        action="store_false",
+        help="Disable anchor prefix expansion. Use bare patterns only.",
+    )
+
+    # Verbatim patterns from config (reusable pattern library)
+    subparser.add_argument(
+        "--verbatim-patterns",
+        dest="verbatim_patterns",
+        action="store_true",
+        default=True,
+        help="Merge patterns from config/verbatim_strip_patterns.yaml and local override. "
+             "These are pre-curated patterns that escape discovery logic. Default: enabled.",
+    )
+    subparser.add_argument(
+        "--no-verbatim-patterns",
+        dest="verbatim_patterns",
+        action="store_false",
+        help="Disable loading verbatim patterns from config files.",
+    )
+
     # Diagnostics
     subparser.add_argument(
         "--trace-matching",
@@ -122,6 +154,22 @@ def register_subparser(subparser: ArgumentParser):
         help="Write detailed matching trace to FILE. "
              "Logs each pattern match with tinyId, pattern length, and pattern text. "
              "Useful for debugging ordering issues or unexpected orphan phrases.",
+    )
+    subparser.add_argument(
+        "--match-log",
+        type=str,
+        metavar="FILE",
+        help="Write detailed match log TSV to FILE. "
+             "Columns: tinyId, matched_pattern, source_pattern, verbatim_text. "
+             "Full audit trail of what was stripped and where.",
+    )
+    subparser.add_argument(
+        "--match-summary",
+        type=str,
+        metavar="FILE",
+        help="Write pattern match summary TSV to FILE. "
+             "Columns: source_pattern, match_count, unique_records. "
+             "Aggregated counts of how many times each pattern was stripped.",
     )
 
     # Diff output options

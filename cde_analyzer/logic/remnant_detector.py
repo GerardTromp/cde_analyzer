@@ -33,6 +33,48 @@ class Remnant:
     position: int
 
 
+# Anchor phrase remnants - explicit enumeration for maintainability
+# Listed longest-first so longer variants match before shorter ones
+ANCHOR_PHRASE_REMNANTS = [
+    "as a part of the",
+    "as a part of",
+    "as part of the",
+    "as part of",
+    "based on the",
+    "based on",
+    "a field of the",
+    "a field of",
+    "field of the",
+    "field of",
+    "from the",
+    "from",
+]
+
+# Trailing suffix remnants - words that follow instrument names
+# Include both case variants since matching is literal
+TRAILING_SUFFIX_REMNANTS = [
+    "questionnaire",
+    "Questionnaire",
+    "form",
+    "Form",
+]
+
+# Precompile anchor remnant pattern (longest first for greedy matching)
+_ANCHOR_REMNANT_RE = re.compile(
+    r',?\s*\b(' +
+    '|'.join(re.escape(a) for a in ANCHOR_PHRASE_REMNANTS) +
+    r')\s*[,.\-;:)]*\s*$',
+    re.IGNORECASE
+)
+
+# Precompile trailing suffix pattern
+_TRAILING_SUFFIX_RE = re.compile(
+    r'\s+(' +
+    '|'.join(re.escape(s) for s in TRAILING_SUFFIX_REMNANTS) +
+    r')\s*[,.\-;:)]*\s*$',
+    re.IGNORECASE
+)
+
 # Remnant patterns: (name, compiled regex, description)
 # Each regex is designed to match artifacts commonly left after phrase removal.
 _REMNANT_PATTERNS = [
@@ -72,6 +114,11 @@ _REMNANT_PATTERNS = [
         "Trailing preposition before punctuation",
     ),
     (
+        "orphan_conjunction",
+        re.compile(r'\b(and|or)\s*[,.\-;:)]\s*$', re.IGNORECASE),
+        "Trailing conjunction before punctuation",
+    ),
+    (
         "empty_parens",
         re.compile(r'\(\s*\)'),
         "Empty parentheses",
@@ -96,6 +143,16 @@ _REMNANT_PATTERNS = [
         re.compile(r'[,;:]{2,}'),
         "Repeated punctuation",
     ),
+    (
+        "orphan_anchor",
+        _ANCHOR_REMNANT_RE,
+        "Trailing anchor phrase remnant (as part of, based on, etc.)",
+    ),
+    (
+        "orphan_suffix",
+        _TRAILING_SUFFIX_RE,
+        "Trailing orphan suffix (questionnaire, form, etc.)",
+    ),
 ]
 
 
@@ -106,6 +163,14 @@ _REMNANT_PATTERNS = [
 def _clean_text_once(text: str) -> str:
     """Apply one pass of cleanup rules. Returns cleaned text."""
     s = text
+
+    # Remove orphan anchor phrases first (multi-word, before single-word cleanup)
+    # e.g., "foo, as part of the ." -> "foo."
+    s = _ANCHOR_REMNANT_RE.sub('', s)
+
+    # Remove orphan trailing suffixes (questionnaire, form, etc.)
+    # e.g., "As part of questionnaire" -> "As part of" (then anchor cleanup gets rest)
+    s = _TRAILING_SUFFIX_RE.sub('', s)
 
     # Remove empty parens/brackets: "()" "[]"
     s = re.sub(r'\(\s*\)', '', s)
@@ -134,6 +199,12 @@ def _clean_text_once(text: str) -> str:
 
     # Remove trailing orphan prepositions: "foo of" -> "foo"
     s = re.sub(r'\s+(of|for|in|on|at|by|to)\s*$', '', s, flags=re.IGNORECASE)
+
+    # Remove orphan conjunctions before punctuation: "and." -> ""
+    s = re.sub(r'\b(and|or)\s*[,.\-;:)]\s*$', '', s, flags=re.IGNORECASE)
+
+    # Remove trailing orphan conjunctions: "foo and" -> "foo"
+    s = re.sub(r'\s+(and|or)\s*$', '', s, flags=re.IGNORECASE)
 
     # Remove dangling possessive 's: "foo 's bar" -> "foo bar"
     s = re.sub(r"(?<=\s)'?s\b", '', s)

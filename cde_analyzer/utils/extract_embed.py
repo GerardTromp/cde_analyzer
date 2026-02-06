@@ -171,6 +171,18 @@ def normalize_extracted_value(val: Any, collapse: bool = False) -> Any:
     return val
 
 
+def collapse_reference_documents(ref_docs: list) -> str:
+    """Coalesce referenceDocuments text: prefer 'document' field, fall back to 'text'."""
+    texts = []
+    for doc in ref_docs:
+        if not isinstance(doc, dict):
+            continue
+        blob = doc.get("document") or doc.get("text")
+        if blob:
+            texts.append(sanitize(blob))
+    return ";; ".join(texts)
+
+
 def strip_json(obj):
     """
     clean up the json to remove extra whitespace on values

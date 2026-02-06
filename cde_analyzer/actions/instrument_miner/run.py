@@ -116,7 +116,10 @@ def run_action(args: Namespace):
         )
         logger.info(f"Wrote {verbatim_count} instrument variants to instruments_verbatim.tsv (for curation)")
 
-    logger.info("Next step: curate output, then run strip_discover with --pattern-list instruments_verbatim.tsv")
+    if detect_families:
+        logger.info("Next step: run discover_verbatim with --pattern-list mined_patterns.tsv")
+    else:
+        logger.info("Next step: curate output, then run strip_discover with --pattern-list instruments_verbatim.tsv")
     return 0
 
 

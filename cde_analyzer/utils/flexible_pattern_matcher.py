@@ -1450,6 +1450,26 @@ def coalesce_variants_tsv(
             # Only select if this prefix covers patterns not yet covered
             uncovered = original_patterns - covered_patterns
             if len(uncovered) >= 2:  # Must combine at least 2 patterns
+                # Protection: Don't collapse patterns with parenthesized abbreviations
+                # if the prefix would lose the abbreviation. The (ABBREV) suffix is
+                # structurally important for matching formal instrument names.
+                # E.g., "Family History Research Diagnostic Criteria (FH-RDC) -"
+                # should NOT collapse to "Family History" (a different instrument).
+                import re as _re
+                has_protected_abbrev = False
+                for orig in uncovered:
+                    paren_match = _re.search(r'\([A-Z][A-Za-z0-9-]+\)', orig)
+                    if paren_match and paren_match.group() not in prefix_pattern:
+                        has_protected_abbrev = True
+                        logger.debug(
+                            f"Prefix extraction blocked: '{orig[:60]}' has abbreviation "
+                            f"'{paren_match.group()}' not in prefix '{prefix_pattern}'"
+                        )
+                        break
+
+                if has_protected_abbrev:
+                    continue
+
                 # Check if all uncovered patterns meet threshold
                 combined_tinyids = set()
                 for p in uncovered:

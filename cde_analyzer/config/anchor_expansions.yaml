@@ -1,0 +1,47 @@
+#
+# File: config/anchor_expansions.yaml
+#
+# Pattern expansion configuration for strip_phrases.
+# Prefixes are prepended, suffixes are appended to base patterns.
+# All combinations are generated and sorted longest-first.
+#
+# Loading priority (later extends earlier):
+#   1. Built-in defaults (fallback if no config found)
+#   2. This file: config/anchor_expansions.yaml
+#   3. Local override: ./anchor_expansions.yaml in working directory
+#
+# Local files extend (add to) these lists rather than replacing them.
+
+# ---------------------------------------------------------------------------
+# Anchor prefixes - prepended to patterns
+# ---------------------------------------------------------------------------
+# Listed longest-first for documentation; actual matching uses length sort.
+# These are common phrases that introduce instrument/scale names.
+# A trailing space is added automatically during expansion.
+
+prefixes:
+  - "as a part of the"
+  - "as a part of"
+  - "as part of the"
+  - "as part of"
+  - "based on the"
+  - "based on"
+  - "a field of the"
+  - "a field of"
+  - "field of the"
+  - "field of"
+  - "from the"
+  - "from"
+
+# ---------------------------------------------------------------------------
+# Trailing suffixes - appended to patterns
+# ---------------------------------------------------------------------------
+# Common trailing words that follow instrument names.
+# A leading space is added automatically during expansion.
+# Include both case variants since matching is literal.
+
+suffixes:
+  - "questionnaire"
+  - "Questionnaire"
+  - "form"
+  - "Form"

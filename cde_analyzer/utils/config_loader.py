@@ -70,19 +70,20 @@ def load_yaml_config(filename: str, use_cache: bool = True) -> Optional[Dict]:
         return None
 
 
-def load_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
+def _extract_patterns_from_config(
+    config: Dict,
+    source: str = "unknown"
+) -> List[Tuple[str, str, Optional[str]]]:
     """
-    Load supplementary instrument patterns from config file.
+    Extract pattern tuples from a parsed YAML config dict.
+
+    Args:
+        config: Parsed YAML config with category sections containing pattern lists
+        source: Source name for logging (e.g., "global", "local")
 
     Returns:
         List of (pattern_text, display_name, acronym) tuples.
-        Acronym may be None if not specified.
     """
-    config = load_yaml_config('supplementary_patterns')
-    if not config:
-        logger.warning("No supplementary patterns config found, using empty list")
-        return []
-
     patterns = []
 
     # Iterate through all category sections
@@ -101,9 +102,169 @@ def load_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
             if pattern and name:
                 patterns.append((pattern, name, acronym))
             else:
-                logger.warning(f"Skipping incomplete pattern entry in {category}: {item}")
+                logger.warning(f"Skipping incomplete pattern entry in {category} ({source}): {item}")
 
-    logger.info(f"Loaded {len(patterns)} supplementary patterns from config")
+    return patterns
+
+
+def load_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
+    """
+    Load supplementary instrument patterns from config files.
+
+    Loading priority (later extends earlier):
+      1. Global config: config/supplementary_patterns.yaml (in project root)
+      2. Local override: ./supplementary_patterns.yaml (in working directory)
+
+    Local files extend (add to) the global list rather than replacing it.
+    This allows rapid iteration during curation without modifying installed code.
+
+    Returns:
+        List of (pattern_text, display_name, acronym) tuples.
+        Acronym may be None if not specified.
+    """
+    patterns = []
+    seen_patterns = set()  # Track pattern text to avoid exact duplicates
+    configs_loaded = []
+
+    # 1. Load global config from project config/ directory
+    global_config = load_yaml_config('supplementary_patterns')
+    if global_config:
+        global_patterns = _extract_patterns_from_config(global_config, "global")
+        for p in global_patterns:
+            if p[0] not in seen_patterns:
+                seen_patterns.add(p[0])
+                patterns.append(p)
+        configs_loaded.append(str(get_config_dir() / 'supplementary_patterns.yaml'))
+
+    # 2. Load local override from working directory (extends global)
+    local_path = Path.cwd() / 'supplementary_patterns.yaml'
+    if local_path.exists():
+        try:
+            import yaml
+            with open(local_path, encoding='utf-8') as f:
+                local_config = yaml.safe_load(f)
+            if local_config:
+                local_patterns = _extract_patterns_from_config(local_config, "local")
+                added_count = 0
+                for p in local_patterns:
+                    if p[0] not in seen_patterns:
+                        seen_patterns.add(p[0])
+                        patterns.append(p)
+                        added_count += 1
+                if added_count > 0:
+                    configs_loaded.append(str(local_path))
+                    logger.info(f"Added {added_count} patterns from local override: {local_path}")
+        except ImportError:
+            logger.warning("PyYAML not installed, cannot load local supplementary_patterns.yaml")
+        except Exception as e:
+            logger.warning(f"Error loading local {local_path}: {e}")
+
+    if configs_loaded:
+        logger.info(f"Loaded {len(patterns)} supplementary patterns from: {', '.join(configs_loaded)}")
+    else:
+        logger.warning("No supplementary patterns config found, using empty list")
+
+    return patterns
+
+
+def _extract_verbatim_patterns_from_config(
+    config: Dict,
+    source: str = "unknown"
+) -> List[Tuple[str, str]]:
+    """
+    Extract verbatim strip patterns from a parsed YAML config dict.
+
+    Args:
+        config: Parsed YAML config with category sections containing pattern lists
+        source: Source name for logging (e.g., "global", "local")
+
+    Returns:
+        List of (pattern_text, replace_with) tuples.
+        replace_with defaults to empty string if not specified.
+    """
+    patterns = []
+
+    # Iterate through all category sections
+    for category, items in config.items():
+        if not isinstance(items, list):
+            continue
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            pattern = item.get('pattern')
+            replace_with = item.get('replace_with', '')  # Default to empty string
+
+            if pattern:
+                patterns.append((pattern, replace_with))
+            else:
+                logger.warning(f"Skipping entry without pattern in {category} ({source}): {item}")
+
+    return patterns
+
+
+def load_verbatim_strip_patterns() -> List[Tuple[str, str]]:
+    """
+    Load verbatim strip patterns from config files.
+
+    These patterns are stripped directly during phrase stripping, unlike
+    supplementary_patterns which are used for instrument extraction.
+
+    Loading priority (later extends earlier):
+      1. Global config: config/verbatim_strip_patterns.yaml (in project root)
+      2. Local override: ./verbatim_strip_patterns.yaml (in working directory)
+
+    Local files extend (add to) the global list rather than replacing it.
+    This allows rapid iteration during curation without modifying installed code.
+
+    Returns:
+        List of (pattern_text, replace_with) tuples.
+        replace_with is typically empty string for removal.
+    """
+    patterns = []
+    seen_patterns = set()  # Track pattern text to avoid exact duplicates
+    configs_loaded = []
+
+    # 1. Load global config from project config/ directory
+    global_config = load_yaml_config('verbatim_strip_patterns')
+    if global_config:
+        global_patterns = _extract_verbatim_patterns_from_config(global_config, "global")
+        for p in global_patterns:
+            if p[0] not in seen_patterns:
+                seen_patterns.add(p[0])
+                patterns.append(p)
+        configs_loaded.append(str(get_config_dir() / 'verbatim_strip_patterns.yaml'))
+
+    # 2. Load local override from working directory (extends global)
+    local_path = Path.cwd() / 'verbatim_strip_patterns.yaml'
+    if local_path.exists():
+        try:
+            import yaml
+            with open(local_path, encoding='utf-8') as f:
+                local_config = yaml.safe_load(f)
+            if local_config:
+                local_patterns = _extract_verbatim_patterns_from_config(local_config, "local")
+                added_count = 0
+                for p in local_patterns:
+                    if p[0] not in seen_patterns:
+                        seen_patterns.add(p[0])
+                        patterns.append(p)
+                        added_count += 1
+                if added_count > 0:
+                    configs_loaded.append(str(local_path))
+                    logger.info(f"Added {added_count} verbatim patterns from local override: {local_path}")
+        except ImportError:
+            logger.warning("PyYAML not installed, cannot load local verbatim_strip_patterns.yaml")
+        except Exception as e:
+            logger.warning(f"Error loading local {local_path}: {e}")
+
+    if configs_loaded:
+        logger.info(f"Loaded {len(patterns)} verbatim strip patterns from: {', '.join(configs_loaded)}")
+    elif patterns:
+        # Patterns loaded but no configs tracked (shouldn't happen)
+        logger.info(f"Loaded {len(patterns)} verbatim strip patterns")
+
     return patterns
 
 

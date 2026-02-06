@@ -20,6 +20,8 @@ verbosity = get_verbosity()
 # Module-level variable for sharing phrase_map with worker processes
 _phrase_map_global: Optional[List[Tuple[str, str, str, Optional[Set[str]]]]] = None
 _model_class_global: Optional[Type[BaseModel]] = None
+_source_map_global: Optional[dict] = None
+_logging_enabled_global: bool = False
 
 
 # Modify to always expect replacement even if empty string
@@ -188,6 +190,10 @@ def _recurse_and_replace(
 # Module-level trace file for detailed matching diagnostics
 _trace_file = None
 
+# Module-level match log for full audit trail
+_match_log: Optional[list] = None
+_source_map: Optional[dict] = None
+
 
 def set_trace_file(filepath: str):
     """
@@ -210,6 +216,57 @@ def close_trace_file():
         _trace_file = None
 
 
+def init_match_log(source_map: Optional[dict] = None):
+    """
+    Initialize match logging for full audit trail.
+
+    Args:
+        source_map: Optional dict mapping expanded patterns to source patterns.
+    """
+    global _match_log, _source_map
+    _match_log = []
+    _source_map = source_map or {}
+
+
+def get_match_log() -> list:
+    """Return collected match log entries."""
+    global _match_log
+    return _match_log if _match_log else []
+
+
+def write_match_log(filepath: str):
+    """
+    Write match log as TSV with header.
+
+    Columns: tinyId, matched_pattern, source_pattern, verbatim_text
+    """
+    global _match_log
+    if not _match_log:
+        logger.warning("No match log entries to write")
+        return
+
+    import csv
+    with open(filepath, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f, delimiter='\t')
+        writer.writerow(['tinyId', 'matched_pattern', 'source_pattern', 'verbatim_text'])
+        for entry in _match_log:
+            writer.writerow([
+                entry.get('tinyId', ''),
+                entry.get('matched_pattern', ''),
+                entry.get('source_pattern', ''),
+                entry.get('verbatim_text', ''),
+            ])
+
+    logger.info(f"Wrote {len(_match_log)} match log entries to {filepath}")
+
+
+def close_match_log():
+    """Clear match log state."""
+    global _match_log, _source_map
+    _match_log = None
+    _source_map = None
+
+
 def _replace_if_match(
     container: Any, key_or_index: Any, phrase: str, replace_with: str,
     tiny_id: str = None
@@ -224,12 +281,23 @@ def _replace_if_match(
         replace_with: Replacement string
         tiny_id: Optional tinyId for trace output
     """
-    global _trace_file
+    global _trace_file, _match_log, _source_map
     try:
         value = container[key_or_index]
         if isinstance(value, str):
             if phrase in value:
                 log_if_verbose(f"Replacing phrase in path: {key_or_index}", 3)
+
+                # Capture verbatim text (context around the match) before replacement
+                idx = value.find(phrase)
+                start = max(0, idx - 20)
+                end = min(len(value), idx + len(phrase) + 20)
+                verbatim = value[start:end]
+                if start > 0:
+                    verbatim = "..." + verbatim
+                if end < len(value):
+                    verbatim = verbatim + "..."
+
                 result = sanitize(value.replace(phrase, replace_with))
                 container[key_or_index] = result
 
@@ -237,6 +305,16 @@ def _replace_if_match(
                 if _trace_file:
                     phrase_preview = phrase[:50] + "..." if len(phrase) > 50 else phrase
                     _trace_file.write(f"MATCH\t{tiny_id or '-'}\t{len(phrase)}\t{phrase_preview}\n")
+
+                # Match log for full audit trail
+                if _match_log is not None:
+                    source_pattern = _source_map.get(phrase, phrase) if _source_map else phrase
+                    _match_log.append({
+                        'tinyId': tiny_id or '',
+                        'matched_pattern': phrase,
+                        'source_pattern': source_pattern,
+                        'verbatim_text': verbatim,
+                    })
             else:
                 log_if_verbose(f"Phrase not found at {key_or_index}", 3)
         else:
@@ -339,21 +417,35 @@ def reset_debug_filter_stats():
     _debug_filter_stats = {"checked": 0, "passed": 0, "sample_ids": set()}
 
 
-def _worker_init(phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]], model_class_name: str):
+def _worker_init(
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]],
+    model_class_name: str,
+    source_map: Optional[dict] = None,
+    logging_enabled: bool = False
+):
     """
     Initialize worker process with shared phrase_map.
 
     Uses global variables to avoid serializing large phrase_map for each task.
     """
-    global _phrase_map_global, _model_class_global
+    global _phrase_map_global, _model_class_global, _source_map_global, _logging_enabled_global
+    global _match_log, _source_map
     _phrase_map_global = phrase_map
 
     # Resolve model class from name
     from utils.constants import MODEL_REGISTRY
     _model_class_global = MODEL_REGISTRY.get(model_class_name)
 
+    # Set up logging state for this worker
+    _source_map_global = source_map or {}
+    _logging_enabled_global = logging_enabled
+    if logging_enabled:
+        # Initialize per-worker match log
+        _match_log = []
+        _source_map = source_map or {}
 
-def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[int, List[dict]]:
+
+def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[int, List[dict], List[dict]]:
     """
     Process a chunk of model data dicts in a worker process.
 
@@ -361,23 +453,32 @@ def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[i
         chunk_with_indices: Tuple of (chunk_index, list of model data dicts)
 
     Returns:
-        Tuple of (chunk_index, list of processed data dicts)
+        Tuple of (chunk_index, list of processed data dicts, list of match log entries)
     """
-    global _phrase_map_global
+    global _phrase_map_global, _logging_enabled_global, _match_log
     chunk_idx, data_list = chunk_with_indices
+
+    # Reset match log for this chunk (in case worker is reused)
+    if _logging_enabled_global:
+        _match_log = []
 
     processed = []
     for data in data_list:
         processed_data = _strip_single_model(data, _phrase_map_global)
         processed.append(processed_data)
 
-    return chunk_idx, processed
+    # Collect matches from this worker
+    matches = list(_match_log) if _logging_enabled_global and _match_log else []
+
+    return chunk_idx, processed, matches
 
 
 def strip_phrases(
     model_list: List[BaseModel],
     phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]],
-    n_workers: int = 1
+    n_workers: int = 1,
+    source_map: Optional[dict] = None,
+    logging_enabled: bool = False
 ) -> List[BaseModel]:
     """
     Strip phrases from a list of models.
@@ -387,10 +488,15 @@ def strip_phrases(
         phrase_map: List of (path, phrase, replace, tinyIds) tuples
         n_workers: Number of parallel workers (default: 1 for sequential)
                    Use 0 for auto-detect (CPU count)
+        source_map: Optional dict mapping expanded patterns to source patterns.
+                    Used for match logging in parallel mode.
+        logging_enabled: If True, enable match logging (for parallel aggregation).
 
     Returns:
         List of cleaned models in original order
     """
+    global _match_log
+
     if not model_list:
         return []
 
@@ -438,10 +544,11 @@ def strip_phrases(
 
     # Process in parallel
     results = {}
+    all_matches = []
     with ProcessPoolExecutor(
         max_workers=n_workers,
         initializer=_worker_init,
-        initargs=(phrase_map, model_class_name)
+        initargs=(phrase_map, model_class_name, source_map, logging_enabled)
     ) as executor:
         futures = {
             executor.submit(_worker_process_chunk, chunk): chunk[0]
@@ -449,8 +556,17 @@ def strip_phrases(
         }
 
         for future in as_completed(futures):
-            chunk_idx, processed_data = future.result()
+            chunk_idx, processed_data, matches = future.result()
             results[chunk_idx] = processed_data
+            if matches:
+                all_matches.extend(matches)
+
+    # Aggregate matches into global match log (if logging enabled)
+    if logging_enabled and all_matches:
+        if _match_log is None:
+            _match_log = []
+        _match_log.extend(all_matches)
+        logger.info(f"Aggregated {len(all_matches)} match log entries from {n_workers} workers")
 
     # Reassemble in original order
     cleaned_models = []

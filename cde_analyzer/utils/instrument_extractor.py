@@ -14,8 +14,10 @@ k-mer mining:
 
 Supplementary patterns (Jan 2026):
 Non-Title-Case patterns discovered in CDE corpus that the main regex misses.
-These patterns are now loaded from config/supplementary_patterns.yaml for
-easy curation without code changes.
+These patterns are loaded from two locations:
+  1. Global config: config/supplementary_patterns.yaml (in project)
+  2. Local override: ./supplementary_patterns.yaml (in working directory)
+Local files extend the global list for rapid iteration during curation.
 """
 
 import re
@@ -34,10 +36,17 @@ _supplementary_patterns_cache: Optional[List[Tuple[str, str, Optional[str]]]] = 
 
 def get_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
     """
-    Load supplementary patterns from config file.
+    Load supplementary patterns from config files.
+
+    Patterns are loaded from two locations (later extends earlier):
+      1. Global config: config/supplementary_patterns.yaml (in project)
+      2. Local override: ./supplementary_patterns.yaml (in working directory)
+
+    Local files extend the global list, allowing rapid iteration during
+    curation without modifying installed code.
 
     Patterns are cached after first load. Use clear_supplementary_patterns_cache()
-    to force reload if config file changes.
+    to force reload if config files change.
 
     Returns:
         List of (pattern_text, display_name, acronym) tuples.
@@ -50,9 +59,9 @@ def get_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
     try:
         from utils.config_loader import load_supplementary_patterns, get_config_dir
         config_dir = get_config_dir()
-        logger.debug(f"Loading supplementary patterns from: {config_dir / 'supplementary_patterns.yaml'}")
+        logger.debug(f"Loading supplementary patterns from: {config_dir / 'supplementary_patterns.yaml'} + local override")
         _supplementary_patterns_cache = load_supplementary_patterns()
-        logger.info(f"Loaded {len(_supplementary_patterns_cache)} supplementary patterns from config")
+        logger.info(f"Loaded {len(_supplementary_patterns_cache)} supplementary patterns total")
     except ImportError as e:
         logger.warning(f"Config loader not available ({e}), using empty supplementary patterns")
         _supplementary_patterns_cache = []
@@ -61,9 +70,21 @@ def get_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
 
 
 def clear_supplementary_patterns_cache():
-    """Clear the cached supplementary patterns to force reload."""
+    """
+    Clear the cached supplementary patterns to force reload.
+
+    Also clears the underlying config_loader cache to ensure fresh reads
+    from both global and local config files.
+    """
     global _supplementary_patterns_cache
     _supplementary_patterns_cache = None
+
+    # Also clear config_loader cache for supplementary_patterns
+    try:
+        from utils.config_loader import clear_config_cache
+        clear_config_cache()
+    except ImportError:
+        pass
 
 
 @dataclass

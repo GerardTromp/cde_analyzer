@@ -464,17 +464,18 @@ class InstrumentFamilyAssigner:
             self.write_families_summary_tsv(catalog, families_path)
             outputs["instrument_families"] = families_path
 
-        # Simplified curated files for two diverging workflows:
+        # Simplified pattern files for discovery workflow:
         #   curated_fullmatch.tsv - full instrument substitution (pattern = full_match)
-        #   curated.tsv           - identical initially; curator edits for family-level stripping
+        #   mined_patterns.tsv    - mined patterns for discover_verbatim input
         # Both have 4 columns: instrument_id, pattern, family_full_match, tinyids
+        # Note: curated.tsv is reserved for human-edited patterns (copied from coalesced.tsv)
         curated_fullmatch_path = output_dir / "curated_fullmatch.tsv"
         self._write_curated_tsv(catalog, curated_fullmatch_path)
         outputs["curated_fullmatch"] = curated_fullmatch_path
 
-        curated_path = output_dir / "curated.tsv"
-        self._write_curated_tsv(catalog, curated_path)
-        outputs["curated"] = curated_path
+        mined_patterns_path = output_dir / "mined_patterns.tsv"
+        self._write_curated_tsv(catalog, mined_patterns_path)
+        outputs["mined_patterns"] = mined_patterns_path
 
         # Write stats JSON
         stats_path = output_dir / "family_assignment_stats.json"

@@ -1,0 +1,69 @@
+# Verbatim Strip Patterns
+#
+# Patterns for direct stripping that escape the discovery logic.
+# Unlike supplementary_patterns.yaml (used for instrument extraction),
+# these patterns are matched EXACTLY as written and stripped directly.
+#
+# Use cases:
+#   - Instrument variants with unusual formatting (parenthetical notes, versions)
+#   - Patterns that appear without anchor prefixes ("as part of", etc.)
+#   - Recurring patterns that would otherwise require manual curation each run
+#
+# Loading priority (later extends earlier):
+#   1. This file: config/verbatim_strip_patterns.yaml (global, in project)
+#   2. Local override: ./verbatim_strip_patterns.yaml (in working directory)
+#
+# Local files extend (add to) this list rather than replacing it.
+# This allows rapid iteration during curation without modifying installed code.
+#
+# Format:
+#   category_name:
+#     - pattern: "exact text to strip"
+#       replace_with: ""  # optional, defaults to empty string
+#       note: "documentation note"  # optional
+#
+# Patterns are matched case-sensitively and stripped in longest-first order.
+# Anchor expansion is applied automatically (patterns are tried with/without
+# "as part of", "based on", etc. prefixes).
+
+# =============================================================================
+# Instrument name variants with version/form specifiers
+# These include parenthetical notes that the main regex doesn't capture
+# =============================================================================
+instrument_variants:
+  - pattern: "the Geriatric Depression Scale (short form) (GDSSF)"
+    note: "Short form variant with acronym - appears 16x in corpus"
+
+  - pattern: "Geriatric Depression Scale (short form) (GDSSF)"
+    note: "Without leading 'the'"
+
+# =============================================================================
+# Short-form instrument references
+# Abbreviated names that appear alongside full instrument names
+# =============================================================================
+short_form_references:
+  - pattern: "STOP Questionnaire (STOP)"
+    note: "Short name for STOP-Bang questionnaire"
+
+  - pattern: "PIMS Questionnaire"
+    note: "Short name for Parkinson's Impact Scale"
+
+  - pattern: "BQ form"
+    note: "Short name for Berlin Questionnaire"
+
+# =============================================================================
+# Neuro-QOL subscales
+# These appear without full "Quality of Life in Neurological Disorders" prefix
+# =============================================================================
+neuroqol_short:
+  - pattern: "Neuro-QOL Depression"
+    note: "Subscale reference without full instrument name"
+
+# =============================================================================
+# Boilerplate phrases (non-instrument)
+# Recurring definition fragments that should be stripped
+# =============================================================================
+# boilerplate:
+#   - pattern: "the individual's reproductive organs and functions assigned by chromosomal complement"
+#     note: "Sex/gender definition boilerplate - evaluate if this is content-bearing"
+

@@ -16,7 +16,8 @@ from utils.designation_parser import extract_name_and_question_from_designations
 from utils.logger import log_if_verbose
 # from utils.analyzer_state import get_verbosity, set_verbosity
 from utils.extract_embed import (normalize_extracted_value, sanitize, sanitize_dictlist,
-    simplify_permissible_values, strip_embedded_nl, strip_json_list)
+    simplify_permissible_values, strip_embedded_nl, strip_json_list,
+    collapse_reference_documents)
 # from logic.lemma_fasta import encode_pfasta
 
 # from CDE_Schema.CDE_Item import CDEItem
@@ -82,6 +83,14 @@ def extract_path(
 
                     row.update(result)  # type: ignore
                     # continue
+
+                if re.match(r"referenceDocuments$", path_expr):
+                    ref_docs = [
+                        d.model_dump()
+                        for d in getattr(item, "referenceDocuments", []) or []
+                    ]
+                    row[tag] = collapse_reference_documents(ref_docs)
+                    continue
 
                 val = get_path_value(item.model_dump(), path_expr)
                 log_if_verbose(f"[extract_embed logic] Check tinyId: {item.tinyId}", 3)  # type: ignore

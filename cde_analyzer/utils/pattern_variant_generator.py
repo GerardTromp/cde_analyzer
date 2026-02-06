@@ -182,11 +182,14 @@ def generate_punctuation_variants(pattern: str) -> Set[str]:
 
     # Strip trailing punctuation (both simple and spaced) to get base
     base = pattern.rstrip(''.join(TRAILING_PUNCT))
-    # Also strip spaced punctuation endings
+    # Strip trailing whitespace BEFORE checking spaced punctuation
+    # (patterns like "...SCS) - " end with dash-space, not space-dash)
+    base = base.rstrip()
+    # Also strip spaced punctuation endings (now correctly detects ' -', ':', etc.)
     for spaced_punct in TRAILING_PUNCT_WITH_SPACE:
         if base.endswith(spaced_punct.rstrip()):  # e.g., ends with ' -' or ':'
             base = base[:-len(spaced_punct.rstrip())]
-    base = base.rstrip()  # Clean up any trailing whitespace
+    base = base.rstrip()  # Clean up any remaining trailing whitespace
     variants.add(base)
 
     # Add common trailing punctuation variants

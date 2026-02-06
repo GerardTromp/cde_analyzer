@@ -4,6 +4,13 @@
 # The main InstrumentExtractor requires 60%+ Title Case words and 3+ words,
 # which misses many valid instruments with non-standard naming.
 #
+# Loading priority (later extends earlier):
+#   1. This file: config/supplementary_patterns.yaml (global, in project)
+#   2. Local override: ./supplementary_patterns.yaml (in working directory)
+#
+# Local files extend (add to) this list rather than replacing it.
+# This allows rapid iteration during curation without modifying installed code.
+#
 # Format:
 #   - pattern: "text to match after anchor prefix"
 #     name: "Canonical instrument name"
@@ -14,7 +21,7 @@
 #
 # To add new patterns:
 #   1. Find the exact text in CDE definitions (case matters for matching)
-#   2. Add entry here with pattern, name, and optional acronym
+#   2. Add entry to local override for rapid testing, or here for permanent addition
 #   3. Re-run discovery to verify pattern is captured
 
 # =============================================================================

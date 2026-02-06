@@ -124,6 +124,16 @@ cde-analyzer pattern_util --generate-strip-patterns grouped.tsv -o strip_pattern
 
 Produces `{output}_full.tsv` (full removal) and `{output}_sub.tsv` (group prefix removed, suffix retained).
 
+### Normalize Mode
+
+Convert any pattern TSV to minimal 2-column format for merging:
+
+```bash
+cde-analyzer pattern_util --to-minimal discovered.tsv -o minimal.tsv
+```
+
+Auto-detects column names (`pattern`/`tinyIds`/`tinyids`) and normalizes tinyId separator to pipe (`|`). Useful for combining files from different pipeline stages that may have different column structures.
+
 ### Supplementary Import Mode
 
 Add curated patterns to `config/supplementary_patterns.yaml`:
@@ -140,10 +150,12 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 
 | Option | Description |
 |--------|-------------|
-| `--merge-patterns FILE` | Input TSV file with duplicate patterns |
+| `--merge-patterns FILE` | Deduplicate patterns within a single TSV file, merging tinyId sets for identical patterns |
 | `-o, --output FILE` | Output merged TSV file (required) |
 | `--merge-pattern-column` | Column name for patterns (default: `pattern`) |
 | `--merge-tinyids-column` | Column name for tinyIds (default: `tinyIds`) |
+
+**Note**: To merge multiple files, first normalize with `--to-minimal`, concatenate, then merge. See [Merge Multiple Pattern Files](#merge-multiple-pattern-files) example.
 
 ### Coalesce Options
 
@@ -184,6 +196,13 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 | `--min-prefix-words N` | Minimum words in shared prefix (default: 2) |
 | `--no-temporal-implied` | Disable implied-ONE temporal variant generation |
 
+### Normalize Options
+
+| Option | Description |
+|--------|-------------|
+| `--to-minimal FILE` | Normalize TSV to 2-column format (pattern, tinyIds) for merging |
+| `-o, --output FILE` | Output normalized TSV file (required) |
+
 ### Import Options
 
 | Option | Description |
@@ -214,6 +233,30 @@ cde-analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
     --patterns coalesced_fields.tsv --clean-remnants \
     --detect-remnants --remnant-report remnants.tsv
 ```
+
+### Merge Multiple Pattern Files
+
+To combine patterns from multiple sources (e.g., `coalesced.tsv` and `abbrev_patterns.tsv`):
+
+```bash
+# 1. Normalize each file to minimal 2-column format
+#    (handles column name variations, normalizes tinyId separator to pipe)
+cde-analyzer pattern_util --to-minimal coalesced.tsv -o coalesced_min.tsv
+cde-analyzer pattern_util --to-minimal abbrev_patterns.tsv -o abbrev_min.tsv
+
+# 2. Concatenate files (skip header on subsequent files)
+head -1 coalesced_min.tsv > combined.tsv
+tail -n +2 coalesced_min.tsv >> combined.tsv
+tail -n +2 abbrev_min.tsv >> combined.tsv
+
+# 3. Merge duplicate patterns (combines tinyId sets for identical patterns)
+cde-analyzer pattern_util --merge-patterns combined.tsv -o merged.tsv
+
+# 4. Clean up intermediate files
+rm coalesced_min.tsv abbrev_min.tsv combined.tsv
+```
+
+**Note**: `--merge-patterns` operates on a single file, deduplicating rows with identical patterns and merging their tinyId sets. Use the normalize-concatenate-merge workflow above to combine multiple source files.
 
 ### Import Supplementary Patterns
 

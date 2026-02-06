@@ -385,6 +385,75 @@ options:
 
 ---
 
+### `pipeline_report` Command
+
+Generate comprehensive pipeline execution reports with phase details and key metrics.
+
+```bash
+usage: pipeline_report [-h] {-s STATE_FILE | -d OUTPUT_DIR} -o OUTPUT
+                       [--phase {1,2,3,4}] [--title TITLE] [--version LABEL]
+                       [--ground-truth FILE] [--pipeline-output FILE]
+                       [--tinyid-column COL] [--source-json FILE]
+
+options:
+  -h, --help            show this help message and exit
+  -s, --state-file FILE Path to workflow state file (.workflow_state.json)
+  -d, --output-dir DIR  Path to pipeline output directory
+  -o, --output FILE     Path to output markdown report
+  --phase N             Generate report for specific phase only (1-4)
+  --title TITLE         Title for the report (default: Pipeline Execution Report)
+  --version LABEL       Version label for this report
+  --ground-truth FILE   Ground truth pattern file for recall analysis
+  --pipeline-output F   Pipeline output TSV for recall comparison
+  --tinyid-column COL   Column name for tinyIds (default: tinyIds)
+  --source-json FILE    Source CDE JSON file for recall analysis
+```
+
+---
+
+### `recall_analyze` Command
+
+Analyze recall and detect false negatives in instrument detection.
+
+```bash
+usage: recall_analyze [-h] -i INPUT -m MODEL -F PATTERN_FILE
+                      [--pipeline-output FILE] [--pipeline-tinyid-column COL]
+                      -o OUTPUT [--false-negatives-file FILE]
+                      [--markdown-report FILE] [--markdown-detail FILE]
+                      [--report-version LABEL] [--report-title TITLE]
+                      [-f FIELDS ...] [--case-sensitive]
+                      [--min-recall N] [--previous-report FILE]
+                      [--stopping-threshold N] [--suggest-patterns FILE]
+                      [--suggest-min-matches N]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input FILE      Path to source CDE JSON (ground truth)
+  -m, --model MODEL     Pydantic model: CDE, Form, EmbedText
+  -F, --pattern-file F  File with patterns and labels (pattern<TAB>label)
+  --pipeline-output F   Pipeline output TSV with tinyIds column
+  --pipeline-tinyid-column COL
+                        Column name for tinyIds (default: tinyIds)
+  -o, --output FILE     Path to recall report TSV
+  --false-negatives-file FILE
+                        Output file listing false negatives by family
+  --markdown-report F   Path to human-readable markdown report
+  --markdown-detail F   Standalone detailed report for this phase
+  --report-version L    Version label for iteration tracking
+  --report-title TITLE  Title for markdown report
+  -f, --fields FIELDS   Fields to search (default: designation definition)
+  --case-sensitive      Make pattern matching case-sensitive
+  --min-recall N        Minimum recall threshold (default: 0.0)
+  --previous-report F   Previous recall report for marginal gains
+  --stopping-threshold N
+                        Stop when marginal gain <= N (default: 2)
+  --suggest-patterns F  Output suggested patterns for low-recall families
+  --suggest-min-matches N
+                        Min false negatives for suggestion (default: 2)
+```
+
+---
+
 ## LLM-Assisted Classification
 
 > **Note**: These commands require API keys for LLM providers. See [LLM Configuration](../llm/configuration.md).

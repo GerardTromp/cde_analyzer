@@ -65,3 +65,7 @@ nul
 
 # MkDocs build output
 site/
+
+# One-off scripts and presentations
+trial_boundary_llm.py
+docs/slides/*.html

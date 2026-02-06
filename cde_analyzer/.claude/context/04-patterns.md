@@ -533,6 +533,72 @@ action_parser = subparsers.add_parser(
 # Shows default values in help text
 ```
 
+## Parallelization Patterns
+
+### 7. Worker Aggregation Pattern for ProcessPoolExecutor
+**Location**: `logic/phrase_stripper.py`
+
+**Pattern**: Per-worker state collection with main process aggregation
+
+**Problem**: Need to collect data (e.g., match logs) from parallel workers, but global state isn't shared across processes.
+
+**Solution**:
+```python
+# Worker initialization - set up per-worker state
+def _worker_init(phrase_map, model_class_name, source_map=None, logging_enabled=False):
+    global _phrase_map_global, _logging_enabled_global, _match_log, _source_map
+    _phrase_map_global = phrase_map
+    _logging_enabled_global = logging_enabled
+    if logging_enabled:
+        _match_log = []  # Per-worker list
+        _source_map = source_map or {}
+
+# Worker processing - return collected data alongside results
+def _worker_process_chunk(chunk_with_indices) -> Tuple[int, List[dict], List[dict]]:
+    global _match_log, _logging_enabled_global
+    chunk_idx, data_list = chunk_with_indices
+
+    if _logging_enabled_global:
+        _match_log = []  # Reset per chunk (workers may be reused)
+
+    processed = []
+    for data in data_list:
+        processed.append(process(data))  # Processing populates _match_log
+
+    matches = list(_match_log) if _logging_enabled_global else []
+    return chunk_idx, processed, matches  # Extended return tuple
+
+# Main process - aggregate after completion
+all_matches = []
+with ProcessPoolExecutor(max_workers=n_workers, initializer=_worker_init,
+                         initargs=(phrase_map, model_class_name, source_map, True)) as executor:
+    futures = {executor.submit(_worker_process_chunk, chunk): chunk[0] for chunk in chunks}
+
+    for future in as_completed(futures):
+        chunk_idx, processed_data, matches = future.result()
+        results[chunk_idx] = processed_data
+        all_matches.extend(matches)  # Aggregate from all workers
+
+logger.info(f"Aggregated {len(all_matches)} entries from {n_workers} workers")
+```
+
+**Benefits**:
+- Clean separation: workers collect, main process aggregates
+- No temp files or inter-process communication needed
+- Works for any collectable data (logs, metrics, summaries)
+
+**Key Considerations**:
+1. Reset per-chunk state at start (workers may be reused for multiple chunks)
+2. Extend return tuple to include any data needing aggregation
+3. Use initializer to pass shared read-only data (phrase_map, config)
+4. For streaming output (trace files), fall back to sequential mode
+
+**Used By**:
+- `strip_phrases --match-log` and `--match-summary` (parallel-safe)
+- `strip_phrases --trace-matching` forces sequential (streaming file writes)
+
+---
+
 ## Anti-Patterns and Technical Debt
 
 ### 1. Duplicated Code in Actions

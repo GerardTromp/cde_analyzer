@@ -27,10 +27,14 @@ variables:
   # Intermediate files (derived from output_dir)
   instruments_tsv: "${output_dir}/instruments.tsv"
   families_tsv: "${output_dir}/instrument_families.tsv"
+  # mined_patterns: Auto-generated patterns from mine_instruments (has 'pattern' column)
+  # Used as input to discover_verbatim, before human curation
+  mined_patterns_tsv: "${output_dir}/mined_patterns.tsv"
   abbrev_patterns: "${output_dir}/abbrev_patterns.tsv"
   discovered_tsv: "${output_dir}/discovered.tsv"
   coalesced_tsv: "${output_dir}/coalesced.tsv"
   coalesce_report: "${output_dir}/coalesce_report.tsv"
+  # curated_tsv: Human-edited patterns (copy coalesced.tsv → curated.tsv after checkpoint)
   curated_tsv: "${output_dir}/curated.tsv"
   stripped_json: "${output_dir}/inst_stripped.json"
   trace_tsv: "${output_dir}/strip_trace.tsv"
@@ -59,7 +63,8 @@ steps:
       input: "${input_json}"
       model: CDE
       output: "${discovered_tsv}"
-      pattern_list: "${instruments_tsv}"
+      # Use mined_patterns (has 'pattern' column) not instruments.tsv (summary only)
+      pattern_list: "${mined_patterns_tsv}"
       additional_patterns:
         - "${abbrev_patterns}"
       expand_variants: true
