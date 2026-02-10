@@ -795,6 +795,39 @@ cde-analyzer strip_phrases ... --sort-order alpha
 Use `--sort-order file` when you've carefully ordered patterns in your
 curated TSV and want that order respected.
 
+### Expanding curated patterns with variants
+
+When your curated patterns need case/number/plural coverage, pre-expand
+them before stripping. This is more precise than `--ignore-case` because
+the curator can review exactly which variants are generated:
+
+```bash
+# 1. Expand curated patterns with case + number + plural variants
+#    --rescan searches source JSON for actual tinyIds per variant
+cde-analyzer pattern_util --expand-verbatim curated.tsv \
+    -i inst_stripped.json -m CDE --rescan -o expanded.tsv
+
+# 2. Strip with word boundaries for precision
+#    --word-boundary prevents "in the past" matching inside "within the past"
+#    --no-expand-anchors because variants already handle case
+cde-analyzer strip_phrases \
+    -i inst_stripped.json -m CDE -o stripped.json \
+    --patterns expanded.tsv,pattern \
+    --word-boundary --no-expand-anchors \
+    --match-log match_log.tsv --workers 0
+```
+
+**When to use `--word-boundary`**: Always recommended when stripping short
+patterns (2-4 words) that could appear as substrings of longer words. The
+`\b` anchors require word breaks at both ends of the match.
+
+**When NOT to use `--ignore-case`**: Case-insensitive matching can over-strip
+when patterns are generic. For example, `"in the past"` with `--ignore-case`
+matches regardless of case, but if the pattern text also appears inside
+`"within the past"`, even word boundaries won't help because `"in the past"`
+IS a word-boundary-valid match. Pre-expanding with `--expand-verbatim` gives
+you explicit control.
+
 ### Disabling anchor expansion
 
 By default, `strip_phrases` expands patterns with anchor prefixes ("as part
@@ -867,3 +900,5 @@ Start: You have CDE JSON and want to strip boilerplate
 | **verbatim pattern** | The exact surface form of a phrase as it appears in the text |
 | **subsumption** | When a shorter pattern's tinyIds are fully covered by longer patterns |
 | **tier splitting** | Dividing patterns into long (tier-1) and short (tier-2) for ordered stripping |
+| **variant expansion** | Generating case/number/plural variants of curated patterns via `--expand-verbatim` |
+| **word boundary** | Regex `\b` anchor that requires a word break at the match boundary, preventing partial-word matches |

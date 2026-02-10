@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-02-09
+
+### Added
+- `pattern_util --expand-verbatim` — expand curated patterns with narrow verbatim variants
+  - Case variants: original + all-lowercase
+  - Number variants: digit ↔ word (`7` ↔ `seven`) via existing `generate_number_variants()`
+  - Plural variants: temporal singular ↔ plural (`day` ↔ `days`, `week` ↔ `weeks`)
+  - `--rescan` — re-scan source JSON to discover tinyIds per variant (instead of inheriting)
+  - `--no-case-variants`, `--no-number-variants`, `--no-plural-variants` — disable specific variant types
+- `strip_phrases --word-boundary` — use `\b` regex anchors for pattern matching
+  - Prevents partial-word matches: "in the past" will NOT match inside "within the past"
+  - Composable with `--ignore-case` (both flags can be active simultaneously)
+- `strip_phrases --ignore-case` — case-insensitive pattern matching via `re.IGNORECASE`
+- `generate_case_variants()` and `generate_plural_variants()` in `utils/pattern_variant_generator.py`
+- `TEMPORAL_PLURALS` dictionary for singular/plural temporal word mapping
+
+### Changed
+- `strip_phrases` matching engine now supports three modes: exact substring (default), word-boundary regex, and case-insensitive regex — modes compose via flag combination
+- `_worker_init()` and `strip_phrases()` accept `case_insensitive` and `word_boundary` parameters for parallel worker propagation
+
 ## [0.5.1] - 2026-01-29
 
 ### Added

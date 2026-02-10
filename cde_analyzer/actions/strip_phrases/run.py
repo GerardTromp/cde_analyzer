@@ -649,11 +649,16 @@ def run_action(args: Namespace):
     if case_insensitive:
         logger.info("Case-insensitive matching enabled")
 
+    word_boundary = getattr(args, 'word_boundary', False)
+    if word_boundary:
+        logger.info("Word boundary matching enabled (\\b anchors)")
+
     logger.info(f"Stripping phrases from {len(parsed)} records (workers={n_workers})...")
     cleaned = strip_phrases(
         parsed, phrase_map, n_workers=n_workers,
         source_map=source_map, logging_enabled=logging_enabled,
-        case_insensitive=case_insensitive
+        case_insensitive=case_insensitive,
+        word_boundary=word_boundary
     )
     logger.info("Phrase stripping complete")
 

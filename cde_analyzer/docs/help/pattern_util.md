@@ -27,6 +27,11 @@ cde-analyzer pattern_util --group-hierarchy FILE -o GROUPED.tsv \
 cde-analyzer pattern_util --group-semantic FILE -o GROUPED.tsv \
     [--min-group-size N] [--min-prefix-words N]
 
+# Expand curated patterns with variants
+cde-analyzer pattern_util --expand-verbatim FILE -o EXPANDED.tsv \
+    [--no-case-variants] [--no-number-variants] [--no-plural-variants] \
+    [--rescan -i SOURCE.json -m CDE]
+
 # Import patterns to supplementary config
 cde-analyzer pattern_util --add-to-supplementary CURATED.tsv
 ```
@@ -134,6 +139,30 @@ cde-analyzer pattern_util --to-minimal discovered.tsv -o minimal.tsv
 
 Auto-detects column names (`pattern`/`tinyIds`/`tinyids`) and normalizes tinyId separator to pipe (`|`). Useful for combining files from different pipeline stages that may have different column structures.
 
+### Expand Verbatim Mode
+
+Expand curated patterns with case, number, and plural variants for precise verbatim matching:
+
+```bash
+cde-analyzer pattern_util --expand-verbatim curated.tsv -o expanded.tsv
+```
+
+Generates narrow variants of each curated pattern:
+- **Case**: original + all-lowercase (`In the past` → also `in the past`)
+- **Number**: digit ↔ word (`7 days` ↔ `seven days`)
+- **Plural**: temporal singular ↔ plural (`day` ↔ `days`, `week` ↔ `weeks`)
+
+Optionally re-scan source JSON to discover actual tinyIds per variant:
+
+```bash
+cde-analyzer pattern_util --expand-verbatim curated.tsv \
+    -i source.json -m CDE --rescan -o expanded.tsv
+```
+
+Without `--rescan`, variants inherit the source pattern's tinyIds. With `--rescan`, each variant is searched in the JSON and variants with no matches are dropped.
+
+Output includes `source_pattern` column for tracing back to the curated pattern.
+
 ### Supplementary Import Mode
 
 Add curated patterns to `config/supplementary_patterns.yaml`:
@@ -195,6 +224,17 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 | `--min-group-size N` | Minimum patterns per group (default: 2) |
 | `--min-prefix-words N` | Minimum words in shared prefix (default: 2) |
 | `--no-temporal-implied` | Disable implied-ONE temporal variant generation |
+
+### Expand Verbatim Options
+
+| Option | Description |
+|--------|-------------|
+| `--expand-verbatim FILE` | Input curated patterns TSV to expand with variants |
+| `-o, --output FILE` | Output expanded TSV file (required) |
+| `--no-case-variants` | Skip case variant generation (original + lowercase) |
+| `--no-number-variants` | Skip digit ↔ word variants (`7` ↔ `seven`) |
+| `--no-plural-variants` | Skip singular ↔ plural variants (`day` ↔ `days`) |
+| `--rescan` | Re-scan source JSON for tinyIds per variant (requires `-i` and `-m`) |
 
 ### Normalize Options
 

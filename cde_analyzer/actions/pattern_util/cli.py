@@ -334,6 +334,45 @@ def register_subparser(subparser: ArgumentParser):
              "separator to pipe (|). Writes to --output.",
     )
 
+    # Verbatim expansion mode
+    subparser.add_argument(
+        "--expand-verbatim",
+        type=str,
+        metavar="FILE",
+        help="Expand curated patterns with case, number, and plural variants. "
+             "Reads a patterns TSV (with pattern and tinyIds columns), generates "
+             "narrow verbatim variants (lowercase, digit↔word, day↔days), and "
+             "writes expanded TSV to --output. Optionally re-scans source JSON "
+             "with --rescan to discover tinyIds for each variant.",
+    )
+    subparser.add_argument(
+        "--no-case-variants",
+        dest="case_variants",
+        action="store_false",
+        default=True,
+        help="Skip case variant generation (original + lowercase). Default: enabled.",
+    )
+    subparser.add_argument(
+        "--no-number-variants",
+        dest="number_variants",
+        action="store_false",
+        default=True,
+        help="Skip digit↔word variants (7↔seven). Default: enabled.",
+    )
+    subparser.add_argument(
+        "--no-plural-variants",
+        dest="plural_variants",
+        action="store_false",
+        default=True,
+        help="Skip singular↔plural variants (day↔days). Default: enabled.",
+    )
+    subparser.add_argument(
+        "--rescan",
+        action="store_true",
+        help="Re-scan source JSON to discover tinyIds for each expanded variant "
+             "(instead of inheriting from source pattern). Requires --input and --model.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

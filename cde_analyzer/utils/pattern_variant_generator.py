@@ -79,6 +79,63 @@ POSSESSIVE_WORDS = [
     'meniere',       # Ménière's Disease
 ]
 
+# Temporal words with singular/plural variants
+TEMPORAL_PLURALS = {
+    'day': 'days', 'days': 'day',
+    'week': 'weeks', 'weeks': 'week',
+    'month': 'months', 'months': 'month',
+    'year': 'years', 'years': 'year',
+}
+
+
+def generate_case_variants(pattern: str) -> Set[str]:
+    """
+    Generate case variants: original + all-lowercase.
+
+    'In the past 7 days' → {'In the past 7 days', 'in the past 7 days'}
+    'PROMIS Depression' → {'PROMIS Depression', 'promis depression'}
+
+    Covers the two main cases in CDE text: sentence-start (uppercase first
+    letter) and mid-sentence (lowercase). Lowercase is additive — the
+    original is always preserved, so acronyms are not lost.
+
+    Args:
+        pattern: Original pattern string
+
+    Returns:
+        Set of variant patterns including original
+    """
+    variants = {pattern}
+    lower = pattern.lower()
+    if lower != pattern:
+        variants.add(lower)
+    return variants
+
+
+def generate_plural_variants(pattern: str) -> Set[str]:
+    """
+    Generate singular/plural variants for temporal words.
+
+    'in the past 7 days' → {'in the past 7 days', 'in the past 7 day'}
+    'past week scale' → {'past week scale', 'past weeks scale'}
+
+    Uses word-boundary matching to avoid partial substitutions.
+    Only handles temporal words (day/week/month/year).
+
+    Args:
+        pattern: Original pattern string
+
+    Returns:
+        Set of variant patterns including original
+    """
+    variants = {pattern}
+    for singular, plural in TEMPORAL_PLURALS.items():
+        word_re = re.compile(r'\b' + re.escape(singular) + r'\b')
+        if word_re.search(pattern):
+            new_pattern = word_re.sub(plural, pattern)
+            variants.add(new_pattern)
+    return variants
+
 
 def generate_possessive_variants(pattern: str) -> Set[str]:
     """

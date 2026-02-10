@@ -1090,6 +1090,202 @@ def _run_generate_proxies(args, input_path: str) -> int:
     return 0
 
 
+def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
+    """
+    Expand curated patterns with case, number, and plural variants.
+
+    Generates a narrow set of verbatim variants from curated patterns
+    so the strip engine can use exact matching without runtime magic.
+    """
+    import re
+    from utils.file_utils import exit_if_missing
+    from utils.pattern_tsv_utils import load_pattern_list_with_tinyids
+    from utils.pattern_variant_generator import (
+        generate_case_variants, generate_number_variants, generate_plural_variants
+    )
+
+    output_path = getattr(args, 'output', None)
+    if not output_path:
+        logger.error("--output is required for --expand-verbatim")
+        raise SystemExit(1)
+
+    exit_if_missing(expand_verbatim_path, "Curated patterns TSV")
+
+    do_case = getattr(args, 'case_variants', True)
+    do_number = getattr(args, 'number_variants', True)
+    do_plural = getattr(args, 'plural_variants', True)
+    do_rescan = getattr(args, 'rescan', False)
+
+    # Load curated patterns with tinyIds
+    patterns, pattern_to_tinyids = load_pattern_list_with_tinyids(expand_verbatim_path)
+    logger.info(f"Loaded {len(patterns)} curated patterns from {expand_verbatim_path}")
+
+    # Generate variants for each pattern
+    # Track: variant -> (source_pattern, tinyids)
+    # Use list to preserve ordering, dict for dedup/merge
+    variant_to_sources = {}  # variant -> set of source patterns
+    variant_to_tinyids = {}  # variant -> set of tinyIds
+
+    stats = {'case': 0, 'number': 0, 'plural': 0}
+
+    for source_pattern in patterns:
+        source_tinyids = pattern_to_tinyids.get(source_pattern, set())
+
+        # Build variant set incrementally
+        variants = {source_pattern}
+
+        if do_plural:
+            plural_expanded = set()
+            for v in variants:
+                plural_expanded.update(generate_plural_variants(v))
+            stats['plural'] += len(plural_expanded) - len(variants)
+            variants = plural_expanded
+
+        if do_number:
+            number_expanded = set()
+            for v in variants:
+                number_expanded.update(generate_number_variants(v))
+            stats['number'] += len(number_expanded) - len(variants)
+            variants = number_expanded
+
+        if do_case:
+            case_expanded = set()
+            for v in variants:
+                case_expanded.update(generate_case_variants(v))
+            stats['case'] += len(case_expanded) - len(variants)
+            variants = case_expanded
+
+        # Register each variant
+        for variant in variants:
+            if variant not in variant_to_sources:
+                variant_to_sources[variant] = set()
+                variant_to_tinyids[variant] = set()
+            variant_to_sources[variant].add(source_pattern)
+            variant_to_tinyids[variant].update(source_tinyids)
+
+    logger.info(
+        f"Expanded {len(patterns)} patterns → {len(variant_to_sources)} variants "
+        f"(case: +{stats['case']}, number: +{stats['number']}, plural: +{stats['plural']})"
+    )
+
+    # Optional re-scan: search source JSON for actual tinyIds per variant
+    if do_rescan:
+        input_json = getattr(args, 'input', None)
+        if not input_json:
+            logger.error("--input (CDE JSON) is required with --rescan")
+            raise SystemExit(1)
+
+        import json
+        from pydantic import ValidationError
+        from utils.constants import MODEL_REGISTRY
+        from logic.verbatim_discoverer import _extract_at_path
+
+        exit_if_missing(input_json, "Input JSON")
+
+        model_name = getattr(args, 'model', 'CDE')
+        field_paths = getattr(args, 'fields',
+                              ["definitions.*.definition", "designations.*.designation"])
+        model_class = MODEL_REGISTRY[model_name]
+
+        with open(input_json, encoding="utf-8") as f:
+            data = json.load(f)
+
+        try:
+            parsed = [model_class.model_validate(obj) for obj in data]
+        except ValidationError as e:
+            for error in e.errors():
+                logger.error(f"{error['type']}: {error['msg']} at {error['loc']}")
+            raise SystemExit(1)
+
+        logger.info(f"Re-scanning {len(parsed)} records for tinyIds...")
+
+        # Build text index: tinyId -> [texts across all fields]
+        tid_texts = {}
+        for item in parsed:
+            item_dict = item.model_dump(mode="json")
+            tid = item_dict.get("tinyId", "")
+            if not tid:
+                continue
+            texts = []
+            for fp in field_paths:
+                parts = fp.split(".")
+                texts.extend(_extract_at_path(item_dict, parts))
+            if texts:
+                tid_texts[tid] = texts
+
+        # Search each variant in all texts
+        rescan_hits = 0
+        rescan_tinyids_total = 0
+        for variant in variant_to_sources:
+            discovered_tids = set()
+            for tid, texts in tid_texts.items():
+                for text in texts:
+                    if variant in text:
+                        discovered_tids.add(tid)
+                        break
+            if discovered_tids:
+                rescan_hits += 1
+                rescan_tinyids_total += len(discovered_tids)
+            # Replace inherited tinyIds with discovered ones
+            variant_to_tinyids[variant] = discovered_tids
+
+        logger.info(
+            f"Re-scan complete: {rescan_hits}/{len(variant_to_sources)} variants matched, "
+            f"{rescan_tinyids_total} total tinyId hits"
+        )
+
+    # Filter out variants with no tinyIds when rescan is active
+    # Empty tinyIds in strip_phrases means "apply to all records" — so unmatched
+    # rescan variants would cause over-stripping
+    if do_rescan:
+        empty_variants = [v for v in variant_to_sources if not variant_to_tinyids[v]]
+        if empty_variants:
+            logger.info(
+                f"Dropping {len(empty_variants)} variants with no rescan matches "
+                f"(would over-strip as unrestricted)"
+            )
+            for v in empty_variants:
+                del variant_to_sources[v]
+                del variant_to_tinyids[v]
+
+    # Write output TSV
+    # Sort: by source pattern (grouped), then longest variant first
+    ordered_variants = sorted(
+        variant_to_sources.keys(),
+        key=lambda v: (
+            min(variant_to_sources[v]),  # group by source pattern
+            -len(v),                     # longest first within group
+            v                            # alpha tiebreaker
+        )
+    )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("pattern\tsource_pattern\ttinyIds\n")
+        for variant in ordered_variants:
+            sources = sorted(variant_to_sources[variant])
+            source_str = sources[0]  # primary source (shortest if multiple)
+            tinyids = variant_to_tinyids[variant]
+            tinyids_str = " ".join(sorted(tinyids)) if tinyids else ""
+            f.write(f"{variant}\t{source_str}\t{tinyids_str}\n")
+
+    n_with_tinyids = sum(1 for v in ordered_variants if variant_to_tinyids[v])
+    n_empty = len(ordered_variants) - n_with_tinyids
+
+    print(f"Input:    {len(patterns)} curated patterns")
+    print(f"Expanded: {len(ordered_variants)} variants")
+    if do_rescan and empty_variants:
+        print(f"  Dropped: {len(empty_variants)} unmatched variants")
+    print(f"  Case:   +{stats['case']}")
+    print(f"  Number: +{stats['number']}")
+    print(f"  Plural: +{stats['plural']}")
+    if do_rescan:
+        print(f"Re-scan:  {rescan_hits} variants matched in source JSON")
+    print(f"TinyIds:  {n_with_tinyids} with, {n_empty} without")
+    print(f"Wrote:    {output_path}")
+
+    return 0
+
+
 @graceful_interrupt
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
@@ -1132,6 +1328,11 @@ def run_action(args: Namespace):
     group_semantic = getattr(args, 'group_semantic', None)
     if group_semantic:
         return _run_group_semantic(args, group_semantic)
+
+    # Check for expand-verbatim mode
+    expand_verbatim = getattr(args, 'expand_verbatim', None)
+    if expand_verbatim:
+        return _run_expand_verbatim(args, expand_verbatim)
 
     # Check for field-analysis mode
     field_analysis = getattr(args, 'field_analysis', None)

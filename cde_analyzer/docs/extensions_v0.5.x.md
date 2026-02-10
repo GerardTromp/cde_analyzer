@@ -199,3 +199,95 @@ Group/sub-group hierarchy assignment using prefix-based grouping with delimiter 
 ### `logic/span_boundary.py`
 
 SpaCy-based semantic boundary detection for prefix group trimming. Uses POS tagging to prevent overshooting into content-bearing tokens. Supports temporal frame detection and classification.
+
+---
+
+## 9. Verbatim Variant Expansion (`pattern_util --expand-verbatim`) — v0.5.3
+
+**Files**: `actions/pattern_util/{cli,run}.py`, `utils/pattern_variant_generator.py`
+
+Expands curated patterns with narrow case/number/plural variants for precise verbatim matching. Replaces the need for `--ignore-case` at strip time, giving the curator control over what gets stripped.
+
+### CLI
+
+```bash
+cde-analyzer pattern_util --expand-verbatim curated.tsv \
+    -o expanded.tsv \
+    [--no-case-variants] [--no-number-variants] [--no-plural-variants] \
+    [--rescan -i source.json -m CDE]
+```
+
+### Variant Types
+
+| Type | Example input | Variants generated |
+|------|--------------|-------------------|
+| Case | `In the past 7 days` | + `in the past 7 days` |
+| Number | `in the past 7 days` | + `in the past seven days` |
+| Plural | `in the past 7 days` | + `in the past 7 day` |
+| Cross-product | all of the above | Case applied to all accumulated variants |
+
+### Rescan Mode
+
+With `--rescan`, each expanded variant is searched in the source JSON to discover which tinyIds actually contain it. Without rescan, variants inherit the source pattern's tinyIds.
+
+**Important**: Variants with no rescan matches are dropped — empty tinyIds would mean "apply to all records" in the strip engine, causing over-stripping.
+
+### Output Format
+
+```tsv
+pattern	source_pattern	tinyIds
+In the past 7 days	In the past 7 days	tid1|tid2|tid3
+in the past 7 days	In the past 7 days	tid1|tid2|tid3|tid4
+In the past seven days	In the past 7 days	tid5|tid6
+```
+
+### Typical Expansion
+
+For 12 curated patterns → ~40-60 expanded variants after dedup and rescan filtering.
+
+---
+
+## 10. Word Boundary Matching (`strip_phrases --word-boundary`) — v0.5.3
+
+**Files**: `logic/phrase_stripper.py`, `actions/strip_phrases/{cli,run}.py`
+
+Adds `\b` regex word boundary anchors to prevent partial-word matches during stripping.
+
+### Problem Solved
+
+Without word boundaries, the pattern `"in the past"` matches inside `"within the past week"`, leaving the artifact `"with week"`. With `--word-boundary`, the `\b` anchors require word boundaries at both ends of the match, preventing partial-word overlap.
+
+### CLI
+
+```bash
+cde-analyzer strip_phrases -i source.json -m CDE -o output.json \
+    --patterns expanded.tsv,pattern \
+    --word-boundary \
+    --workers 0
+```
+
+### Composable Flags
+
+Both `--word-boundary` and `--ignore-case` can be active simultaneously:
+
+```bash
+# Word boundary + case insensitive
+cde-analyzer strip_phrases ... --word-boundary --ignore-case
+```
+
+The matching engine builds `re.search(r'\b' + re.escape(phrase) + r'\b', value, re.IGNORECASE)` when both are set.
+
+### Recommended Workflow
+
+Pre-expand patterns with `--expand-verbatim` (which handles case variants explicitly), then strip with `--word-boundary` for precision:
+
+```bash
+# 1. Expand curated patterns
+cde-analyzer pattern_util --expand-verbatim curated.tsv \
+    --rescan -i source.json -m CDE -o expanded.tsv
+
+# 2. Strip with word boundaries (no anchor expansion needed)
+cde-analyzer strip_phrases -i source.json -m CDE -o stripped.json \
+    --patterns expanded.tsv,pattern \
+    --word-boundary --no-expand-anchors --workers 0
+```

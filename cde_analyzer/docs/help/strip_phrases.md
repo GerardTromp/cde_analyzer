@@ -46,6 +46,8 @@ Column matching is case-insensitive. Excel-quoted fields are automatically unquo
 | `-f, --fields` | Field paths to strip phrases from (default: `definitions.*.definition designations.*.designation`) |
 | `--sort-order` | Pattern processing order: `length` (longest-first, default), `file` (preserve TSV order), `alpha` (alphabetical) |
 | `-w, --workers` | Parallel workers: `0` = auto-detect, `1` = sequential (default), `N` = exactly N workers |
+| `--word-boundary` | Use `\b` regex word boundary anchors for pattern matching. Prevents partial-word matches: `"in the past"` will NOT match inside `"within the past"`. Composable with `--ignore-case` |
+| `--ignore-case` | Case-insensitive pattern matching via `re.IGNORECASE`. Composable with `--word-boundary` |
 
 ### Remnant Detection and Cleanup
 
@@ -157,7 +159,7 @@ The command produces:
 
 ## Notes
 
-- Phrase matching is exact (verbatim) — no regex support in phrases
+- Phrase matching is exact (verbatim) by default. Use `--word-boundary` for regex word-boundary matching or `--ignore-case` for case-insensitive matching
 - Multiple spaces are normalized after phrase removal
 - When `--clean-remnants` is used, cleanup runs after stripping but before writing
 - When both `--clean-remnants` and `--detect-remnants` are used, remnant detection runs after cleanup (measuring residual artifacts)

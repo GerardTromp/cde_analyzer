@@ -123,6 +123,16 @@ def register_subparser(subparser: ArgumentParser):
              "will also match 'in the past' and 'IN THE PAST'.",
     )
 
+    # Word boundary matching
+    subparser.add_argument(
+        "--word-boundary",
+        action="store_true",
+        default=False,
+        help="Use word boundary anchors (\\b) for pattern matching. "
+             "Prevents partial-word matches: 'in the past' will NOT match "
+             "inside 'within the past'. Composable with --ignore-case.",
+    )
+
     # Anchor expansion (improves stripping by matching with context)
     subparser.add_argument(
         "--expand-anchors",

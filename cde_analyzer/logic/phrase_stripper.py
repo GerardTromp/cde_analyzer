@@ -23,6 +23,7 @@ _model_class_global: Optional[Type[BaseModel]] = None
 _source_map_global: Optional[dict] = None
 _logging_enabled_global: bool = False
 _case_insensitive_global: bool = False
+_word_boundary_global: bool = False
 
 
 # Modify to always expect replacement even if empty string
@@ -282,13 +283,22 @@ def _replace_if_match(
         replace_with: Replacement string
         tiny_id: Optional tinyId for trace output
     """
-    global _trace_file, _match_log, _source_map, _case_insensitive_global
+    global _trace_file, _match_log, _source_map, _case_insensitive_global, _word_boundary_global
     try:
         value = container[key_or_index]
         if isinstance(value, str):
-            # Case-insensitive: compare lowered strings; case-sensitive: direct substring
-            if _case_insensitive_global:
-                found = phrase.lower() in value.lower()
+            # Build regex flags for word-boundary and case-insensitive modes
+            use_regex = _word_boundary_global or _case_insensitive_global
+
+            if use_regex:
+                regex_flags = 0
+                if _case_insensitive_global:
+                    regex_flags |= re.IGNORECASE
+                pattern_str = re.escape(phrase)
+                if _word_boundary_global:
+                    pattern_str = r'\b' + pattern_str + r'\b'
+                match_obj = re.search(pattern_str, value, flags=regex_flags)
+                found = match_obj is not None
             else:
                 found = phrase in value
 
@@ -296,8 +306,8 @@ def _replace_if_match(
                 log_if_verbose(f"Replacing phrase in path: {key_or_index}", 3)
 
                 # Capture verbatim text (context around the match) before replacement
-                if _case_insensitive_global:
-                    idx = value.lower().find(phrase.lower())
+                if use_regex:
+                    idx = match_obj.start()
                 else:
                     idx = value.find(phrase)
                 start = max(0, idx - 20)
@@ -308,9 +318,9 @@ def _replace_if_match(
                 if end < len(value):
                     verbatim = verbatim + "..."
 
-                # Case-insensitive: use regex for replacement; case-sensitive: str.replace
-                if _case_insensitive_global:
-                    result = sanitize(re.sub(re.escape(phrase), replace_with, value, flags=re.IGNORECASE))
+                # Regex mode (word-boundary and/or case-insensitive); otherwise plain str.replace
+                if use_regex:
+                    result = sanitize(re.sub(pattern_str, replace_with, value, flags=regex_flags))
                 else:
                     result = sanitize(value.replace(phrase, replace_with))
                 container[key_or_index] = result
@@ -436,7 +446,8 @@ def _worker_init(
     model_class_name: str,
     source_map: Optional[dict] = None,
     logging_enabled: bool = False,
-    case_insensitive: bool = False
+    case_insensitive: bool = False,
+    word_boundary: bool = False
 ):
     """
     Initialize worker process with shared phrase_map.
@@ -444,10 +455,11 @@ def _worker_init(
     Uses global variables to avoid serializing large phrase_map for each task.
     """
     global _phrase_map_global, _model_class_global, _source_map_global
-    global _logging_enabled_global, _case_insensitive_global
+    global _logging_enabled_global, _case_insensitive_global, _word_boundary_global
     global _match_log, _source_map
     _phrase_map_global = phrase_map
     _case_insensitive_global = case_insensitive
+    _word_boundary_global = word_boundary
 
     # Resolve model class from name
     from utils.constants import MODEL_REGISTRY
@@ -496,7 +508,8 @@ def strip_phrases(
     n_workers: int = 1,
     source_map: Optional[dict] = None,
     logging_enabled: bool = False,
-    case_insensitive: bool = False
+    case_insensitive: bool = False,
+    word_boundary: bool = False
 ) -> List[BaseModel]:
     """
     Strip phrases from a list of models.
@@ -510,12 +523,14 @@ def strip_phrases(
                     Used for match logging in parallel mode.
         logging_enabled: If True, enable match logging (for parallel aggregation).
         case_insensitive: If True, use case-insensitive pattern matching.
+        word_boundary: If True, use \\b word boundary anchors for matching.
 
     Returns:
         List of cleaned models in original order
     """
-    global _match_log, _case_insensitive_global
+    global _match_log, _case_insensitive_global, _word_boundary_global
     _case_insensitive_global = case_insensitive
+    _word_boundary_global = word_boundary
 
     if not model_list:
         return []
@@ -568,7 +583,7 @@ def strip_phrases(
     with ProcessPoolExecutor(
         max_workers=n_workers,
         initializer=_worker_init,
-        initargs=(phrase_map, model_class_name, source_map, logging_enabled, case_insensitive)
+        initargs=(phrase_map, model_class_name, source_map, logging_enabled, case_insensitive, word_boundary)
     ) as executor:
         futures = {
             executor.submit(_worker_process_chunk, chunk): chunk[0]
