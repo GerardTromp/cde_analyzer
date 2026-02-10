@@ -114,6 +114,15 @@ def register_subparser(subparser: ArgumentParser):
              "Modifies the output JSON in-place before writing.",
     )
 
+    # Case-insensitive matching
+    subparser.add_argument(
+        "--ignore-case",
+        action="store_true",
+        default=False,
+        help="Case-insensitive pattern matching. Patterns like 'In the past' "
+             "will also match 'in the past' and 'IN THE PAST'.",
+    )
+
     # Anchor expansion (improves stripping by matching with context)
     subparser.add_argument(
         "--expand-anchors",

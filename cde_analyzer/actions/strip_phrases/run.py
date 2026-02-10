@@ -645,10 +645,15 @@ def run_action(args: Namespace):
         logger.warning(f"Trace file enabled: forcing sequential processing (workers=1 instead of {n_workers})")
         n_workers = 1
 
+    case_insensitive = getattr(args, 'ignore_case', False)
+    if case_insensitive:
+        logger.info("Case-insensitive matching enabled")
+
     logger.info(f"Stripping phrases from {len(parsed)} records (workers={n_workers})...")
     cleaned = strip_phrases(
         parsed, phrase_map, n_workers=n_workers,
-        source_map=source_map, logging_enabled=logging_enabled
+        source_map=source_map, logging_enabled=logging_enabled,
+        case_insensitive=case_insensitive
     )
     logger.info("Phrase stripping complete")
 
