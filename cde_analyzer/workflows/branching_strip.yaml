@@ -18,6 +18,10 @@
 #       --set output_dir=/path/to/output \
 #       --set inst_patterns_base=/path/to/inst_patterns \
 #       --set phrase_patterns=/path/to/curated_phrases.tsv
+#
+# Phrase stripping uses --word-boundary to prevent partial-word matches
+# (e.g. "past 7 day" matching inside "past 7 days") and --clean-remnants
+# to remove post-strip artifacts (orphan articles, floating punctuation).
 
 name: branching_strip
 description: "5-way branching strip: full/sub instrument × with/without phrases"
@@ -27,6 +31,7 @@ variables:
   output_dir: "${OUTPUT_DIR}"
   model: "${MODEL:-CDE}"
   workers: 0
+  version: "${VERSION:-}"
 
   # Instrument pattern files (from --generate-strip-patterns)
   # Base path without _full.tsv / _sub.tsv suffix
@@ -74,6 +79,8 @@ steps:
       model: "${model}"
       output: "${phrase_json}"
       workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
 
   # Branch 4: Full instrument + phrases
   - name: strip_both_full
@@ -84,6 +91,8 @@ steps:
       model: "${model}"
       output: "${both_full_json}"
       workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
 
   # Branch 5: Sub-group instrument + phrases
   - name: strip_both_sub
@@ -94,3 +103,14 @@ steps:
       model: "${model}"
       output: "${both_sub_json}"
       workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+
+  # Quality report — scans all stripped outputs for detritus and remnants
+  - name: quality_report
+    action: strip_report
+    args:
+      output_dir: "${output_dir}"
+      input_json: "${input_json}"
+      output: "${output_dir}/strip_report.md"
+      version: "${version}"

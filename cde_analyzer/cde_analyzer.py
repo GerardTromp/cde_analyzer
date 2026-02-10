@@ -124,6 +124,11 @@ ACTION_REGISTRY = {
         "help": "Generate markdown summary reports for discovery pipelines",
         "description": "Summarize pipeline steps with pattern counts, tinyId coverage, and subsumption stats",
     },
+    "strip_report": {
+        "module": "actions.strip_report.cli",
+        "help": "Generate quality report for stripped JSON outputs",
+        "description": "Scan stripped outputs for detritus, remnants, and remaining temporal patterns",
+    },
     # "depth": {...}
     # "quality": {...}
 }

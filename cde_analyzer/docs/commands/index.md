@@ -32,6 +32,8 @@ CDE Analyzer provides a suite of CLI commands for processing and analyzing Commo
 | Command | Description | Status |
 |---------|-------------|--------|
 | [discovery_report](../help/discovery_report.md) | Generate markdown pipeline summary with remnant analysis | New |
+| [pipeline_report](../help/pipeline_report.md) | Generate comprehensive pipeline execution reports | New |
+| [strip_report](../help/strip_report.md) | Quality report for stripped JSON outputs (remnants, temporal phrases) | New |
 
 ## Data Cleaning
 

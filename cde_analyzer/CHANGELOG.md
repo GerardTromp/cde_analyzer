@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2026-02-10
+
+### Added
+- New action: `strip_report` — generate markdown quality reports for stripped JSON outputs
+  - Per-branch remnant detection matrix (15 detritus types × N branches)
+  - Remaining temporal phrase inventory with tinyId counts
+  - Embed data CSV manifest (file sizes, row counts)
+  - Version history tracking across iterations
+  - Auto-detects `*_stripped.json` files in output directory
+- Quality report step added to `branching_strip.yaml` workflow (runs automatically after stripping)
+
 ## [0.5.4] - 2026-02-09
 
 ### Added

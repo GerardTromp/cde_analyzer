@@ -66,6 +66,7 @@ python cde_analyzer.py phrase-miner --help
 | [discovery-report](help/discovery_report.md) | Generate pipeline summary reports |
 | [recall-analyze](help/recall_analyze.md) | Pattern recall analysis with ground truth comparison |
 | [pipeline-report](help/pipeline_report.md) | Generate comprehensive pipeline reports |
+| [strip-report](help/strip_report.md) | Quality report for stripped outputs (remnants, temporal phrases) |
 | [count](help/count.md) | Count structural elements and field occurrences |
 
 ### Data Cleaning & Export

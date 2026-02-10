@@ -411,6 +411,29 @@ options:
 
 ---
 
+### `strip_report` Command
+
+Generate quality report for stripped JSON outputs with remnant detection and temporal phrase inventory.
+
+```bash
+usage: strip_report [-h] --output-dir OUTPUT_DIR -o OUTPUT
+                    [--input-json INPUT_JSON] [--version VERSION]
+                    [--embed-dir EMBED_DIR] [--no-temporal-scan]
+                    [--json-pattern JSON_PATTERN]
+
+options:
+  -h, --help            show this help message and exit
+  --output-dir, -d DIR  Directory containing *_stripped.json outputs
+  -o, --output FILE     Path to output markdown report
+  --input-json, -i FILE Original input JSON (for baseline record count)
+  --version LABEL       Version label for iteration tracking
+  --embed-dir DIR       Embed data directory for CSV file manifest
+  --no-temporal-scan    Skip scanning for remaining temporal phrases
+  --json-pattern PAT    Glob pattern to match JSON files (default: *_stripped.json)
+```
+
+---
+
 ### `recall_analyze` Command
 
 Analyze recall and detect false negatives in instrument detection.

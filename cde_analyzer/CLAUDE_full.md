@@ -91,6 +91,7 @@ The `cde-analyzer` command accepts action arguments:
 14. **subset** - Extract subsets using literal/regex/tinyID filters
 15. **llm_classify** - Multi-LLM phrase classification with confidence aggregation
 16. **workflow** - YAML-based workflow orchestrator with checkpoints
+17. **strip_report** - Quality report for stripped JSON outputs (remnant detection, temporal phrases)
 
 **Usage**: `cde-analyzer <action> [arguments]`
 

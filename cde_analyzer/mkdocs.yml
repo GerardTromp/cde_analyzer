@@ -35,6 +35,7 @@ nav:
     - Reporting:
       - discovery_report: help/discovery_report.md
       - pipeline_report: help/pipeline_report.md
+      - strip_report: help/strip_report.md
       - recall_analyze: help/recall_analyze.md
     - Export & Filtering:
       - lemma_fasta: help/lemma_fasta.md
