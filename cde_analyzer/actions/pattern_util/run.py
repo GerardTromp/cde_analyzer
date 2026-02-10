@@ -1090,6 +1090,126 @@ def _run_generate_proxies(args, input_path: str) -> int:
     return 0
 
 
+def _run_edit(args, edit_path: str) -> int:
+    """
+    Launch a local HTTP server serving the interactive TSV editor.
+
+    Pre-loads the specified TSV file and provides REST endpoints for
+    save-back. Opens the browser automatically unless --no-browser.
+    """
+    import json
+    import threading
+    import webbrowser
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    from pathlib import Path
+    from urllib.parse import urlparse
+
+    # Validate input file exists (if specified)
+    tsv_path = None
+    if edit_path:
+        from utils.file_utils import exit_if_missing
+        exit_if_missing(edit_path, "TSV file to edit")
+        tsv_path = Path(edit_path).resolve()
+
+    # Locate the HTML file co-located with this module
+    html_path = Path(__file__).parent / "tsv_editor.html"
+    if not html_path.exists():
+        logger.error(f"Editor HTML not found: {html_path}")
+        raise SystemExit(1)
+
+    html_content = html_path.read_bytes()
+
+    # Read TSV content for pre-loading
+    tsv_content = ""
+    if tsv_path and tsv_path.exists():
+        tsv_content = tsv_path.read_text(encoding="utf-8")
+
+    # Build request handler with closure over file state
+    class EditorHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            parsed = urlparse(self.path)
+            path = parsed.path
+            if path in ('/', '/index.html'):
+                self._serve_bytes(html_content, 'text/html; charset=utf-8')
+            elif path == '/data':
+                payload = json.dumps({
+                    'content': tsv_content,
+                    'filename': tsv_path.name if tsv_path else '',
+                }).encode('utf-8')
+                self._serve_bytes(payload, 'application/json')
+            elif path == '/info':
+                info = {
+                    'path': str(tsv_path) if tsv_path else '',
+                    'filename': tsv_path.name if tsv_path else '',
+                    'server_mode': True,
+                }
+                self._serve_bytes(json.dumps(info).encode('utf-8'), 'application/json')
+            else:
+                self.send_error(404)
+
+        def do_POST(self):
+            if self.path == '/save':
+                self._handle_save()
+            else:
+                self.send_error(404)
+
+        def _serve_bytes(self, data, content_type):
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def _handle_save(self):
+            nonlocal tsv_content
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body)
+                new_content = data['content']
+                if tsv_path:
+                    tsv_path.write_text(new_content, encoding='utf-8')
+                    tsv_content = new_content
+                    logger.info(f"Saved {len(new_content)} bytes to {tsv_path}")
+                    resp = json.dumps({'status': 'ok', 'path': str(tsv_path)}).encode()
+                else:
+                    resp = json.dumps({'status': 'error', 'message': 'No file path'}).encode()
+                self._serve_bytes(resp, 'application/json')
+            except Exception as e:
+                logger.error(f"Save failed: {e}")
+                self.send_error(500, str(e))
+
+        def log_message(self, format, *log_args):
+            pass  # suppress per-request logging
+
+    port = getattr(args, 'port', 0)
+    no_browser = getattr(args, 'no_browser', False)
+
+    server = HTTPServer(('127.0.0.1', port), EditorHandler)
+    actual_port = server.server_address[1]
+    url = f"http://127.0.0.1:{actual_port}/"
+
+    file_desc = f" ({tsv_path.name})" if tsv_path else ""
+    print(f"\nTSV Editor{file_desc}")
+    print(f"  URL:    {url}")
+    if tsv_path:
+        print(f"  File:   {tsv_path}")
+    print(f"  Press Ctrl-C to stop.\n")
+
+    if not no_browser:
+        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+        print("\nEditor server stopped.")
+
+    return 0
+
+
 def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     """
     Expand curated patterns with temporal preposition, case, number, and plural variants.
@@ -1303,6 +1423,11 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
 
+    # Check for interactive editor mode (early — interactive, long-running)
+    edit_path = getattr(args, 'edit', None)
+    if edit_path is not None:
+        return _run_edit(args, edit_path)
+
     # Check for to-minimal mode first (simple normalization)
     to_minimal = getattr(args, 'to_minimal', None)
     if to_minimal:
@@ -1490,8 +1615,9 @@ def run_action(args: Namespace):
         return 0
 
     # No mode specified
-    logger.error("No mode specified. Use --to-minimal, --merge-patterns, --coalesce-variants, --group-hierarchy, --generate-strip-patterns, --generate-proxies, or --add-to-supplementary.")
+    logger.error("No mode specified. Use --edit, --to-minimal, --merge-patterns, --coalesce-variants, --group-hierarchy, --generate-strip-patterns, --generate-proxies, or --add-to-supplementary.")
     print("\nUsage:")
+    print("  cde-analyzer pattern_util --edit FILE                    # interactive TSV editor")
     print("  cde-analyzer pattern_util --to-minimal FILE -o OUTPUT")
     print("  cde-analyzer pattern_util --merge-patterns FILE -o OUTPUT")
     print("  cde-analyzer pattern_util --coalesce-variants FILE -o OUTPUT")

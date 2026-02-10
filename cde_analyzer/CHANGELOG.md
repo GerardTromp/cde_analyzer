@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2026-02-10
+
+### Added
+- `pattern_util --edit FILE` — interactive browser-based TSV editor for pattern curation
+  - Hybrid architecture: standalone HTML (drag-drop) + Python server (direct save-back)
+  - Self-contained HTML file with no external dependencies (vanilla JS/CSS)
+  - Python server uses stdlib `http.server` with REST endpoints (`/info`, `/data`, `POST /save`)
+  - Features: sortable columns, column filtering (with `>N`, `<N`, `!negation` syntax), inline cell editing, row selection (Shift/Ctrl-click), bulk categorize, merge rows (union tinyIds), split by field_profile, drag-and-drop row reorder, undo/redo (Ctrl+Z, 50 levels), tinyId collapsed/expanded display, field_profile color coding, unsaved changes detection
+  - `--port PORT` — specify server port (default: auto-assign)
+  - `--no-browser` — start server without opening browser
+
 ## [0.5.5] - 2026-02-10
 
 ### Added

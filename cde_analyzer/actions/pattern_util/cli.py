@@ -381,6 +381,28 @@ def register_subparser(subparser: ArgumentParser):
              "(instead of inheriting from source pattern). Requires --input and --model.",
     )
 
+    # Interactive TSV editor mode
+    subparser.add_argument(
+        "--edit",
+        type=str,
+        metavar="FILE",
+        help="Open an interactive TSV editor in the browser. "
+             "Starts a local server, opens the browser pre-loaded with the TSV file, "
+             "and supports save-back to disk. Press Ctrl-C to stop the server. "
+             "Without a file, opens a blank editor for drag-drop loading.",
+    )
+    subparser.add_argument(
+        "--port",
+        type=int,
+        default=0,
+        help="Port for the editor server (default: auto-assign). Use with --edit.",
+    )
+    subparser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Start the editor server without opening a browser. Use with --edit.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

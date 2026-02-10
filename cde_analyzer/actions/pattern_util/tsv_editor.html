@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSV Pattern Editor</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #ffffff;
+    --bg-alt: #f8f9fa;
+    --bg-selected: #e3f2fd;
+    --bg-hover: #f0f4f8;
+    --border: #dee2e6;
+    --border-light: #e9ecef;
+    --text: #212529;
+    --text-muted: #6c757d;
+    --primary: #1976d2;
+    --primary-light: #bbdefb;
+    --danger: #d32f2f;
+    --danger-light: #ffcdd2;
+    --success: #388e3c;
+    --success-light: #c8e6c9;
+    --warning: #f57c00;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    --toolbar-h: 42px;
+    --filter-h: 30px;
+    --status-h: 28px;
+    --profile-def: #1565c0;
+    --profile-desig: #e65100;
+    --profile-both: #2e7d32;
+    --profile-mixed: #6a1b9a;
+}
+
+body {
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* ===== TOOLBAR ===== */
+#toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    height: var(--toolbar-h);
+    flex-shrink: 0;
+}
+
+#toolbar .sep {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    margin: 0 6px;
+}
+
+.tb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.1s;
+}
+.tb-btn:hover { background: var(--bg-hover); }
+.tb-btn:active { background: var(--border-light); }
+.tb-btn:disabled { opacity: 0.4; cursor: default; }
+.tb-btn.danger { color: var(--danger); }
+.tb-btn.danger:hover { background: var(--danger-light); }
+.tb-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.tb-btn.primary:hover { background: #1565c0; }
+
+#toolbar .title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+#toolbar .spacer { flex: 1; }
+
+/* ===== DROP ZONE ===== */
+#drop-zone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    z-index: 100;
+}
+
+#drop-zone .drop-area {
+    width: 500px;
+    height: 300px;
+    border: 3px dashed var(--border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+#drop-zone .drop-area.dragover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+#drop-zone .drop-icon { font-size: 48px; color: var(--text-muted); }
+#drop-zone .drop-text { font-size: 18px; color: var(--text-muted); }
+#drop-zone .drop-hint { font-size: 13px; color: var(--text-muted); }
+
+#drop-zone .file-btn {
+    padding: 8px 24px;
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--primary);
+    font-size: 14px;
+    cursor: pointer;
+}
+#drop-zone .file-btn:hover { background: var(--primary-light); }
+
+#file-input { display: none; }
+
+/* ===== GRID CONTAINER ===== */
+#grid-container {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+}
+
+/* ===== TABLE ===== */
+#grid {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    font-size: 12px;
+}
+
+#grid th, #grid td {
+    border: 1px solid var(--border-light);
+    padding: 3px 6px;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+
+/* Header row */
+#grid thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-alt);
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid var(--border);
+    padding: 5px 6px;
+}
+
+#grid thead tr:first-child th:hover { background: #e2e6ea; }
+
+.sort-arrow { margin-left: 4px; font-size: 10px; color: var(--text-muted); }
+
+/* Filter row */
+#grid thead tr.filter-row th {
+    position: sticky;
+    top: 29px;
+    z-index: 9;
+    background: #f5f5f5;
+    padding: 2px 3px;
+    border-bottom: 2px solid var(--border);
+}
+
+.filter-input {
+    width: 100%;
+    padding: 2px 4px;
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: var(--font);
+    outline: none;
+}
+.filter-input:focus { border-color: var(--primary); }
+.filter-input.active { background: #fff3e0; border-color: var(--warning); }
+
+/* Checkbox column */
+.col-check { width: 30px; max-width: 30px; text-align: center !important; }
+.col-check input[type="checkbox"] { cursor: pointer; }
+
+/* Row number column */
+.col-rownum { width: 36px; max-width: 36px; text-align: right !important; color: var(--text-muted); font-size: 11px; }
+
+/* Row styling */
+#grid tbody tr { transition: background 0.05s; }
+#grid tbody tr:hover { background: var(--bg-hover); }
+#grid tbody tr.selected { background: var(--bg-selected); }
+#grid tbody tr.hidden { display: none; }
+
+/* Field profile color coding */
+#grid tbody tr.fp-def-only { border-left: 3px solid var(--profile-def); }
+#grid tbody tr.fp-desig-only { border-left: 3px solid var(--profile-desig); }
+#grid tbody tr.fp-both-all { border-left: 3px solid var(--profile-both); }
+#grid tbody tr.fp-both { border-left: 3px solid var(--profile-both); }
+#grid tbody tr.fp-mixed { border-left: 3px solid var(--profile-mixed); }
+
+/* Editing cell */
+#grid td.editing {
+    padding: 0;
+    overflow: visible;
+}
+
+#grid td.editing input,
+#grid td.editing textarea {
+    width: 100%;
+    min-width: 200px;
+    padding: 3px 5px;
+    border: 2px solid var(--primary);
+    border-radius: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    background: #fff;
+}
+
+#grid td.editing textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+/* tinyId cells */
+.tinyid-cell { cursor: pointer; }
+
+.tinyid-collapsed .tid-count {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0 5px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.tinyid-collapsed .tid-preview { color: var(--text-muted); font-size: 11px; }
+
+.tinyid-expanded {
+    white-space: normal !important;
+    max-width: 600px !important;
+}
+
+.tinyid-expanded .tid-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.tid-pill {
+    display: inline-block;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-light);
+    padding: 0 4px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 18px;
+}
+
+/* ===== STATUS BAR ===== */
+#status-bar {
+    display: flex;
+    align-items: center;
+    padding: 2px 12px;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
+    height: var(--status-h);
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    gap: 8px;
+}
+
+#status-bar .spacer { flex: 1; }
+
+#status-left { display: flex; gap: 12px; }
+#status-action { color: var(--success); }
+
+.mode-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.mode-dot.server { background: var(--success); }
+.mode-dot.standalone { background: var(--text-muted); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.modal {
+    background: var(--bg);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    min-width: 420px;
+    max-width: 700px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.modal label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.modal select, .modal input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.modal .preview-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ===== DRAG-DROP ROW REORDER ===== */
+#grid tbody tr[draggable="true"] .col-rownum { cursor: grab; }
+#grid tbody tr.drag-over-top { border-top: 2px solid var(--primary); }
+#grid tbody tr.drag-over-bottom { border-bottom: 2px solid var(--primary); }
+
+/* ===== SCROLLBAR ===== */
+#grid-container::-webkit-scrollbar { width: 10px; height: 10px; }
+#grid-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+#grid-container::-webkit-scrollbar-track { background: var(--bg-alt); }
+</style>
+</head>
+<body>
+
+<!-- Drop Zone (shown when no data loaded) -->
+<div id="drop-zone">
+    <div class="drop-area" id="drop-area">
+        <div class="drop-icon">&#128196;</div>
+        <div class="drop-text">Drop a TSV file here</div>
+        <div class="drop-hint">or</div>
+        <button class="file-btn" onclick="document.getElementById('file-input').click()">Choose File</button>
+        <div class="drop-hint">.tsv, .txt, .tab</div>
+    </div>
+    <input type="file" id="file-input" accept=".tsv,.txt,.tab,.csv">
+</div>
+
+<!-- Toolbar -->
+<div id="toolbar" style="display:none">
+    <span class="title">TSV Editor</span>
+    <div class="sep"></div>
+
+    <!-- File ops -->
+    <button class="tb-btn" id="btn-open" title="Open file (drag-drop or pick)">&#128194; Open</button>
+    <button class="tb-btn primary" id="btn-save" title="Save to server (Ctrl+S)">&#128190; Save</button>
+    <button class="tb-btn" id="btn-download" title="Download as TSV">&#8615; Download</button>
+    <div class="sep"></div>
+
+    <!-- Row ops -->
+    <button class="tb-btn" id="btn-add-row" title="Add empty row">+ Row</button>
+    <button class="tb-btn danger" id="btn-delete" title="Delete selected rows (Del)" disabled>&#10005; Delete</button>
+    <button class="tb-btn" id="btn-move-up" title="Move selected rows up" disabled>&#9650;</button>
+    <button class="tb-btn" id="btn-move-down" title="Move selected rows down" disabled>&#9660;</button>
+    <div class="sep"></div>
+
+    <!-- Bulk ops -->
+    <button class="tb-btn" id="btn-categorize" title="Categorize selected rows" disabled>&#9998; Categorize</button>
+    <button class="tb-btn" id="btn-merge" title="Merge selected rows" disabled>&#8726; Merge</button>
+    <button class="tb-btn" id="btn-split" title="Split by field_profile">&#8700; Split</button>
+    <div class="sep"></div>
+
+    <!-- Undo/redo -->
+    <button class="tb-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
+    <button class="tb-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>&#8631; Redo</button>
+
+    <span class="spacer"></span>
+
+    <span id="toolbar-info" style="font-size:11px; color:var(--text-muted)"></span>
+</div>
+
+<!-- Grid -->
+<div id="grid-container" style="display:none">
+    <table id="grid">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- Status Bar -->
+<div id="status-bar" style="display:none">
+    <div id="status-left"></div>
+    <span class="spacer"></span>
+    <span id="status-action"></span>
+    <span class="spacer"></span>
+    <span id="status-mode"></span>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== STATE =====
+    const S = {
+        headers: [],
+        rows: [],          // [{id, cells:[], selected:bool}]
+        originalContent: '',
+        sortCol: -1,
+        sortAsc: true,
+        filters: {},
+        serverMode: false,
+        filePath: '',
+        fileName: '',
+        undoStack: [],
+        redoStack: [],
+        editingCell: null,
+        nextId: 0,
+        lastShiftIdx: -1,
+        fpCol: -1,         // field_profile column index
+        tinyIdCols: [],     // indices of tinyId columns
+        expandedTids: new Set(), // row IDs with expanded tinyIds
+    };
+
+    // ===== DOM REFS =====
+    const $ = id => document.getElementById(id);
+    const dropZone = $('drop-zone');
+    const dropArea = $('drop-area');
+    const fileInput = $('file-input');
+    const toolbar = $('toolbar');
+    const gridContainer = $('grid-container');
+    const grid = $('grid');
+    const thead = grid.querySelector('thead');
+    const tbody = grid.querySelector('tbody');
+    const statusBar = $('status-bar');
+    const statusLeft = $('status-left');
+    const statusAction = $('status-action');
+    const statusMode = $('status-mode');
+    const toolbarInfo = $('toolbar-info');
+
+    // Toolbar buttons
+    const btnSave = $('btn-save');
+    const btnDownload = $('btn-download');
+    const btnOpen = $('btn-open');
+    const btnAddRow = $('btn-add-row');
+    const btnDelete = $('btn-delete');
+    const btnMoveUp = $('btn-move-up');
+    const btnMoveDown = $('btn-move-down');
+    const btnCategorize = $('btn-categorize');
+    const btnMerge = $('btn-merge');
+    const btnSplit = $('btn-split');
+    const btnUndo = $('btn-undo');
+    const btnRedo = $('btn-redo');
+
+    // ===== TSV PARSER =====
+    const TSV = {
+        parse(text) {
+            const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+            // Remove trailing empty lines
+            while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+            if (lines.length === 0) return { headers: [], rows: [] };
+
+            const headers = lines[0].split('\t');
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                const cells = lines[i].split('\t');
+                // Pad to header count
+                while (cells.length < headers.length) cells.push('');
+                rows.push(cells);
+            }
+            return { headers, rows };
+        },
+
+        serialize(headers, rows) {
+            const lines = [headers.join('\t')];
+            for (const cells of rows) {
+                lines.push(cells.join('\t'));
+            }
+            return lines.join('\n') + '\n';
+        }
+    };
+
+    // ===== DETECT SPECIAL COLUMNS =====
+    function detectColumns() {
+        S.fpCol = -1;
+        S.tinyIdCols = [];
+        for (let i = 0; i < S.headers.length; i++) {
+            const h = S.headers[i].toLowerCase();
+            if (h === 'field_profile') S.fpCol = i;
+            if (h.includes('tinyid') || h.includes('tinyids')) S.tinyIdCols.push(i);
+        }
+    }
+
+    // ===== LOAD DATA =====
+    function loadData(text, filename) {
+        const parsed = TSV.parse(text);
+        S.headers = parsed.headers;
+        S.rows = parsed.rows.map(cells => ({
+            id: S.nextId++,
+            cells: cells,
+            selected: false,
+        }));
+        S.originalContent = text;
+        S.fileName = filename || 'untitled.tsv';
+        S.sortCol = -1;
+        S.sortAsc = true;
+        S.filters = {};
+        S.undoStack = [];
+        S.redoStack = [];
+        S.editingCell = null;
+        S.expandedTids = new Set();
+
+        detectColumns();
+
+        dropZone.style.display = 'none';
+        toolbar.style.display = 'flex';
+        gridContainer.style.display = 'block';
+        statusBar.style.display = 'flex';
+
+        renderGrid();
+        updateStatus();
+        updateToolbarButtons();
+        document.title = S.fileName + ' - TSV Editor';
+    }
+
+    // ===== RENDER GRID =====
+    function renderGrid() {
+        renderHeader();
+        renderBody();
+    }
+
+    function renderHeader() {
+        thead.innerHTML = '';
+
+        // Header row
+        const tr = document.createElement('tr');
+
+        // Checkbox header
+        const thCheck = document.createElement('th');
+        thCheck.className = 'col-check';
+        const cbAll = document.createElement('input');
+        cbAll.type = 'checkbox';
+        cbAll.title = 'Select all visible';
+        cbAll.addEventListener('change', () => toggleSelectAll(cbAll.checked));
+        thCheck.appendChild(cbAll);
+        tr.appendChild(thCheck);
+
+        // Row num header
+        const thNum = document.createElement('th');
+        thNum.className = 'col-rownum';
+        thNum.textContent = '#';
+        tr.appendChild(thNum);
+
+        // Data headers
+        for (let i = 0; i < S.headers.length; i++) {
+            const th = document.createElement('th');
+            th.textContent = S.headers[i];
+            th.dataset.col = i;
+
+            // Sort arrow
+            if (S.sortCol === i) {
+                const arrow = document.createElement('span');
+                arrow.className = 'sort-arrow';
+                arrow.textContent = S.sortAsc ? '\u25B2' : '\u25BC';
+                th.appendChild(arrow);
+            }
+
+            th.addEventListener('click', () => onHeaderClick(i));
+            tr.appendChild(th);
+        }
+        thead.appendChild(tr);
+
+        // Filter row
+        const trFilter = document.createElement('tr');
+        trFilter.className = 'filter-row';
+
+        // Empty cells for checkbox + rownum
+        const fCheck = document.createElement('th');
+        fCheck.className = 'col-check';
+        trFilter.appendChild(fCheck);
+        const fNum = document.createElement('th');
+        fNum.className = 'col-rownum';
+        trFilter.appendChild(fNum);
+
+        for (let i = 0; i < S.headers.length; i++) {
+            const th = document.createElement('th');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'filter-input';
+            input.placeholder = 'Filter...';
+            input.dataset.col = i;
+            if (S.filters[i]) {
+                input.value = S.filters[i];
+                input.classList.add('active');
+            }
+            input.addEventListener('input', (e) => onFilterChange(i, e.target.value, e.target));
+            th.appendChild(input);
+            trFilter.appendChild(th);
+        }
+        thead.appendChild(trFilter);
+    }
+
+    function renderBody() {
+        tbody.innerHTML = '';
+        const visible = getVisibleRows();
+
+        for (let vi = 0; vi < visible.length; vi++) {
+            const row = visible[vi];
+            const tr = createRowElement(row, vi);
+            tbody.appendChild(tr);
+        }
+    }
+
+    function createRowElement(row, displayIndex) {
+        const tr = document.createElement('tr');
+        tr.dataset.rowId = row.id;
+        tr.draggable = true;
+
+        if (row.selected) tr.classList.add('selected');
+
+        // Field profile coloring
+        if (S.fpCol >= 0 && row.cells[S.fpCol]) {
+            const fp = row.cells[S.fpCol].trim().replace(/[_ ]/g, '-').toLowerCase();
+            if (fp) tr.classList.add('fp-' + fp);
+        }
+
+        // Check if visible
+        if (!rowMatchesFilters(row)) {
+            tr.classList.add('hidden');
+        }
+
+        // Checkbox
+        const tdCheck = document.createElement('td');
+        tdCheck.className = 'col-check';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = row.selected;
+        cb.addEventListener('change', (e) => {
+            e.stopPropagation();
+            onRowCheckbox(row.id, cb.checked, e);
+        });
+        tdCheck.appendChild(cb);
+        tr.appendChild(tdCheck);
+
+        // Row number
+        const tdNum = document.createElement('td');
+        tdNum.className = 'col-rownum';
+        tdNum.textContent = displayIndex + 1;
+        tr.appendChild(tdNum);
+
+        // Data cells
+        for (let i = 0; i < S.headers.length; i++) {
+            const td = document.createElement('td');
+            const value = row.cells[i] || '';
+
+            if (S.tinyIdCols.includes(i) && value) {
+                renderTinyIdCell(td, value, row.id);
+            } else {
+                td.textContent = value;
+                td.title = value.length > 50 ? value : '';
+            }
+
+            td.dataset.col = i;
+            td.addEventListener('dblclick', () => startEdit(row.id, i));
+            tr.appendChild(td);
+        }
+
+        // Drag events for reorder
+        tr.addEventListener('dragstart', (e) => onDragStart(e, row.id));
+        tr.addEventListener('dragover', (e) => onDragOver(e, tr));
+        tr.addEventListener('dragleave', () => { tr.classList.remove('drag-over-top', 'drag-over-bottom'); });
+        tr.addEventListener('drop', (e) => onDrop(e, row.id, tr));
+        tr.addEventListener('dragend', clearDragIndicators);
+
+        return tr;
+    }
+
+    // ===== TINYID CELL RENDERING =====
+    function renderTinyIdCell(td, value, rowId) {
+        const ids = value.split(/[\s|]+/).filter(Boolean);
+        const expanded = S.expandedTids.has(rowId + '-' + td.dataset?.col);
+
+        td.className = 'tinyid-cell';
+
+        if (expanded && ids.length > 3) {
+            td.classList.add('tinyid-expanded');
+            const pills = document.createElement('div');
+            pills.className = 'tid-pills';
+            for (const id of ids) {
+                const pill = document.createElement('span');
+                pill.className = 'tid-pill';
+                pill.textContent = id;
+                pills.appendChild(pill);
+            }
+            td.appendChild(pills);
+        } else {
+            td.classList.add('tinyid-collapsed');
+            if (ids.length > 3) {
+                const count = document.createElement('span');
+                count.className = 'tid-count';
+                count.textContent = ids.length + ' IDs';
+                td.appendChild(count);
+
+                const preview = document.createElement('span');
+                preview.className = 'tid-preview';
+                preview.textContent = ids.slice(0, 3).join(', ') + '...';
+                td.appendChild(preview);
+            } else {
+                td.textContent = ids.join(' ');
+            }
+        }
+
+        // Store col for toggle
+        td.dataset.col = td.dataset.col || '';
+        td.addEventListener('click', (e) => {
+            if (e.detail === 1 && ids.length > 3) {
+                // Single click toggles expand/collapse (but not on double-click for edit)
+                const key = rowId + '-' + td.dataset.col;
+                if (S.expandedTids.has(key)) S.expandedTids.delete(key);
+                else S.expandedTids.add(key);
+                renderBody();
+            }
+        });
+    }
+
+    // ===== SORTING =====
+    function onHeaderClick(col) {
+        if (S.sortCol === col) {
+            if (S.sortAsc) {
+                S.sortAsc = false;
+            } else {
+                // Third click: unsort
+                S.sortCol = -1;
+            }
+        } else {
+            S.sortCol = col;
+            S.sortAsc = true;
+        }
+        sortRows();
+        renderGrid();
+    }
+
+    function sortRows() {
+        if (S.sortCol < 0) return;
+        const col = S.sortCol;
+        const asc = S.sortAsc;
+
+        // Detect if column is numeric
+        const isNumeric = S.rows.every(r => {
+            const v = (r.cells[col] || '').trim();
+            return v === '' || !isNaN(Number(v));
+        });
+
+        S.rows.sort((a, b) => {
+            let va = (a.cells[col] || '').trim();
+            let vb = (b.cells[col] || '').trim();
+            // Empty values sort last
+            if (va === '' && vb === '') return 0;
+            if (va === '') return 1;
+            if (vb === '') return -1;
+
+            let cmp;
+            if (isNumeric) {
+                cmp = Number(va) - Number(vb);
+            } else {
+                cmp = va.localeCompare(vb, undefined, { sensitivity: 'base' });
+            }
+            return asc ? cmp : -cmp;
+        });
+    }
+
+    // ===== FILTERING =====
+    function onFilterChange(col, value, inputEl) {
+        if (value.trim()) {
+            S.filters[col] = value;
+            inputEl.classList.add('active');
+        } else {
+            delete S.filters[col];
+            inputEl.classList.remove('active');
+        }
+        renderBody();
+        updateStatus();
+    }
+
+    function rowMatchesFilters(row) {
+        for (const colStr in S.filters) {
+            const col = parseInt(colStr);
+            const filter = S.filters[col].trim();
+            const cellVal = (row.cells[col] || '').trim();
+
+            if (!matchFilter(cellVal, filter)) return false;
+        }
+        return true;
+    }
+
+    function matchFilter(cellVal, filter) {
+        if (!filter) return true;
+        const lower = cellVal.toLowerCase();
+
+        // Negation
+        if (filter.startsWith('!')) {
+            const term = filter.slice(1).toLowerCase();
+            return !lower.includes(term);
+        }
+        // Numeric comparisons
+        if (filter.startsWith('>') || filter.startsWith('<')) {
+            const op = filter[0];
+            const num = parseFloat(filter.slice(1));
+            if (!isNaN(num)) {
+                const cv = parseFloat(cellVal);
+                if (isNaN(cv)) return false;
+                return op === '>' ? cv > num : cv < num;
+            }
+        }
+        // OR matching (pipe-separated)
+        if (filter.includes('|')) {
+            const terms = filter.split('|').map(t => t.trim().toLowerCase()).filter(Boolean);
+            return terms.some(t => lower.includes(t));
+        }
+        // Default: substring match
+        return lower.includes(filter.toLowerCase());
+    }
+
+    function getVisibleRows() {
+        return S.rows.filter(r => rowMatchesFilters(r));
+    }
+
+    // ===== SELECTION =====
+    function onRowCheckbox(rowId, checked, event) {
+        const row = S.rows.find(r => r.id === rowId);
+        if (!row) return;
+
+        const visible = getVisibleRows();
+        const visIdx = visible.findIndex(r => r.id === rowId);
+
+        if (event.shiftKey && S.lastShiftIdx >= 0) {
+            // Range select
+            const start = Math.min(S.lastShiftIdx, visIdx);
+            const end = Math.max(S.lastShiftIdx, visIdx);
+            for (let i = start; i <= end; i++) {
+                visible[i].selected = true;
+            }
+        } else {
+            row.selected = checked;
+        }
+
+        S.lastShiftIdx = visIdx;
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+    }
+
+    function toggleSelectAll(checked) {
+        const visible = getVisibleRows();
+        for (const r of visible) r.selected = checked;
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+    }
+
+    function getSelectedRows() {
+        return S.rows.filter(r => r.selected);
+    }
+
+    function deselectAll() {
+        for (const r of S.rows) r.selected = false;
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+    }
+
+    // ===== CELL EDITING =====
+    function startEdit(rowId, col) {
+        commitEdit(); // commit any existing edit
+
+        const row = S.rows.find(r => r.id === rowId);
+        if (!row) return;
+
+        S.editingCell = { rowId, col };
+        const tr = tbody.querySelector(`tr[data-row-id="${rowId}"]`);
+        if (!tr) return;
+
+        // +2 for checkbox + rownum columns
+        const td = tr.children[col + 2];
+        if (!td) return;
+
+        const value = row.cells[col] || '';
+        td.classList.add('editing');
+        td.innerHTML = '';
+
+        // Use textarea for tinyId columns or long values
+        const useTa = S.tinyIdCols.includes(col) || value.length > 100;
+        const input = document.createElement(useTa ? 'textarea' : 'input');
+        if (!useTa) input.type = 'text';
+        input.value = value;
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cancelEdit();
+                e.preventDefault();
+            } else if (e.key === 'Enter' && !useTa) {
+                commitEdit();
+                e.preventDefault();
+            } else if (e.key === 'Tab') {
+                commitEdit();
+                // Move to next/prev cell
+                const nextCol = e.shiftKey ? col - 1 : col + 1;
+                if (nextCol >= 0 && nextCol < S.headers.length) {
+                    startEdit(rowId, nextCol);
+                }
+                e.preventDefault();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            // Delay to allow button clicks to fire first
+            setTimeout(() => {
+                if (S.editingCell && S.editingCell.rowId === rowId && S.editingCell.col === col) {
+                    commitEdit();
+                }
+            }, 150);
+        });
+
+        td.appendChild(input);
+        input.focus();
+        input.select();
+    }
+
+    function commitEdit() {
+        if (!S.editingCell) return;
+        const { rowId, col } = S.editingCell;
+        const row = S.rows.find(r => r.id === rowId);
+        if (!row) { S.editingCell = null; return; }
+
+        const tr = tbody.querySelector(`tr[data-row-id="${rowId}"]`);
+        if (!tr) { S.editingCell = null; return; }
+
+        const td = tr.children[col + 2];
+        const input = td.querySelector('input, textarea');
+        if (!input) { S.editingCell = null; return; }
+
+        const newValue = input.value;
+        const oldValue = row.cells[col] || '';
+
+        if (newValue !== oldValue) {
+            pushUndo('Edit cell');
+            row.cells[col] = newValue;
+        }
+
+        S.editingCell = null;
+        renderBody(); // re-render to restore normal cell display
+        updateStatus();
+    }
+
+    function cancelEdit() {
+        S.editingCell = null;
+        renderBody();
+    }
+
+    // ===== ROW OPERATIONS =====
+    function addRow() {
+        pushUndo('Add row');
+        const cells = S.headers.map(() => '');
+        const selectedRows = getSelectedRows();
+        const newRow = { id: S.nextId++, cells, selected: false };
+
+        if (selectedRows.length > 0) {
+            // Insert after last selected
+            const lastSel = selectedRows[selectedRows.length - 1];
+            const idx = S.rows.indexOf(lastSel);
+            S.rows.splice(idx + 1, 0, newRow);
+        } else {
+            S.rows.push(newRow);
+        }
+
+        renderBody();
+        updateStatus();
+        setAction('Added row');
+    }
+
+    function deleteSelectedRows() {
+        const sel = getSelectedRows();
+        if (sel.length === 0) return;
+        pushUndo('Delete ' + sel.length + ' row(s)');
+        const ids = new Set(sel.map(r => r.id));
+        S.rows = S.rows.filter(r => !ids.has(r.id));
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Deleted ' + sel.length + ' row(s)');
+    }
+
+    function moveSelectedRows(direction) {
+        const sel = getSelectedRows();
+        if (sel.length === 0) return;
+
+        pushUndo('Move rows ' + (direction > 0 ? 'down' : 'up'));
+
+        const selIds = new Set(sel.map(r => r.id));
+        if (direction < 0) {
+            // Move up
+            for (let i = 1; i < S.rows.length; i++) {
+                if (selIds.has(S.rows[i].id) && !selIds.has(S.rows[i - 1].id)) {
+                    [S.rows[i - 1], S.rows[i]] = [S.rows[i], S.rows[i - 1]];
+                }
+            }
+        } else {
+            // Move down
+            for (let i = S.rows.length - 2; i >= 0; i--) {
+                if (selIds.has(S.rows[i].id) && !selIds.has(S.rows[i + 1].id)) {
+                    [S.rows[i], S.rows[i + 1]] = [S.rows[i + 1], S.rows[i]];
+                }
+            }
+        }
+
+        renderBody();
+        setAction('Moved ' + sel.length + ' row(s)');
+    }
+
+    // ===== DRAG-DROP REORDER =====
+    let dragRowId = null;
+
+    function onDragStart(e, rowId) {
+        dragRowId = rowId;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', rowId);
+        e.target.style.opacity = '0.5';
+    }
+
+    function onDragOver(e, tr) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        tr.classList.remove('drag-over-top', 'drag-over-bottom');
+        const rect = tr.getBoundingClientRect();
+        if (e.clientY < rect.top + rect.height / 2) {
+            tr.classList.add('drag-over-top');
+        } else {
+            tr.classList.add('drag-over-bottom');
+        }
+    }
+
+    function onDrop(e, targetRowId, tr) {
+        e.preventDefault();
+        tr.classList.remove('drag-over-top', 'drag-over-bottom');
+
+        if (dragRowId === null || dragRowId === targetRowId) return;
+
+        pushUndo('Reorder row');
+
+        const srcIdx = S.rows.findIndex(r => r.id === dragRowId);
+        const dstIdx = S.rows.findIndex(r => r.id === targetRowId);
+        if (srcIdx < 0 || dstIdx < 0) return;
+
+        const [moved] = S.rows.splice(srcIdx, 1);
+
+        // Determine insert position based on drop position
+        const rect = tr.getBoundingClientRect();
+        const insertBefore = e.clientY < rect.top + rect.height / 2;
+        let newIdx = S.rows.findIndex(r => r.id === targetRowId);
+        if (!insertBefore) newIdx++;
+        S.rows.splice(newIdx, 0, moved);
+
+        renderBody();
+        setAction('Reordered row');
+    }
+
+    function clearDragIndicators() {
+        dragRowId = null;
+        for (const tr of tbody.querySelectorAll('tr')) {
+            tr.style.opacity = '';
+            tr.classList.remove('drag-over-top', 'drag-over-bottom');
+        }
+    }
+
+    // ===== BULK CATEGORIZE =====
+    function showCategorizeModal() {
+        const sel = getSelectedRows();
+        if (sel.length === 0) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        // Remember last used column
+        const lastCol = localStorage.getItem('tsv_editor_cat_col') || '';
+        const lastVal = localStorage.getItem('tsv_editor_cat_val') || '';
+
+        overlay.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">Categorize ${sel.length} Row(s)</div>
+                <div class="modal-body">
+                    <label>Target Column</label>
+                    <select id="cat-col">
+                        ${S.headers.map((h, i) =>
+                            `<option value="${i}" ${h === lastCol || (lastCol === '' && h === 'field_profile') ? 'selected' : ''}>${h}</option>`
+                        ).join('')}
+                    </select>
+                    <label>Value</label>
+                    <input type="text" id="cat-val" value="${lastVal}" placeholder="Enter category value...">
+                    <div class="preview-list">${sel.map(r => r.cells[0] || '(empty)').join('\n')}</div>
+                </div>
+                <div class="modal-footer">
+                    <button class="tb-btn" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button class="tb-btn primary" id="cat-apply">Apply</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const catVal = overlay.querySelector('#cat-val');
+        catVal.focus();
+        catVal.select();
+
+        overlay.querySelector('#cat-apply').addEventListener('click', () => {
+            const col = parseInt(overlay.querySelector('#cat-col').value);
+            const val = catVal.value;
+
+            pushUndo('Categorize ' + sel.length + ' rows');
+
+            for (const r of sel) {
+                r.cells[col] = val;
+            }
+
+            localStorage.setItem('tsv_editor_cat_col', S.headers[col]);
+            localStorage.setItem('tsv_editor_cat_val', val);
+
+            overlay.remove();
+            renderBody();
+            setAction('Categorized ' + sel.length + ' row(s) as "' + val + '"');
+        });
+
+        // Enter key applies
+        catVal.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') overlay.querySelector('#cat-apply').click();
+            if (e.key === 'Escape') overlay.remove();
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+    }
+
+    // ===== MERGE ROWS =====
+    function showMergeModal() {
+        const sel = getSelectedRows();
+        if (sel.length < 2) return;
+
+        // Find pattern column
+        const patCol = S.headers.findIndex(h => h.toLowerCase() === 'pattern');
+        const tidCol = S.tinyIdCols[0] !== undefined ? S.tinyIdCols[0] : -1;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        // Preview patterns
+        const patterns = sel.map(r => r.cells[patCol >= 0 ? patCol : 0] || '(empty)');
+
+        // Compute merged tinyIds
+        let mergedTids = '';
+        if (tidCol >= 0) {
+            const allIds = new Set();
+            for (const r of sel) {
+                const val = r.cells[tidCol] || '';
+                for (const id of val.split(/[\s|]+/)) {
+                    if (id) allIds.add(id);
+                }
+            }
+            mergedTids = Array.from(allIds).sort().join('|');
+        }
+
+        // Default: keep longest pattern
+        const longestIdx = patterns.reduce((best, p, i) => p.length > patterns[best].length ? i : best, 0);
+
+        overlay.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">Merge ${sel.length} Rows</div>
+                <div class="modal-body">
+                    <label>Patterns to merge</label>
+                    <div class="preview-list">${patterns.map((p, i) =>
+                        `<label style="display:block;cursor:pointer"><input type="radio" name="keep-pat" value="${i}" ${i === longestIdx ? 'checked' : ''}> ${p}</label>`
+                    ).join('\n')}</div>
+                    ${tidCol >= 0 ? `
+                        <label>Merged tinyIds (${mergedTids.split('|').length} unique)</label>
+                        <div class="preview-list" style="font-size:10px;word-break:break-all">${mergedTids}</div>
+                    ` : ''}
+                </div>
+                <div class="modal-footer">
+                    <button class="tb-btn" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button class="tb-btn primary" id="merge-apply">Merge</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#merge-apply').addEventListener('click', () => {
+            const keepIdx = parseInt(overlay.querySelector('input[name="keep-pat"]:checked').value);
+
+            pushUndo('Merge ' + sel.length + ' rows');
+
+            // Build merged row from the chosen pattern's row
+            const mergedRow = { id: S.nextId++, cells: [...sel[keepIdx].cells], selected: false };
+            if (tidCol >= 0) {
+                mergedRow.cells[tidCol] = mergedTids;
+            }
+
+            // Replace first selected row, remove the rest
+            const firstIdx = S.rows.indexOf(sel[0]);
+            const selIds = new Set(sel.map(r => r.id));
+            S.rows = S.rows.filter(r => !selIds.has(r.id));
+            S.rows.splice(firstIdx, 0, mergedRow);
+
+            overlay.remove();
+            renderBody();
+            updateToolbarButtons();
+            updateStatus();
+            setAction('Merged ' + sel.length + ' rows');
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+    }
+
+    // ===== SPLIT BY FIELD =====
+    function splitByField() {
+        if (S.fpCol < 0) {
+            alert('No field_profile column found in this TSV.');
+            return;
+        }
+
+        const groups = {};
+        const visible = getVisibleRows();
+        for (const r of visible) {
+            const fp = (r.cells[S.fpCol] || 'unspecified').trim();
+            if (!groups[fp]) groups[fp] = [];
+            groups[fp].push(r);
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        const groupItems = Object.entries(groups).map(([fp, rows]) =>
+            `<div style="display:flex;justify-content:space-between;padding:4px 0">
+                <span><strong>${fp}</strong> (${rows.length} rows)</span>
+                <button class="tb-btn" data-fp="${fp}" style="font-size:11px">Download</button>
+            </div>`
+        ).join('');
+
+        overlay.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">Split by field_profile</div>
+                <div class="modal-body">
+                    <p style="margin-bottom:12px;color:var(--text-muted)">Download each group as a separate TSV file.</p>
+                    ${groupItems}
+                </div>
+                <div class="modal-footer">
+                    <button class="tb-btn" onclick="this.closest('.modal-overlay').remove()">Close</button>
+                    <button class="tb-btn primary" id="split-all">Download All</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Individual download buttons
+        for (const btn of overlay.querySelectorAll('button[data-fp]')) {
+            btn.addEventListener('click', () => {
+                const fp = btn.dataset.fp;
+                const rows = groups[fp];
+                downloadTSV(S.headers, rows.map(r => r.cells), splitFileName(fp));
+                btn.textContent = 'Done';
+                btn.disabled = true;
+            });
+        }
+
+        // Download all
+        overlay.querySelector('#split-all').addEventListener('click', () => {
+            for (const [fp, rows] of Object.entries(groups)) {
+                downloadTSV(S.headers, rows.map(r => r.cells), splitFileName(fp));
+            }
+            overlay.remove();
+            setAction('Downloaded ' + Object.keys(groups).length + ' split files');
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+    }
+
+    function splitFileName(fp) {
+        const base = S.fileName.replace(/\.\w+$/, '');
+        return base + '_' + fp.replace(/[^a-zA-Z0-9_-]/g, '_') + '.tsv';
+    }
+
+    // ===== UNDO / REDO =====
+    function pushUndo(description) {
+        S.undoStack.push({
+            description,
+            snapshot: JSON.parse(JSON.stringify(S.rows.map(r => ({ cells: r.cells, selected: r.selected })))),
+            headers: [...S.headers],
+        });
+        if (S.undoStack.length > 50) S.undoStack.shift();
+        S.redoStack = [];
+        updateToolbarButtons();
+    }
+
+    function undo() {
+        if (S.undoStack.length === 0) return;
+        const entry = S.undoStack.pop();
+
+        // Save current state for redo
+        S.redoStack.push({
+            description: 'Redo',
+            snapshot: JSON.parse(JSON.stringify(S.rows.map(r => ({ cells: r.cells, selected: r.selected })))),
+            headers: [...S.headers],
+        });
+
+        // Restore
+        S.headers = entry.headers;
+        S.rows = entry.snapshot.map(s => ({
+            id: S.nextId++,
+            cells: s.cells,
+            selected: s.selected,
+        }));
+        detectColumns();
+
+        renderGrid();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Undo: ' + entry.description);
+    }
+
+    function redo() {
+        if (S.redoStack.length === 0) return;
+        const entry = S.redoStack.pop();
+
+        // Save current for undo
+        S.undoStack.push({
+            description: 'Undo redo',
+            snapshot: JSON.parse(JSON.stringify(S.rows.map(r => ({ cells: r.cells, selected: r.selected })))),
+            headers: [...S.headers],
+        });
+
+        S.headers = entry.headers;
+        S.rows = entry.snapshot.map(s => ({
+            id: S.nextId++,
+            cells: s.cells,
+            selected: s.selected,
+        }));
+        detectColumns();
+
+        renderGrid();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Redo');
+    }
+
+    // ===== FILE I/O =====
+    function downloadTSV(headers, cellRows, filename) {
+        const content = TSV.serialize(headers, cellRows);
+        const blob = new Blob([content], { type: 'text/tab-separated-values;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || S.fileName || 'patterns.tsv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setAction('Downloaded ' + (filename || S.fileName));
+    }
+
+    function downloadCurrent() {
+        downloadTSV(S.headers, S.rows.map(r => r.cells), S.fileName);
+    }
+
+    async function saveToServer() {
+        if (!S.serverMode) {
+            downloadCurrent();
+            return;
+        }
+
+        const content = TSV.serialize(S.headers, S.rows.map(r => r.cells));
+        try {
+            const resp = await fetch('/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content }),
+            });
+            const data = await resp.json();
+            if (data.status === 'ok') {
+                S.originalContent = content;
+                const now = new Date();
+                setAction('Saved at ' + now.toLocaleTimeString());
+            } else {
+                setAction('Save failed: ' + (data.message || 'unknown error'));
+            }
+        } catch (e) {
+            setAction('Save error: ' + e.message);
+        }
+    }
+
+    function openFile() {
+        fileInput.click();
+    }
+
+    function handleFileLoad(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            loadData(e.target.result, file.name);
+            setAction('Loaded ' + file.name);
+        };
+        reader.readAsText(file);
+    }
+
+    // ===== STATUS =====
+    function updateStatus() {
+        const total = S.rows.length;
+        const selected = getSelectedRows().length;
+        const visible = getVisibleRows().length;
+        const hidden = total - visible;
+
+        let text = S.fileName + ' \u2014 ' + total + ' rows';
+        if (selected > 0) text += ' (' + selected + ' selected)';
+        if (hidden > 0) text += ' (' + hidden + ' hidden by filter)';
+        statusLeft.textContent = text;
+
+        const dot = S.serverMode ? 'server' : 'standalone';
+        statusMode.innerHTML = `<span class="mode-dot ${dot}"></span>${S.serverMode ? 'Server' : 'Standalone'}`;
+    }
+
+    function setAction(text) {
+        statusAction.textContent = text;
+        // Auto-clear after 5s
+        setTimeout(() => {
+            if (statusAction.textContent === text) statusAction.textContent = '';
+        }, 5000);
+    }
+
+    function updateToolbarButtons() {
+        const sel = getSelectedRows().length;
+        btnDelete.disabled = sel === 0;
+        btnMoveUp.disabled = sel === 0;
+        btnMoveDown.disabled = sel === 0;
+        btnCategorize.disabled = sel === 0;
+        btnMerge.disabled = sel < 2;
+        btnUndo.disabled = S.undoStack.length === 0;
+        btnRedo.disabled = S.redoStack.length === 0;
+
+        // Show/hide save button based on mode
+        btnSave.style.display = S.serverMode ? '' : 'none';
+    }
+
+    function hasUnsavedChanges() {
+        const current = TSV.serialize(S.headers, S.rows.map(r => r.cells));
+        return current !== S.originalContent;
+    }
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', (e) => {
+        // Don't intercept if editing a cell or modal input
+        const tag = (e.target.tagName || '').toLowerCase();
+        const isInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+        const inModal = e.target.closest('.modal-overlay');
+
+        if (e.key === 'Escape') {
+            if (S.editingCell) {
+                cancelEdit();
+                e.preventDefault();
+            } else if (!inModal) {
+                deselectAll();
+            }
+            return;
+        }
+
+        // Allow filter inputs to work normally except for global shortcuts
+        if (isInput && !e.ctrlKey && !e.metaKey) return;
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            undo();
+            e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && (e.key === 'Z' || (e.key === 'z' && e.shiftKey) || e.key === 'y')) {
+            redo();
+            e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            saveToServer();
+            e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isInput) {
+            toggleSelectAll(true);
+            e.preventDefault();
+        } else if (e.key === 'Delete' && !isInput) {
+            deleteSelectedRows();
+            e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            // Focus first filter input
+            const firstFilter = thead.querySelector('.filter-input');
+            if (firstFilter) {
+                firstFilter.focus();
+                e.preventDefault();
+            }
+        }
+    });
+
+    // ===== CHANGE DETECTION =====
+    window.addEventListener('beforeunload', (e) => {
+        if (S.rows.length > 0 && hasUnsavedChanges()) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    // ===== BUTTON EVENT HANDLERS =====
+    btnSave.addEventListener('click', saveToServer);
+    btnDownload.addEventListener('click', downloadCurrent);
+    btnOpen.addEventListener('click', openFile);
+    btnAddRow.addEventListener('click', addRow);
+    btnDelete.addEventListener('click', deleteSelectedRows);
+    btnMoveUp.addEventListener('click', () => moveSelectedRows(-1));
+    btnMoveDown.addEventListener('click', () => moveSelectedRows(1));
+    btnCategorize.addEventListener('click', showCategorizeModal);
+    btnMerge.addEventListener('click', showMergeModal);
+    btnSplit.addEventListener('click', splitByField);
+    btnUndo.addEventListener('click', undo);
+    btnRedo.addEventListener('click', redo);
+
+    // File input handler
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileLoad(e.target.files[0]);
+        }
+    });
+
+    // ===== DROP ZONE HANDLERS =====
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('dragover');
+    });
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('dragover');
+    });
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleFileLoad(e.dataTransfer.files[0]);
+        }
+    });
+
+    // Also handle drops on the grid container (for re-loading)
+    gridContainer.addEventListener('dragover', (e) => {
+        // Only handle file drops, not row reorder
+        if (e.dataTransfer.types.includes('Files')) {
+            e.preventDefault();
+        }
+    });
+    gridContainer.addEventListener('drop', (e) => {
+        if (e.dataTransfer.types.includes('Files') && e.dataTransfer.files.length > 0) {
+            e.preventDefault();
+            if (hasUnsavedChanges()) {
+                if (!confirm('You have unsaved changes. Load new file?')) return;
+            }
+            handleFileLoad(e.dataTransfer.files[0]);
+        }
+    });
+
+    // ===== INIT =====
+    async function init() {
+        // Try server mode
+        try {
+            const infoResp = await fetch('/info');
+            const info = await infoResp.json();
+            if (info.server_mode) {
+                S.serverMode = true;
+                S.filePath = info.path;
+                S.fileName = info.filename;
+
+                const dataResp = await fetch('/data');
+                const data = await dataResp.json();
+                if (data.content) {
+                    loadData(data.content, data.filename);
+                    setAction('Loaded from server');
+                    return;
+                }
+            }
+        } catch (e) {
+            // Standalone mode
+        }
+
+        // Standalone: show drop zone
+        S.serverMode = false;
+        dropZone.style.display = 'flex';
+    }
+
+    init();
+})();
+</script>
+</body>
+</html>
