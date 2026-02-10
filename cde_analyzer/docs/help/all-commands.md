@@ -8,14 +8,14 @@ Quick reference for all CDE Analyzer commands. For detailed documentation, see t
 
 ## Launcher
 
-The `cde_analyzer` script is a launcher that dispatches to individual commands. It does not perform any analysis itself.
+The `cde-analyzer` command is a launcher that dispatches to individual commands. It does not perform any analysis itself.
 
 ```bash
 # List all available commands
-cde_analyzer --help
+cde-analyzer --help
 
 # Get help for a specific command
-cde_analyzer <command> --help
+cde-analyzer <command> --help
 ```
 
 ---
@@ -107,20 +107,113 @@ options:
 Remove curated phrases from specific paths in CDE documents.
 
 ```bash
-usage: strip_phrases [-h] -i INPUT -m MODEL -p PHRASES -o OUTPUT
+usage: strip_phrases [-h] -i INPUT -m MODEL -o OUTPUT
+                     {-p PATTERNS | --phrases FILE}
+                     [-f FIELDS ...] [--sort-order {length,file,alpha}]
+                     [-w WORKERS] [--detect-remnants] [--remnant-report FILE]
+                     [--clean-remnants] [--trace-matching FILE]
                      [-d] [--diff-output FILE] [-c] [--summary] [-C N]
 
 options:
   -h, --help            show this help message and exit
   -i, --input INPUT     Path to input JSON file
   -m, --model MODEL     Pydantic model (CDE, Form)
-  -p, --phrases FILE    Path to phrases file (JSON, CSV, or TSV)
   -o, --output OUTPUT   Path to output JSON file
+  -p, --patterns FILE   Discovered patterns TSV (from strip_discover)
+  --phrases FILE        Legacy phrase map (JSON, CSV, or TSV)
+  -f, --fields FIELDS   Field paths to strip (default: definitions, designations)
+  --sort-order ORDER    Pattern order: length, file, alpha (default: length)
+  -w, --workers N       Parallel workers (0=auto, 1=sequential, N=exact)
+  --detect-remnants     Scan output for post-strip artifacts
+  --remnant-report FILE Write remnant report TSV
+  --clean-remnants      Apply iterative cleanup to fix artifacts
+  --trace-matching FILE Write pattern matching trace TSV
   -d, --diff            Show diff between original and cleaned JSON
   --diff-output FILE    Write diff information to a file
   -c, --color           Colorize diff output
   --summary             Show summary of changed lines
   -C, --context N       Number of context lines (default: 3)
+```
+
+---
+
+### `strip_analyze` Command
+
+Pattern conflict and false-negative analysis.
+
+```bash
+usage: strip_analyze [-h] [-i INPUT] [-o OUTPUT] [-p PATTERN_LIST]
+                     [--analyze-conflicts FILE] [--sort-order {length,file,alpha}]
+                     [--analyze-false-negatives] [--fn-anchor STRING]
+                     [--expand-variants] [--include-name-only]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input INPUT     Cleaned JSON for false-negative analysis
+  -o, --output OUTPUT   Output TSV file
+  -p, --pattern-list    Pattern TSV for conflict analysis
+  --analyze-conflicts F Output file for conflict report
+  --sort-order ORDER    Pattern order: length, file, alpha (default: length)
+  --analyze-false-negatives
+                        Analyze remaining anchor patterns
+  --fn-anchor STRING    Anchor phrase (default: "as part of")
+  --expand-variants     Generate variants for conflict analysis
+  --include-name-only   Include bare names (default: True)
+```
+
+---
+
+### `pattern_util` Command
+
+TSV pattern utilities (merge, coalesce, field analysis, import).
+
+```bash
+usage: pattern_util [-h] [-o OUTPUT]
+                    [--merge-patterns FILE] [--merge-pattern-column COL]
+                    [--merge-tinyids-column COL]
+                    [--coalesce-variants FILE] [--coalesce-report FILE]
+                    [--min-prefix-tinyids N] [--min-parent-tinyids N]
+                    [--no-trim-anchors] [--rollup-subset-tinyids]
+                    [--emit-def-variants] [--split-tiers MIN_TOKENS]
+                    [--field-analysis FILE] [-i INPUT] [-m MODEL]
+                    [--fields FIELDS ...] [--min-field-count N]
+                    [--min-tokens N] [--exclude-patterns FILE]
+                    [--group-hierarchy FILE] [--min-tinyids N]
+                    [--group-semantic FILE] [--min-group-size N]
+                    [--generate-strip-patterns FILE]
+                    [--add-to-supplementary FILE] [--supplementary-section NAME]
+
+options:
+  -h, --help            show this help message and exit
+  -o, --output OUTPUT   Output TSV file (required for most modes)
+  --merge-patterns FILE Merge duplicate patterns, combine tinyIds
+  --coalesce-variants FILE
+                        Remove subsumed patterns (tinyId-aware)
+  --coalesce-report FILE
+                        Write subsumption report
+  --min-prefix-tinyids N
+                        Enable prefix extraction (0 = disabled)
+  --min-parent-tinyids N
+                        Filter by parent phrase tinyId count (0 = disabled)
+  --no-trim-anchors     Disable anchor trimming during coalesce
+  --rollup-subset-tinyids
+                        Enable tinyId-subset rollup
+  --emit-def-variants   Emit definition-form variants
+  --split-tiers N       Split output by token count threshold
+  --field-analysis FILE Enrich patterns with per-field counts
+  -i, --input FILE      CDE JSON for field analysis
+  -m, --model MODEL     Model for JSON parsing (default: CDE)
+  --min-field-count N   Filter patterns below N in both fields
+  --min-tokens N        Filter patterns with fewer than N tokens
+  --exclude-patterns FILE
+                        Remove patterns matching exclusion file
+  --group-hierarchy FILE
+                        Assign group/sub_group labels by prefix
+  --group-semantic FILE Semantic grouping with POS boundary detection
+  --generate-strip-patterns FILE
+                        Generate strip-ready files from hierarchy
+  --add-to-supplementary FILE
+                        Import patterns to supplementary_patterns.yaml
 ```
 
 ---
@@ -267,6 +360,119 @@ options:
   --id-list IDS         List of tinyIds to include or exclude
   --id-file FILE        File containing tinyIds (JSON, CSV, or TSV)
   --exclude             Exclude matching tinyIds (default: include)
+```
+
+---
+
+## Reporting
+
+### `discovery_report` Command
+
+Generate markdown pipeline summary reports.
+
+```bash
+usage: discovery_report [-h] -d OUTPUT_DIR -p {instrument,phrase}
+                        -o OUTPUT [--version LABEL] [-i INPUT_JSON]
+
+options:
+  -h, --help            show this help message and exit
+  -d, --output-dir DIR  Pipeline output directory to scan
+  -p, --pipeline TYPE   Pipeline type: instrument, phrase
+  -o, --output FILE     Markdown report output path
+  --version LABEL       Version label for iteration tracking
+  -i, --input-json FILE Original input JSON (for record count)
+```
+
+---
+
+### `pipeline_report` Command
+
+Generate comprehensive pipeline execution reports with phase details and key metrics.
+
+```bash
+usage: pipeline_report [-h] {-s STATE_FILE | -d OUTPUT_DIR} -o OUTPUT
+                       [--phase {1,2,3,4}] [--title TITLE] [--version LABEL]
+                       [--ground-truth FILE] [--pipeline-output FILE]
+                       [--tinyid-column COL] [--source-json FILE]
+
+options:
+  -h, --help            show this help message and exit
+  -s, --state-file FILE Path to workflow state file (.workflow_state.json)
+  -d, --output-dir DIR  Path to pipeline output directory
+  -o, --output FILE     Path to output markdown report
+  --phase N             Generate report for specific phase only (1-4)
+  --title TITLE         Title for the report (default: Pipeline Execution Report)
+  --version LABEL       Version label for this report
+  --ground-truth FILE   Ground truth pattern file for recall analysis
+  --pipeline-output F   Pipeline output TSV for recall comparison
+  --tinyid-column COL   Column name for tinyIds (default: tinyIds)
+  --source-json FILE    Source CDE JSON file for recall analysis
+```
+
+---
+
+### `strip_report` Command
+
+Generate quality report for stripped JSON outputs with remnant detection and temporal phrase inventory.
+
+```bash
+usage: strip_report [-h] --output-dir OUTPUT_DIR -o OUTPUT
+                    [--input-json INPUT_JSON] [--version VERSION]
+                    [--embed-dir EMBED_DIR] [--no-temporal-scan]
+                    [--json-pattern JSON_PATTERN]
+
+options:
+  -h, --help            show this help message and exit
+  --output-dir, -d DIR  Directory containing *_stripped.json outputs
+  -o, --output FILE     Path to output markdown report
+  --input-json, -i FILE Original input JSON (for baseline record count)
+  --version LABEL       Version label for iteration tracking
+  --embed-dir DIR       Embed data directory for CSV file manifest
+  --no-temporal-scan    Skip scanning for remaining temporal phrases
+  --json-pattern PAT    Glob pattern to match JSON files (default: *_stripped.json)
+```
+
+---
+
+### `recall_analyze` Command
+
+Analyze recall and detect false negatives in instrument detection.
+
+```bash
+usage: recall_analyze [-h] -i INPUT -m MODEL -F PATTERN_FILE
+                      [--pipeline-output FILE] [--pipeline-tinyid-column COL]
+                      -o OUTPUT [--false-negatives-file FILE]
+                      [--markdown-report FILE] [--markdown-detail FILE]
+                      [--report-version LABEL] [--report-title TITLE]
+                      [-f FIELDS ...] [--case-sensitive]
+                      [--min-recall N] [--previous-report FILE]
+                      [--stopping-threshold N] [--suggest-patterns FILE]
+                      [--suggest-min-matches N]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input FILE      Path to source CDE JSON (ground truth)
+  -m, --model MODEL     Pydantic model: CDE, Form, EmbedText
+  -F, --pattern-file F  File with patterns and labels (pattern<TAB>label)
+  --pipeline-output F   Pipeline output TSV with tinyIds column
+  --pipeline-tinyid-column COL
+                        Column name for tinyIds (default: tinyIds)
+  -o, --output FILE     Path to recall report TSV
+  --false-negatives-file FILE
+                        Output file listing false negatives by family
+  --markdown-report F   Path to human-readable markdown report
+  --markdown-detail F   Standalone detailed report for this phase
+  --report-version L    Version label for iteration tracking
+  --report-title TITLE  Title for markdown report
+  -f, --fields FIELDS   Fields to search (default: designation definition)
+  --case-sensitive      Make pattern matching case-sensitive
+  --min-recall N        Minimum recall threshold (default: 0.0)
+  --previous-report F   Previous recall report for marginal gains
+  --stopping-threshold N
+                        Stop when marginal gain <= N (default: 2)
+  --suggest-patterns F  Output suggested patterns for low-recall families
+  --suggest-min-matches N
+                        Min false negatives for suggestion (default: 2)
 ```
 
 ---

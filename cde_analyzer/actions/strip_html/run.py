@@ -4,9 +4,11 @@
 from argparse import Namespace
 from pathlib import Path
 from logic.html_stripper import process_file
+from utils.file_utils import graceful_interrupt
 from utils.logger import log_if_verbose
 from utils.constants import MODEL_REGISTRY
 
+@graceful_interrupt
 def run_action(args: Namespace):
     model_class = MODEL_REGISTRY[args.model]
     outdir = Path(args.outdir)

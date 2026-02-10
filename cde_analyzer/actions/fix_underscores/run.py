@@ -3,6 +3,7 @@
 import json
 import logging
 from argparse import Namespace
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,11 @@ def fix_keys(data, prefix, max_depth=None, current_depth=0):
         return data
 
 
+@graceful_interrupt
 def run_action(args: Namespace):
-    logger.info(f"Reading input JSON from {args.input}")
-    with open(args.input, "r", encoding="utf-8") as f:
+    input_path = exit_if_missing(args.input, "Input file")
+    logger.info(f"Reading input JSON from {input_path}")
+    with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     logger.info(f"Fixing underscore-prefixed keys with prefix '{args.prefix}'")

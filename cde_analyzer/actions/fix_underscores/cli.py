@@ -1,14 +1,19 @@
 # actions/fix_underscores/cli.py
 
 from argparse import ArgumentParser, BooleanOptionalAction
-from .run import run_action
 
 help_text = "Prepend a character to JSON keys starting with an underscore."
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = "Pydantic reserves keys beginning with an underscore as private. Convert to start with another character."
 
 def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
-        "--input", help="Full path, including name, of input JSON file."
+        "--input", "-i", required=True, help="Full path, including name, of input JSON file."
     )
     subparser.add_argument(
         "--output", help="Full path, including name, of output JSON file."
@@ -27,4 +32,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.set_defaults(
         _runner="actions.fix_underscores.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

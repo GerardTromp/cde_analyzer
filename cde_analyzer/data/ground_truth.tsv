@@ -1,0 +1,39 @@
+tinyId	category	status	notes
+3DO9ttnND	no_instrument	no_match	No instrument or phrase patterns detected
+4w61RUjTGgR	cesd_instrument	works_mostly	CES-D instrument - some residual fragments
+7122bdW_3Og	promis_clean	works_perfectly	PROMIS instrument fully stripped
+71lxkd_Z3_l	neuroqol_residual	partial	Neuro-QoL residual text in stripped output
+7kyWeb_ZWhux	promis_clean	works_perfectly	PROMIS instrument fully stripped
+7y5xY5ci3il	phrase_stripped	phrase_stripped	No instrument but generic phrases stripped in Phase 2
+A2tKuwBB7K4	cesd_instrument	works_mostly	CES-D instrument - some residual fragments
+An4npMH575J	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+Cqc1c1FHbA	phrase_stripped	phrase_stripped	No instrument but generic phrases stripped in Phase 2
+E_8JhG4IiO	no_instrument	no_match	No instrument or phrase patterns detected
+G6fhAhmvFC9	hdrs_clean	works_perfectly	HDRS instrument fully stripped
+GWSXOMx8dVJ	cesd_instrument	works_mostly	CES-D instrument - some residual fragments
+He_p5EzVhWj	hdrs_clean	works_perfectly	HDRS instrument fully stripped
+HhvaZrDJa_b	hdrs_clean	works_perfectly	HDRS instrument fully stripped
+IG6jYWF2q	phrase_stripped	phrase_stripped	No instrument but generic phrases stripped in Phase 2
+MHGrQqqt57P	cesd_residual	partial	CES-D residual text in stripped output
+MznbpfA5gXs	cesd_residual	partial	CES-D residual text in stripped output
+Q1DRvYp6I	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+Q1GUCwKT6I	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+Q1zJ_bW3ul	neuroqol_residual	partial	Neuro-QoL residual text in stripped output
+QJIL0eqFG	orphan_the	artifact	Orphan article left after def-variant stripping
+QJWEEwFaaL	phrase_stripped	phrase_stripped	No instrument but generic phrases stripped in Phase 2
+QkX9uFaTI	no_instrument	no_match	No instrument or phrase patterns detected
+QyExJuconsx	phrase_stripped	phrase_stripped	No instrument but generic phrases stripped in Phase 2
+X1EzOZWhOl	promis_clean	works_perfectly	PROMIS instrument fully stripped
+X1KhZub_3dx	promis_clean	works_perfectly	PROMIS instrument fully stripped
+XJwxth9ihsx	no_instrument	no_match	No instrument or phrase patterns detected
+YjSRW1KTQ5r	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+_W4xHINn6	orphan_the	artifact	Orphan article left after def-variant stripping
+bP2pQP7WpbM	cesd_instrument	works_mostly	CES-D instrument - some residual fragments
+fZywnJRV_aQ	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+m1okuWbn_g	neuroqol_residual	partial	Neuro-QoL residual text in stripped output
+mJ1AbOZb3Ol	promis_clean	works_perfectly	PROMIS instrument fully stripped
+mkTeY35jhse	orphan_the	artifact	Orphan article left after def-variant stripping
+nSXRtkERXFM	verb_false_positive	false_positive	Verb-containing pattern incorrectly matched as instrument
+osskT1TwkPD	cesd_residual	partial	CES-D residual text in stripped output
+vBgZrOfdDr2	cesd_instrument	works_mostly	CES-D instrument - some residual fragments
+vrkNyAsOgnG	no_instrument	no_match	No instrument or phrase patterns detected

@@ -8,6 +8,180 @@
 
 ## Recent Work (Last 30 Days)
 
+### Session 2026-01-27b: Instrument Detection Workflow Documentation
+
+**Focus**: Comprehensive documentation of the automated instrument detection pipeline
+
+**Key Accomplishments**:
+- Created `docs/workflows/instrument-detection-workflow.md` - Complete 4-phase workflow documentation
+  - Phase 1: Initial Mining (instrument_miner, batch_expand_abbreviations, discover_abbreviations)
+  - Phase 2: Discovery & Coalesce (discover_verbatim, coalesce with prefix extraction)
+  - Phase 3: Family Analysis & Final Coalesce (phrase_grouper, re-discover, final coalesce)
+  - Phase 4: Stripping & Verification (strip_phrases, diagnose_strip)
+- Created `docs/workflows/instrument-detection-workflow.svg` - Visual workflow diagram
+- Updated `docs/help/strip_discover.md` with:
+  - Coalesce mode documentation
+  - Abbreviation discovery mode documentation
+  - `--min-prefix-tinyids` parameter
+  - `--discover-abbreviations` parameter
+  - Examples for prefix extraction
+- Updated `mkdocs.yml` navigation:
+  - Added "Workflow Orchestration" section under Commands
+  - Split Workflows into conceptual (instrument-phrase-stripping) and specific (instrument-detection)
+- Updated `CLAUDE.md`:
+  - Added Instrument Detection Workflow to Recent Work section
+  - Documented Prefix Extraction feature
+  - Added instrument_detection.yaml to Built-in Workflows
+  - Updated Documentation references
+
+**Prefix Extraction Algorithm**:
+- Groups patterns by common word prefix (builds trie from tokens)
+- Replaces multiple patterns with shortest prefix meeting tinyId threshold
+- Example: "Neuro-QOL Lower Extremity..." + "Neuro-QOL Upper Extremity..." → "Neuro-QOL"
+- Dramatically reduces manual curation effort (553 patterns → ~50)
+
+**Files Created** (2):
+- `docs/workflows/instrument-detection-workflow.md` (comprehensive documentation)
+- `docs/workflows/instrument-detection-workflow.svg` (visual diagram)
+
+**Files Modified** (4):
+- `docs/help/strip_discover.md` (added coalesce and abbreviation discovery modes)
+- `mkdocs.yml` (updated navigation)
+- `CLAUDE.md` (updated current status and features)
+- `.claude/context/08-progress.md` (this file)
+
+**Status**: Documentation complete
+
+---
+
+### Session 2026-01-27: Pattern Variant Enhancements & Coalesce
+
+**Focus**: Number word variants, spaced punctuation, tinyId format fixes, coalesce feature
+
+**Key Accomplishments**:
+- Added number word variant generation for temporal phrases
+  - Bidirectional mapping: "7" ↔ "seven", "30" ↔ "thirty", etc.
+  - Handles common temporal numbers: 1-10, 12, 14, 24, 30, 60, 90
+- Added spaced punctuation variants: " - ", ": ", ", "
+- Fixed critical tinyId format mismatch bug across pipeline
+  - Root cause: strip_discover wrote space-separated, phrase_grouper expected pipe-separated
+  - Fix: All parsers now use `re.split(r'[\s|]+', ...)` for flexible format support
+  - Fixed in: phrase_grouper, phrase_family_analyzer, strip_discover, strip_phrases, flexible_pattern_matcher
+- Added `--coalesce-variants` mode for tinyId-aware pattern subsumption
+  - Removes shorter patterns when covered by longer ones with same tinyIds
+  - Outputs subsumption report showing which patterns were removed
+
+**Files Modified**:
+- `utils/pattern_variant_generator.py` - Number word and spaced punctuation variants
+- `utils/flexible_pattern_matcher.py` - Added `coalesce_variants_tsv()` function
+- `actions/strip_discover/cli.py` - Added `--coalesce-variants`, `--coalesce-report`
+- `actions/strip_discover/run.py` - Added coalesce mode handler
+- `actions/phrase_grouper/run.py` - Fixed tinyIds parsing
+- `logic/phrase_family_analyzer.py` - Fixed tinyIds counting
+- Multiple files - Consistent tinyId parsing with flexible format support
+
+**Planned Work**: Split strip_discover into focused commands
+- `strip_discover` - Core discovery only
+- `strip_analyze` - Analysis modes (false-negatives, conflicts)
+- `pattern_util` - TSV utilities (merge, coalesce)
+
+**Status**: Features implemented, testing pending
+
+---
+
+### Session 2026-01-26c: Architecture Split & Phrase Grouper
+
+**Focus**: Split phrase_miner into dedicated instrument_miner action, added phrase_grouper for bottom-up family discovery
+
+**Key Accomplishments**:
+- Split `phrase_miner` into separate `instrument_miner` action
+  - Created `actions/instrument_miner/` (cli.py, run.py, __init__.py)
+  - Removed instrument-specific arguments from `phrase_miner`
+  - Cleaner separation of concerns: instruments vs general phrases
+- Added `phrase_grouper` action for bottom-up k-mer analysis
+  - Created `actions/phrase_grouper/` (cli.py, run.py, __init__.py)
+  - Created `logic/phrase_grouper.py` with three tree strategies:
+    - Prefix tree (trie): Groups by shared beginnings
+    - Suffix tree (reversed trie): Groups by shared endings
+    - Infix index (inverted index): Groups by shared internal patterns
+  - Stopword filtering to exclude low-content patterns
+  - Outputs: `families.tsv`, `phrase_assignments.tsv`, `family_members.tsv`
+- Bumped version to 0.4.0
+- Updated workflow documentation and SVG diagram
+
+**CLI Changes**:
+- New action: `instrument_miner` (dedicated instrument extraction)
+- New action: `phrase_grouper` (phrase family analysis)
+- `phrase_miner` no longer has `--instruments-only` (use `instrument_miner` instead)
+
+**Files Created**:
+- `actions/instrument_miner/__init__.py`, `cli.py`, `run.py`
+- `actions/phrase_grouper/__init__.py`, `cli.py`, `run.py`
+- `logic/phrase_grouper.py`
+
+**Files Modified**:
+- `cde_analyzer.py` (registered new actions)
+- `cde_analyzer/__version__.py` (0.3.0 → 0.4.0)
+- `docs/workflows/instrument-phrase-stripping-workflow.md` (updated for new actions)
+- `docs/workflows/instrument-phrase-stripping-workflow.svg` (updated diagram)
+
+**Status**: MILESTONE - Action architecture improved with dedicated commands
+
+---
+
+### Session 2026-01-26b: Strip Discover Complete & False-Negative Reduction
+
+**Focus**: Completed strip_discover action, achieved 91% false-negative reduction
+
+**Key Accomplishments**:
+- Reduced false negatives from ~500 to 46 unique patterns (123 occurrences)
+- All remaining patterns are legitimate contextual phrases (not instruments)
+- Fixed RFQ-U patterns (changed from abbreviated to full form)
+- Added patterns: Neuro-QOL subscales, PROMIS Anxiety, NIH Toolbox
+- Refactored `--analyze-false-negatives` from string arg to boolean flag
+- Implemented per-mode argument validation in strip_discover
+
+**CLI Changes**:
+- `--analyze-false-negatives` now uses `-i/--input` for input file (consistent with other tools)
+- Arguments are optional at argparse level, validated per-mode in run.py
+
+**False-Negative Analysis Final Results**:
+```
+Total unique patterns: 46
+Total occurrences: 123
+Top patterns: medical history, treatment sessions, project descriptions
+```
+All remaining are legitimate "as part of" contextual phrases.
+
+**Status**: MILESTONE COMPLETE - Instrument stripping pipeline ready for production
+
+**Checkpoint**: checkpoint-20260126-1540-strip-discover-complete.md
+
+---
+
+### Session 2026-01-26a: Config Architecture & Diagnostic Action
+
+**Focus**: Refactored supplementary patterns to config-based architecture, created diagnostic action for iterative stripping improvement.
+
+**Key Changes**:
+- Created `config/supplementary_patterns.yaml` - 27 patterns for non-Title-Case instruments
+- Created `utils/config_loader.py` - Generic YAML config loader with caching
+- Created `actions/diagnose_strip/` - New action for stripping diagnostics
+- Refactored `utils/instrument_extractor.py` to load patterns from config
+
+**Critical Learning**: Two separate workflows exist:
+1. `phrase_miner --instruments-only --extract-supplementary` → Extract instrument catalog
+2. `strip_discover` → `strip_phrases` → Strip patterns from text
+
+These workflows use **different pattern sources**. For comprehensive stripping:
+1. Run phrase_miner with all extraction passes
+2. Use instruments_verbatim.tsv as pattern-list for strip_discover
+3. Run strip_phrases
+4. Run diagnose_strip to identify remaining patterns
+5. Add patterns to config, iterate
+
+**Status**: Config architecture complete, diagnostic action working
+
 ### Commits
 
 **2026-01-07: Launcher fixes (commits 4e601c7, 57b9437)**
@@ -365,16 +539,21 @@ All functional and updated for lazy loading
 4. ☐ Test all actions on fresh Python environment
 
 ### Short Term (Medium Priority)
-5. ☐ Merge Repeats → main (after validation)
-6. ☐ Expand test coverage (core modules)
-7. ☐ Standardize CLI argument names
-8. ☐ Document legacy kmer_*.py files
+5. ☐ Test `--coalesce-variants` feature with real data
+6. ☐ Split `strip_discover` into focused commands:
+   - `strip_discover` - Core discovery only
+   - `strip_analyze` - Analysis modes (false-negatives, conflicts, supplementary import)
+   - `pattern_util` - TSV utilities (merge, coalesce)
+7. ☐ Merge Repeats → main (after validation)
+8. ☐ Expand test coverage (core modules)
+9. ☐ Standardize CLI argument names
+10. ☐ Document legacy kmer_*.py files
 
 ### Long Term (Lower Priority)
-9. ☐ Package for PyPI distribution
-10. ☐ Add CI/CD pipeline
-11. ☐ Comprehensive user guide
-12. ☐ Type checking with mypy
+11. ☐ Package for PyPI distribution
+12. ☐ Add CI/CD pipeline
+13. ☐ Comprehensive user guide
+14. ☐ Type checking with mypy
 
 ## Metrics
 
@@ -792,6 +971,65 @@ collapsed before phrase detection, reducing false phrase variants.
 - Validate output quality and performance
 - Merge to main after successful testing
 - Future: Implement Phase 4-7 enhancements
+
+---
+
+### Session 2026-01-26: Config Architecture & Diagnostic Action
+
+**Branch**: phrase-curator
+
+**Goals**:
+- Move hardcoded supplementary patterns to YAML config
+- Create diagnostic action for iterative stripping improvement
+- Enable curator-friendly pattern curation workflow
+
+**Accomplishments**:
+- ✅ Created `config/supplementary_patterns.yaml` (27 patterns, categorized)
+- ✅ Created `utils/config_loader.py` (generic YAML loader with caching)
+- ✅ Refactored `utils/instrument_extractor.py` to load from config
+- ✅ Created `actions/diagnose_strip/` action (cli.py, run.py)
+- ✅ Registered `diagnose_strip` in ACTION_REGISTRY
+
+**Files Created** (4):
+- config/supplementary_patterns.yaml (27 patterns in YAML format)
+- utils/config_loader.py (load_yaml_config, load_supplementary_patterns)
+- actions/diagnose_strip/cli.py (CLI argument definitions)
+- actions/diagnose_strip/run.py (diagnostic logic, pattern categorization)
+
+**Files Modified** (2):
+- utils/instrument_extractor.py (removed hardcoded constant, added config loading)
+- cde_analyzer.py (added diagnose_strip to ACTION_REGISTRY)
+
+**Key Insight**: phrase_miner and strip_discover are **separate workflows**:
+- phrase_miner uses config/supplementary_patterns.yaml for extraction
+- strip_discover uses --pattern-list input (TSV)
+- For comprehensive stripping, use phrase_miner output as strip_discover input
+
+**Test Results** (on cde_all_06_20260105_phrases14/cleaned.json):
+- 170 unique remaining patterns
+- 936 total occurrences
+- Categories: other(499), test(186), questionnaire(122), model(61), scale(44), acronym(22), version(2)
+
+**Checkpoint**: checkpoint-2026-01-26-config-diagnostics.md
+
+**Status**: Implementation complete, ready for iteration
+
+**Recommended Workflow**:
+```bash
+# 1. Extract instruments with supplementary
+cde_analyzer phrase_miner -i cdes.json -o output/ --instruments-only --extract-supplementary
+
+# 2. Discover patterns using instrument list
+cde_analyzer strip_discover -i cdes.json -m CDE -o discovered.tsv --pattern-list output/instruments_verbatim.tsv
+
+# 3. Strip patterns
+cde_analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json --patterns discovered.tsv
+
+# 4. Diagnose remaining
+cde_analyzer diagnose_strip -i cleaned.json -m CDE -o remaining.tsv --suggest-patterns
+
+# 5. Review remaining.yaml, add to config, iterate
+```
 
 ---
 

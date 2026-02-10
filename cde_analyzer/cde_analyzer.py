@@ -44,6 +44,21 @@ ACTION_REGISTRY = {
         "help": "Remove literal phrases at given paths",
         "description": "Literal search-and-replace on structured data",
     },
+    "strip_discover": {
+        "module": "actions.strip_discover.cli",
+        "help": "Discover instrument patterns in CDE text fields",
+        "description": "Flexible regex discovery for pattern curation workflow",
+    },
+    "strip_analyze": {
+        "module": "actions.strip_analyze.cli",
+        "help": "Analyze patterns for conflicts and false negatives",
+        "description": "Pattern analysis utilities for conflict detection and iterative improvement",
+    },
+    "pattern_util": {
+        "module": "actions.pattern_util.cli",
+        "help": "TSV pattern utilities (merge, coalesce, import)",
+        "description": "Manipulate pattern TSV files without CDE input",
+    },
     "lemma_fasta": {
         "module": "actions.lemma_fasta.cli",
         "help": "Create FASTA from lemma sequences",
@@ -64,10 +79,55 @@ ACTION_REGISTRY = {
         "help": "Iterative k-mer phrase mining with de Bruijn extension",
         "description": "Detects repeated phrases using descending k-mer mining (k=25 to k=3)",
     },
+    "instrument_miner": {
+        "module": "actions.instrument_miner.cli",
+        "help": "Extract measurement instruments from CDE text fields",
+        "description": "Detects instrument patterns from 'as part of <Instrument>' phrases",
+    },
+    "phrase_grouper": {
+        "module": "actions.phrase_grouper.cli",
+        "help": "Bottom-up k-mer analysis for phrase family discovery",
+        "description": "Groups phrases by shared prefix, suffix, or infix patterns",
+    },
     "llm_classify": {
         "module": "actions.llm_classify.cli",
         "help": "Classify phrases using multi-LLM queries",
         "description": "Agentic LLM-based classification for phrase curation",
+    },
+    "diagnose_strip": {
+        "module": "actions.diagnose_strip.cli",
+        "help": "Diagnose remaining anchor patterns after stripping",
+        "description": "Analyze cleaned JSON for iterative stripping improvement",
+    },
+    "workflow": {
+        "module": "actions.workflow.cli",
+        "help": "YAML-based workflow orchestrator for CDE analysis pipelines",
+        "description": "Execute sequential workflows with checkpoints and resume capability",
+    },
+    "batch_expand_abbreviations": {
+        "module": "actions.batch_expand_abbreviations.cli",
+        "help": "Batch expand abbreviations to discover full instrument phrases",
+        "description": "Iterate over abbreviations, subset CDEs, and mine phrases to discover extended names",
+    },
+    "recall_analyze": {
+        "module": "actions.recall_analyze.cli",
+        "help": "Analyze recall and detect false negatives by instrument family",
+        "description": "Compare source data matches against pipeline output to identify gaps",
+    },
+    "pipeline_report": {
+        "module": "actions.pipeline_report.cli",
+        "help": "Generate markdown summary reports for pipeline execution",
+        "description": "Create human-readable reports with phase summaries and key metrics",
+    },
+    "discovery_report": {
+        "module": "actions.discovery_report.cli",
+        "help": "Generate markdown summary reports for discovery pipelines",
+        "description": "Summarize pipeline steps with pattern counts, tinyId coverage, and subsumption stats",
+    },
+    "strip_report": {
+        "module": "actions.strip_report.cli",
+        "help": "Generate quality report for stripped JSON outputs",
+        "description": "Scan stripped outputs for detritus, remnants, and remaining temporal patterns",
     },
     # "depth": {...}
     # "quality": {...}
@@ -144,11 +204,18 @@ def main():
                 f"Action module {args._module_path} failed to set args.func in register_subparser()"
             )
 
-        # Run the action
-        args.func(args)
+        # Run the action and return its exit code
+        result = args.func(args)
+        return result if result is not None else 0
     else:
         parser.print_help()
+        return 0
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Graceful exit on Ctrl-C without stack trace
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)  # Standard exit code for SIGINT

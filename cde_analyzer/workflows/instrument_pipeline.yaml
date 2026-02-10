@@ -1,0 +1,117 @@
+# Workflow: Instrument Pattern Mining & Stripping (Phase 1)
+#
+# Executes the full instrument detection and stripping pipeline:
+# 1. Mine instrument patterns from CDE JSON
+# 2. Discover abbreviation-based patterns
+# 3. Discover verbatim occurrences with variants
+# 4. Coalesce redundant patterns
+# 5. [CHECKPOINT] Human curator review
+# 6. Strip patterns from CDE JSON
+#
+# Usage:
+#   cde-analyzer workflow run workflows/instrument_pipeline.yaml \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/output
+
+name: instrument_stripping
+description: Phase 1 - Mine and strip instrument patterns from CDE records
+
+variables:
+  # Input/output paths - override with --set
+  input_json: "${CDE_INPUT:-cdes.json}"
+  output_dir: "${OUTPUT_DIR:-./phase1_output}"
+
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
+  # Intermediate files (derived from output_dir)
+  instruments_tsv: "${output_dir}/instruments.tsv"
+  families_tsv: "${output_dir}/instrument_families.tsv"
+  # mined_patterns: Auto-generated patterns from mine_instruments (has 'pattern' column)
+  # Used as input to discover_verbatim, before human curation
+  mined_patterns_tsv: "${output_dir}/mined_patterns.tsv"
+  abbrev_patterns: "${output_dir}/abbrev_patterns.tsv"
+  discovered_tsv: "${output_dir}/discovered.tsv"
+  coalesced_tsv: "${output_dir}/coalesced.tsv"
+  coalesce_report: "${output_dir}/coalesce_report.tsv"
+  # curated_tsv: Human-edited patterns (copy coalesced.tsv → curated.tsv after checkpoint)
+  curated_tsv: "${output_dir}/curated.tsv"
+  stripped_json: "${output_dir}/inst_stripped.json"
+  trace_tsv: "${output_dir}/strip_trace.tsv"
+  sanity_check: "${output_dir}/sanity_check.tsv"
+
+steps:
+  - name: mine_instruments
+    action: instrument_miner
+    args:
+      input: "${input_json}"
+      output: "${output_dir}/"
+      detect_families: true
+      family_summary: true
+
+  - name: discover_abbreviations
+    action: strip_discover
+    args:
+      discover_abbreviations: "${instruments_tsv}"
+      input: "${input_json}"
+      output: "${abbrev_patterns}"
+      workers: "${workers}"
+
+  - name: discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      # Use mined_patterns (has 'pattern' column) not instruments.tsv (summary only)
+      pattern_list: "${mined_patterns_tsv}"
+      additional_patterns:
+        - "${abbrev_patterns}"
+      expand_variants: true
+      discover_bare_names: true
+      workers: "${workers}"
+
+  - name: coalesce_patterns
+    action: pattern_util
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+      min_prefix_tinyids: 2
+
+  - name: curator_review
+    checkpoint: true
+    message: |
+      Instrument pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (patterns to strip)
+        - ${coalesce_report} (subsumption details)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives (accidental matches)
+        3. Add any missing patterns
+        4. Save as ${curated_tsv}
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  - name: strip_instruments
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${curated_tsv},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: "${workers}"
+
+  - name: sanity_check
+    action: diagnose_strip
+    args:
+      input: "${stripped_json}"
+      model: CDE
+      output: "${sanity_check}"
+      min_count: 2
+      suggest_patterns: true

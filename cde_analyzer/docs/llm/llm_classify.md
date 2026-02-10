@@ -16,7 +16,7 @@ The `llm_classify` action classifies phrases from `phrase_miner` output using mu
 ## Usage
 
 ```bash
-cde_analyzer llm_classify --input-dir <phrase_output> --module <module_name> [options]
+cde-analyzer llm_classify --input-dir <phrase_output> --module <module_name> [options]
 ```
 
 ## Arguments
@@ -87,7 +87,7 @@ cde_analyzer llm_classify --input-dir <phrase_output> --module <module_name> [op
 
 ```bash
 # Classify phrases as instrument names using Claude
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument
@@ -97,7 +97,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Use Claude and OpenAI for higher confidence
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument \
@@ -109,7 +109,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Detect time-related expressions
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module temporal \
@@ -120,7 +120,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Focus on frequent phrases (faster, cheaper)
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument \
@@ -132,7 +132,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Use known instruments list to improve accuracy
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument \
@@ -143,7 +143,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Check configuration without making API calls
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --providers claude openai \
@@ -154,7 +154,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Adjudicate instruments with low family confidence
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --adjudicate-instruments instrument_output/instruments.tsv \
   --adjudicate-threshold 0.7 \
   --module instrument_family \
@@ -232,13 +232,13 @@ Run statistics and metadata.
 
 ```bash
 # Phase 1: Extract instruments with phrase_miner
-cde_analyzer phrase_miner \
+cde-analyzer phrase_miner \
   --input cdes.json \
   --output-dir phase1_output \
   --instruments-only
 
 # Phase 2: Classify phrases with LLMs
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phase1_output \
   --output-dir phase2_output \
   --module instrument \
@@ -252,14 +252,14 @@ grep "highly_likely" phase2_output/classified_instrument.tsv > review_queue.tsv
 
 ```bash
 # Start with single provider for quick results
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir quick_results \
   --module instrument \
   --providers claude
 
 # Add providers for uncertain cases
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir refined_results \
   --module instrument \
@@ -271,7 +271,7 @@ cde_analyzer llm_classify \
 
 ```bash
 # Identify all temporal expressions
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir temporal_output \
   --module temporal \
@@ -397,5 +397,5 @@ occurrences.tsv ─┘    Query LLMs (parallel)
 
 - [Configuration](configuration.md) - API key setup
 - [Query Modules](query_modules.md) - Available classification modules
-- [phrase_miner](../commands/phrase_miner.md) - Generate input data
+- [phrase_miner](../help/phrase_miner.md) - Generate input data
 - [LLM Overview](index.md) - Module introduction

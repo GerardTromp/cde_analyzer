@@ -1,10 +1,15 @@
 # `subset` Command
 
-Extract a subset of CDE records by tinyId with Pydantic validation.
+Extract a subset of CDE records by tinyId or text content with Pydantic validation.
 
 ## Overview
 
-The `subset` command filters CDE records based on a list of tinyIds and outputs a smaller, schema-compliant JSON file. All output records are validated against the specified Pydantic model to ensure data integrity.
+The `subset` command filters CDE records and outputs a smaller, schema-compliant JSON file. All output records are validated against the specified Pydantic model to ensure data integrity.
+
+**Two Filtering Modes:**
+
+1. **tinyId filtering** - Include/exclude records by tinyId list
+2. **Text filtering** - Include/exclude records containing specific text (NEW)
 
 **Use Cases:**
 
@@ -12,11 +17,18 @@ The `subset` command filters CDE records based on a list of tinyIds and outputs 
 - Reducing file size for faster processing
 - Isolating records of interest from large CDE exports
 - Excluding known problematic records from a dataset
+- Extracting records containing specific abbreviations or keywords
 
 ## Usage
 
 ```bash
-cde_analyzer subset -i INPUT -o OUTPUT -m MODEL [OPTIONS]
+# tinyId filtering
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --id-list ID1 ID2 ...
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --id-file ids.txt
+
+# Text filtering (NEW)
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PROMIS"
+cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 ```
 
 ## Arguments
@@ -31,45 +43,51 @@ cde_analyzer subset -i INPUT -o OUTPUT -m MODEL [OPTIONS]
 
 ### tinyId Filtering
 
-At least one of these is required:
-
 | Argument | Description |
 |----------|-------------|
 | `--id-list` | List of tinyIds on command line |
 | `--id-file` | File containing tinyIds (JSON, CSV, or TSV) |
+
+### Text Filtering (NEW)
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--text-filter` | - | Text pattern to search for in specified fields |
+| `--fields, -f` | `designation definition` | Fields to search |
+| `--case-sensitive` | `false` | Enable case-sensitive matching |
+| `--regex` | `false` | Treat `--text-filter` as a regular expression |
+
+**Supported fields:** `designation`, `definition`, `valueMeaningName`, `valueMeaningDefinition`
 
 ### Options
 
 | Argument | Description |
 |----------|-------------|
 | `--output-format` | Output format: `json` (default), `csv`, `tsv` |
-| `--exclude` | Exclude matching tinyIds instead of including |
-| `--no-exclude` | Include matching tinyIds (default) |
+| `--exclude` | Exclude matching records instead of including |
+| `--no-exclude` | Include matching records (default) |
 
 ## Examples
 
-### Include specific records
+### tinyId Filtering
 
 ```bash
-# From command line list
-cde_analyzer subset \
+# Include specific records from command line
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.json \
     -m CDE \
     --id-list abc123 def456 ghi789
 
-# From file
-cde_analyzer subset \
+# Include from file
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.json \
     -m CDE \
     --id-file selected_ids.txt
-```
 
-### Exclude specific records
-
-```bash
-cde_analyzer subset \
+# Exclude specific records
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_cleaned.json \
     -m CDE \
@@ -77,14 +95,66 @@ cde_analyzer subset \
     --exclude
 ```
 
-### Output to TSV
+### Text Filtering (NEW)
 
 ```bash
-cde_analyzer subset \
+# Find all CDEs containing "PROMIS"
+cde-analyzer subset \
+    -i cdes.json \
+    -o promis_subset.json \
+    -m CDE \
+    --text-filter "PROMIS"
+
+# Search only in definitions
+cde-analyzer subset \
+    -i cdes.json \
+    -o results.json \
+    -m CDE \
+    --text-filter "Patient Health Questionnaire" \
+    --fields definition
+
+# Case-sensitive search
+cde-analyzer subset \
+    -i cdes.json \
+    -o results.json \
+    -m CDE \
+    --text-filter "PHQ-9" \
+    --case-sensitive
+
+# Regex: find PHQ variants (PHQ-9, PHQ-2, PHQ-15)
+cde-analyzer subset \
+    -i cdes.json \
+    -o phq_subset.json \
+    -m CDE \
+    --text-filter "PHQ-\d+" \
+    --regex
+
+# Exclude CDEs containing certain text
+cde-analyzer subset \
+    -i cdes.json \
+    -o no_promis.json \
+    -m CDE \
+    --text-filter "PROMIS" \
+    --exclude
+
+# Search in permissible values
+cde-analyzer subset \
+    -i cdes.json \
+    -o results.json \
+    -m CDE \
+    --text-filter "Not applicable" \
+    --fields valueMeaningName valueMeaningDefinition
+```
+
+### Output Formats
+
+```bash
+# Output to TSV
+cde-analyzer subset \
     -i cdes_full.json \
     -o cdes_subset.tsv \
     -m CDE \
-    --id-file ids.txt \
+    --text-filter "SF-36" \
     --output-format tsv
 ```
 
@@ -140,6 +210,17 @@ The `EmbedText` model is a simplified schema for text embedding workflows:
 | `Definition` | No | CDE definition |
 | `PermissibleValues` | No | Permissible values as string |
 
+## Text Filtering Details
+
+The text filter searches for the pattern in the specified fields:
+
+- **designation**: Searches `designations[*].designation` (CDE names/questions)
+- **definition**: Searches `definitions[*].definition` (CDE descriptions)
+- **valueMeaningName**: Searches `valueDomain.permissibleValues[*].valueMeaningName`
+- **valueMeaningDefinition**: Searches `valueDomain.permissibleValues[*].valueMeaningDefinition`
+
+**Performance:** Text filtering operates on raw dictionaries before Pydantic validation, making it fast for large files. Only matching records undergo full validation.
+
 ## Validation
 
 All records in the subset are validated against the specified Pydantic model:
@@ -150,6 +231,7 @@ All records in the subset are validated against the specified Pydantic model:
 
 ## See Also
 
+- [`batch_expand_abbreviations`](batch_expand_abbreviations.md) - Batch expand abbreviations using text filtering
 - [`extract_embed`](extract_embed.md) - Extract specific fields for embedding
 - [`strip_phrases`](strip_phrases.md) - Remove phrases from records
-- [`phrase_miner`](../commands/phrase_miner.md) - Detect repeated phrases
+- [`phrase_miner`](phrase_miner.md) - Detect repeated phrases

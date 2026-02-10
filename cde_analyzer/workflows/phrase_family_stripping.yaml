@@ -1,0 +1,98 @@
+# Workflow: Generic Phrase Family Stripping
+#
+# Flexible workflow for stripping any phrase family discovered by phrase_grouper.
+# Parameterized by family name for reuse across different phrase categories.
+#
+# Typical phrase families:
+#   - temporal (pastN, recency, duration)
+#   - body_parts (anatomical terms)
+#   - units (measurement units)
+#   - qualifiers (severity, frequency modifiers)
+#
+# Prerequisites:
+#   - Input JSON (typically instrument-stripped)
+#   - Pattern TSV from phrase_grouper family analysis
+#
+# Usage:
+#   cde-analyzer workflow run workflows/phrase_family_stripping.yaml \
+#       --set family_name=temporal \
+#       --set input_json=/path/to/input.json \
+#       --set pattern_source=/path/to/family_patterns.tsv \
+#       --set output_dir=/path/to/output
+
+name: phrase_family_stripping
+description: Generic phrase family stripping - parameterized by family_name
+
+variables:
+  # Family identifier - used for file naming
+  family_name: "${FAMILY_NAME:-generic}"
+
+  # Input/output paths
+  input_json: "${FAMILY_INPUT:-input.json}"
+  output_dir: "${OUTPUT_DIR:-./phase3_${family_name}}"
+
+  # Pattern source configuration
+  pattern_source: "${PATTERN_SOURCE:-patterns.tsv}"
+  pattern_column: "${PATTERN_COLUMN:-pattern}"
+  tinyid_column: "${TINYID_COLUMN:-}"
+
+  # Processing options
+  expand_variants: "${EXPAND_VARIANTS:-true}"
+  sort_order: "${SORT_ORDER:-length}"
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
+  # Intermediate files (auto-named by family)
+  discovered_tsv: "${output_dir}/${family_name}_discovered.tsv"
+  coalesced_tsv: "${output_dir}/${family_name}_coalesced.tsv"
+  coalesce_report: "${output_dir}/${family_name}_subsumption.tsv"
+  curated_tsv: "${output_dir}/${family_name}_curated.tsv"
+  stripped_json: "${output_dir}/no_${family_name}.json"
+  trace_tsv: "${output_dir}/${family_name}_trace.tsv"
+
+steps:
+  - name: discover_family_patterns
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${pattern_source},${pattern_column}"
+      expand_variants: "${expand_variants}"
+      sort_order: "${sort_order}"
+      workers: "${workers}"
+
+  - name: coalesce_patterns
+    action: pattern_util
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+
+  - name: curator_review
+    checkpoint: true
+    message: |
+      ${family_name} pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (patterns to strip)
+        - ${coalesce_report} (subsumption details)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives
+        3. Verify pattern coverage is complete
+        4. Save as ${curated_tsv}
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  - name: strip_family_patterns
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${curated_tsv},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: "${workers}"

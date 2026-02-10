@@ -1,0 +1,236 @@
+# Workflow: Major Instrument Stripping (No Sub-instruments)
+#
+# Use this workflow when you have curated patterns with sub-instrument
+# details removed. Since removing sub-instruments creates duplicate
+# patterns, this workflow starts with a merge/deduplication step.
+#
+# Prerequisites:
+#   1. Run instrument_detection.yaml through initial_review checkpoint
+#   2. Edit the curated patterns to remove sub-instrument specifics
+#      (e.g., "PROMIS Pain Interference 8a" → "PROMIS Pain Interference")
+#   3. Save edited patterns as curated_major.tsv
+#
+# Workflow:
+#   1. Merge duplicate patterns (created by sub-instrument removal)
+#   2. Discover verbatim occurrences
+#   3. Coalesce patterns (subsumption analysis)
+#   4. [CHECKPOINT] Curator review
+#   5. Family discovery (optional)
+#   6. Final discover
+#   7. Final coalesce
+#   8. [CHECKPOINT] Final review
+#   9. Strip instruments
+#   10. Sanity check
+#
+# Usage:
+#   cde-analyzer workflow copy instrument_major_only
+#   # Edit the copied file to set input_json and curated_patterns paths
+#   cde-analyzer workflow run ./instrument_major_only.yaml
+
+name: instrument_major_only
+description: Strip major instruments (sub-instrument details removed) with deduplication
+
+variables:
+  # Primary input
+  input_json: "${CDE_INPUT:-cdes.json}"
+  output_dir: "${OUTPUT_DIR:-./major_instruments_output}"
+
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
+  # User-curated patterns with sub-instruments removed
+  # This file should be edited from the instrument_detection output
+  curated_patterns: "${CURATED_PATTERNS:-curated_major.tsv}"
+
+  # Merge output (deduplicated patterns)
+  merged_tsv: "${output_dir}/merged_patterns.tsv"
+
+  # Discovery outputs
+  discovered_tsv: "${output_dir}/discovered_instruments.tsv"
+  failed_patterns: "${output_dir}/failed_patterns.tsv"
+
+  # Coalesce outputs
+  coalesced_tsv: "${output_dir}/coalesced_instruments.tsv"
+  coalesce_report: "${output_dir}/subsumption_report.tsv"
+
+  # Post-review curated output
+  reviewed_tsv: "${output_dir}/reviewed_instruments.tsv"
+
+  # Family grouper outputs
+  families_dir: "${output_dir}/families"
+
+  # Final discovery/coalesce
+  final_discovered: "${output_dir}/final_discovered.tsv"
+  final_coalesced: "${output_dir}/final_coalesced.tsv"
+  final_subsumption: "${output_dir}/final_subsumption.tsv"
+
+  # Sanity check
+  sanity_check: "${output_dir}/sanity_check.tsv"
+
+  # Final output
+  stripped_json: "${output_dir}/no_instruments.json"
+  trace_tsv: "${output_dir}/strip_trace.tsv"
+
+steps:
+  # =========================================================================
+  # PHASE 1: Merge & Discover
+  # =========================================================================
+
+  # Step 1: Merge duplicate patterns
+  # After removing sub-instrument details, many patterns become identical
+  # e.g., "PROMIS Pain 8a" and "PROMIS Pain 8b" both become "PROMIS Pain"
+  - name: merge_duplicates
+    action: pattern_util
+    args:
+      merge_patterns: "${curated_patterns}"
+      output: "${merged_tsv}"
+      merge_pattern_column: pattern
+      merge_tinyid_column: tinyids
+
+  # Step 2: Discover verbatim occurrences
+  - name: discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${merged_tsv},pattern,tinyids"
+      expand_variants: true
+      discover_bare_names: true
+      discover_fails: "${failed_patterns}"
+      workers: "${workers}"
+
+  # Step 3: Coalesce patterns via subsumption analysis
+  - name: coalesce_patterns
+    action: pattern_util
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+      min_prefix_tinyids: 2
+
+  # Step 4: Curator review checkpoint
+  - name: initial_review
+    checkpoint: true
+    message: |
+      PHASE 1 COMPLETE: Review merged and coalesced patterns.
+
+      Files to review:
+        - ${merged_tsv} (deduplicated patterns after sub-instrument removal)
+        - ${coalesced_tsv} (discovered patterns after subsumption)
+        - ${coalesce_report} (subsumption details)
+        - ${failed_patterns} (patterns that didn't match)
+
+      Actions:
+        1. Review ${coalesced_tsv} for false positives
+        2. Verify the merge was correct (no over-merging)
+        3. Check ${failed_patterns} for patterns that should have matched
+        4. Save reviewed version as ${reviewed_tsv}
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 2: Family Analysis & Final Coalesce
+  # =========================================================================
+
+  # Step 5: Family discovery using phrase_grouper
+  - name: family_discovery
+    action: phrase_grouper
+    args:
+      input: "${reviewed_tsv}"
+      output_dir: "${families_dir}"
+      text_column: "pattern"
+      tinyid_column: "tinyids"
+      min_family_size: 3
+      trees:
+        - prefix
+        - suffix
+
+  # Step 6: Re-discover with reviewed patterns for final verbatim forms
+  - name: final_discover
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${final_discovered}"
+      pattern_list: "${reviewed_tsv},pattern,tinyids"
+      expand_variants: true
+      sort_order: length
+      workers: "${workers}"
+
+  # Step 7: Final coalesce with subsumption
+  - name: final_coalesce
+    action: pattern_util
+    args:
+      coalesce_variants: "${final_discovered}"
+      output: "${final_coalesced}"
+      coalesce_report: "${final_subsumption}"
+      min_prefix_tinyids: 2
+
+  # Step 8: Pre-strip review checkpoint
+  - name: final_review
+    checkpoint: true
+    message: |
+      PHASE 2 COMPLETE: Final review before stripping.
+
+      Files to review:
+        - ${final_coalesced} (final patterns to strip)
+        - ${final_subsumption} (subsumption analysis)
+        - ${families_dir}/ (family assignments)
+
+      Actions:
+        1. Review ${final_subsumption} to verify subsumption is complete
+        2. Verify family assignments are correct
+        3. Confirm pattern list is complete
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 3: Stripping & Verification
+  # =========================================================================
+
+  # Step 9: Strip instruments from CDE JSON
+  # Uses ${workers} which is auto-detected from CPU count
+  - name: strip_instruments
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${final_coalesced},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: "${workers}"
+
+  # Step 10: Sanity check - diagnose any remaining anchor patterns
+  - name: sanity_check
+    action: diagnose_strip
+    args:
+      input: "${stripped_json}"
+      model: CDE
+      output: "${sanity_check}"
+      min_count: 2
+      suggest_patterns: true
+
+
+  # Completion checkpoint
+  - name: pipeline_complete
+    checkpoint: true
+    message: |
+      MAJOR INSTRUMENT STRIPPING COMPLETE!
+
+      Outputs:
+        - ${stripped_json} (CDE JSON with major instruments stripped)
+        - ${trace_tsv} (detailed matching trace)
+        - ${families_dir}/ (instrument family analysis)
+
+      Quality Assurance:
+        - ${sanity_check} shows remaining "as part of" patterns
+        - If patterns found with count >= 2, they may be sub-instruments
+          that were incorrectly removed during curation
+
+      Comparison with full stripping:
+        - This output strips major instruments only
+        - Sub-instrument variations are NOT stripped
+        - Use instrument_detection.yaml for complete stripping

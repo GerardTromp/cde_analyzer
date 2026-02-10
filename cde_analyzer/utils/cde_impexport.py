@@ -3,6 +3,7 @@ import csv
 from pathlib import Path
 from CDE_Schema.CDE_Item import CDEItem
 from typing import Any, Type, List, Optional, Dict, Union
+from utils.file_utils import require_file
 
 
 def save_raw_json(model, base_filename, idx):
@@ -59,5 +60,18 @@ def load_json_model(file_path: str) -> List[CDEItem]:
 
 
 def load_json(filepath: Path) -> Union[list, dict]:
+    """
+    Load JSON from a file path.
+
+    Args:
+        filepath: Path to JSON file
+
+    Returns:
+        Parsed JSON data (list or dict)
+
+    Raises:
+        FileNotFoundError: If file does not exist
+    """
+    require_file(filepath, "JSON file")
     with filepath.open("r", encoding="utf-8") as f:
         return json.load(f)

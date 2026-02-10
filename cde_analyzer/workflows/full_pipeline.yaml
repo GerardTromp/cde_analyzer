@@ -1,0 +1,168 @@
+# Workflow: Full CDE Stripping Pipeline
+#
+# Complete multi-phase pipeline for CDE text normalization:
+#   Phase 1: Instrument stripping (measurement tools, scales)
+#   Phase 2: Generic phrase stripping (common repeated phrases)
+#   Phase 3: Temporal pattern stripping (pastN, recency)
+#
+# Each phase has a checkpoint for curator review.
+#
+# Usage:
+#   cde-analyzer workflow run workflows/full_pipeline.yaml \
+#       --set input_json=/path/to/raw_cdes.json \
+#       --set base_output=/path/to/output_root
+
+name: full_pipeline
+description: Complete multi-phase CDE stripping pipeline
+
+variables:
+  # Primary input
+  input_json: "${CDE_INPUT:-cdes.json}"
+  base_output: "${BASE_OUTPUT:-./pipeline_output}"
+
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
+  # Phase 1: Instruments
+  phase1_dir: "${base_output}/phase1_instruments"
+  instruments_tsv: "${phase1_dir}/instruments.tsv"
+  inst_discovered: "${phase1_dir}/discovered.tsv"
+  inst_coalesced: "${phase1_dir}/coalesced.tsv"
+  inst_curated: "${phase1_dir}/curated.tsv"
+  inst_stripped: "${phase1_dir}/inst_stripped.json"
+  inst_abbrev_patterns: "${phase1_dir}/abbrev_patterns.tsv"
+
+  # Phase 2: Generic phrases
+  phase2_dir: "${base_output}/phase2_phrases"
+  phrases_tsv: "${phase2_dir}/verbatim_phrases.tsv"
+  phrase_discovered: "${phase2_dir}/discovered.tsv"
+  phrase_coalesced: "${phase2_dir}/coalesced.tsv"
+  phrase_curated: "${phase2_dir}/curated.tsv"
+  phrase_stripped: "${phase2_dir}/phrase_stripped.json"
+
+  # Phase 3: Temporal patterns (if pattern source provided)
+  phase3_dir: "${base_output}/phase3_temporal"
+  temporal_source: "${TEMPORAL_PATTERNS:-}"
+  temporal_discovered: "${phase3_dir}/discovered.tsv"
+  temporal_coalesced: "${phase3_dir}/coalesced.tsv"
+  temporal_curated: "${phase3_dir}/curated.tsv"
+  final_stripped: "${phase3_dir}/final_stripped.json"
+
+steps:
+  # ===== PHASE 1: Instrument Stripping =====
+  - name: phase1_mine_instruments
+    action: instrument_miner
+    args:
+      input: "${input_json}"
+      output: "${phase1_dir}/"
+      detect_families: true
+      family_summary: true
+
+  - name: phase1_discover_abbreviations
+    action: strip_discover
+    args:
+      discover_abbreviations: "${instruments_tsv}"
+      input: "${input_json}"
+      output: "${inst_abbrev_patterns}"
+      min_pattern_tinyids: 2
+
+  - name: phase1_discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${inst_discovered}"
+      pattern_list: "${instruments_tsv}"
+      additional_patterns:
+        - "${inst_abbrev_patterns}"
+      expand_variants: true
+      discover_bare_names: true
+      workers: "${workers}"
+
+  - name: phase1_coalesce
+    action: pattern_util
+    args:
+      coalesce_variants: "${inst_discovered}"
+      output: "${inst_coalesced}"
+      coalesce_report: "${phase1_dir}/subsumption_report.tsv"
+      min_prefix_tinyids: 2
+
+  - name: phase1_review
+    checkpoint: true
+    message: |
+      PHASE 1: Instrument pattern curation required.
+
+      Review: ${inst_coalesced}
+      Save curated version as: ${inst_curated}
+
+      Resume: cde-analyzer workflow resume --state-file ${base_output}/.workflow_state.json
+
+  - name: phase1_strip
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${inst_stripped}"
+      patterns: "${inst_curated},pattern"
+      trace_matching: "${phase1_dir}/trace.tsv"
+      workers: "${workers}"
+
+  # ===== PHASE 2: Generic Phrase Stripping =====
+  - name: phase2_mine_phrases
+    action: phrase_miner
+    args:
+      input: "${inst_stripped}"
+      output: "${phase2_dir}/"
+      enable_subsumption: true
+
+  - name: phase2_discover_verbatim
+    action: strip_discover
+    args:
+      input: "${inst_stripped}"
+      model: CDE
+      output: "${phrase_discovered}"
+      pattern_list: "${phrases_tsv}"
+      expand_variants: true
+      workers: "${workers}"
+
+  - name: phase2_coalesce
+    action: pattern_util
+    args:
+      coalesce_variants: "${phrase_discovered}"
+      output: "${phrase_coalesced}"
+      coalesce_report: "${phase2_dir}/subsumption_report.tsv"
+      min_prefix_tinyids: 2
+
+  - name: phase2_review
+    checkpoint: true
+    message: |
+      PHASE 2: Phrase pattern curation required.
+
+      Review: ${phrase_coalesced}
+      Save curated version as: ${phrase_curated}
+
+      Resume: cde-analyzer workflow resume --state-file ${base_output}/.workflow_state.json
+
+  - name: phase2_strip
+    action: strip_phrases
+    args:
+      input: "${inst_stripped}"
+      model: CDE
+      output: "${phrase_stripped}"
+      patterns: "${phrase_curated},pattern"
+      trace_matching: "${phase2_dir}/trace.tsv"
+      workers: "${workers}"
+
+  - name: pipeline_complete
+    checkpoint: true
+    message: |
+      Pipeline complete!
+
+      Final output: ${phrase_stripped}
+
+      Phase outputs:
+        - Phase 1 (instruments): ${inst_stripped}
+        - Phase 2 (phrases): ${phrase_stripped}
+
+      For Phase 3 (temporal patterns), run temporal_stripping.yaml separately
+      with the phrase-stripped output as input.

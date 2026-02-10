@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1050" width="800" height="1050">
+  <defs>
+    <style>
+      .title { font: bold 18px sans-serif; fill: #1a1a1a; }
+      .phase-title { font: bold 14px sans-serif; fill: #ffffff; }
+      .step-title { font: bold 12px sans-serif; fill: #333333; }
+      .step-text { font: 11px monospace; fill: #555555; }
+      .arrow { stroke: #666666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .phase-box { stroke: #2563eb; stroke-width: 2; rx: 8; }
+      .step-box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 4; }
+      .subworkflow-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 4; stroke-dasharray: 5,3; }
+      .input-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 8; }
+      .output-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; rx: 8; }
+      .report-box { fill: #faf5ff; stroke: #9f7aea; stroke-width: 2; rx: 4; }
+      .file-label { font: italic 10px sans-serif; fill: #6b7280; }
+      .detail-text { font: 10px sans-serif; fill: #666666; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666666"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">CDE Pattern Mining &amp; Stripping Workflow</text>
+
+  <!-- Input Box -->
+  <rect x="250" y="50" width="300" height="50" class="input-box"/>
+  <text x="400" y="72" text-anchor="middle" class="step-title">INPUT: Raw CDE JSON</text>
+  <text x="400" y="88" text-anchor="middle" class="step-text">(fix_underscores + strip_html)</text>
+
+  <!-- Arrow to Phase 1 -->
+  <path d="M400,100 L400,130" class="arrow"/>
+
+  <!-- Phase 1 Box -->
+  <rect x="50" y="130" width="700" height="300" fill="#eff6ff" class="phase-box"/>
+  <rect x="50" y="130" width="700" height="30" fill="#2563eb" class="phase-box"/>
+  <text x="400" y="150" text-anchor="middle" class="phase-title">PHASE 1: INSTRUMENT PATTERN STRIPPING</text>
+
+  <!-- Phase 1 Step 1: Mine -->
+  <rect x="80" y="175" width="640" height="55" class="step-box"/>
+  <text x="100" y="195" class="step-title">1. Mine Instruments</text>
+  <text x="100" y="215" class="step-text">instrument_miner -i cdes.json -o inst_output/ --detect-families</text>
+  <text x="620" y="220" class="file-label">instruments.tsv</text>
+
+  <!-- Arrow -->
+  <path d="M400,230 L400,250" class="arrow"/>
+
+  <!-- Phase 1 Subworkflow Box -->
+  <rect x="120" y="250" width="560" height="50" class="subworkflow-box"/>
+  <text x="400" y="280" text-anchor="middle" class="step-title">PATTERN CURATION SUB-WORKFLOW (see detail diagram)</text>
+  <text x="600" y="290" class="file-label">curated.tsv</text>
+
+  <!-- Arrow -->
+  <path d="M400,300 L400,320" class="arrow"/>
+
+  <!-- Phase 1 Step: Strip -->
+  <rect x="80" y="320" width="640" height="55" class="step-box"/>
+  <text x="100" y="340" class="step-title">2. Strip Instruments</text>
+  <text x="100" y="360" class="step-text">strip_phrases -i cdes.json -m CDE -o inst_stripped.json --patterns curated.tsv</text>
+  <text x="600" y="365" class="file-label">inst_stripped.json</text>
+
+  <!-- Arrow to Phase 2 -->
+  <path d="M400,430 L400,470" class="arrow"/>
+
+  <!-- Phase 2 Box -->
+  <rect x="50" y="470" width="700" height="350" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
+  <rect x="50" y="470" width="700" height="30" fill="#16a34a" class="phase-box" style="stroke: #16a34a;"/>
+  <text x="400" y="490" text-anchor="middle" class="phase-title">PHASE 2: GENERIC PHRASE STRIPPING</text>
+
+  <!-- Phase 2 Step 1: Mine -->
+  <rect x="80" y="515" width="640" height="55" class="step-box"/>
+  <text x="100" y="535" class="step-title">1. Mine Phrases</text>
+  <text x="100" y="555" class="step-text">phrase_miner -i inst_stripped.json -o phrase_out/ --enable-subsumption</text>
+  <text x="580" y="560" class="file-label">verbatim_phrases.tsv</text>
+
+  <!-- Arrow -->
+  <path d="M400,570 L400,590" class="arrow"/>
+
+  <!-- Phase 2 Subworkflow Box -->
+  <rect x="120" y="590" width="560" height="50" class="subworkflow-box"/>
+  <text x="400" y="620" text-anchor="middle" class="step-title">PATTERN CURATION SUB-WORKFLOW (see detail diagram)</text>
+  <text x="600" y="630" class="file-label">curated.tsv</text>
+
+  <!-- Arrow -->
+  <path d="M400,640 L400,660" class="arrow"/>
+
+  <!-- Phase 2 Step: Strip with cleanup -->
+  <rect x="80" y="660" width="640" height="70" class="step-box"/>
+  <text x="100" y="680" class="step-title">2. Strip Phrases + Cleanup</text>
+  <text x="100" y="700" class="step-text">strip_phrases -i inst_stripped.json -m CDE -o final.json --patterns curated.tsv</text>
+  <text x="100" y="715" class="step-text">    --clean-remnants --detect-remnants --remnant-report remnants.tsv</text>
+  <text x="600" y="720" class="file-label">final_stripped.json</text>
+
+  <!-- Arrow to Reporting -->
+  <path d="M400,820 L400,855" class="arrow"/>
+
+  <!-- Reporting Box -->
+  <rect x="100" y="855" width="600" height="80" class="report-box"/>
+  <text x="120" y="880" class="step-title">REPORTING</text>
+  <text x="120" y="900" class="step-text">discovery_report --output-dir output/ --pipeline phrase -o report.md</text>
+  <text x="120" y="920" class="detail-text">Generates: pipeline summary, remnant analysis, version history</text>
+
+  <!-- Arrow to Output -->
+  <path d="M400,935 L400,960" class="arrow"/>
+
+  <!-- Output Box -->
+  <rect x="250" y="960" width="300" height="50" class="output-box"/>
+  <text x="400" y="982" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
+  <text x="400" y="998" text-anchor="middle" class="step-text">(instruments &amp; phrases removed)</text>
+</svg>

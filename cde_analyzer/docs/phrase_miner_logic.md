@@ -100,7 +100,7 @@ Optional post-processing to remove redundant shorter phrases (enabled with `--en
 ### Phase 1: Discovery
 
 ```bash
-cde_analyzer phrase_miner -i data.json -o output/ --instruments-only
+cde-analyzer phrase_miner -i data.json -o output/ --instruments-only
 ```
 
 Extracts "as part of \<Instrument Name\> (\<ACRONYM\>)" patterns to `instruments_verbatim.tsv` for human curation.
@@ -108,7 +108,7 @@ Extracts "as part of \<Instrument Name\> (\<ACRONYM\>)" patterns to `instruments
 ### Phase 2: Full Mining
 
 ```bash
-cde_analyzer phrase_miner -i data.json -o output/ \
+cde-analyzer phrase_miner -i data.json -o output/ \
     --instrument-list instruments_verbatim.tsv,full_match
 ```
 

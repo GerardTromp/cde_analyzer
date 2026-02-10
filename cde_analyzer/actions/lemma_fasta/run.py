@@ -7,6 +7,7 @@ import logging
 from CDE_Schema import CDEItem, CDEForm
 from utils.tinyid_utils import load_tinyids
 from utils.constants import MODEL_REGISTRY
+from utils.file_utils import exit_if_missing, graceful_interrupt
 from logic.lemma_fasta import make_pfasta, make_lfasta
 from argparse import ArgumentParser, ArgumentError, BooleanOptionalAction
 
@@ -14,6 +15,7 @@ from argparse import ArgumentParser, ArgumentError, BooleanOptionalAction
 logger = logging.getLogger(__name__)
 
 
+@graceful_interrupt
 def run_action(args):
     if (args.id_list or args.id_file) and args.id_type is None:
         print(
@@ -35,7 +37,8 @@ def run_action(args):
     else:
         idlist = args.id_list
 
-    raw = json.load(open(args.input))
+    input_path = exit_if_missing(args.input, "Input file")
+    raw = json.load(open(input_path))
     # ModelType = TypeVar(MODEL_REGISTRY[args.model], bound=BaseModel)
     model_class = MODEL_REGISTRY[args.model]
     

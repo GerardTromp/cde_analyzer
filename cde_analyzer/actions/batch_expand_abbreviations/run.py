@@ -1,0 +1,295 @@
+"""Orchestration layer for batch_expand_abbreviations action"""
+
+import csv
+import json
+import logging
+from argparse import Namespace
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
+from CDE_Schema.CDE_Item import CDEItem
+from utils.file_utils import exit_if_missing, graceful_interrupt
+
+logger = logging.getLogger(__name__)
+
+
+def load_abbreviations(tsv_path: str, column: str = "acronym") -> List[str]:
+    """
+    Load unique abbreviations from a TSV file.
+
+    Args:
+        tsv_path: Path to TSV file (typically instruments.tsv)
+        column: Column name containing abbreviations
+
+    Returns:
+        List of unique abbreviations (sorted)
+    """
+    abbreviations: Set[str] = set()
+
+    with open(tsv_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+
+        if column not in reader.fieldnames:
+            available = ', '.join(reader.fieldnames)
+            raise ValueError(f"Column '{column}' not found. Available: {available}")
+
+        # Check for family_display_name fallback column
+        has_display_name = 'family_display_name' in (reader.fieldnames or [])
+
+        for row in reader:
+            value = row.get(column, "").strip()
+            if value:
+                # Handle pipe-separated multiple abbreviations
+                for abbrev in value.split("|"):
+                    abbrev = abbrev.strip()
+                    if abbrev and len(abbrev) >= 2:  # Skip single-char abbreviations
+                        abbreviations.add(abbrev)
+            elif has_display_name:
+                # Fallback: use family_display_name if it looks like an abbreviation
+                # Must contain consecutive uppercase or uppercase+hyphen (e.g. "Neuro-QOL", "PROMIS")
+                import re
+                display_name = row.get('family_display_name', "").strip()
+                if (display_name
+                        and len(display_name) >= 2
+                        and len(display_name.split()) <= 3
+                        and re.search(r'[A-Z]{2,}|[A-Z][a-z]+-[A-Z]', display_name)):
+                    abbreviations.add(display_name)
+
+    return sorted(abbreviations)
+
+
+def subset_by_text(
+    data: List[Dict],
+    text_filter: str,
+    field_names: List[str],
+) -> Tuple[List[Dict], Set[str]]:
+    """
+    Fast text-based subsetting without Pydantic validation.
+
+    Returns raw dicts for speed - validation happens later if needed.
+    """
+    from logic.subset import record_matches_text
+
+    results = []
+    matched_tinyids: Set[str] = set()
+
+    for record in data:
+        if record_matches_text(record, text_filter, field_names, case_sensitive=False):
+            results.append(record)
+            tinyid = record.get("tinyId", "")
+            if tinyid:
+                matched_tinyids.add(tinyid)
+
+    return results, matched_tinyids
+
+
+def mine_phrases_from_subset(
+    subset: List[Dict],
+    k_max: int,
+    k_min: int,
+    min_tinyids: int,
+    field_names: List[str],
+) -> List[Dict]:
+    """
+    Run lightweight phrase mining on a subset.
+
+    Returns list of phrase dicts with frequency info.
+    """
+    from collections import Counter
+    from logic.phrase_miner import MinerConfig, mine_phrases
+
+    # Convert to CDEItem objects
+    items = [CDEItem.model_validate(record) for record in subset]
+
+    config = MinerConfig(
+        k_max=k_max,
+        k_min=k_min,
+        freq_min=2,
+        min_distinct_tinyids=min_tinyids,
+        field_names=field_names,
+        lemmatize=True,
+        remove_stopwords=False,
+        skip_debruijn=True,
+        skip_anchor=True,
+        use_aho_corasick=True,
+        generate_histograms=False,
+        histogram_output_dir=None,
+        extract_instruments=False,
+        min_instrument_words=3,
+        extract_abbreviation_only=False,
+        extract_supplementary=False,
+        instrument_patterns=None,
+        context_aware_masking=False,
+    )
+
+    # Run mining - returns (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog)
+    phrase_objects, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
+
+    # Extract verbatim info from Phrase objects
+    phrases = []
+    for phrase_obj in phrase_objects:
+        # Collect verbatim forms from occurrences
+        verbatim_counts: Counter = Counter()
+        tinyids: Set[str] = set()
+
+        for occ in phrase_obj.occurrences:
+            if occ.verbatim_text:
+                verbatim_counts[occ.verbatim_text] += 1
+            tinyids.add(occ.tinyId)
+
+        # Get the most common verbatim form, or fall back to lemma text
+        if verbatim_counts:
+            top_form = verbatim_counts.most_common(1)[0][0]
+        else:
+            top_form = phrase_obj.text
+
+        phrases.append({
+            "phrase": top_form,
+            "frequency": phrase_obj.frequency,
+            "n_tinyids": len(tinyids),
+            "tinyids": "|".join(sorted(tinyids)[:10]),  # Limit for output
+        })
+
+    # Sort by frequency descending
+    phrases.sort(key=lambda x: (-x["frequency"], -x["n_tinyids"]))
+
+    return phrases
+
+
+@graceful_interrupt
+def run_action(args: Namespace):
+    """
+    Main entry point for batch_expand_abbreviations action.
+
+    Iterates over abbreviations, subsets CDEs, and mines phrases
+    to discover extended instrument names.
+    """
+    # 1. Load input data
+    input_path = exit_if_missing(args.input, "Input file")
+    abbrev_path = exit_if_missing(args.abbreviations, "Abbreviations file")
+
+    logger.info(f"Loading CDE data from {input_path}")
+    with open(input_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    logger.info(f"Loaded {len(data)} CDE records")
+
+    # 2. Load abbreviations
+    logger.info(f"Loading abbreviations from {abbrev_path}")
+    abbreviations = load_abbreviations(abbrev_path, args.acronym_column)
+    logger.info(f"Found {len(abbreviations)} unique abbreviations")
+
+    # Apply skip filter
+    skip_set = set(args.skip_abbreviations or [])
+    if skip_set:
+        abbreviations = [a for a in abbreviations if a not in skip_set]
+        logger.info(f"After filtering: {len(abbreviations)} abbreviations")
+
+    # 3. Create output directory
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # 4. Process each abbreviation
+    all_expansions = []
+    summary_rows = []
+
+    for i, abbrev in enumerate(abbreviations):
+        logger.info(f"[{i+1}/{len(abbreviations)}] Processing '{abbrev}'...")
+
+        # Subset CDEs containing this abbreviation
+        subset, matched_tinyids = subset_by_text(data, abbrev, args.fields)
+
+        if len(subset) < args.min_subset_size:
+            logger.info(f"  Skipping: only {len(subset)} CDEs (min: {args.min_subset_size})")
+            summary_rows.append({
+                "abbreviation": abbrev,
+                "subset_size": len(subset),
+                "status": "skipped_too_small",
+                "top_phrase": "",
+                "top_frequency": 0,
+            })
+            continue
+
+        logger.info(f"  Found {len(subset)} CDEs containing '{abbrev}'")
+
+        # Mine phrases from subset
+        try:
+            phrases = mine_phrases_from_subset(
+                subset,
+                k_max=args.k_max,
+                k_min=args.k_min,
+                min_tinyids=args.min_tinyids,
+                field_names=args.fields,
+            )
+        except Exception as e:
+            logger.warning(f"  Mining failed: {e}")
+            summary_rows.append({
+                "abbreviation": abbrev,
+                "subset_size": len(subset),
+                "status": "mining_failed",
+                "top_phrase": "",
+                "top_frequency": 0,
+            })
+            continue
+
+        if not phrases:
+            logger.info(f"  No phrases found")
+            summary_rows.append({
+                "abbreviation": abbrev,
+                "subset_size": len(subset),
+                "status": "no_phrases",
+                "top_phrase": "",
+                "top_frequency": 0,
+            })
+            continue
+
+        # Take top N phrases
+        top_phrases = phrases[:args.top_phrases]
+        logger.info(f"  Found {len(phrases)} phrases, top: '{top_phrases[0]['phrase']}'")
+
+        # Add to all expansions
+        for phrase in top_phrases:
+            all_expansions.append({
+                "abbreviation": abbrev,
+                "expanded_phrase": phrase["phrase"],
+                "frequency": phrase["frequency"],
+                "n_tinyids": phrase["n_tinyids"],
+                "tinyids": phrase["tinyids"],
+            })
+
+        summary_rows.append({
+            "abbreviation": abbrev,
+            "subset_size": len(subset),
+            "status": "success",
+            "top_phrase": top_phrases[0]["phrase"],
+            "top_frequency": top_phrases[0]["frequency"],
+        })
+
+    # 5. Write outputs
+    # All expansions TSV - always write header for downstream compatibility
+    expansions_path = output_dir / "expanded_phrases.tsv"
+    fieldnames = ["abbreviation", "expanded_phrase", "frequency", "n_tinyids", "tinyids"]
+    with open(expansions_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
+        if all_expansions:
+            writer.writerows(all_expansions)
+    logger.info(f"Wrote {len(all_expansions)} expanded phrases to {expansions_path}")
+
+    # Summary TSV
+    summary_path = output_dir / "expansion_summary.tsv"
+    with open(summary_path, 'w', encoding='utf-8', newline='') as f:
+        if summary_rows:
+            writer = csv.DictWriter(f, fieldnames=summary_rows[0].keys(), delimiter='\t')
+            writer.writeheader()
+            writer.writerows(summary_rows)
+    logger.info(f"Wrote summary to {summary_path}")
+
+    # Print summary
+    success_count = sum(1 for r in summary_rows if r["status"] == "success")
+    print(f"\nBatch expansion complete:")
+    print(f"  Abbreviations processed: {len(abbreviations)}")
+    print(f"  Successful expansions: {success_count}")
+    print(f"  Expanded phrases found: {len(all_expansions)}")
+    print(f"  Output: {expansions_path}")
+
+    return 0

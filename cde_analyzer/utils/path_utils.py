@@ -5,13 +5,19 @@ import json
 from typing import Any, Dict, List, Union
 from collections import defaultdict
 from utils.logger import log_if_verbose
+from utils.file_utils import require_file
 
 
 def load_path_schema(path: str) -> Dict[str, str]:
     """
     Load schema mapping output tags to dot-separated paths.
     Supports JSON, TSV, or CSV.
+
+    Raises:
+        FileNotFoundError: If the file does not exist
     """
+    require_file(path, "Path schema file")
+
     if path.endswith(".json"):
         with open(path, encoding="utf-8") as f:
             return json.load(f)

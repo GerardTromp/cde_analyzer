@@ -1,0 +1,439 @@
+# Workflow: Instrument Detection Pipeline (Full Automated)
+#
+# Complete multi-stage instrument detection workflow with automatic
+# abbreviation expansion and designation pattern discovery:
+#
+#   Phase 1: Initial Mining
+#     1. Mine instruments (abbreviation-only + supplementary patterns)
+#     2. Batch expand abbreviations to discover extended phrases
+#     3. Discover abbreviation-based designation patterns (PROMIS - ..., [PROMIS])
+#     4. [CHECKPOINT] Review expansion results (continue or investigate)
+#
+#   Phase 2: Discovery & Coalesce
+#     5. Discover verbatim occurrences (instruments + expanded + abbrev patterns)
+#     6. Coalesce patterns (subsumption analysis)
+#     7. [CHECKPOINT] Curator review
+#
+#   Phase 3: Family Analysis & Final Coalesce
+#     8. Family discovery (phrase_grouper)
+#     9. Discover abbreviation patterns from curated list
+#     10. Re-discover with curated patterns (includes abbrev patterns)
+#     11. Final coalesce with subsumption
+#     12. [CHECKPOINT] Final review
+#
+#   Phase 4: Stripping & Verification
+#     13. Strip instruments from CDE JSON
+#     14. Sanity check (diagnose remaining anchor patterns)
+#
+# Usage:
+#   cde-analyzer workflow run workflows/instrument_detection.yaml \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/phase1_output
+
+name: instrument_detection
+description: Full instrument detection with automatic abbreviation expansion
+
+variables:
+  # Primary input
+  input_json: "${CDE_INPUT:-cdes.json}"
+  output_dir: "${OUTPUT_DIR:-./phase1_output}"
+
+  # Parallelization (0 = auto-detect with headroom)
+  workers: 0
+
+  # Phase 1: Mining outputs
+  instruments_tsv: "${output_dir}/instruments.tsv"
+  instruments_verbatim: "${output_dir}/instruments_verbatim.tsv"
+  families_tsv: "${output_dir}/instrument_families.tsv"
+
+  # Abbreviation expansion outputs
+  expansions_dir: "${output_dir}/abbreviation_expansions"
+  expanded_phrases: "${expansions_dir}/expanded_phrases.tsv"
+
+  # Abbreviation-based designation patterns (PROMIS - ..., [PROMIS])
+  abbrev_patterns: "${output_dir}/abbrev_patterns.tsv"
+
+  # Phase 2: Discovery outputs
+  discovered_tsv: "${output_dir}/discovered_instruments.tsv"
+  failed_patterns: "${output_dir}/failed_patterns.tsv"
+
+  # Phase 3: Coalesce outputs
+  coalesced_tsv: "${output_dir}/coalesced_instruments.tsv"
+  coalesce_report: "${output_dir}/subsumption_report.tsv"
+
+  # Curator output
+  curated_tsv: "${output_dir}/curated_instruments.tsv"
+
+  # Phase 4: Family grouper outputs
+  families_dir: "${output_dir}/families"
+
+  # Phase 5: Final discovery/coalesce
+  final_discovered: "${output_dir}/final_discovered.tsv"
+  final_coalesced: "${output_dir}/final_coalesced.tsv"
+  final_subsumption: "${output_dir}/final_subsumption.tsv"
+
+  # Two-pass stripping: tier-1 (long instrument patterns) then tier-2 (short fragments)
+  final_coalesced_short: "${output_dir}/final_coalesced_short.tsv"
+  tier1_stripped_json: "${output_dir}/tier1_stripped.json"
+  tier1_trace_tsv: "${output_dir}/tier1_strip_trace.tsv"
+
+  # Phase 6: Sanity check
+  sanity_check: "${output_dir}/sanity_check.tsv"
+
+  # Final output
+  stripped_json: "${output_dir}/no_instruments.json"
+  trace_tsv: "${output_dir}/strip_trace.tsv"
+
+  # Recall analysis (optional - provide ground truth patterns for tracking)
+  # Set recall_patterns to enable recall tracking across phases
+  recall_patterns: "${RECALL_PATTERNS:-}"
+  recall_tinyid_column: "${RECALL_TINYID_COLUMN:-tinyids}"
+  recall_report_tsv: "${output_dir}/recall_report.tsv"
+  recall_report_md: "${output_dir}/recall_report.md"
+  recall_phase2_tsv: "${output_dir}/recall_phase2.tsv"
+  recall_phase2_md: "${output_dir}/recall_phase2_detail.md"
+  recall_phase3_tsv: "${output_dir}/recall_phase3.tsv"
+  recall_phase3_md: "${output_dir}/recall_phase3_detail.md"
+
+steps:
+  # =========================================================================
+  # PHASE 1: Initial Mining
+  # =========================================================================
+
+  # Step 1: Mine instruments from "as part of" patterns
+  - name: mine_instruments
+    action: instrument_miner
+    args:
+      input: "${input_json}"
+      output_dir: "${output_dir}/"
+      extract_abbreviation_only: true
+      extract_supplementary: true
+      detect_families: true
+      family_summary: true
+
+  # Step 2: Batch expand abbreviations to discover extended phrases
+  # e.g., PROMIS → "Patient-Reported Outcome Measure Information System"
+  - name: expand_abbreviations
+    action: batch_expand_abbreviations
+    args:
+      input: "${input_json}"
+      abbreviations: "${instruments_tsv}"
+      acronym_column: "acronym"
+      output_dir: "${expansions_dir}"
+      fields:
+        - designation
+        - definition
+      k_max: 15
+      k_min: 3
+      min_tinyids: 2
+      top_phrases: 10
+      min_subset_size: 3
+
+  # Step 3: Discover abbreviation-based designation patterns
+  # Finds patterns like "PROMIS - Smoking..." and "[PROMIS]" that k-mer mining misses
+  # Extracts common prefix patterns (not full designations) filtered by min_pattern_tinyids
+  - name: discover_abbreviations
+    action: strip_discover
+    args:
+      discover_abbreviations: "${instruments_tsv}"
+      input: "${input_json}"
+      output: "${abbrev_patterns}"
+      min_pattern_tinyids: 2
+
+  # Step 3b: Review abbreviation expansion results
+  - name: expansion_review
+    checkpoint: true
+    message: |
+      PHASE 1 COMPLETE: Review abbreviation expansion and designation patterns.
+
+      Files to review:
+        - ${expansions_dir}/expanded_phrases.tsv (discovered expansions)
+        - ${expansions_dir}/expansion_summary.tsv (per-abbreviation status)
+        - ${abbrev_patterns} (abbreviation-based designations: PROMIS - ..., [PROMIS])
+        - ${instruments_verbatim} (base instrument patterns)
+
+      Summary check:
+        - If expanded_phrases.tsv has 0 data rows, expansion found nothing
+        - This is OK if instruments_verbatim.tsv has sufficient patterns
+        - Check ${abbrev_patterns} for designation patterns (PROMIS - ..., [PROMIS])
+        - Check expansion_summary.tsv for why expansions may have failed
+
+      Options:
+        1. Continue → discovery will use all pattern sources
+        2. Stop → investigate expansion failures before proceeding
+
+      To continue, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 2: Discovery & Coalesce
+  # =========================================================================
+
+  # Step 5: Discover verbatim occurrences
+  # Combines instrument patterns with expanded phrases and abbreviation patterns
+  - name: discover_verbatim
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${discovered_tsv}"
+      pattern_list: "${instruments_verbatim},full_match,tinyids"
+      additional_patterns:
+        - "${expanded_phrases},expanded_phrase"
+        - "${abbrev_patterns},pattern"
+      expand_variants: true
+      discover_bare_names: true
+      min_bare_words: 2
+      discover_fails: "${failed_patterns}"
+      workers: "${workers}"
+
+  # Step 6: Coalesce patterns via subsumption + prefix extraction
+  # Prefix extraction groups patterns like "as part of Neuro-QOL Lower..."
+  # and "as part of Neuro-QOL Upper..." into "as part of Neuro-QOL"
+  - name: coalesce_patterns
+    action: pattern_util
+    args:
+      coalesce_variants: "${discovered_tsv}"
+      output: "${coalesced_tsv}"
+      coalesce_report: "${coalesce_report}"
+      min_prefix_tinyids: 2
+      rollup_subset_tinyids: true
+
+  # Step 6b: Recall analysis for Phase 2 (optional - requires recall_patterns)
+  - name: recall_phase2
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${input_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${coalesced_tsv}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_phase2_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_phase2_md}"
+      report_version: "phase-2-coalesced"
+      min_recall: 0.7
+
+  # Step 7: Curator review checkpoint
+  - name: initial_review
+    checkpoint: true
+    message: |
+      PHASE 2 COMPLETE: Initial instrument pattern curation required.
+
+      Files to review:
+        - ${coalesced_tsv} (discovered patterns after subsumption)
+        - ${coalesce_report} (subsumption details)
+        - ${failed_patterns} (patterns that didn't match)
+        - ${abbrev_patterns} (abbreviation-based designation patterns)
+        - ${expansions_dir}/expansion_summary.tsv (abbreviation expansion results)
+        - ${recall_report_md} (recall analysis - if ground truth provided)
+
+      Actions:
+        1. Open ${coalesced_tsv} in spreadsheet
+        2. Remove false positives (accidental matches)
+        3. Verify expanded phrases are correct instrument names
+        4. Review ${abbrev_patterns} for PROMIS - ... and [PROMIS] patterns
+        5. Check ${failed_patterns} for patterns that should have matched
+        6. Save reviewed version as ${curated_tsv}
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 3: Family Analysis & Final Coalesce
+  # =========================================================================
+
+  # Step 8: Family discovery using phrase_grouper
+  - name: family_discovery
+    action: phrase_grouper
+    args:
+      input: "${curated_tsv}"
+      output_dir: "${families_dir}"
+      text_column: "pattern"
+      tinyid_column: "tinyids"
+      min_family_size: 3
+      trees:
+        - prefix
+        - suffix
+
+  # Step 9: Re-discover abbreviation patterns
+  # Re-scans with instruments.tsv acronyms to catch patterns missed earlier
+  - name: discover_abbreviations_final
+    action: strip_discover
+    args:
+      discover_abbreviations: "${instruments_tsv}"
+      input: "${input_json}"
+      output: "${output_dir}/abbrev_patterns_final.tsv"
+      min_pattern_tinyids: 2
+
+  # Step 10: Re-discover with curated patterns for final verbatim forms
+  # Includes abbreviation patterns from Phase 3 discovery
+  - name: final_discover
+    action: strip_discover
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${final_discovered}"
+      pattern_list: "${curated_tsv},pattern,tinyids"
+      additional_patterns:
+        - "${output_dir}/abbrev_patterns_final.tsv,pattern"
+      expand_variants: true
+      workers: "${workers}"
+
+  # Step 11: Final coalesce with subsumption + prefix extraction
+  # emit_def_variants: for patterns ending with " -", also emit without it
+  #   so definitions get matched (they don't have the " - " separator)
+  # split_tiers: split output into tier-1 (>=3 tokens, instruments) and
+  #   tier-2 (<3 tokens, fragments like "Scale", "past") for two-pass stripping
+  - name: final_coalesce
+    action: pattern_util
+    args:
+      coalesce_variants: "${final_discovered}"
+      output: "${final_coalesced}"
+      coalesce_report: "${final_subsumption}"
+      min_prefix_tinyids: 2
+      rollup_subset_tinyids: true
+      emit_def_variants: true
+      split_tiers: 3
+
+  # Step 11b: Recall analysis for Phase 3 (optional - requires recall_patterns)
+  # Compares against Phase 2 recall to show improvement
+  - name: recall_phase3
+    action: recall_analyze
+    condition: "${recall_patterns}"
+    args:
+      input: "${input_json}"
+      model: CDE
+      pattern_file: "${recall_patterns}"
+      pipeline_output: "${final_coalesced}"
+      pipeline_tinyid_column: "${recall_tinyid_column}"
+      output: "${recall_phase3_tsv}"
+      markdown_report: "${recall_report_md}"
+      markdown_detail: "${recall_phase3_md}"
+      report_version: "phase-3-final"
+      previous_report: "${recall_phase2_tsv}"
+      min_recall: 0.8
+
+  # Step 12: Pre-strip review checkpoint
+  - name: final_review
+    checkpoint: true
+    message: |
+      PHASE 3 COMPLETE: Final instrument pattern review before stripping.
+
+      Files to review:
+        - ${final_coalesced} (tier-1: long instrument patterns to strip first)
+        - ${final_coalesced_short} (tier-2: short fragments stripped after tier-1)
+        - ${final_subsumption} (subsumption analysis - verify no sub-phrases missed)
+        - ${output_dir}/abbrev_patterns_final.tsv (Phase 3 abbreviation patterns)
+        - ${families_dir}/ (family assignments)
+        - ${recall_report_md} (recall comparison: Phase 2 → Phase 3)
+
+      Actions:
+        1. Review ${final_subsumption} to verify subsumption is complete
+        2. Check abbrev_patterns_final.tsv for new PROMIS - ... patterns
+        3. Verify family assignments are correct
+        4. Confirm pattern list is complete
+
+      When ready, resume with:
+        cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  # =========================================================================
+  # PHASE 4: Stripping & Verification
+  # =========================================================================
+
+  # Step 13a: Strip tier-1 (long instrument patterns, >=3 tokens)
+  # These are the high-confidence instrument name patterns. Stripping them
+  # first prevents short fragment patterns (tier-2) from damaging instrument
+  # names that the long patterns would have matched.
+  - name: strip_tier1
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: CDE
+      output: "${tier1_stripped_json}"
+      patterns: "${final_coalesced},pattern"
+      trace_matching: "${tier1_trace_tsv}"
+      workers: "${workers}"
+
+  # Step 13b: Strip tier-2 (short fragment patterns, <3 tokens)
+  # Applied to tier-1 stripped output. Fragments like "Scale", "past" now
+  # only match residual text, not text inside already-removed instrument names.
+  - name: strip_tier2
+    action: strip_phrases
+    args:
+      input: "${tier1_stripped_json}"
+      model: CDE
+      output: "${stripped_json}"
+      patterns: "${final_coalesced_short},pattern"
+      trace_matching: "${trace_tsv}"
+      workers: "${workers}"
+
+  # Step 14: Sanity check - diagnose any remaining anchor patterns
+  # This verifies we didn't miss any instruments
+  - name: sanity_check
+    action: diagnose_strip
+    args:
+      input: "${stripped_json}"
+      model: CDE
+      output: "${sanity_check}"
+      min_count: 2
+      suggest_patterns: true
+
+  # Step 15: Discovery report — summarize pipeline metrics
+  - name: discovery_report
+    action: discovery_report
+    args:
+      output_dir: "${output_dir}"
+      pipeline: instrument
+      output: "${output_dir}/discovery_report.md"
+      input_json: "${input_json}"
+
+  # Step 16: Generate recall report (optional - requires RECALL_PATTERNS)
+  # Compares ground truth patterns against final discovered patterns
+  # Run manually if you have a ground truth pattern file:
+  #   cde-analyzer recall_analyze -i ${input_json} -m CDE \
+  #       --pattern-file <ground_truth.txt> \
+  #       --pipeline-output ${final_coalesced} \
+  #       --pipeline-tinyid-column tinyids \
+  #       -o ${recall_report_tsv} \
+  #       --markdown-report ${recall_report_md} \
+  #       --report-version final
+
+  # Completion checkpoint
+  - name: pipeline_complete
+    checkpoint: true
+    message: |
+      INSTRUMENT DETECTION PIPELINE COMPLETE!
+
+      Outputs:
+        - ${stripped_json} (CDE JSON with instruments stripped)
+        - ${trace_tsv} (detailed matching trace)
+        - ${families_dir}/ (instrument family analysis)
+        - ${expansions_dir}/ (abbreviation expansion results)
+
+      Quality Assurance:
+        - ${sanity_check} shows remaining "as part of" patterns
+        - If patterns found with count >= 2, consider adding to curated.tsv
+        - Re-run workflow from step 7 if patterns added
+
+      Recall Analysis (optional):
+        If you have ground truth patterns to verify recall, run:
+          cde-analyzer recall_analyze -i ${input_json} -m CDE \
+              --pattern-file <ground_truth_patterns.txt> \
+              --pipeline-output ${final_coalesced} \
+              --pipeline-tinyid-column tinyids \
+              -o ${recall_report_tsv} \
+              --markdown-report ${recall_report_md} \
+              --report-version final \
+              --min-recall 0.9
+
+        The markdown report (${recall_report_md}) provides:
+          - Summary with overall recall metrics
+          - Per-family recall breakdown with status indicators
+          - Missing tinyIds for curation
+          - Version history for tracking iteration improvements
+
+      Next steps:
+        - Run phrase_pipeline.yaml with ${stripped_json} as input
+        - Or run full_pipeline.yaml for complete multi-phase stripping

@@ -1,11 +1,11 @@
-# llm_classify
+# `llm_classify` Command
 
 Classify phrases using multi-LLM queries.
 
 ## Synopsis
 
 ```
-cde_analyzer llm_classify -i <input_dir> -m <module> [options]
+cde-analyzer llm_classify -i <input_dir> -m <module> [options]
 ```
 
 ## Description
@@ -65,13 +65,13 @@ Agentic LLM-based classification for phrase curation. Uses multiple LLM provider
 ### Basic Usage
 
 ```bash
-cde_analyzer llm_classify -i phrase_output -o llm_output -m instrument
+cde-analyzer llm_classify -i phrase_output -o llm_output -m instrument
 ```
 
 ### Multi-Provider
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   -i phrase_output \
   -m instrument \
   --providers claude openai \
@@ -81,13 +81,13 @@ cde_analyzer llm_classify \
 ### Temporal Detection
 
 ```bash
-cde_analyzer llm_classify -i phrase_output -m temporal --providers claude
+cde-analyzer llm_classify -i phrase_output -m temporal --providers claude
 ```
 
 ### Dry Run
 
 ```bash
-cde_analyzer llm_classify -i phrase_output -m instrument --dry-run
+cde-analyzer llm_classify -i phrase_output -m instrument --dry-run
 ```
 
 ## Output Files

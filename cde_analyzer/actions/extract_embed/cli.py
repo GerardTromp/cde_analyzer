@@ -3,9 +3,14 @@
 #
 from argparse import ArgumentParser, BooleanOptionalAction
 from utils.constants import MODEL_REGISTRY
-from .run import run_action
 
 help_text = "Extract subset of fields from model for embedding text"
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 description_text = """Extract a desired subset of fields and collapse repeated
 key:value pairs to key: 'value1;; value2;; value3,...'.
 
@@ -16,7 +21,7 @@ The subset of fields is specified in a file (--path-file) as a set of
 """
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", help="Input JSON file.")
+    subparser.add_argument("--input", "-i", required=True, help="Input JSON file.")
 #    ids = subparser.add_mutually_exclusive_group()
     subparser.add_argument(
         "--id-list",
@@ -27,7 +32,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--id-file",
         # default=str,
-        help="File containing list of item IDs (tinyId) to exclude or extract (requires --exclude / --no-exclude).",
+        help="File containing list of item IDs (tinyId) to exclude or extract. "
+             "Use file:column format to specify column (e.g., 'data.csv:tinyId'). "
+             "Cells can contain multiple tinyIds (pipe, comma, or space separated).",
     )
     subparser.add_argument(
         "--id-type", default=None, help="The type of ID, e.g., tinyId (default=None)."
@@ -77,7 +84,20 @@ def register_subparser(subparser: ArgumentParser):
         default=True,
         help="Process limited set of permissibleValues fields using heuristic.",
     )
+    subparser.add_argument(
+        "--concatenate",
+        default=None,
+        metavar="SEP",
+        help="Concatenate all non-tinyId fields into a single 'embed_text' column "
+             "using SEP as the joining string (e.g., ' | ' or ' [SEP] '). "
+             "Forces output format to csv or tsv.",
+    )
     subparser.set_defaults(
         _runner="actions.extract_embed.run"
     )
-    subparser.set_defaults(func=run_action)
+
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

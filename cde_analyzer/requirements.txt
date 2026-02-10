@@ -17,6 +17,11 @@ pandas>=2.0.0,<3.0.0
 # Used in html_stripper for YAML output format
 PyYAML>=6.0.0,<7.0.0
 
+# Optional: Visualization
+# Used for k-mer frequency histogram generation (--histograms flag)
+# Install with: pip install matplotlib
+# matplotlib>=3.7.0,<4.0.0
+
 # Note: Standard library dependencies (not listed):
 # - argparse (CLI argument parsing)
 # - json (JSON serialization/deserialization)

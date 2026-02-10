@@ -16,7 +16,8 @@ from utils.designation_parser import extract_name_and_question_from_designations
 from utils.logger import log_if_verbose
 # from utils.analyzer_state import get_verbosity, set_verbosity
 from utils.extract_embed import (normalize_extracted_value, sanitize, sanitize_dictlist,
-    simplify_permissible_values, strip_embedded_nl, strip_json_list)
+    simplify_permissible_values, strip_embedded_nl, strip_json_list,
+    collapse_reference_documents)
 # from logic.lemma_fasta import encode_pfasta
 
 # from CDE_Schema.CDE_Item import CDEItem
@@ -39,6 +40,7 @@ def extract_path(
     collapse: bool = False,
     simplify: bool = False,
     remove_stopwords: bool = False,
+    concatenate: Optional[str] = None,
 ) -> Union[None, List[Dict]]:
     # model_class = MODEL_REGISTRY[args.model]
     items = [model_class.model_validate(obj) for obj in data]
@@ -79,9 +81,20 @@ def extract_path(
                     #         {k: sanitize(v) for k, v in d.items()} for d in result  # type: ignore
                     #     ]
                     result = sanitize_dictlist(result)
+                    result = {k: strip_embedded_nl(v) if isinstance(v, str) else v
+                              for k, v in result.items()}
 
                     row.update(result)  # type: ignore
                     # continue
+
+                if re.match(r"referenceDocuments$", path_expr):
+                    ref_docs = [
+                        d.model_dump()
+                        for d in getattr(item, "referenceDocuments", []) or []
+                    ]
+                    val = collapse_reference_documents(ref_docs)
+                    row[tag] = strip_embedded_nl(val) if isinstance(val, str) else val
+                    continue
 
                 val = get_path_value(item.model_dump(), path_expr)
                 log_if_verbose(f"[extract_embed logic] Check tinyId: {item.tinyId}", 3)  # type: ignore
@@ -115,12 +128,24 @@ def extract_path(
                 ):
                     val = sanitize(val)
 
+                if isinstance(val, str):
+                    val = strip_embedded_nl(val)
                 row[tag] = val if val is not None else ""  # type: ignore
             rows.append(row)
     else:
         rows = extract_embed_project_fields_by_tinyid(data, tinyids, exclude)
     
-    # print(rows[1:20:1])
+    # Concatenate non-tinyId fields into a single embed_text column
+    if concatenate is not None and rows:
+        concat_rows = []
+        for row in rows:
+            parts = [str(v) for k, v in row.items() if k != "tinyId" and v]
+            concat_rows.append({
+                "tinyId": row.get("tinyId", ""),
+                "embed_text": concatenate.join(parts),
+            })
+        rows = concat_rows
+
     if format == "pfasta":
         return rows # type: ignore
 

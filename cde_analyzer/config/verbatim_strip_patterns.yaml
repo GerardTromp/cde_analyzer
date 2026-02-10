@@ -1,0 +1,119 @@
+# Verbatim Strip Patterns
+#
+# Patterns for direct stripping that escape the discovery logic.
+# Unlike supplementary_patterns.yaml (used for instrument extraction),
+# these patterns are matched EXACTLY as written and stripped directly.
+#
+# Use cases:
+#   - Instrument variants with unusual formatting (parenthetical notes, versions)
+#   - Patterns that appear without anchor prefixes ("as part of", etc.)
+#   - Recurring patterns that would otherwise require manual curation each run
+#
+# Loading priority (later extends earlier):
+#   1. This file: config/verbatim_strip_patterns.yaml (global, in project)
+#   2. Local override: ./verbatim_strip_patterns.yaml (in working directory)
+#
+# Local files extend (add to) this list rather than replacing it.
+# This allows rapid iteration during curation without modifying installed code.
+#
+# Format:
+#   category_name:
+#     - pattern: "exact text to strip"
+#       replace_with: ""  # optional, defaults to empty string
+#       note: "documentation note"  # optional
+#
+# Patterns are matched case-sensitively and stripped in longest-first order.
+# Anchor expansion is applied automatically (patterns are tried with/without
+# "as part of", "based on", etc. prefixes).
+
+# =============================================================================
+# Instrument name variants with version/form specifiers
+# These include parenthetical notes that the main regex doesn't capture
+# =============================================================================
+instrument_variants:
+  - pattern: "the Geriatric Depression Scale (short form) (GDSSF)"
+    note: "Short form variant with acronym - appears 16x in corpus"
+
+  - pattern: "Geriatric Depression Scale (short form) (GDSSF)"
+    note: "Without leading 'the'"
+
+  - pattern: "(short form) (GDSSF)"
+    note: "Bare suffix left after main instrument name is stripped"
+
+  - pattern: "the Geriatric Depression Scale (long form) (GDSLF)"
+    note: "Long form variant with acronym - appears 15x in corpus"
+
+  - pattern: "Geriatric Depression Scale (long form) (GDSLF)"
+    note: "Without leading 'the'"
+
+  - pattern: "(long form) (GDSLF)"
+    note: "Bare suffix left after main instrument name is stripped"
+
+# =============================================================================
+# Short-form instrument references
+# Abbreviated names that appear alongside full instrument names
+# =============================================================================
+short_form_references:
+  - pattern: "STOP Questionnaire (STOP)"
+    note: "Short name for STOP-Bang questionnaire"
+
+  - pattern: "PIMS Questionnaire"
+    note: "Short name for Parkinson's Impact Scale"
+
+  - pattern: "BQ form"
+    note: "Short name for Berlin Questionnaire"
+
+# =============================================================================
+# Neuro-QOL subscales
+# These appear without full "Quality of Life in Neurological Disorders" prefix
+# =============================================================================
+neuroqol_short:
+  - pattern: "Neuro-QOL Depression"
+    note: "Subscale reference without full instrument name"
+
+# =============================================================================
+# Boilerplate phrases (non-instrument)
+# Recurring definition/designation fragments that should be stripped.
+# These are applied to ALL records (no tinyId restriction), unlike curated
+# patterns which are limited to their discovery set.
+# Both case variants are needed because matching is case-sensitive.
+# =============================================================================
+boilerplate_temporal:
+  - pattern: "In the past 7 days"
+    note: "PROMIS/Neuro-QOL temporal prefix - appears in 300+ CDEs"
+
+  - pattern: "in the past 7 days"
+    note: "Lowercase variant (definitions, mid-sentence)"
+
+  - pattern: "In the past 30 days"
+    note: "Sexual function temporal prefix - appears in 30+ CDEs"
+
+  - pattern: "in the past 30 days"
+    note: "Lowercase variant"
+
+  - pattern: "in the past"
+    note: "Generic temporal prefix - catches other durations (14 days, etc.)"
+
+  - pattern: "In the past"
+    note: "Sentence-start variant"
+
+  - pattern: "over the past week,"
+    note: "Weekly temporal suffix with trailing comma"
+
+  - pattern: "over the past week"
+    note: "Without trailing comma"
+
+  - pattern: "past week scale"
+    note: "Scale type descriptor in designations"
+
+  - pattern: "past 7 day frequency scale"
+    note: "PROMIS frequency scale descriptor"
+
+boilerplate_nlm:
+  - pattern: 'NLM disclaimer: Consistent with Executive Order 14168, "gender" should not be used as a replacement for the element "sex" in the NIH CDE'
+    note: "NLM policy disclaimer prepended to sex/gender CDEs - 49 CDEs"
+
+# boilerplate_other:
+#   - pattern: "the individual's reproductive organs and functions assigned by chromosomal complement"
+#     note: "Sex/gender definition boilerplate - evaluate if this is content-bearing"
+

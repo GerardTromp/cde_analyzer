@@ -10,9 +10,12 @@ import logging
 from argparse import Namespace
 from pathlib import Path
 
+from utils.file_utils import graceful_interrupt
+
 logger = logging.getLogger(__name__)
 
 
+@graceful_interrupt
 def run_action(args: Namespace):
     """
     Run LLM-based phrase classification.

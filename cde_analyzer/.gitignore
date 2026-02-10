@@ -55,8 +55,17 @@ dmypy.json
 # Project specific
 test*
 settings.local.json
+nul
+.workflow_state.json
 
 # Claude checkpoint system
 .claude/sessions/
 .claude/checkpoints/
 .claude/init_session.sh
+
+# MkDocs build output
+site/
+
+# One-off scripts and presentations
+trial_boundary_llm.py
+docs/slides/*.html

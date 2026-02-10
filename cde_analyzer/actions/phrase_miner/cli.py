@@ -4,6 +4,9 @@ Phrase Miner - Iterative k-mer phrase detection with de Bruijn extension.
 Detects repeated multi-word phrases using descending k-mer mining (k=25 to k=3)
 with de Bruijn graph extension, subsumption filtering, and optional anchor extension.
 
+For instrument extraction, use the dedicated `instrument_miner` action instead.
+This action focuses on general phrase mining from CDE text fields.
+
 Implemented features:
 - Core k-mer mining with iterative descent (Phase 1-3)
 - Frequency and tinyId filtering
@@ -15,10 +18,15 @@ Implemented features:
 """
 
 from argparse import ArgumentParser, BooleanOptionalAction
-from .run import run_action
 
 help_text = "Iterative phrase mining using descending k-mers and masking"
 description_text = __doc__
+
+
+def _get_run_action():
+    """Lazy import of run_action to avoid loading heavy dependencies at CLI registration."""
+    from .run import run_action
+    return run_action
 
 
 def register_subparser(subparser: ArgumentParser):
@@ -41,7 +49,8 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Field names to extract phrases from (default: designation definition)"
+        help="Field names to extract phrases from (default: designation definition). "
+             "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
     # K-mer parameters
@@ -102,8 +111,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--skip-anchor",
         action="store_true",
-        default=True,
-        help="Skip anchor-based extension (default: True, use --enable-anchor to enable)"
+        help="Skip anchor-based extension (use with --enable-anchor to disable it again)"
     )
     subparser.add_argument(
         "--enable-anchor",
@@ -123,58 +131,48 @@ def register_subparser(subparser: ArgumentParser):
         help="Use case-sensitive comparison for verbatim subsumption (preserves case variants for QC)"
     )
 
-    # Instrument extraction (pre-processing)
+    # Phrase family analysis (post-mining analysis of non-instrument phrases)
     subparser.add_argument(
-        "--extract-instruments",
+        "--analyze-phrase-families",
         action="store_true",
-        help="Extract and mask 'as part of <Instrument>' patterns before k-mer mining"
+        help="Analyze extracted phrases for family groupings using prefix/suffix patterns. "
+             "Outputs phrase_families.tsv and phrase_family_members.tsv."
     )
     subparser.add_argument(
-        "--instruments-only",
-        action="store_true",
-        help="Phase 1 mode: extract instruments only, skip phrase mining outputs. "
-             "Use with lower --min-tinyids for instrument discovery, then curate "
-             "instruments_verbatim.tsv before phase 2."
+        "--min-prefix-words",
+        type=int,
+        default=2,
+        help="Minimum words for prefix pattern detection (default: 2)"
     )
     subparser.add_argument(
-        "--instrument-list",
-        type=str,
-        help="Phase 2: TSV file with curated instrument patterns to pre-mask. "
-             "Format: 'filename' (uses 'full_match' column) or 'filename,column_name'. "
-             "Patterns are masked before k-mer mining to prevent fragmented detection."
+        "--min-suffix-words",
+        type=int,
+        default=1,
+        help="Minimum words for suffix pattern detection (default: 1)"
     )
     subparser.add_argument(
-        "--min-instrument-words",
+        "--min-family-size",
         type=int,
         default=3,
-        help="Minimum words required in instrument name (default: 3)"
-    )
-
-    # Instrument family detection
-    subparser.add_argument(
-        "--detect-families",
-        action="store_true",
-        help="Enable instrument family detection (groups instruments by family, e.g., Neuro-QOL, PROMIS)"
+        help="Minimum number of phrases to form a family (default: 3)"
     )
     subparser.add_argument(
-        "--family-confidence-threshold",
-        type=float,
-        default=0.7,
-        help="Minimum confidence for automatic family assignment (default: 0.7). "
-             "Below threshold, instruments are flagged for review."
-    )
-    subparser.add_argument(
-        "--family-summary",
-        action="store_true",
-        help="Generate instrument_families.tsv summary file (groups by family)"
+        "--max-families",
+        type=int,
+        default=100,
+        help="Maximum number of families to report (default: 100)"
     )
 
     # Optional features
     subparser.add_argument(
         "--histograms",
         action="store_true",
-        help="Generate k-mer frequency histograms (requires matplotlib, not yet implemented)"
+        help="Generate k-mer frequency histograms in output_dir/histograms/ (requires matplotlib)"
     )
 
     # Set defaults
-    subparser.set_defaults(func=run_action)
+    def _lazy_run_action(args):
+        """Wrapper for lazy import of run_action."""
+        return _get_run_action()(args)
+
+    subparser.set_defaults(func=_lazy_run_action)

@@ -50,7 +50,7 @@ Identifies measurement instruments, medical devices, laboratory equipment, and s
 ### Usage
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument
@@ -61,7 +61,7 @@ cde_analyzer llm_classify \
 Provide a list of known instruments to improve accuracy:
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --module instrument \
   --reference-file known_instruments.tsv
@@ -159,7 +159,7 @@ How often something occurs:
 ### Usage
 
 ```bash
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module temporal
@@ -210,7 +210,7 @@ This module is primarily used for adjudicating uncertain family assignments from
 
 ```bash
 # Adjudicate instruments with low family confidence
-cde_analyzer llm_classify \
+cde-analyzer llm_classify \
   --adjudicate-instruments instruments.tsv \
   --adjudicate-threshold 0.7 \
   --module instrument_family \

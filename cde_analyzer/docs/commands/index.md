@@ -2,14 +2,38 @@
 
 CDE Analyzer provides a suite of CLI commands for processing and analyzing Common Data Elements.
 
-## Phrase Detection
+## Instrument Extraction
 
 | Command | Description | Status |
 |---------|-------------|--------|
-| [phrase_miner](phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | Stable |
+| [instrument_miner](../help/instrument_miner.md) | Extract measurement instruments from CDE text using anchor detection | Stable |
+
+## Phrase Detection & Analysis
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [phrase_miner](../help/phrase_miner.md) | Advanced k-mer phrase mining with iterative detection | Stable |
+| [phrase_grouper](../help/phrase_grouper.md) | Bottom-up k-mer analysis for phrase family discovery | New |
 | [phrase](../help/phrase.md) | Original phrase detection using n-gram counting | Stable |
 | [phrase_builder](../help/phrase_builder.md) | K-mer analysis for phrase identification | Stable |
-| [strip_phrases](../help/strip_phrases.md) | Remove detected phrases from data | Stable |
+
+## Pattern Stripping
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [strip_discover](../help/strip_discover.md) | Flexible regex discovery for pattern curation workflow | Stable |
+| [strip_analyze](../help/strip_analyze.md) | Pattern conflict and false-negative analysis | New |
+| [pattern_util](../help/pattern_util.md) | TSV utilities (merge, coalesce, import) | New |
+| [strip_phrases](../help/strip_phrases.md) | Remove detected phrases using exact string replacement | Stable |
+| [diagnose_strip](../help/diagnose_strip.md) | Diagnose remaining patterns after stripping | Stable |
+
+## Reporting
+
+| Command | Description | Status |
+|---------|-------------|--------|
+| [discovery_report](../help/discovery_report.md) | Generate markdown pipeline summary with remnant analysis | New |
+| [pipeline_report](../help/pipeline_report.md) | Generate comprehensive pipeline execution reports | New |
+| [strip_report](../help/strip_report.md) | Quality report for stripped JSON outputs (remnants, temporal phrases) | New |
 
 ## Data Cleaning
 
@@ -53,20 +77,20 @@ See the [LLM Classification](../llm/index.md) section for comprehensive document
 All commands follow the same basic pattern:
 
 ```bash
-python cde_analyzer.py <command> --input <file.json> [options]
+cde-analyzer <command> --input <file.json> [options]
 ```
 
 ## Getting Help
 
 ```bash
 # List all commands
-python cde_analyzer.py --help
+cde-analyzer --help
 
 # Get help for a specific command
-python cde_analyzer.py <command> --help
+cde-analyzer <command> --help
 
 # Example
-python cde_analyzer.py phrase_miner --help
+cde-analyzer phrase_miner --help
 ```
 
 ## Common Options
@@ -86,46 +110,46 @@ Most commands share these common options:
 
 ```bash
 # 1. Fix field names for Pydantic compatibility
-python cde_analyzer.py fix_underscores --input raw_data.json --output fixed.json
+cde-analyzer fix_underscores --input raw_data.json --output fixed.json
 
 # 2. Strip HTML markup
-python cde_analyzer.py strip_html --input fixed.json --output cleaned.json --model CDE
+cde-analyzer strip_html --input fixed.json --output cleaned.json --model CDE
 
 # 3. Find repeated phrases
-python cde_analyzer.py phrase_miner --input cleaned.json --output-dir phrases
+cde-analyzer phrase_miner --input cleaned.json --output-dir phrases
 
 # 4. Analyze results
-python cde_analyzer.py count --input cleaned.json --fields designation --output counts.json
+cde-analyzer count --input cleaned.json --fields designation --output counts.json
 ```
 
 ### Phrase Detection Comparison
 
 ```bash
 # Original phrase detection (n-gram based)
-python cde_analyzer.py phrase --input data.json --fields designation --output phrases.json
+cde-analyzer phrase --input data.json --fields designation --output phrases.json
 
 # NEW: Advanced k-mer mining (longest-first with masking)
-python cde_analyzer.py phrase_miner --input data.json --output-dir phrase_output
+cde-analyzer phrase_miner --input data.json --output-dir phrase_output
 ```
 
 ### Subsetting Records
 
 ```bash
 # Extract specific CDEs by tinyId list
-python cde_analyzer.py subset -i cdes_full.json -o subset.json -m CDE --id-file ids.txt
+cde-analyzer subset -i cdes_full.json -o subset.json -m CDE --id-file ids.txt
 
 # Exclude problematic records
-python cde_analyzer.py subset -i cdes.json -o cleaned.json -m CDE --id-list bad1 bad2 --exclude
+cde-analyzer subset -i cdes.json -o cleaned.json -m CDE --id-list bad1 bad2 --exclude
 ```
 
 ### LLM-Assisted Classification
 
 ```bash
 # 1. Extract phrases
-python cde_analyzer.py phrase_miner --input cdes.json --output-dir phrase_output
+cde-analyzer phrase_miner --input cdes.json --output-dir phrase_output
 
 # 2. Classify with LLMs (requires API keys)
-python cde_analyzer.py llm_classify \
+cde-analyzer llm_classify \
   --input-dir phrase_output \
   --output-dir llm_output \
   --module instrument \

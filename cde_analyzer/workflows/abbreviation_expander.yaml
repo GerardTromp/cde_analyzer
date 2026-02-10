@@ -1,0 +1,102 @@
+# Workflow: Abbreviation Expansion via Subset Mining
+#
+# Discovers extended instrument phrases by:
+#   1. Subsetting CDEs that contain a specific abbreviation
+#   2. Mining phrases from that focused subset
+#   3. Common phrases reveal the full instrument name
+#
+# This bootstrapping approach finds phrases like:
+#   PROMIS → "Patient-Reported Outcome Measure Information System"
+#   PHQ → "Patient Health Questionnaire"
+#   SF-36 → "36-Item Short Form Health Survey"
+#
+# Usage (single abbreviation):
+#   cde-analyzer workflow run workflows/abbreviation_expander.yaml \
+#       --set abbreviation=PROMIS \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/expansion_output
+#
+# Usage (batch - shell loop):
+#   for abbrev in PROMIS PHQ SF-36 MDS-UPDRS; do
+#       cde-analyzer workflow run workflows/abbreviation_expander.yaml \
+#           --set abbreviation=$abbrev \
+#           --set input_json=cdes.json \
+#           --set output_dir=expansions/${abbrev}
+#   done
+#
+# Prerequisites:
+#   - Run instrument_miner first to identify abbreviations
+#   - Extract abbreviation list from instruments.tsv acronym column
+
+name: abbreviation_expander
+description: Discover extended instrument phrases via abbreviation-based subset mining
+
+variables:
+  # Required: the abbreviation to expand
+  abbreviation: "${ABBREVIATION:-PROMIS}"
+
+  # Input CDE JSON
+  input_json: "${CDE_INPUT:-cdes.json}"
+
+  # Output directory (will contain subset and mined phrases)
+  output_dir: "${OUTPUT_DIR:-./expansion_${abbreviation}}"
+
+  # Fields to search for the abbreviation
+  search_fields: "${SEARCH_FIELDS:-designation definition}"
+
+  # Intermediate files
+  subset_json: "${output_dir}/${abbreviation}_subset.json"
+  phrases_dir: "${output_dir}/${abbreviation}_phrases"
+
+  # Phrase mining parameters
+  k_max: "${K_MAX:-15}"
+  k_min: "${K_MIN:-3}"
+  min_tinyids: "${MIN_TINYIDS:-2}"
+
+steps:
+  # ===== STEP 1: Subset CDEs containing the abbreviation =====
+  - name: subset_by_abbreviation
+    action: subset
+    args:
+      input: "${input_json}"
+      output: "${subset_json}"
+      model: CDE
+      text_filter: "${abbreviation}"
+      fields:
+        - designation
+        - definition
+      output_format: json
+
+  # ===== STEP 2: Mine phrases from the subset =====
+  # The most frequent phrases in this focused subset will likely
+  # be the full instrument name or closely related phrases
+  - name: mine_subset_phrases
+    action: phrase_miner
+    args:
+      input: "${subset_json}"
+      output_dir: "${phrases_dir}"
+      k_max: "${k_max}"
+      k_min: "${k_min}"
+      min_tinyids: "${min_tinyids}"
+      enable_subsumption: true
+
+  # ===== CHECKPOINT: Review discovered phrases =====
+  - name: review_phrases
+    checkpoint: true
+    message: |
+      Abbreviation expansion for "${abbreviation}" complete.
+
+      Files to review:
+        - ${subset_json} (CDEs containing "${abbreviation}")
+        - ${phrases_dir}/verbatim_phrases.tsv (discovered phrases)
+
+      Look for:
+        1. The full instrument name (e.g., "Patient-Reported Outcome Measure Information System")
+        2. Common sub-phrases that identify the instrument family
+        3. Version strings or variant patterns
+
+      The most frequent phrases are likely the extended form of "${abbreviation}".
+
+      Next steps:
+        - Copy relevant phrases to supplementary_patterns.yaml
+        - Or use directly in strip_discover --pattern-list
