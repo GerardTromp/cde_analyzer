@@ -29,7 +29,8 @@ cde-analyzer pattern_util --group-semantic FILE -o GROUPED.tsv \
 
 # Expand curated patterns with variants
 cde-analyzer pattern_util --expand-verbatim FILE -o EXPANDED.tsv \
-    [--no-case-variants] [--no-number-variants] [--no-plural-variants] \
+    [--no-temporal-variants] [--no-case-variants] \
+    [--no-number-variants] [--no-plural-variants] \
     [--rescan -i SOURCE.json -m CDE]
 
 # Import patterns to supplementary config
@@ -141,13 +142,14 @@ Auto-detects column names (`pattern`/`tinyIds`/`tinyids`) and normalizes tinyId 
 
 ### Expand Verbatim Mode
 
-Expand curated patterns with case, number, and plural variants for precise verbatim matching:
+Expand curated patterns with temporal preposition, case, number, and plural variants for precise verbatim matching:
 
 ```bash
 cde-analyzer pattern_util --expand-verbatim curated.tsv -o expanded.tsv
 ```
 
 Generates narrow variants of each curated pattern:
+- **Temporal**: preposition × tense-word variants (`In the past` → also `During the past`, `Over the last`, etc.)
 - **Case**: original + all-lowercase (`In the past` → also `in the past`)
 - **Number**: digit ↔ word (`7 days` ↔ `seven days`)
 - **Plural**: temporal singular ↔ plural (`day` ↔ `days`, `week` ↔ `weeks`)
@@ -234,6 +236,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 | `--no-case-variants` | Skip case variant generation (original + lowercase) |
 | `--no-number-variants` | Skip digit ↔ word variants (`7` ↔ `seven`) |
 | `--no-plural-variants` | Skip singular ↔ plural variants (`day` ↔ `days`) |
+| `--no-temporal-variants` | Skip temporal preposition variants (in/over/during/for/within × past/last) |
 | `--rescan` | Re-scan source JSON for tinyIds per variant (requires `-i` and `-m`) |
 
 ### Normalize Options

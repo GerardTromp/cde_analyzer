@@ -797,12 +797,14 @@ curated TSV and want that order respected.
 
 ### Expanding curated patterns with variants
 
-When your curated patterns need case/number/plural coverage, pre-expand
-them before stripping. This is more precise than `--ignore-case` because
-the curator can review exactly which variants are generated:
+When your curated patterns need temporal preposition, case, number, or
+plural coverage, pre-expand them before stripping. This is more precise
+than `--ignore-case` because the curator can review exactly which
+variants are generated:
 
 ```bash
-# 1. Expand curated patterns with case + number + plural variants
+# 1. Expand curated patterns with temporal + case + number + plural variants
+#    Temporal: "In the past" → also "During the past", "Over the last", etc.
 #    --rescan searches source JSON for actual tinyIds per variant
 cde-analyzer pattern_util --expand-verbatim curated.tsv \
     -i inst_stripped.json -m CDE --rescan -o expanded.tsv
@@ -900,5 +902,5 @@ Start: You have CDE JSON and want to strip boilerplate
 | **verbatim pattern** | The exact surface form of a phrase as it appears in the text |
 | **subsumption** | When a shorter pattern's tinyIds are fully covered by longer patterns |
 | **tier splitting** | Dividing patterns into long (tier-1) and short (tier-2) for ordered stripping |
-| **variant expansion** | Generating case/number/plural variants of curated patterns via `--expand-verbatim` |
+| **variant expansion** | Generating temporal preposition/case/number/plural variants of curated patterns via `--expand-verbatim` |
 | **word boundary** | Regex `\b` anchor that requires a word break at the match boundary, preventing partial-word matches |

@@ -1092,7 +1092,7 @@ def _run_generate_proxies(args, input_path: str) -> int:
 
 def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     """
-    Expand curated patterns with case, number, and plural variants.
+    Expand curated patterns with temporal preposition, case, number, and plural variants.
 
     Generates a narrow set of verbatim variants from curated patterns
     so the strip engine can use exact matching without runtime magic.
@@ -1101,7 +1101,8 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     from utils.file_utils import exit_if_missing
     from utils.pattern_tsv_utils import load_pattern_list_with_tinyids
     from utils.pattern_variant_generator import (
-        generate_case_variants, generate_number_variants, generate_plural_variants
+        generate_case_variants, generate_number_variants,
+        generate_plural_variants, generate_temporal_preposition_variants
     )
 
     output_path = getattr(args, 'output', None)
@@ -1111,6 +1112,7 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
 
     exit_if_missing(expand_verbatim_path, "Curated patterns TSV")
 
+    do_temporal = getattr(args, 'temporal_variants', True)
     do_case = getattr(args, 'case_variants', True)
     do_number = getattr(args, 'number_variants', True)
     do_plural = getattr(args, 'plural_variants', True)
@@ -1126,13 +1128,22 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     variant_to_sources = {}  # variant -> set of source patterns
     variant_to_tinyids = {}  # variant -> set of tinyIds
 
-    stats = {'case': 0, 'number': 0, 'plural': 0}
+    stats = {'temporal': 0, 'case': 0, 'number': 0, 'plural': 0}
 
     for source_pattern in patterns:
         source_tinyids = pattern_to_tinyids.get(source_pattern, set())
 
         # Build variant set incrementally
         variants = {source_pattern}
+
+        # Stage 1: Temporal preposition variants (FIRST — so downstream
+        # stages apply to all preposition/tense combinations)
+        if do_temporal:
+            temporal_expanded = set()
+            for v in variants:
+                temporal_expanded.update(generate_temporal_preposition_variants(v))
+            stats['temporal'] += len(temporal_expanded) - len(variants)
+            variants = temporal_expanded
 
         if do_plural:
             plural_expanded = set()
@@ -1165,7 +1176,8 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
 
     logger.info(
         f"Expanded {len(patterns)} patterns → {len(variant_to_sources)} variants "
-        f"(case: +{stats['case']}, number: +{stats['number']}, plural: +{stats['plural']})"
+        f"(temporal: +{stats['temporal']}, plural: +{stats['plural']}, "
+        f"number: +{stats['number']}, case: +{stats['case']})"
     )
 
     # Optional re-scan: search source JSON for actual tinyIds per variant
@@ -1275,9 +1287,10 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     print(f"Expanded: {len(ordered_variants)} variants")
     if do_rescan and empty_variants:
         print(f"  Dropped: {len(empty_variants)} unmatched variants")
-    print(f"  Case:   +{stats['case']}")
-    print(f"  Number: +{stats['number']}")
-    print(f"  Plural: +{stats['plural']}")
+    print(f"  Temporal: +{stats['temporal']}")
+    print(f"  Plural:   +{stats['plural']}")
+    print(f"  Number:   +{stats['number']}")
+    print(f"  Case:     +{stats['case']}")
     if do_rescan:
         print(f"Re-scan:  {rescan_hits} variants matched in source JSON")
     print(f"TinyIds:  {n_with_tinyids} with, {n_empty} without")

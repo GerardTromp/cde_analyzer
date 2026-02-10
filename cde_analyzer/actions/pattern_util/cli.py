@@ -339,9 +339,9 @@ def register_subparser(subparser: ArgumentParser):
         "--expand-verbatim",
         type=str,
         metavar="FILE",
-        help="Expand curated patterns with case, number, and plural variants. "
+        help="Expand curated patterns with temporal preposition, case, number, and plural variants. "
              "Reads a patterns TSV (with pattern and tinyIds columns), generates "
-             "narrow verbatim variants (lowercase, digit↔word, day↔days), and "
+             "narrow verbatim variants (preposition swap, lowercase, digit↔word, day↔days), and "
              "writes expanded TSV to --output. Optionally re-scans source JSON "
              "with --rescan to discover tinyIds for each variant.",
     )
@@ -365,6 +365,14 @@ def register_subparser(subparser: ArgumentParser):
         action="store_false",
         default=True,
         help="Skip singular↔plural variants (day↔days). Default: enabled.",
+    )
+    subparser.add_argument(
+        "--no-temporal-variants",
+        dest="temporal_variants",
+        action="store_false",
+        default=True,
+        help="Skip temporal preposition variants (in/over/during/for/within × past/last). "
+             "Default: enabled.",
     )
     subparser.add_argument(
         "--rescan",

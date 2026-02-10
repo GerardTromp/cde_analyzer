@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2026-02-09
+
+### Added
+- Temporal preposition variant expansion in `--expand-verbatim`
+  - Patterns starting with `[in|over|during|for|within] the [past|last]` generate all preposition × tense-word combinations
+  - `--no-temporal-variants` flag to disable
+  - `TEMPORAL_PREPOSITIONS`, `TEMPORAL_TENSE_WORDS` constants and `generate_temporal_preposition_variants()` in `utils/pattern_variant_generator.py`
+  - Pipeline order: Temporal → Plural → Number → Case (temporal first so downstream stages multiply across all preposition variants)
+
+### Changed
+- `--expand-verbatim` pipeline now runs temporal preposition expansion as first stage (before plural/number/case)
+
 ## [0.5.3] - 2026-02-09
 
 ### Added

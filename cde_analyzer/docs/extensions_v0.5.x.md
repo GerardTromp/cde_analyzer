@@ -202,18 +202,19 @@ SpaCy-based semantic boundary detection for prefix group trimming. Uses POS tagg
 
 ---
 
-## 9. Verbatim Variant Expansion (`pattern_util --expand-verbatim`) — v0.5.3
+## 9. Verbatim Variant Expansion (`pattern_util --expand-verbatim`) — v0.5.3, v0.5.4
 
 **Files**: `actions/pattern_util/{cli,run}.py`, `utils/pattern_variant_generator.py`
 
-Expands curated patterns with narrow case/number/plural variants for precise verbatim matching. Replaces the need for `--ignore-case` at strip time, giving the curator control over what gets stripped.
+Expands curated patterns with narrow temporal/case/number/plural variants for precise verbatim matching. Replaces the need for `--ignore-case` at strip time, giving the curator control over what gets stripped.
 
 ### CLI
 
 ```bash
 cde-analyzer pattern_util --expand-verbatim curated.tsv \
     -o expanded.tsv \
-    [--no-case-variants] [--no-number-variants] [--no-plural-variants] \
+    [--no-temporal-variants] [--no-case-variants] \
+    [--no-number-variants] [--no-plural-variants] \
     [--rescan -i source.json -m CDE]
 ```
 
@@ -221,10 +222,23 @@ cde-analyzer pattern_util --expand-verbatim curated.tsv \
 
 | Type | Example input | Variants generated |
 |------|--------------|-------------------|
+| Temporal (v0.5.4) | `In the past 7 days` | + `During the past 7 days`, `Over the last 7 days`, ... (5 preps × 2 tenses = 10) |
 | Case | `In the past 7 days` | + `in the past 7 days` |
 | Number | `in the past 7 days` | + `in the past seven days` |
 | Plural | `in the past 7 days` | + `in the past 7 day` |
-| Cross-product | all of the above | Case applied to all accumulated variants |
+| Cross-product | all of the above | Each stage multiplies all variants from previous stages |
+
+### Pipeline Order (v0.5.4)
+
+**Temporal → Plural → Number → Case**
+
+Temporal goes first so downstream stages (plural, number, case) apply to all preposition/tense-word variants. For a single temporal pattern like "In the past 7 days", the maximum cross-product is 5 × 2 × 2 × 2 × 2 = 80 variants. With `--rescan`, most are pruned to ~10-20 survivors.
+
+### Temporal Preposition Expansion (v0.5.4)
+
+Patterns starting with `[in|over|during|for|within] the [past|last] ...` generate all preposition × tense-word combinations. Preserves original capitalization. Non-temporal patterns pass through unchanged.
+
+This eliminates brittle manual curation of preposition variants. The curator specifies ONE canonical form ("In the past 7 days"), and the system generates all surface forms ("During the past 7 days", "Over the last 7 days", etc.). Combined with `--rescan`, only variants that actually exist in the data survive.
 
 ### Rescan Mode
 

@@ -87,6 +87,70 @@ TEMPORAL_PLURALS = {
     'year': 'years', 'years': 'year',
 }
 
+# Temporal prepositions used in "[prep] the past/last N days" frames
+TEMPORAL_PREPOSITIONS = {"in", "over", "during", "for", "within"}
+
+# Temporal tense words used in "[prep] the [past|last] N days" frames
+TEMPORAL_TENSE_WORDS = {"past", "last"}
+
+# Regex to detect temporal frame prefix at start of pattern
+_TEMPORAL_PREFIX_RE = re.compile(
+    r'^(in|over|during|for|within)'   # group 1: preposition
+    r'(\s+the\s+)'                     # group 2: " the " (preserve spacing)
+    r'(past|last)'                     # group 3: tense word
+    r'(\s+.*)$',                       # group 4: rest of pattern
+    re.IGNORECASE,
+)
+
+
+def generate_temporal_preposition_variants(pattern: str) -> Set[str]:
+    """
+    Generate temporal preposition and tense-word variants.
+
+    For patterns starting with a temporal frame
+    (e.g., "In the past 7 days"), generates all combinations of:
+    - Prepositions: {in, over, during, for, within}
+    - Tense words: {past, last}
+
+    Preserves capitalization of the original preposition.
+    Non-temporal patterns pass through unchanged.
+
+    'In the past 7 days' -> {
+        'In the past 7 days', 'In the last 7 days',
+        'Over the past 7 days', 'Over the last 7 days',
+        'During the past 7 days', 'During the last 7 days',
+        'For the past 7 days', 'For the last 7 days',
+        'Within the past 7 days', 'Within the last 7 days',
+    }
+
+    Args:
+        pattern: Original pattern string.
+
+    Returns:
+        Set of variant patterns including original.
+    """
+    variants = {pattern}
+
+    m = _TEMPORAL_PREFIX_RE.match(pattern)
+    if not m:
+        return variants
+
+    orig_prep = m.group(1)
+    the_part = m.group(2)       # " the " with original spacing
+    orig_tense = m.group(3)
+    rest = m.group(4)
+
+    capitalize = orig_prep[0].isupper()
+    tense_capitalize = orig_tense[0].isupper()
+
+    for prep in TEMPORAL_PREPOSITIONS:
+        prep_cased = prep.capitalize() if capitalize else prep.lower()
+        for tense in TEMPORAL_TENSE_WORDS:
+            tense_cased = tense.capitalize() if tense_capitalize else tense.lower()
+            variants.add(prep_cased + the_part + tense_cased + rest)
+
+    return variants
+
 
 def generate_case_variants(pattern: str) -> Set[str]:
     """
