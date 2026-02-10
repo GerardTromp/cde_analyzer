@@ -24,6 +24,10 @@ variables:
   input_json: "${PHRASE_INPUT:-inst_stripped.json}"
   output_dir: "${OUTPUT_DIR:-./phase2_output}"
 
+  # Phrase miner k-mer bounds (tokens per phrase)
+  k_max: "${K_MAX:-25}"
+  k_min: "${K_MIN:-3}"
+
   # Parallelization (0 = auto-detect with headroom)
   workers: 0
 
@@ -65,6 +69,8 @@ steps:
       input: "${input_json}"
       output: "${output_dir}/"
       enable_subsumption: true
+      k_max: "${k_max}"
+      k_min: "${k_min}"
 
   - name: discover_verbatim
     action: strip_discover

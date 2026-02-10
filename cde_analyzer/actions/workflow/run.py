@@ -6,7 +6,8 @@ Workflow runner implementation.
 
 Executes YAML-defined workflows with:
 - Sequential step execution
-- Variable resolution (env → yaml → CLI)
+- Variable resolution (system → yaml → local config → CLI → env fallback)
+- Local config auto-discovery ({output_dir}/{workflow_name}_config.yaml)
 - Checkpoint/resume capability
 - State persistence
 - Auto-detected system variables (cpu_count, workers)
@@ -164,6 +165,70 @@ def resolve_args(args: Dict[str, Any], variables: Dict[str, Any]) -> Dict[str, A
         else:
             resolved[key] = value
     return resolved
+
+
+def _load_workflow_config(variables: Dict[str, Any], workflow_name: str) -> bool:
+    """
+    Look for a local config YAML in output_dir and merge variables.
+
+    Checks for ``{output_dir}/{workflow_name}_config.yaml``.  If found, each
+    key in the config overrides the corresponding workflow variable.  CLI
+    ``--set`` overrides are re-applied by the caller after this function
+    returns, so they always take highest priority.
+
+    Resolution order (lowest → highest):
+        1. Workflow YAML defaults
+        2. Local config YAML  ← this function
+        3. ``--set`` CLI overrides  (caller re-applies)
+
+    Args:
+        variables: Mutable variables dict (modified in-place).
+        workflow_name: The ``name:`` field from the workflow YAML.
+
+    Returns:
+        True if a config file was loaded, False otherwise.
+    """
+    if not workflow_name:
+        return False
+
+    # Early-resolve output_dir so we know where to look.
+    output_dir = variables.get("output_dir", "")
+    if not output_dir:
+        return False
+    output_dir = resolve_variables(str(output_dir), variables)
+
+    config_filename = f"{workflow_name}_config.yaml"
+    config_path = Path(output_dir) / config_filename
+
+    if not config_path.exists():
+        return False
+
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except Exception as e:
+        logger.warning(f"Failed to load {config_path}: {e}")
+        return False
+
+    if not isinstance(config, dict):
+        logger.warning(f"Ignoring {config_path}: expected YAML mapping, got {type(config).__name__}")
+        return False
+
+    # Merge: config values override YAML defaults
+    overridden = []
+    for key, value in config.items():
+        # Convert non-string values so variable resolution works uniformly
+        str_value = str(value) if not isinstance(value, str) else value
+        if key in variables and str(variables[key]) != str_value:
+            overridden.append(f"{key}={str_value} (was {variables[key]})")
+        variables[key] = str_value
+
+    logger.info(f"Loaded {len(config)} variable(s) from {config_path}")
+    if overridden:
+        for desc in overridden:
+            logger.info(f"  Config override: {desc}")
+
+    return True
 
 
 def load_workflow(workflow_path: str) -> Dict:
@@ -386,19 +451,29 @@ def cmd_run(args) -> int:
         print(f"Error: {e}")
         return 1
 
-    # Build variables: system defaults → workflow defaults → CLI overrides
-    # System variables (cpu_count, workers) can be overridden by workflow or CLI
+    # Build variables: system → YAML → local config → CLI overrides
+    # System variables (cpu_count, workers) can be overridden by any later stage
     variables = get_system_variables()
     variables.update(workflow.get("variables", {}))
 
-    # Apply CLI overrides
+    # Parse CLI overrides into a dict (applied twice: once now, once after config)
+    cli_overrides = {}
     if args.overrides:
         for override in args.overrides:
             if "=" not in override:
                 print(f"Error: Invalid override format '{override}', expected KEY=VALUE")
                 return 1
             key, value = override.split("=", 1)
-            variables[key] = value
+            cli_overrides[key] = value
+    variables.update(cli_overrides)
+
+    # Load local config from output_dir (e.g., phase2_output/phrase_stripping_config.yaml)
+    workflow_name = workflow.get("name", "")
+    config_loaded = _load_workflow_config(variables, workflow_name)
+
+    # Re-apply CLI overrides so --set always wins over config file
+    if config_loaded and cli_overrides:
+        variables.update(cli_overrides)
 
     # Resolve variables that reference other variables
     # (multiple passes for nested references)

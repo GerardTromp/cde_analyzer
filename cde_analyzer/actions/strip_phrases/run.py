@@ -134,36 +134,55 @@ def expand_patterns_with_anchors(
         if anchor_suffixes is None:
             anchor_suffixes = loaded_suffixes
 
+    # Normalize patterns: if a pattern ends with " -" (designation format
+    # artifact like "Instrument (ACRONYM) -"), also generate a variant without
+    # it so the bare instrument name matches in definitions.
+    normalized = []
+    n_dash_variants = 0
+    for pattern, tinyids, replace_with in patterns:
+        normalized.append((pattern, tinyids, replace_with))
+        if pattern.endswith(" -"):
+            trimmed = pattern[:-2]
+            normalized.append((trimmed, tinyids, replace_with))
+            n_dash_variants += 1
+    if n_dash_variants:
+        logger.info(
+            f"Trailing-dash normalization: added {n_dash_variants} variants "
+            f"(patterns ending with ' -')"
+        )
+
     expanded = []
     seen = set()  # Avoid duplicate expanded patterns
 
-    for pattern, tinyids, replace_with in patterns:
+    for pattern, tinyids, replace_with in normalized:
+        source = pattern  # Track original for logging
+
         # Generate all combinations: prefix + pattern + suffix
         for prefix in anchor_prefixes:
             for suffix in anchor_suffixes:
                 expanded_pattern = prefix + pattern + suffix
                 if expanded_pattern not in seen:
                     seen.add(expanded_pattern)
-                    expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+                    expanded.append((expanded_pattern, tinyids, replace_with, source))
 
         # Generate prefix + pattern (no suffix)
         for prefix in anchor_prefixes:
             expanded_pattern = prefix + pattern
             if expanded_pattern not in seen:
                 seen.add(expanded_pattern)
-                expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+                expanded.append((expanded_pattern, tinyids, replace_with, source))
 
         # Generate pattern + suffix (no prefix)
         for suffix in anchor_suffixes:
             expanded_pattern = pattern + suffix
             if expanded_pattern not in seen:
                 seen.add(expanded_pattern)
-                expanded.append((expanded_pattern, tinyids, replace_with, pattern))
+                expanded.append((expanded_pattern, tinyids, replace_with, source))
 
         # Include the bare pattern
         if pattern not in seen:
             seen.add(pattern)
-            expanded.append((pattern, tinyids, replace_with, pattern))
+            expanded.append((pattern, tinyids, replace_with, source))
 
     n_prefixes = len(anchor_prefixes)
     n_suffixes = len(anchor_suffixes)
@@ -285,8 +304,9 @@ def load_discovered_patterns(
             if pattern_idx >= len(fields):
                 continue
 
-            # Strip Excel's auto-added quotes around fields containing commas
-            pattern = fields[pattern_idx].strip().strip('"')
+            # Strip Excel's auto-added quotes around fields containing commas,
+            # and un-double CSV-escaped internal quotes (""x"" -> "x")
+            pattern = fields[pattern_idx].strip().strip('"').replace('""', '"')
             if not pattern:
                 continue
 

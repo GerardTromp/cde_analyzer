@@ -1,4 +1,4 @@
-# Scheuermann10: Full Curation Run with Knowledge Graph Grouping
+# Branching Strip: Full Curation Run with Knowledge Graph Grouping
 
 > **Purpose**: Evaluate whether knowledge graph community detection has utility for
 > human curation of phrase patterns. If successful, the `knowledge-graph` branch
@@ -8,16 +8,16 @@
 
 ## Overview
 
-Set up a new evaluation directory `scheuermann10` to run the complete instrument +
-phrase curation pipeline on the scheuermann04 subset data (1148 CDEs). The run uses
-knowledge graph analysis for curation grouping and produces 5 branching-strip outputs.
+Set up an evaluation directory to run the complete instrument + phrase curation
+pipeline on a 1148-CDE subset. The run uses knowledge graph analysis for curation
+grouping and produces 5 branching-strip outputs.
 
 ## Directory Structure
 
 ```
-/mnt/d/GT/Professional/NLM_CDE/work_202601/cde_repository/scheuermann10/
-├── cdes_subset.json              # copied from scheuermann04
-├── cdes_subset_tinyids.csv       # copied from scheuermann04
+<project_dir>/
+├── cdes_subset.json              # input CDE data
+├── cdes_subset_tinyids.csv       # tinyId index
 ├── phase1_output/                # instrument pipeline output
 ├── phase2_output/                # phrase pipeline output (stops at checkpoint)
 ├── curation/                     # KG grouping script + curation files
@@ -91,18 +91,27 @@ After manual curation produces `curated.tsv` files, generate strip patterns and
 run the 5-way branching strip.
 
 ```bash
-# Generate instrument strip pattern files (full and sub-group variants)
-cde-analyzer pattern_util --generate-strip-patterns \
+# Step 1: Assign group hierarchy (adds group/suffix columns)
+cde-analyzer pattern_util --group-hierarchy \
   $BASE/phase1_output/curated.tsv \
+  -o $BASE/phase1_output/hierarchy.tsv
+
+# Step 2: Generate full-removal and sub-group pattern files
+cde-analyzer pattern_util --generate-strip-patterns \
+  $BASE/phase1_output/hierarchy.tsv \
   -o $BASE/phase1_output/strip_patterns
 
-# Run 5-way branching strip
+# Step 3: Run 5-way branching strip
 cde-analyzer workflow run workflows/branching_strip.yaml \
   --set input_json=$BASE/cdes_subset.json \
   --set output_dir=$BASE/branching_output \
   --set inst_patterns_base=$BASE/phase1_output/strip_patterns \
   --set phrase_patterns=$BASE/phase2_output/curated.tsv
 ```
+
+**Important**: The hierarchy step (`--group-hierarchy`) must precede
+`--generate-strip-patterns`. Without it, all patterns get empty `replace_with`
+values and full/sub outputs will be identical.
 
 **Produces 5 outputs**:
 
@@ -140,11 +149,3 @@ If KG grouping proves useful:
 3. Replace standalone `group_for_curation.py` with integrated workflow step
 4. Update `phrase_pipeline.yaml` to include graph grouping before checkpoint
 5. This document becomes documentation template (minus standalone script references)
-
-## Files Created
-
-| File                                           | Description                                                       |
-| ---------------------------------------------- | ----------------------------------------------------------------- |
-| `scheuermann10/curation/pattern_graph.py`      | Copied from `knowledge-graph` branch                              |
-| `scheuermann10/curation/group_for_curation.py` | Loads TSV, builds graphs, detects communities, writes grouped TSV |
-| `scheuermann10/run_pipeline.sh`                | Orchestration with phase detection and checkpoints                |

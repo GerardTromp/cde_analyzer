@@ -40,6 +40,7 @@ def extract_path(
     collapse: bool = False,
     simplify: bool = False,
     remove_stopwords: bool = False,
+    concatenate: Optional[str] = None,
 ) -> Union[None, List[Dict]]:
     # model_class = MODEL_REGISTRY[args.model]
     items = [model_class.model_validate(obj) for obj in data]
@@ -80,6 +81,8 @@ def extract_path(
                     #         {k: sanitize(v) for k, v in d.items()} for d in result  # type: ignore
                     #     ]
                     result = sanitize_dictlist(result)
+                    result = {k: strip_embedded_nl(v) if isinstance(v, str) else v
+                              for k, v in result.items()}
 
                     row.update(result)  # type: ignore
                     # continue
@@ -89,7 +92,8 @@ def extract_path(
                         d.model_dump()
                         for d in getattr(item, "referenceDocuments", []) or []
                     ]
-                    row[tag] = collapse_reference_documents(ref_docs)
+                    val = collapse_reference_documents(ref_docs)
+                    row[tag] = strip_embedded_nl(val) if isinstance(val, str) else val
                     continue
 
                 val = get_path_value(item.model_dump(), path_expr)
@@ -124,12 +128,24 @@ def extract_path(
                 ):
                     val = sanitize(val)
 
+                if isinstance(val, str):
+                    val = strip_embedded_nl(val)
                 row[tag] = val if val is not None else ""  # type: ignore
             rows.append(row)
     else:
         rows = extract_embed_project_fields_by_tinyid(data, tinyids, exclude)
     
-    # print(rows[1:20:1])
+    # Concatenate non-tinyId fields into a single embed_text column
+    if concatenate is not None and rows:
+        concat_rows = []
+        for row in rows:
+            parts = [str(v) for k, v in row.items() if k != "tinyId" and v]
+            concat_rows.append({
+                "tinyId": row.get("tinyId", ""),
+                "embed_text": concatenate.join(parts),
+            })
+        rows = concat_rows
+
     if format == "pfasta":
         return rows # type: ignore
 

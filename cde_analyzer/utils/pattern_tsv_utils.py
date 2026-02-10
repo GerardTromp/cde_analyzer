@@ -154,8 +154,9 @@ def load_pattern_list(
 
             fields = line.split('\t')
             if col_idx < len(fields):
-                # Strip Excel's auto-added quotes around fields containing commas
-                pattern = fields[col_idx].strip().strip('"')
+                # Strip Excel's auto-added quotes around fields containing commas,
+                # and un-double CSV-escaped internal quotes (""x"" -> "x")
+                pattern = fields[col_idx].strip().strip('"').replace('""', '"')
                 if pattern and pattern not in seen:
                     patterns_list.append(pattern)
                     seen.add(pattern)
@@ -274,8 +275,9 @@ def load_pattern_list_with_tinyids(
             if pattern_idx >= len(fields):
                 continue
 
-            # Strip Excel's auto-added quotes around fields containing commas
-            pattern = fields[pattern_idx].strip().strip('"')
+            # Strip Excel's auto-added quotes around fields containing commas,
+            # and un-double CSV-escaped internal quotes (""x"" -> "x")
+            pattern = fields[pattern_idx].strip().strip('"').replace('""', '"')
             if not pattern:
                 continue
 
@@ -361,8 +363,8 @@ def load_parent_mapping(
             if pattern_idx >= len(fields) or parent_idx >= len(fields):
                 continue
 
-            pattern = fields[pattern_idx].strip().strip('"')
-            parent = fields[parent_idx].strip().strip('"')
+            pattern = fields[pattern_idx].strip().strip('"').replace('""', '"')
+            parent = fields[parent_idx].strip().strip('"').replace('""', '"')
             if not pattern or not parent:
                 continue
 

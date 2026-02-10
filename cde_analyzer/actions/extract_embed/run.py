@@ -43,6 +43,12 @@ def run_action(args):
     # ModelType = TypeVar(MODEL_REGISTRY[args.model], bound=BaseModel)
     model_class = MODEL_REGISTRY[args.model]
 
+    concatenate = getattr(args, 'concatenate', None)
+
+    if concatenate and args.output_format == "json":
+        logger.info("--concatenate requires csv or tsv output; switching to tsv")
+        args.output_format = "tsv"
+
     extract_path(
         model_class,
         raw,
@@ -53,4 +59,5 @@ def run_action(args):
         args.exclude,
         args.collapse,
         args.simplify_permissible,
+        concatenate=concatenate,
     )

@@ -18,8 +18,12 @@
 # Listed longest-first for documentation; actual matching uses length sort.
 # These are common phrases that introduce instrument/scale names.
 # A trailing space is added automatically during expansion.
+#
+# Both lowercase and sentence-case variants are included because matching
+# is case-sensitive. Sentence-case occurs after periods ("...score. As part of").
 
 prefixes:
+  # lowercase (mid-sentence)
   - "as a part of the"
   - "as a part of"
   - "as part of the"
@@ -32,6 +36,19 @@ prefixes:
   - "field of"
   - "from the"
   - "from"
+  # sentence-case (after period or start of field)
+  - "As a part of the"
+  - "As a part of"
+  - "As part of the"
+  - "As part of"
+  - "Based on the"
+  - "Based on"
+  - "A field of the"
+  - "A field of"
+  - "Field of the"
+  - "Field of"
+  - "From the"
+  - "From"
 
 # ---------------------------------------------------------------------------
 # Trailing suffixes - appended to patterns
@@ -45,3 +62,5 @@ suffixes:
   - "Questionnaire"
   - "form"
   - "Form"
+  - "form."
+  - "-"

@@ -162,11 +162,37 @@ steps:
 Variables are resolved in this order (later overrides earlier):
 
 1. **System variables** - Auto-detected (see below)
-2. **Environment variables** - `$VAR` or `${VAR}`
-3. **YAML defaults** - Variables section in workflow file
-4. **CLI overrides** - `--set key=value` arguments
+2. **YAML defaults** - Variables section in workflow file
+3. **Local config file** - `{output_dir}/{workflow_name}_config.yaml` (auto-discovered)
+4. **CLI overrides** - `--set key=value` arguments (highest priority)
 
-Default value syntax: `${VAR:-default}` uses "default" if VAR is not set.
+Default value syntax: `${VAR:-default}` uses "default" if VAR is not set. Environment variables referenced in `${VAR}` expressions are resolved after all other sources are merged.
+
+### Local Config File
+
+The workflow engine automatically looks for a project-specific config file in the output directory:
+
+```
+{output_dir}/{workflow_name}_config.yaml
+```
+
+The `workflow_name` comes from the `name:` field in the workflow YAML (e.g., `phrase_stripping` for `phrase_pipeline.yaml`). Example:
+
+```yaml
+# phase2_output/phrase_stripping_config.yaml
+k_max: 35
+min_parent_tinyids: 10
+min_field_count: 6
+```
+
+This separates project-specific tuning from the invocation script. The config file is a flat YAML mapping — no `${VAR}` syntax needed (though it is supported).
+
+**Behaviors**:
+
+- If the file does not exist, the workflow proceeds with YAML defaults (no warning)
+- `--set` always overrides config file values
+- On `resume`, the resolved values from the initial run are used (config is not re-read)
+- Loading is logged: which file was read and which values were overridden
 
 ### Auto-Detected System Variables
 
@@ -177,7 +203,7 @@ The following variables are automatically detected at runtime:
 | `${cpu_count}` | Total logical CPUs on the system |
 | `${workers}` | Recommended worker count (cpu_count - 1, min 1) |
 
-These can be overridden in the workflow YAML or via `--set workers=N`.
+These can be overridden in the workflow YAML, config file, or via `--set workers=N`.
 
 ## State File
 

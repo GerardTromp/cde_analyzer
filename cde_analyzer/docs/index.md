@@ -92,6 +92,12 @@ python cde_analyzer.py phrase-miner --help
 - [Phrase Miner Logic](phrase_miner_logic.md) — Algorithm internals and data flow
 - [Instrument & Phrase Workflow](workflows/instrument-phrase-stripping-workflow.md) — Complete multi-phase workflow
 
+## Vignettes
+
+Step-by-step tutorials with worked examples for common workflows:
+
+- [Phrase Stripping](vignettes/phrase-stripping.md) — From raw CDE JSON to cleaned output, covering six scenarios from minimal strip to full production pipeline
+
 ## Architecture
 
 CDE Analyzer uses a **layered monolithic** architecture with a plugin-style action system:

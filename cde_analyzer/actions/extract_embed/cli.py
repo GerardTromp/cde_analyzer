@@ -84,6 +84,14 @@ def register_subparser(subparser: ArgumentParser):
         default=True,
         help="Process limited set of permissibleValues fields using heuristic.",
     )
+    subparser.add_argument(
+        "--concatenate",
+        default=None,
+        metavar="SEP",
+        help="Concatenate all non-tinyId fields into a single 'embed_text' column "
+             "using SEP as the joining string (e.g., ' | ' or ' [SEP] '). "
+             "Forces output format to csv or tsv.",
+    )
     subparser.set_defaults(
         _runner="actions.extract_embed.run"
     )
