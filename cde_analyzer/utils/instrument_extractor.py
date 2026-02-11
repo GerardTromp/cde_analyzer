@@ -550,9 +550,13 @@ class InstrumentExtractor:
     # e.g., "of", "and", "for", "the", "in", "on", "to", "a"
     CONNECTOR_WORD = r'[a-z]+'
 
-    # Any word in instrument name: ALL CAPS, Title Case, or lowercase connector
+    # Standalone number: trial identifiers, version numbers embedded in names
+    # e.g., "10172" in "Trial of ORG 10172 in Acute Stroke Treatment"
+    NUMERIC_WORD = r'\d+'
+
+    # Any word in instrument name: ALL CAPS, Title Case, lowercase connector, or number
     # IMPORTANT: ALL_CAPS_WORD must come FIRST so "TBI" matches as ALL_CAPS, not "T" as Title Case
-    INSTRUMENT_WORD = rf'(?:{ALL_CAPS_WORD}|{TITLE_CASE_WORD}|{CONNECTOR_WORD})'
+    INSTRUMENT_WORD = rf'(?:{ALL_CAPS_WORD}|{TITLE_CASE_WORD}|{CONNECTOR_WORD}|{NUMERIC_WORD})'
 
     # Instrument name: sequence starting with a capitalized word, followed by more words
     # Can start with ALL CAPS OR Title Case to handle names like "PTSD Checklist"
@@ -689,7 +693,10 @@ class InstrumentExtractor:
             word_lower = word.lower()
             alpha_part = ''.join(c for c in word if c.isalpha())
 
-            if word_lower in self.MINOR_WORDS:
+            if word.isdigit():
+                # Numeric word (e.g., "10172" in trial identifiers): neutral, count as correct
+                correct_count += 1
+            elif word_lower in self.MINOR_WORDS:
                 # Minor word: correct if lowercase (as expected in Title Case)
                 correct_count += 1
             elif alpha_part and len(alpha_part) >= 2 and alpha_part.isupper():

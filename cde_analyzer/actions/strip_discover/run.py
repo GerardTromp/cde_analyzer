@@ -23,6 +23,43 @@ from utils.constants import MODEL_REGISTRY
 logger = logging.getLogger(__name__)
 
 
+def build_field_text_index(
+    parsed_models: list,
+    field_paths: List[str],
+    tinyid_filter: Optional[Set[str]] = None,
+) -> Dict[str, Dict[str, List[str]]]:
+    """Build {tinyId -> {field_path -> [texts]}} index from parsed models.
+
+    Extracts text values from the specified field paths for each model.
+    Used by compute_field_distribution() and validate_subsumption().
+
+    Args:
+        parsed_models: List of parsed Pydantic models (CDEItem instances)
+        field_paths: Field paths to extract (e.g., ["definitions.*.definition", ...])
+        tinyid_filter: If provided, only index these tinyIds (performance optimization)
+
+    Returns:
+        Dict mapping tinyId -> {field_path -> [text_values]}
+    """
+    from logic.verbatim_discoverer import _extract_at_path
+
+    tid_field_texts: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
+    for model in parsed_models:
+        tid = getattr(model, 'tinyId', None)
+        if not tid:
+            continue
+        if tinyid_filter is not None and tid not in tinyid_filter:
+            continue
+        model_dict = model.model_dump(mode="python")
+        for fp in field_paths:
+            texts = _extract_at_path(model_dict, fp.split('.'))
+            for text in texts:
+                if text and isinstance(text, str):
+                    tid_field_texts[tid][fp].append(text)
+
+    return dict(tid_field_texts)
+
+
 def compute_field_distribution(
     parsed_models: list,
     verbatim_map: Dict[str, Set[str]],
@@ -44,8 +81,6 @@ def compute_field_distribution(
         Dict mapping verbatim -> {field_short_name -> set of tinyIds}
         Field short names are derived from the last path segment (e.g., "definition").
     """
-    from logic.verbatim_discoverer import _extract_at_path
-
     if not verbatim_map:
         return {}
 
@@ -59,18 +94,8 @@ def compute_field_distribution(
     for tids in verbatim_map.values():
         all_tinyids.update(tids)
 
-    # Build tinyId -> {field_path -> [texts]} index (only for relevant tinyIds)
-    tid_field_texts: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
-    for model in parsed_models:
-        tid = getattr(model, 'tinyId', None)
-        if not tid or tid not in all_tinyids:
-            continue
-        model_dict = model.model_dump(mode="python")
-        for fp in field_paths:
-            texts = _extract_at_path(model_dict, fp.split('.'))
-            for text in texts:
-                if text and isinstance(text, str):
-                    tid_field_texts[tid][fp].append(text)
+    # Build field text index (shared helper)
+    tid_field_texts = build_field_text_index(parsed_models, field_paths, all_tinyids)
 
     # For each verbatim pattern, check which fields it appears in per tinyId
     result: Dict[str, Dict[str, Set[str]]] = {}

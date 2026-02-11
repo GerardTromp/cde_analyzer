@@ -613,6 +613,38 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
 
     logger.info(f"Loaded {len(parsed)} CDE records from {input_json}")
 
+    # Build CDE text lookup: tinyId -> (name, question, definition)
+    # name = designations[0], question = designations[1], definition = definitions[0]
+    MAX_EXAMPLE_LEN = 120
+    cde_text_lookup = {}
+    for model in parsed:
+        tid = getattr(model, 'tinyId', None)
+        if not tid:
+            continue
+        desigs = getattr(model, 'designations', None) or []
+        defs = getattr(model, 'definitions', None) or []
+        name = ""
+        question = ""
+        definition = ""
+        if desigs:
+            d0 = desigs[0] if len(desigs) > 0 else None
+            d1 = desigs[1] if len(desigs) > 1 else None
+            if d0:
+                name = getattr(d0, 'designation', '') or ''
+            if d1:
+                question = getattr(d1, 'designation', '') or ''
+        if defs:
+            d0 = defs[0]
+            definition = getattr(d0, 'definition', '') or ''
+        # Truncate long text for readability
+        if len(name) > MAX_EXAMPLE_LEN:
+            name = name[:MAX_EXAMPLE_LEN] + "..."
+        if len(question) > MAX_EXAMPLE_LEN:
+            question = question[:MAX_EXAMPLE_LEN] + "..."
+        if len(definition) > MAX_EXAMPLE_LEN:
+            definition = definition[:MAX_EXAMPLE_LEN] + "..."
+        cde_text_lookup[tid] = (name, question, definition)
+
     # Compute field distribution
     field_dist = compute_field_distribution(parsed, verbatim_map, field_paths)
 
@@ -620,21 +652,31 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
     field_col_names = [fp.rsplit('.', 1)[-1] for fp in field_paths]
 
     # Apply filters and write output
-    # Strip existing field columns from header if re-running
-    existing_field_cols = set()
+    # Strip existing field/example columns from header if re-running
+    EXAMPLE_COLS = {"example_name", "example_question", "example_definition"}
+    drop_cols = set()
     for col in field_col_names:
         col_count = f"{col}_count"
         if col_count in headers:
-            existing_field_cols.add(col_count)
+            drop_cols.add(col_count)
     if "field_profile" in headers:
-        existing_field_cols.add("field_profile")
+        drop_cols.add("field_profile")
+    for ec in EXAMPLE_COLS:
+        if ec in headers:
+            drop_cols.add(ec)
 
-    # Build clean header (remove old field columns if present)
-    clean_header_indices = [i for i, h in enumerate(headers) if h not in existing_field_cols]
+    # Build clean header (remove old field/example columns if present)
+    clean_header_indices = [i for i, h in enumerate(headers) if h not in drop_cols]
     clean_headers = [headers[i] for i in clean_header_indices]
 
-    # Add new field columns
+    # Position to insert example columns: right after 'pattern'
+    pattern_pos = clean_headers.index("pattern") if "pattern" in clean_headers else 0
+    example_insert_at = pattern_pos + 1  # used when building each output row
+
+    # Build final header: clean + example cols inserted after pattern + field cols at end
     new_headers = clean_headers[:]
+    for j, ec in enumerate(["example_name", "example_question", "example_definition"]):
+        new_headers.insert(example_insert_at + j, ec)
     for col in field_col_names:
         new_headers.append(f"{col}_count")
     new_headers.append("field_profile")
@@ -677,7 +719,16 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
         clean_fields = [fields_list[i] if i < len(fields_list) else ""
                         for i in clean_header_indices]
 
-        # Append field columns
+        # Look up example CDE text from first tinyId
+        first_tid = next(iter(sorted(tinyids)), None) if tinyids else None
+        ex_name, ex_question, ex_definition = "", "", ""
+        if first_tid and first_tid in cde_text_lookup:
+            ex_name, ex_question, ex_definition = cde_text_lookup[first_tid]
+        # Insert example columns right after pattern position
+        for j, val in enumerate([ex_name, ex_question, ex_definition]):
+            clean_fields.insert(example_insert_at + j, val)
+
+        # Append field columns at end
         for col in field_col_names:
             clean_fields.append(str(field_counts[col]))
         profile = _field_profile(dist) if dist else ""
@@ -1036,6 +1087,277 @@ def _run_update_ledger(args, new_patterns_path: str) -> int:
     print(f"  Active:   {active_count}")
     print(f"  Total:    {len(ledger)}")
     print(f"  Wrote:    {output_path}")
+
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Empirical subsumption validation — worker functions (module-level for pickling)
+# ---------------------------------------------------------------------------
+
+_validate_field_index = None  # Set by worker initializer
+
+
+def _validate_worker_init(field_index):
+    """Initialize shared read-only field index in each worker process."""
+    global _validate_field_index
+    _validate_field_index = field_index
+
+
+def _validate_group(group_key, patterns_with_tinyids, field_index):
+    """Determine which patterns in a group are empirically needed.
+
+    A pattern is "needed" if there exists at least one (tinyId, field) where
+    it matches in the source text but no LONGER group member (that contains
+    it as a substring) also matches.
+
+    Returns list of (group_key, pattern, tinyIds, validation_reason) tuples.
+    """
+    if len(patterns_with_tinyids) <= 1:
+        return [(group_key, p, t, "only_in_group") for p, t in patterns_with_tinyids]
+
+    # Sort longest first
+    sorted_pats = sorted(patterns_with_tinyids, key=lambda x: len(x[0]), reverse=True)
+
+    # Step 1: Build match matrix — which (tinyId, field) each pattern matches
+    pattern_matches = {}
+    for pattern, tinyids in sorted_pats:
+        matches = set()
+        pat_lower = pattern.lower()
+        for tid in tinyids:
+            if tid not in field_index:
+                continue
+            for field_path, texts in field_index[tid].items():
+                for text in texts:
+                    if pat_lower in text.lower():
+                        matches.add((tid, field_path))
+                        break
+        pattern_matches[pattern] = matches
+
+    # Step 2: Determine which patterns are needed
+    kept = []
+    for i, (pattern, tinyids) in enumerate(sorted_pats):
+        # Find longer patterns in this group that contain this pattern as substring
+        longer_containing = [
+            p for p, _ in sorted_pats[:i]
+            if pattern.lower() in p.lower() and p != pattern
+        ]
+
+        if not longer_containing:
+            # Longest in its substring chain — always needed
+            kept.append((group_key, pattern, tinyids, "longest_in_chain"))
+            continue
+
+        # Union of all (tinyId, field) matched by longer patterns
+        longer_match_union = set()
+        for lp in longer_containing:
+            longer_match_union.update(pattern_matches.get(lp, set()))
+
+        # Pattern is needed if it matches somewhere the longer ones don't
+        unique_matches = pattern_matches[pattern] - longer_match_union
+        if unique_matches:
+            kept.append((group_key, pattern, tinyids, "independent_matches"))
+        # else: pattern is redundant — every occurrence is covered by a longer form
+
+    return kept
+
+
+def _validate_worker_process(groups_chunk):
+    """Worker: validate a chunk of groups using the shared field index."""
+    results = []
+    for group_key, patterns_with_tinyids in groups_chunk:
+        kept = _validate_group(group_key, patterns_with_tinyids, _validate_field_index)
+        results.extend(kept)
+    return results
+
+
+def _run_validate_subsumption(args, coalesced_path: str) -> int:
+    """Empirical subsumption validation for coalesced pattern groups.
+
+    For each coalesced group, checks source text per-tinyId per-field to
+    determine which patterns are actually needed. Drops shorter patterns
+    whose occurrences are always covered by longer group members.
+    """
+    import json
+    import re
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    from utils.file_utils import exit_if_missing
+    from utils.constants import MODEL_REGISTRY
+    from pydantic import ValidationError
+
+    output_path = getattr(args, 'output', None)
+    if not output_path:
+        logger.error("--output is required for --validate-subsumption")
+        raise SystemExit(1)
+
+    input_path = getattr(args, 'input', None)
+    model_name = getattr(args, 'model', None)
+    if not input_path or not model_name:
+        logger.error("--input and --model are required for --validate-subsumption")
+        raise SystemExit(1)
+
+    n_workers = getattr(args, 'workers', 0)
+    field_paths = getattr(args, 'fields', None) or [
+        "definitions.*.definition", "designations.*.designation"
+    ]
+
+    # --- Load coalesced groups ---
+    coalesced_path = exit_if_missing(coalesced_path, "Coalesced TSV")
+    groups = {}  # group_key -> [(pattern, tinyIds_set)]
+    total_patterns = 0
+
+    with open(coalesced_path, encoding='utf-8') as f:
+        header = f.readline().strip().split('\t')
+        gk_idx = header.index('group_key')
+        pat_idx = header.index('pattern')
+        tid_idx = header.index('tinyIds')
+
+        for line in f:
+            cols = line.strip().split('\t')
+            if len(cols) <= max(gk_idx, pat_idx, tid_idx):
+                continue
+            gk = cols[gk_idx]
+            pat = cols[pat_idx]
+            tids = set(re.split(r'[\s|]+', cols[tid_idx])) if cols[tid_idx].strip() else set()
+            groups.setdefault(gk, []).append((pat, tids))
+            total_patterns += 1
+
+    multi_groups = {gk: pats for gk, pats in groups.items() if len(pats) > 1}
+    single_groups = {gk: pats for gk, pats in groups.items() if len(pats) == 1}
+
+    logger.info(
+        f"Loaded {total_patterns} patterns in {len(groups)} groups "
+        f"({len(multi_groups)} multi-pattern, {len(single_groups)} single-pattern)"
+    )
+
+    # --- Load source JSON and build field text index ---
+    input_path = exit_if_missing(input_path, "Input JSON")
+    model_class = MODEL_REGISTRY[model_name]
+
+    with open(input_path, encoding='utf-8') as f:
+        data = json.load(f)
+
+    try:
+        parsed = [model_class.model_validate(obj) for obj in data]
+    except ValidationError as e:
+        for error in e.errors():
+            logger.error(f"{error['type']}: {error['msg']}")
+        raise SystemExit(1)
+
+    # Collect all tinyIds referenced by coalesced patterns
+    all_tinyids = set()
+    for pats in groups.values():
+        for _, tids in pats:
+            all_tinyids.update(tids)
+
+    logger.info(f"Building field text index for {len(all_tinyids)} tinyIds...")
+    from actions.strip_discover.run import build_field_text_index
+    field_index = build_field_text_index(parsed, field_paths, all_tinyids)
+    logger.info(f"Indexed {len(field_index)} tinyIds across {len(field_paths)} fields")
+
+    # Free parsed models (no longer needed, save memory before fork)
+    del parsed, data
+
+    # --- Validate groups ---
+    # Single-pattern groups pass through directly
+    results = []
+    for gk, pats in single_groups.items():
+        for pat, tids in pats:
+            results.append((gk, pat, tids, "only_in_group"))
+
+    if not multi_groups:
+        logger.info("No multi-pattern groups to validate")
+    elif n_workers <= 0 or len(multi_groups) < 4:
+        # Sequential
+        logger.info(f"Validating {len(multi_groups)} multi-pattern groups (sequential)...")
+        for gk, pats in multi_groups.items():
+            kept = _validate_group(gk, pats, field_index)
+            results.extend(kept)
+    else:
+        # Parallel — greedy bin packing by tinyId count
+        logger.info(
+            f"Validating {len(multi_groups)} multi-pattern groups "
+            f"({n_workers} workers)..."
+        )
+
+        group_loads = {}
+        for gk, pats in multi_groups.items():
+            group_loads[gk] = sum(len(tids) for _, tids in pats)
+
+        sorted_groups = sorted(
+            multi_groups.items(), key=lambda g: group_loads[g[0]], reverse=True
+        )
+
+        worker_loads = [0] * n_workers
+        worker_chunks = [[] for _ in range(n_workers)]
+        for gk, pats in sorted_groups:
+            lightest = min(range(n_workers), key=lambda i: worker_loads[i])
+            worker_chunks[lightest].append((gk, pats))
+            worker_loads[lightest] += group_loads[gk]
+
+        # Log load distribution
+        for i, (chunk, load) in enumerate(zip(worker_chunks, worker_loads)):
+            logger.debug(f"  Worker {i}: {len(chunk)} groups, ~{load} tinyId-checks")
+
+        with ProcessPoolExecutor(
+            max_workers=n_workers,
+            initializer=_validate_worker_init,
+            initargs=(field_index,),
+        ) as executor:
+            futures = {
+                executor.submit(_validate_worker_process, chunk): i
+                for i, chunk in enumerate(worker_chunks)
+                if chunk  # skip empty chunks
+            }
+            for future in as_completed(futures):
+                worker_results = future.result()
+                results.extend(worker_results)
+
+    # --- Write output ---
+    # Sort by group_key, then longest pattern first within group
+    results.sort(key=lambda r: (r[0], -len(r[1])))
+
+    kept_count = len(results)
+    dropped_count = total_patterns - kept_count
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("group_key\tpattern\ttinyIds\tvalidation\n")
+        for gk, pat, tids, reason in results:
+            tids_str = " ".join(sorted(tids))
+            f.write(f"{gk}\t{pat}\t{tids_str}\t{reason}\n")
+
+    # --- Summary ---
+    print(f"\n{'=' * 60}")
+    print("EMPIRICAL SUBSUMPTION VALIDATION")
+    print('=' * 60)
+    print(f"\n  Input:    {coalesced_path}")
+    print(f"  Groups:   {len(groups)} ({len(multi_groups)} multi-pattern)")
+    print(f"  Input:    {total_patterns} patterns")
+    print(f"  Kept:     {kept_count} patterns")
+    print(f"  Dropped:  {dropped_count} patterns (redundant shorter forms)")
+    print(f"  Output:   {output_path}")
+
+    # Per-group drop details (only for groups that lost patterns)
+    dropped_groups = []
+    result_by_group = {}
+    for gk, pat, tids, reason in results:
+        result_by_group.setdefault(gk, []).append(pat)
+
+    for gk, pats in multi_groups.items():
+        input_pats = {p for p, _ in pats}
+        output_pats = set(result_by_group.get(gk, []))
+        dropped = input_pats - output_pats
+        if dropped:
+            dropped_groups.append((gk, dropped, output_pats))
+
+    if dropped_groups:
+        print(f"\n  Groups with drops ({len(dropped_groups)}):")
+        for gk, dropped, kept_pats in sorted(dropped_groups, key=lambda x: -len(x[1])):
+            print(f"    {gk}:")
+            for d in sorted(dropped, key=len):
+                print(f"      - dropped: {d[:70]}")
+            for k in sorted(kept_pats, key=len):
+                print(f"      + kept:    {k[:70]}")
 
     return 0
 
@@ -2262,6 +2584,11 @@ def run_action(args: Namespace):
     update_ledger = getattr(args, 'update_ledger', None)
     if update_ledger:
         return _run_update_ledger(args, update_ledger)
+
+    # Check for validate-subsumption mode
+    validate_sub = getattr(args, 'validate_subsumption', None)
+    if validate_sub:
+        return _run_validate_subsumption(args, validate_sub)
 
     # Check for merge mode (supports multiple files)
     merge_patterns = getattr(args, 'merge_patterns', None)

@@ -466,6 +466,23 @@ def register_subparser(subparser: ArgumentParser):
         help="Iteration round number for ledger entries. Default: 1.",
     )
 
+    # Empirical subsumption validation mode
+    subparser.add_argument(
+        "--validate-subsumption",
+        type=str,
+        metavar="COALESCED_TSV",
+        help="Empirical subsumption validation: for each coalesced group, check source "
+             "text per-tinyId per-field to determine which patterns are actually needed. "
+             "Drops shorter patterns that are always covered by longer group members. "
+             "Requires --input, --model, and --output. Use --workers for parallelization.",
+    )
+    subparser.add_argument(
+        "--workers",
+        type=int,
+        default=0,
+        help="Number of parallel workers for validate-subsumption (0 = sequential). Default: 0.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

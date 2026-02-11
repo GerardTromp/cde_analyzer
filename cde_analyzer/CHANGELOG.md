@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.12] - 2026-02-11
+
+### Added
+- `pattern_util --validate-subsumption` — empirical post-coalescing validation
+  - Checks source text per-tinyId per-field to determine which patterns are actually needed
+  - Drops shorter patterns whose occurrences are always covered by longer group members
+  - Parallelized with `ProcessPoolExecutor`, greedy bin packing by tinyId count
+  - `--workers N` flag (0 = sequential); sequential and parallel produce identical output
+- Example CDE columns in `--field-analysis` enriched output
+  - `example_name` (designation[0]), `example_question` (designation[1]), `example_definition` (definition[0])
+  - Inserted after `pattern` column; text truncated to 120 chars
+  - Idempotent: re-runs strip old example columns before adding new ones
+- NUMERIC_WORD support in instrument extractor
+  - Standalone numbers now recognized in instrument names (e.g., "Trial of ORG 10172 in Acute Stroke Treatment")
+  - `_is_valid_instrument_name()` counts digit words as correct
+
+### Fixed
+- Coalescer trailing-punctuation trie bug: "Well-Being" and "Well-Being." no longer split into separate trie branches
+  - Phase 2 prefix trie now normalizes trailing punctuation (`.,;:!?`) before token insertion
+  - Group key computation uses punctuation-aware word comparison
+  - ~15 patterns now preserve full names that were previously truncated (e.g., "Neuro-QOL Positive Affect and Well-Being", "Los Angeles Motor Scale", "NIH Toolbox Cognitive Battery")
+
+### Changed
+- `validate_subsumption` step added to `instrument_pipeline.yaml` between `coalesce_patterns` and `enrich_fields`
+- `enrich_fields` now reads `validated.tsv` instead of `coalesced.tsv`
+- `build_field_text_index()` extracted from `compute_field_distribution()` in `strip_discover/run.py` for reuse
+
 ## [0.5.6] - 2026-02-10
 
 ### Added

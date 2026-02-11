@@ -1381,6 +1381,7 @@ def coalesce_variants_tsv(
 
     if rollup_subset_tinyids and kept_patterns:
         logger.info("Phase 1b: Reverse subsumption (roll-down greedy expansions)...")
+
         # Process longest first so we can remove them
         sorted_desc = sorted(kept_patterns, key=len, reverse=True)
 
@@ -1517,8 +1518,11 @@ def coalesce_variants_tsv(
         root = PrefixNode()
 
         # Insert all kept patterns into trie
+        # Normalize trailing punctuation so "Well-Being" and "Well-Being."
+        # merge into the same trie path (the period is not part of the name)
+        _trie_punct = str.maketrans('', '', '.,;:!?')
         for pattern in kept_patterns:
-            tokens = pattern.split()
+            tokens = [t.translate(_trie_punct) or t for t in pattern.split()]
             node = root
             for i, token in enumerate(tokens):
                 if token not in node.children:
@@ -1654,6 +1658,7 @@ def coalesce_variants_tsv(
     # Falls back to first 2 words if no shared prefix found
     pattern_group_keys: Dict[str, str] = {}
     kept_list = sorted(kept_patterns)
+    _punct_strip = str.maketrans('', '', '.,;:!?\'")}]')
     for pattern in kept_list:
         tokens = pattern.split()
         best_prefix_len = 0
@@ -1663,7 +1668,7 @@ def coalesce_variants_tsv(
             other_tokens = other.split()
             common = 0
             for a, b in zip(tokens, other_tokens):
-                if a == b:
+                if a == b or a.translate(_punct_strip) == b.translate(_punct_strip):
                     common += 1
                 else:
                     break

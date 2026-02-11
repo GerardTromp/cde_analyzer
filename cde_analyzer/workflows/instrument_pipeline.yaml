@@ -34,7 +34,8 @@ variables:
   discovered_tsv: "${output_dir}/discovered.tsv"
   coalesced_tsv: "${output_dir}/coalesced.tsv"
   coalesce_report: "${output_dir}/coalesce_report.tsv"
-  # curated_tsv: Human-edited patterns (copy coalesced.tsv → curated.tsv after checkpoint)
+  validated_tsv: "${output_dir}/validated.tsv"
+  # curated_tsv: Human-edited patterns (copy validated/enriched → curated.tsv after checkpoint)
   curated_tsv: "${output_dir}/curated.tsv"
   stripped_json: "${output_dir}/inst_stripped.json"
   trace_tsv: "${output_dir}/strip_trace.tsv"
@@ -82,10 +83,19 @@ steps:
       coalesce_report: "${coalesce_report}"
       min_prefix_tinyids: 2
 
+  - name: validate_subsumption
+    action: pattern_util
+    args:
+      validate_subsumption: "${coalesced_tsv}"
+      input: "${input_json}"
+      model: CDE
+      workers: "${workers}"
+      output: "${validated_tsv}"
+
   - name: enrich_fields
     action: pattern_util
     args:
-      field_analysis: "${coalesced_tsv}"
+      field_analysis: "${validated_tsv}"
       input: "${input_json}"
       model: CDE
       output: "${field_enriched_tsv}"
