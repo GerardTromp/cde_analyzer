@@ -424,8 +424,8 @@ body {
 
     <!-- File ops -->
     <button class="tb-btn" id="btn-open" title="Open file (drag-drop or pick)">&#128194; Open</button>
-    <button class="tb-btn primary" id="btn-save" title="Save to server (Ctrl+S)">&#128190; Save</button>
-    <button class="tb-btn" id="btn-download" title="Download as TSV">&#8615; Download</button>
+    <button class="tb-btn" id="btn-save" title="Save to server (Ctrl+S)">&#128190; Save</button>
+    <button class="tb-btn primary" id="btn-save-as" title="Download as new file (Save As)">&#128190; Save As</button>
     <div class="sep"></div>
 
     <!-- Row ops -->
@@ -510,7 +510,7 @@ body {
 
     // Toolbar buttons
     const btnSave = $('btn-save');
-    const btnDownload = $('btn-download');
+    const btnSaveAs = $('btn-save-as');
     const btnOpen = $('btn-open');
     const btnAddRow = $('btn-add-row');
     const btnDelete = $('btn-delete');
@@ -1442,13 +1442,37 @@ body {
         setAction('Downloaded ' + (filename || S.fileName));
     }
 
-    function downloadCurrent() {
+    async function saveAsDialog() {
+        const content = TSV.serialize(S.headers, S.rows.map(r => r.cells));
+        // Use File System Access API for a real Save As dialog (Chrome/Edge)
+        if (window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: S.fileName || 'patterns.tsv',
+                    types: [{
+                        description: 'TSV files',
+                        accept: { 'text/tab-separated-values': ['.tsv'] }
+                    }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(content);
+                await writable.close();
+                S.dirty = false;
+                setAction('Saved as ' + handle.name);
+                updateStatus();
+                return;
+            } catch (e) {
+                if (e.name === 'AbortError') return; // User cancelled
+                // Fall through to blob download
+            }
+        }
+        // Fallback: blob download to browser Downloads folder
         downloadTSV(S.headers, S.rows.map(r => r.cells), S.fileName);
     }
 
     async function saveToServer() {
         if (!S.serverMode) {
-            downloadCurrent();
+            saveAsDialog();
             return;
         }
 
@@ -1583,7 +1607,7 @@ body {
 
     // ===== BUTTON EVENT HANDLERS =====
     btnSave.addEventListener('click', saveToServer);
-    btnDownload.addEventListener('click', downloadCurrent);
+    btnSaveAs.addEventListener('click', saveAsDialog);
     btnOpen.addEventListener('click', openFile);
     btnAddRow.addEventListener('click', addRow);
     btnDelete.addEventListener('click', deleteSelectedRows);

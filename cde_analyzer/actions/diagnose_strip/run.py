@@ -91,9 +91,15 @@ def find_anchor_patterns(
             start = match.start()
             end = match.end()
 
-            # Extract context after anchor
+            # Extract context after anchor, snap to word boundary if truncated
             context_end = min(end + context_chars, len(text))
-            context = text[end:context_end].strip()
+            context = text[end:context_end]
+            # If truncated mid-text, snap back to last word boundary
+            if context_end < len(text) and context and context[-1].isalnum():
+                last_space = context.rfind(' ')
+                if last_space > 0:
+                    context = context[:last_space]
+            context = context.strip()
 
             # Extract full match including context up to sentence end or newline
             full_end = end
@@ -263,8 +269,13 @@ def run_action(args: Namespace):
     remaining_count = sum(count for _, count in filtered_patterns)
 
     # Write output TSV
+    emit_tinyids = getattr(args, 'emit_tinyids', False)
     with open(args.output, 'w', encoding='utf-8') as f:
-        f.write("pattern\tcount\tnum_tinyids\tcategory\texample\n")
+        header = "pattern\tcount\tnum_tinyids"
+        if emit_tinyids:
+            header += "\ttinyIds"
+        header += "\tcategory\texample"
+        f.write(header + "\n")
 
         for pattern, count in filtered_patterns:
             tinyids = pattern_tinyids[pattern]
@@ -273,7 +284,11 @@ def run_action(args: Namespace):
             # Escape tabs/newlines in example
             example_escaped = example.replace('\t', ' ').replace('\n', ' ')
 
-            f.write(f"{pattern}\t{count}\t{len(tinyids)}\t{category}\t{example_escaped}\n")
+            row = f"{pattern}\t{count}\t{len(tinyids)}"
+            if emit_tinyids:
+                row += "\t" + " ".join(sorted(tinyids))
+            row += f"\t{category}\t{example_escaped}"
+            f.write(row + "\n")
 
     logger.info(f"Wrote {len(filtered_patterns)} remaining patterns to {args.output}")
 

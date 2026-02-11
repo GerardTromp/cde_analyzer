@@ -96,6 +96,12 @@ def register_subparser(subparser: ArgumentParser):
         help="Output suggested patterns for config/supplementary_patterns.yaml",
     )
 
+    subparser.add_argument(
+        "--emit-tinyids",
+        action="store_true",
+        help="Include tinyIds column (space-separated) in output TSV",
+    )
+
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""
         return _get_run_action()(args)

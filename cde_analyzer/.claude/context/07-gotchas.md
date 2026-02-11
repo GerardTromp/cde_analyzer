@@ -494,17 +494,36 @@ for future in as_completed(futures):
 - `--trace-matching FILE`: Streams detailed per-match output during processing
 - `--match-log FILE`: Writes batch summary after all processing completes
 
-**Difference**:
-- **Streaming** (trace): Must write during processing, requires either sequential execution or temp files per worker with post-hoc merge
-- **Batch** (match log): Only needs final data, can collect in memory and write once at end
-
-**Current Behavior**:
-- `--trace-matching` forces sequential (`workers=1`) with warning message
+**Current Behavior** (all parallel-safe):
+- `--trace-matching` collects per-worker entries, merges by timestamp after completion
 - `--match-log` and `--match-summary` work with parallel execution
 
-**Recommendation**: For new diagnostic features, prefer batch aggregation over streaming when possible. Batch aggregation parallelizes cleanly; streaming requires temp file management.
+**Pattern**: All diagnostic features use batch aggregation — workers collect entries in per-process memory, return them alongside processed data, and the main process aggregates and writes to file after all workers complete.
 
 ---
+
+## Coalescer Gotchas
+
+### 28. Reverse Subsumption Drops Instrument Sub-Domains
+**Issue**: Phase 1b reverse subsumption removes long patterns whose tinyIds ⊆ a shorter base's tinyIds, treating them as "greedy expansions". But when the shorter is a prefix of the longer AND the extension is a noun phrase, it's a family sub-domain, not greedy context gobbling.
+
+**Example**:
+- "NIH Toolbox" (9 tinyIds) subsumes "NIH Toolbox General Life Satisfaction" (9 tinyIds)
+- Phase 1b removed the longer form, leaving only "NIH Toolbox"
+- After stripping "NIH Toolbox", the residual "General Life Satisfaction" appears as a false positive in diagnostics
+
+**Fix** (v0.5.11): `_is_np_continuation()` helper checks if the extension beyond the prefix is NP-like (80%+ Title Case words). If so, both forms are kept.
+
+**Location**: `utils/flexible_pattern_matcher.py` — Phase 1b loop (~line 1412) and helper (~line 1056)
+
+**Impact**: allcde01 coalesced patterns increased from 417 to 604 (+325 sub-domain patterns preserved)
+
+### 29. Anchor-Prefix Residuals After Stripping
+**Issue**: After stripping "Dizziness Handicap Inventory", the sanity check finds "the Dizziness Handicap Inventory" (29x) because the anchor prefix "the" was attached in the source text but not expanded during stripping.
+
+**Mitigation**: The iterative stripping pipeline (`phase1_iterate`) harvests these residuals and adds them to the pattern set for the next round. The `--harvest-to-supplementary` command ingests them into `supplementary_patterns.yaml` for permanent coverage.
+
+**Location**: `actions/diagnose_strip/run.py`, `actions/pattern_util/run.py` (harvest functions)
 
 ## Future Gotchas
 

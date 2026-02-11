@@ -24,13 +24,11 @@ Instead of temp files or shared state, the solution collects matches per-worker 
 
 ### Key Design Decisions
 
-1. **Trace files remain sequential-only**: The `--trace-matching` feature writes detailed per-match output to a single file. Parallelizing this would require temp files and merging, adding complexity for a diagnostic feature. It's simpler to force sequential mode when trace is enabled.
+1. **All logging is parallel-safe**: Both `--trace-matching` and `--match-log`/`--match-summary` use in-memory per-worker collection with post-completion aggregation. Trace entries include timestamps for cross-worker chronological ordering.
 
-2. **Match logging is parallel-safe**: The new `--match-log` and `--match-summary` features only need the final aggregated data, not streaming output. Workers can collect matches in memory and return them alongside processed data.
+2. **Worker return value extended**: `_worker_process_chunk()` returns a 4-tuple: `(chunk_idx, processed_data, matches, traces)`.
 
-3. **Worker return value extended**: `_worker_process_chunk()` now returns a 3-tuple: `(chunk_idx, processed_data, matches)` instead of `(chunk_idx, processed_data)`.
-
-4. **Aggregation after completion**: The main process collects all matches from all workers and extends the global `_match_log` after parallel processing completes.
+3. **Aggregation after completion**: The main process collects all matches and trace entries from all workers, extends the global `_match_log` and `_trace_log`, then writes to files. Trace entries are sorted by timestamp before writing.
 
 ---
 
@@ -134,7 +132,7 @@ def write_match_summary(match_log: list, filepath: str):
 --match-summary FILE  # Aggregated counts TSV (source_pattern, match_count, unique_records)
 ```
 
-Both options now work with parallel execution. Only `--trace-matching` forces sequential mode.
+All three options (`--trace-matching`, `--match-log`, `--match-summary`) now work with parallel execution.
 
 ---
 

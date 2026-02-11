@@ -64,3 +64,20 @@ suffixes:
   - "Form"
   - "form."
   - "-"
+
+# ---------------------------------------------------------------------------
+# Regex prefixes - prepended to patterns using regex matching
+# ---------------------------------------------------------------------------
+# Unlike literal prefixes above, these use Python regex syntax.
+# Useful for variable text like version numbers.
+# A trailing space is included in the pattern (not auto-appended).
+# Both case variants are handled by including re.IGNORECASE-compatible patterns.
+#
+# Expanded patterns are marked with "REGEX:" prefix in the phrase map
+# so the matching engine uses re.search() instead of literal substring.
+
+regex_prefixes:
+  - "version \\d+(?:\\.\\d+)? of the "
+  - "version \\d+(?:\\.\\d+)? of "
+  - "Version \\d+(?:\\.\\d+)? of the "
+  - "Version \\d+(?:\\.\\d+)? of "
