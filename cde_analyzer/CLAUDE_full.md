@@ -31,9 +31,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: phrase-curator (LLM-based phrase classification)
-
-**Main Branch**: main (stable)
+**Active Branch**: main (phrase-curator merged at v0.5.14)
 
 **Recent Work** (Last 30 days):
 - **v0.5.14: Temporal Case-Insensitive Split Pipeline**

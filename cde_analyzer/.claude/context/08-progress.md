@@ -1,10 +1,10 @@
 # Progress and Current State
 
-## Current Branch: phrase-curator
+## Current Branch: main
 
 **Focus**: Automated instrument/phrase stripping pipeline for CDE text normalization
 
-**Tracking**: origin/phrase-curator
+**Note**: phrase-curator branch merged into main at v0.5.14 (2026-02-12)
 
 **Version**: 0.5.14
 
@@ -40,18 +40,16 @@
 
 ## Branches
 
-### Active: phrase-curator (CURRENT)
-- **Purpose**: Full instrument + phrase stripping pipeline
-- **Contains**: All v0.5.x features (instrument pipeline, phrase pipeline, branching strip, temporal stripping, dedup, LLM classify)
+### Active: main (CURRENT)
+- **Contains**: All v0.5.x features merged from phrase-curator
 - **Status**: Phase 3 complete, ready for embedding/clustering evaluation
 
-### Main: main (stable baseline)
-- **Last sync**: Commit 328b48e
-- **Tracking**: origin/main
+### Retired: phrase-curator (merged at v0.5.14)
+- Merged into main on 2026-02-12
+- Remote branch preserved for history
 
 ## What Remains
 
 - **Priority 3 — LLM-assisted classification** (not started)
 - **Priority 4 — Field-aware stripping** (not started)
 - **Embedding evaluation** — run extract_embed on 5 branching-strip outputs
-- **Merge to main** — after full pipeline validation

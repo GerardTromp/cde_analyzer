@@ -241,20 +241,18 @@ Based on import analysis:
 
 ## Current State
 
-- **Active branch**: phrase-curator (LLM-based phrase classification)
-- **Previous branch**: feature/phrase-miner-kmer-detection (k-mer phrase mining - COMPLETE)
-- **Main branch**: Stable, recently updated
+- **Active branch**: main (phrase-curator merged at v0.5.14)
+- **Version**: 0.5.14
 - **Recent focus**:
-  - LLM-based phrase classification (Jan 2026)
-  - Multi-provider support (Claude, OpenAI, Gemini)
-  - Async architecture with rate limiting
-  - Comprehensive MkDocs documentation
+  - Temporal/curated split strip pipeline (Feb 2026)
+  - Universal temporal stripping with case-insensitive matching
+  - Whole-text dedup pre-pass in phrase miner
+  - 5-way branching strip pipeline
 
-**Latest Development** (2026-01-24):
-- Implemented new `llm_classify` action for multi-LLM phrase classification
-- Branch: phrase-curator
-- Status: Implementation complete (all 5 phases + documentation)
-- Commit: 10b7f13 "Implement llm_classify command for multi-LLM phrase classification"
+**Latest Development** (2026-02-12):
+- Split temporal/curated stripping in branching_strip.yaml (v0.5.14)
+- Universal temporal stripping, dedup pre-pass, 3 bug fixes (v0.5.13)
+- Empirical subsumption validation (v0.5.12)
 - Features:
   - Async LLM provider implementations (Claude, OpenAI, Gemini)
   - Modular query framework (instrument detection, temporal detection, instrument_family)
