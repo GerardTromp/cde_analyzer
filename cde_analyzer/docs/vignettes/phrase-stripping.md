@@ -859,9 +859,8 @@ cde-analyzer strip_phrases \
     --trace-matching trace.tsv
 ```
 
-The trace file logs every pattern tested against every record, showing which
-matched and which didn't. Note: this forces `--workers 1` (sequential mode)
-and produces large output.
+The trace file logs every match with timestamps. Trace logging is parallel-safe
+(entries are collected per-worker and merged by timestamp). Output can be large.
 
 ---
 
@@ -889,6 +888,87 @@ Start: You have CDE JSON and want to strip boilerplate
 
 ---
 
+## Scenario 7: Iterative Instrument Stripping with Residual Harvesting
+
+**Goal**: After an initial instrument strip, detect residual anchor patterns
+that escaped stripping, harvest them, and re-strip — converging to a clean
+output across multiple rounds.
+
+**When to use**: Production instrument stripping on large corpora (10k+ CDEs)
+where a single pass leaves residuals due to anchor-prefix mismatches or
+supplementary patterns not yet in the curated set.
+
+### The residual problem
+
+After stripping "Dizziness Handicap Inventory" from definitions, the
+sanity check may still find "the Dizziness Handicap Inventory" (29 occurrences)
+because the anchor prefix "the" wasn't expanded. Similarly, instrument
+sub-domains like "NIH Toolbox General Life Satisfaction" may be partially
+stripped, leaving "the General Life Satisfaction" as a residual.
+
+### The iterative pipeline
+
+```bash
+# In run_pipeline.sh (or equivalent):
+./run_pipeline.sh phase1_iterate 3   # max 3 rounds
+```
+
+Each iteration:
+
+1. **Strip** with current curated patterns
+2. **Sanity check** — find remaining anchor patterns (`diagnose_strip`
+   with `--emit-tinyids` and dynamic `--min-count`)
+3. **Harvest residuals** — cross-reference against curated patterns
+   (`pattern_util --harvest-residuals`)
+4. **Merge** harvested patterns into the curated set
+5. **Check convergence** — stop when no new residuals above threshold
+
+### Dynamic min-count threshold
+
+The `--min-count` for `diagnose_strip` scales with corpus size to avoid
+chasing low-frequency noise:
+
+```
+k = max(round(N * 0.0005), 5)
+```
+
+For N=22,743 CDEs: k=11. This filters patterns appearing fewer than 11 times,
+focusing effort on significant residuals.
+
+### Supplementary pattern management
+
+Residuals that aren't covered by the main coalesced patterns can be ingested
+into supplementary patterns for future runs:
+
+```bash
+# Harvest residuals into local supplementary_patterns.yaml
+cde-analyzer pattern_util --harvest-to-supplementary sanity_check.tsv
+
+# Review and curate the local file, then promote to codebase
+cde-analyzer pattern_util --promote-supplementary --clean-local
+```
+
+### Coalescer NP-continuity fix
+
+The coalescer's Phase 1b reverse subsumption ("roll-down") removes long
+patterns whose tinyIds are covered by a shorter base. This incorrectly
+drops instrument family sub-domains like "NIH Toolbox General Life
+Satisfaction" → "NIH Toolbox".
+
+The NP-continuity guard (v0.5.11) checks whether the extension beyond the
+base is a noun-phrase continuation (Title Case words, connectors). If so,
+both forms are kept:
+
+- "NIH Toolbox" + "NIH Toolbox General Life Satisfaction" → both kept
+- "Berg Balance Scale" + "Berg Balance Scale (or BBS), a clinical test..."
+  → clause boundary, roll-down is correct
+
+**Impact on allcde01**: Coalesced patterns increased from 417 to 604 (+325
+sub-domain patterns preserved). Residuals dropped from 8 to 5 unique
+patterns at k≥6.
+
+---
+
 ## Glossary
 
 | Term | Meaning |
@@ -901,6 +981,8 @@ Start: You have CDE JSON and want to strip boilerplate
 | **field profile** | Whether a pattern appears in definitions, designations, or both |
 | **verbatim pattern** | The exact surface form of a phrase as it appears in the text |
 | **subsumption** | When a shorter pattern's tinyIds are fully covered by longer patterns |
+| **reverse subsumption** | When a longer pattern's tinyIds are covered by a shorter base (greedy expansion removal) |
+| **NP-continuity** | Heuristic that checks whether text extending a base pattern is a noun-phrase continuation (Title Case words) vs. a clause boundary |
 | **tier splitting** | Dividing patterns into long (tier-1) and short (tier-2) for ordered stripping |
 | **variant expansion** | Generating temporal preposition/case/number/plural variants of curated patterns via `--expand-verbatim` |
 | **word boundary** | Regex `\b` anchor that requires a word break at the match boundary, preventing partial-word matches |

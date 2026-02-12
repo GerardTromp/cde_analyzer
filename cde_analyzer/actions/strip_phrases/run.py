@@ -18,6 +18,7 @@ from utils.file_utils import exit_if_missing, graceful_interrupt
 from pydantic import ValidationError
 from logic.phrase_stripper import (
     load_phrase_map, strip_phrases, set_trace_file, close_trace_file,
+    init_trace_log, write_trace_log, close_trace_log,
     init_match_log, write_match_log, close_match_log, get_match_log
 )
 from utils.diff_utils import print_json_diff
@@ -37,7 +38,7 @@ DEFAULT_PREFIXES = [f"{anchor} " for anchor in ANCHOR_PHRASE_REMNANTS]
 DEFAULT_SUFFIXES = [f" {suffix}" for suffix in TRAILING_SUFFIX_REMNANTS]
 
 
-def load_anchor_expansions() -> Tuple[List[str], List[str]]:
+def load_anchor_expansions() -> Tuple[List[str], List[str], List[str]]:
     """
     Load anchor expansion configuration from YAML files.
 
@@ -47,17 +48,20 @@ def load_anchor_expansions() -> Tuple[List[str], List[str]]:
       3. Local override: ./anchor_expansions.yaml in working directory
 
     Returns:
-        Tuple of (prefixes, suffixes) lists with leading/trailing spaces.
+        Tuple of (prefixes, suffixes, regex_prefixes) lists.
+        prefixes/suffixes have leading/trailing spaces.
+        regex_prefixes are raw regex strings (no auto-space).
     """
     import os
     try:
         import yaml
     except ImportError:
         logger.warning("PyYAML not installed, using built-in defaults for anchor expansion")
-        return DEFAULT_PREFIXES, DEFAULT_SUFFIXES
+        return DEFAULT_PREFIXES, DEFAULT_SUFFIXES, []
 
     prefixes = list(DEFAULT_PREFIXES)
     suffixes = list(DEFAULT_SUFFIXES)
+    regex_prefixes = []
 
     # Find config directory relative to this file
     this_dir = Path(__file__).parent.parent.parent  # actions/strip_phrases -> cde_analyzer
@@ -86,6 +90,10 @@ def load_anchor_expansions() -> Tuple[List[str], List[str]]:
                         for s in new_suffixes:
                             if s not in suffixes:
                                 suffixes.append(s)
+                    if 'regex_prefixes' in config and config['regex_prefixes']:
+                        for rp in config['regex_prefixes']:
+                            if rp not in regex_prefixes:
+                                regex_prefixes.append(rp)
                     configs_loaded.append(str(config_path))
             except Exception as e:
                 logger.warning(f"Error loading {config_path}: {e}")
@@ -95,13 +103,14 @@ def load_anchor_expansions() -> Tuple[List[str], List[str]]:
     else:
         logger.debug("Using built-in anchor expansion defaults")
 
-    return prefixes, suffixes
+    return prefixes, suffixes, regex_prefixes
 
 
 def expand_patterns_with_anchors(
     patterns: List[Tuple[str, Optional[Set[str]], str]],
     anchor_prefixes: Optional[List[str]] = None,
     anchor_suffixes: Optional[List[str]] = None,
+    regex_prefixes: Optional[List[str]] = None,
 ) -> List[Tuple[str, Optional[Set[str]], str, str]]:
     """
     Expand patterns with anchor prefixes and suffixes for cleaner stripping.
@@ -111,9 +120,13 @@ def expand_patterns_with_anchors(
       - prefix + pattern (no suffix)
       - pattern + suffix (no prefix)
       - pattern (bare)
+      - REGEX:regex_prefix + re.escape(pattern) (regex prefix variants)
 
     Expanded variants are sorted longest-first by the caller, so the most
     complete match wins (anchor context gets stripped along with the pattern).
+
+    Regex prefix variants are marked with "REGEX:" prefix so the matching
+    engine uses re.search() instead of literal substring matching.
 
     Args:
         patterns: List of (pattern, tinyIds, replace_with) tuples.
@@ -121,18 +134,23 @@ def expand_patterns_with_anchors(
                          Default: loaded from config files.
         anchor_suffixes: Optional list of suffixes (with leading space).
                          Default: loaded from config files.
+        regex_prefixes: Optional list of regex prefix strings.
+                        Default: loaded from config files.
 
     Returns:
         List of (pattern, tinyIds, replace_with, source_pattern) tuples.
         source_pattern indicates the original pattern (for logging).
+        Regex patterns are prefixed with "REGEX:" marker.
     """
     # Load from config if not provided
-    if anchor_prefixes is None or anchor_suffixes is None:
-        loaded_prefixes, loaded_suffixes = load_anchor_expansions()
+    if anchor_prefixes is None or anchor_suffixes is None or regex_prefixes is None:
+        loaded_prefixes, loaded_suffixes, loaded_regex = load_anchor_expansions()
         if anchor_prefixes is None:
             anchor_prefixes = loaded_prefixes
         if anchor_suffixes is None:
             anchor_suffixes = loaded_suffixes
+        if regex_prefixes is None:
+            regex_prefixes = loaded_regex
 
     # Normalize patterns: if a pattern ends with " -" (designation format
     # artifact like "Instrument (ACRONYM) -"), also generate a variant without
@@ -184,11 +202,24 @@ def expand_patterns_with_anchors(
             seen.add(pattern)
             expanded.append((pattern, tinyids, replace_with, source))
 
+        # Generate regex prefix + pattern variants (marked with REGEX:)
+        if regex_prefixes:
+            escaped_pattern = re.escape(pattern)
+            for rprefix in regex_prefixes:
+                regex_pattern = f"REGEX:{rprefix}{escaped_pattern}"
+                if regex_pattern not in seen:
+                    seen.add(regex_pattern)
+                    expanded.append((regex_pattern, tinyids, replace_with, source))
+
     n_prefixes = len(anchor_prefixes)
     n_suffixes = len(anchor_suffixes)
+    n_regex = len(regex_prefixes)
+    parts = [f"{n_prefixes} prefixes x {n_suffixes} suffixes + combinations"]
+    if n_regex:
+        parts.append(f"{n_regex} regex prefixes")
     logger.info(
         f"Anchor expansion: {len(patterns)} base patterns -> "
-        f"{len(expanded)} total ({n_prefixes} prefixes x {n_suffixes} suffixes + combinations)"
+        f"{len(expanded)} total ({', '.join(parts)})"
     )
     return expanded
 
@@ -619,11 +650,11 @@ def run_action(args: Namespace):
         source_map = {}  # No source tracking for legacy mode
         logger.info(f"Loaded {len(phrase_map)} phrase map entries from {args.phrases}")
 
-    # Enable trace output if requested
+    # Enable trace output if requested (parallel-safe in-memory collection)
     trace_file = getattr(args, 'trace_matching', None)
     if trace_file:
-        set_trace_file(trace_file)
-        logger.info(f"Writing matching trace to {trace_file}")
+        init_trace_log()
+        logger.info(f"Trace logging enabled -> {trace_file}")
 
     # Enable match log if requested (full audit trail or summary)
     match_log_file = getattr(args, 'match_log', None)
@@ -639,12 +670,6 @@ def run_action(args: Namespace):
     # Apply phrase stripping
     n_workers = getattr(args, 'workers', 1)
 
-    # Force sequential only for trace file (writes to single file, can't parallelize)
-    # Match logging now supports parallel execution with per-worker aggregation
-    if trace_file and n_workers != 1:
-        logger.warning(f"Trace file enabled: forcing sequential processing (workers=1 instead of {n_workers})")
-        n_workers = 1
-
     case_insensitive = getattr(args, 'ignore_case', False)
     if case_insensitive:
         logger.info("Case-insensitive matching enabled")
@@ -658,14 +683,15 @@ def run_action(args: Namespace):
         parsed, phrase_map, n_workers=n_workers,
         source_map=source_map, logging_enabled=logging_enabled,
         case_insensitive=case_insensitive,
-        word_boundary=word_boundary
+        word_boundary=word_boundary,
+        trace_enabled=bool(trace_file)
     )
     logger.info("Phrase stripping complete")
 
-    # Close trace file if open
+    # Write trace log if enabled (parallel-safe, sorted by timestamp)
     if trace_file:
-        close_trace_file()
-        logger.info(f"Trace file written to {trace_file}")
+        write_trace_log(trace_file)
+        close_trace_log()
 
     # Write match log and/or summary if enabled
     if logging_enabled:

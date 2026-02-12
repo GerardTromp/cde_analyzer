@@ -1,4 +1,4 @@
-# CDE Analyzer — Focused Context: Phase 2 Phrase Curation Automation
+# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.14)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -15,64 +15,65 @@ Entry point: `cde_analyzer.py`. Data models: Pydantic in `CDE_Schema/`.
 wsl -d Ubuntu-22.04 -- bash -c "cd /mnt/d/GT/Professional/NLM_CDE/clone_git/cde-clustering/cde_analyzer && source /mnt/d/GT/Professional/NLM_CDE/cde_python/py313_base/bin/activate && python cde_analyzer.py <action> [args]"
 ```
 
-## Current Task: Automate Phase 2 Phrase Curation
+## Pipeline Overview
 
-**Goal**: Convert the manual phrase curation process (documented in
-`scheuermann04/phase2_output/PROCESS_NOTES.md`) into automated `pattern_util`
-subcommands and potentially LLM-assisted classification.
+### Phase 1: Instrument Pipeline (`instrument_pipeline.yaml`)
+mine_instruments → discover_verbatim → coalesce → validate_subsumption → enrich_fields → [CURATOR] → generate_strip_patterns → strip_instruments
 
-### What Was Done Manually (scheuermann04)
+### Phase 2: Phrase Pipeline (`phrase_pipeline.yaml`)
+mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → strip_phrases → discovery_report
 
-1. k-mer mining → subsumption → coalescing (already automated)
-2. Field distribution analysis (function exists in `strip_discover/run.py`, needs CLI)
-3. Instrument residual removal (keyword regex + manual review)
-4. Minimum count filtering (>=6 in either field)
-5. Short pattern removal (<=2 tokens)
-6. Temporal pattern grouping (prefix-based, most labor-intensive)
-7. Coverage analysis (tinyId set subtraction)
-8. Field-aware sequential stripping (def pass, then desig pass)
+### Phase 3: Branching Strip (`branching_strip.yaml`)
+strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-### What Needs Implementation
+## Current State (v0.5.14)
 
-**Priority 1 — `pattern_util` enhancements**:
-- `--field-analysis` : Add field distribution columns (def_count, desig_count, field_profile) to a patterns TSV by scanning source JSON
-- `--min-field-count N` : Filter patterns below threshold in both fields
-- `--min-tokens N` : Filter patterns with fewer than N tokens
-- `--exclude-patterns FILE` : Remove patterns matching entries in exclusion list
+### Implemented — Phrase Curation Automation
+- **`--field-analysis`**: Adds def_count, desig_count, field_profile columns + example CDE columns
+- **`--min-field-count N`**, **`--min-tokens N`**, **`--exclude-patterns FILE`**: Filtering
+- **`--validate-subsumption`**: Empirical post-coalescing validation (parallelized)
+- **`--expand-temporal-seeds`**: Universal temporal stripping from 25 seed patterns (~2100 variants)
+- **`--merge-patterns`**: Combine/deduplicate pattern TSV files
+- **`--dedup`** in phrase_miner: Identifies whole-text duplicates exceeding k_max
+- **Split temporal/curated stripping**: Temporal patterns stripped case-insensitively in dedicated pass before case-sensitive curated phrase stripping
 
-**Priority 2 — Temporal pattern automation**:
-- `--group-temporal` : Detect temporal phrases via regex, group by prefix, merge tinyIds
-- Temporal regex: `(in|over|during|for|within) the (past|last) \d+ (days?|weeks?|months?|years?)`
+### Dedup Design (refined)
+- Stage 0a: Hash field texts, group identical strings shared by N+ CDEs
+- Stage 0b: Only emit phrases with **tokens > k_max** (unreachable by k-mer mining)
+- **No masking** — sub-phrases within dedup'd texts remain visible to k-mer mining
+- Short duplicates found naturally by k-mer mining
+- Output: separate `dedup_phrases.tsv` curation template (not in regular phrase output)
+- allcde01: 1003 shared texts → 4 dedup phrases (>25 tokens), 13640 k-mer phrases
 
-**Priority 3 — LLM-assisted classification**:
-- Use `llm_classify` infrastructure to classify remaining patterns
-- Categories: temporal_boilerplate, definition_template, lab_nomenclature, instrument_residual, content_bearing
-- Could replace manual steps 3-6 entirely
+### What Remains
+- **Priority 3 — LLM-assisted classification** (not started):
+  - Use `llm_classify` infrastructure to classify remaining patterns
+  - Categories: temporal_boilerplate, definition_template, lab_nomenclature, instrument_residual, content_bearing
+- **Priority 4 — Field-aware stripping** (not started):
+  - `--split-by-field` or field_profile-aware strip_phrases
 
-**Priority 4 — Field-aware stripping workflow**:
-- `--split-by-field` on pattern_util: split TSV into def-only and desig-only files
-- Or: teach `strip_phrases` to accept a `field_profile` column and route patterns to correct fields
-
-## Key Files for This Task
+## Key Files
 
 ### Source Code (cde_analyzer/)
 - `actions/pattern_util/cli.py` — CLI definitions for pattern_util
-- `actions/pattern_util/run.py` — pattern_util orchestration
-- `actions/strip_discover/run.py` — contains `compute_field_distribution()` (lines 26-94) and `_field_profile()` (lines 97-108) — **move or reuse these**
+- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds)
+- `actions/phrase_miner/run.py` — phrase miner runner + `write_dedup_curation_tsv()`
+- `logic/phrase_miner.py` — core mining: `dedup_field_texts()`, `mine_phrases()`, k-mer loop, masking
+- `actions/strip_discover/run.py` — `compute_field_distribution()`, `build_field_text_index()`
 - `actions/strip_phrases/run.py` — stripping engine
-- `logic/verbatim_discoverer.py` — `_extract_at_path()` helper
-- `utils/pattern_tsv_utils.py` — shared TSV loading
-- `actions/llm_classify/` — LLM classification infrastructure
+- `utils/instrument_extractor.py` — instrument name extraction
+- `utils/flexible_pattern_matcher.py` — coalescer (Phase 1a prefix-kept, Phase 1b NP-continuity)
+- `config/temporal_seed_patterns.yaml` — 25 temporal seed patterns (~2100 expanded variants)
+- `utils/pattern_variant_generator.py` — temporal/case/number/plural variant generators
 
-### Data (scheuermann04/)
-- `phase2_output/PROCESS_NOTES.md` — **detailed process documentation with automation recommendations**
-- `phase2_output/manual_coalesce_fields.tsv` — 11 manually curated patterns (ground truth)
-- `phase2_output/coalesced_min6_remaining.tsv` — 59 patterns needing classification
-- `phase2_output/residual_instruments.tsv` — 13 instrument patterns to exclude
-- `phase1_output/no_instruments_stripped_byhand.json` — input JSON (1148 CDEs)
+### Workflows
+- `workflows/instrument_pipeline.yaml` — Phase 1
+- `workflows/phrase_pipeline.yaml` — Phase 2
+- `workflows/branching_strip.yaml` — Phase 3 (5-way branch)
 
-### Workflow
-- `workflows/phrase_pipeline.yaml` — existing phrase pipeline (may need updates)
+### Data (allcde01/)
+- `phase1_output/inst_stripped.json` — instrument-stripped JSON (22,743 CDEs)
+- `phase2_output/` — phrase pipeline output (in progress)
 
 ## Architecture Reminders
 
@@ -80,14 +81,18 @@ subcommands and potentially LLM-assisted classification.
 - **Lazy loading**: All imports inside functions
 - **Pattern TSV format**: `pattern\ttinyIds\ttype\tsource_pattern` + optional field columns
 - **Field paths**: `definitions.*.definition`, `designations.*.designation`
-- **strip_phrases --fields**: Controls which fields get stripped (key for field-aware stripping)
+- **K-mer mining**: Descending (k_max → k_min), masks detected phrases after each k
+- **Dedup**: Identification only (no masking), separate curation template, >k_max filter
 
-## Existing `pattern_util` Capabilities
+## `pattern_util` Capabilities
 
 ```bash
-cde-analyzer pattern_util --coalesce-variants FILE -o OUT   # subsumption + prefix extraction
-cde-analyzer pattern_util --merge-patterns FILE FILE -o OUT  # deduplicate/merge
-cde-analyzer pattern_util --add-to-supplementary FILE        # import to config
+cde-analyzer pattern_util --coalesce-variants FILE -o OUT         # subsumption + prefix trie
+cde-analyzer pattern_util --merge-patterns FILE FILE -o OUT       # deduplicate/merge TSVs
+cde-analyzer pattern_util --field-analysis FILE --input JSON -o OUT  # add field counts
+cde-analyzer pattern_util --validate-subsumption FILE --input JSON -o OUT  # empirical validation
+cde-analyzer pattern_util --expand-temporal-seeds -o OUT          # temporal seed expansion
+cde-analyzer pattern_util --harvest-to-supplementary FILE         # ingest to local supplementary
+cde-analyzer pattern_util --promote-supplementary                 # promote to global config
+cde-analyzer pattern_util --edit FILE                             # browser-based TSV editor
 ```
-
-New subcommands should follow the same pattern: `--flag FILE` with `-o OUT`.

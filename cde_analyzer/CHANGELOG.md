@@ -5,6 +5,92 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.14] - 2026-02-12
+
+### Fixed
+- Temporal phrases not fully stripped due to case mismatches — title-case
+  ("Past 7 Days") and ALL-CAPS ("LAST 4 WEEKS") forms in designations were
+  missed by case-sensitive matching
+- Split `branching_strip.yaml` into separate temporal (case-insensitive) and
+  curated phrase (case-sensitive) stripping passes — temporal patterns now
+  stripped with `--ignore-case` in a dedicated pass before curated phrases
+- Added bare ("Past 7 days") and article-only ("The past 7 days") temporal
+  variant forms to `generate_temporal_preposition_variants()` — catches
+  designations that omit the preposition prefix
+- Added 5 new temporal seed patterns: 90 days, 12 weeks, 3 weeks, 48 hours,
+  8 hours — covers all remaining temporal forms in allcde01 (25 seeds total,
+  ~2100 expanded variants)
+
+### Changed
+- `branching_strip.yaml` restructured from 8 to 10 steps: 3 temporal strip
+  steps (case-insensitive) + 3 curated phrase strip steps (case-sensitive),
+  replacing the previous merged-pattern approach
+- Removed `merge_temporal_phrases` step — no longer needed since temporal and
+  curated patterns are stripped in separate passes
+- `config/temporal_seed_patterns.yaml` expanded from 20 to 25 seed patterns
+- Temporal variant expansion now generates ~2100 variants (up from ~1200)
+
+## [0.5.13] - 2026-02-11
+
+### Added
+- Universal temporal phrase stripping via `pattern_util --expand-temporal-seeds`
+  - `config/temporal_seed_patterns.yaml` — 20 seed patterns covering all observed temporal frames
+  - Expands to ~1200 variants via temporal preposition/tense/case/number/plural generators
+  - Integrated into `branching_strip.yaml` — auto-expands and merges with curated phrase patterns
+  - Covers all 59 temporal phrases (664 tinyIds) detected in allcde01 strip report
+- Whole-text dedup pre-pass in `phrase_miner`
+  - `--dedup` (default: enabled) — hashes field texts shared by N+ CDEs
+  - Only emits phrases exceeding `k_max` tokens (unreachable by k-mer mining)
+  - Shorter duplicates left to k-mer mining — no masking, no lost sub-phrase counts
+  - Outputs separate `dedup_phrases.tsv` curation template (not mixed into regular output)
+  - `--dedup-min-count N` (default: 2) and `--dedup-min-tokens N` (default: 3)
+  - `--no-dedup` to disable
+
+### Fixed
+- Workflow engine list argument handling — `build_action_args()` now emits a single
+  `--flag val1 val2` instead of `--flag val1 --flag val2`, fixing argparse `nargs="+"`
+  last-wins behavior that silently dropped earlier values (e.g., `--merge-patterns`
+  only loaded the last file, discarding curated phrases)
+- Phrase stripping performance — pre-compile regex patterns once via
+  `_compile_pattern_cache()` instead of re-compiling per match (~28x speedup);
+  combined with `no_expand_anchors` for phrase steps (178x fewer patterns),
+  reduces phrase strip from ~5 hours to ~13 seconds per step
+- Phrase strip steps in `branching_strip.yaml` now set `no_expand_anchors: true` —
+  anchor expansion (instrument-style "from X" / "X -" prefixes/suffixes) is
+  unnecessary for self-contained phrase/temporal patterns
+
+### Changed
+- `branching_strip.yaml` now includes `expand_temporal` and `merge_temporal_phrases` steps
+  before phrase stripping branches
+- Phrase strip branches use merged temporal + curated patterns instead of curated-only
+
+## [0.5.12] - 2026-02-11
+
+### Added
+- `pattern_util --validate-subsumption` — empirical post-coalescing validation
+  - Checks source text per-tinyId per-field to determine which patterns are actually needed
+  - Drops shorter patterns whose occurrences are always covered by longer group members
+  - Parallelized with `ProcessPoolExecutor`, greedy bin packing by tinyId count
+  - `--workers N` flag (0 = sequential); sequential and parallel produce identical output
+- Example CDE columns in `--field-analysis` enriched output
+  - `example_name` (designation[0]), `example_question` (designation[1]), `example_definition` (definition[0])
+  - Inserted after `pattern` column; text truncated to 120 chars
+  - Idempotent: re-runs strip old example columns before adding new ones
+- NUMERIC_WORD support in instrument extractor
+  - Standalone numbers now recognized in instrument names (e.g., "Trial of ORG 10172 in Acute Stroke Treatment")
+  - `_is_valid_instrument_name()` counts digit words as correct
+
+### Fixed
+- Coalescer trailing-punctuation trie bug: "Well-Being" and "Well-Being." no longer split into separate trie branches
+  - Phase 2 prefix trie now normalizes trailing punctuation (`.,;:!?`) before token insertion
+  - Group key computation uses punctuation-aware word comparison
+  - ~15 patterns now preserve full names that were previously truncated (e.g., "Neuro-QOL Positive Affect and Well-Being", "Los Angeles Motor Scale", "NIH Toolbox Cognitive Battery")
+
+### Changed
+- `validate_subsumption` step added to `instrument_pipeline.yaml` between `coalesce_patterns` and `enrich_fields`
+- `enrich_fields` now reads `validated.tsv` instead of `coalesced.tsv`
+- `build_field_text_index()` extracted from `compute_field_distribution()` in `strip_discover/run.py` for reuse
+
 ## [0.5.6] - 2026-02-10
 
 ### Added

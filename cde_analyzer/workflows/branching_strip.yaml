@@ -7,6 +7,10 @@
 #   4. both_full_stripped.json  — full instrument + phrase removal
 #   5. both_sub_stripped.json   — sub-group instrument + phrase removal
 #
+# Temporal phrases are automatically expanded from seed patterns in
+# config/temporal_seed_patterns.yaml and stripped case-insensitively in a
+# separate pass before curated phrase patterns (stripped case-sensitively).
+#
 # Prerequisites:
 #   - Curated instrument patterns processed through --generate-strip-patterns
 #     to produce {inst_patterns_base}_full.tsv and {inst_patterns_base}_sub.tsv
@@ -18,6 +22,10 @@
 #       --set output_dir=/path/to/output \
 #       --set inst_patterns_base=/path/to/inst_patterns \
 #       --set phrase_patterns=/path/to/curated_phrases.tsv
+#
+# Temporal patterns are stripped case-insensitively (--ignore-case) to catch
+# title-case and ALL-CAPS forms in designations. Curated phrase patterns are
+# stripped case-sensitively (verbatim expansion ensures controlled matching).
 #
 # Phrase stripping uses --word-boundary to prevent partial-word matches
 # (e.g. "past 7 day" matching inside "past 7 days") and --clean-remnants
@@ -41,6 +49,14 @@ variables:
 
   # Phrase patterns (curated TSV with pattern + tinyIds columns)
   phrase_patterns: "${PHRASE_PATTERNS}"
+
+  # Temporal expansion (auto-generated from config seeds)
+  temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
+
+  # Intermediate files (temporal-stripped, before curated phrase strip)
+  temporal_phrase_tmp: "${output_dir}/.temporal_phrase_tmp.json"
+  temporal_both_full_tmp: "${output_dir}/.temporal_both_full_tmp.json"
+  temporal_both_sub_tmp: "${output_dir}/.temporal_both_sub_tmp.json"
 
   # Output files
   inst_full_json: "${output_dir}/inst_full_stripped.json"
@@ -70,41 +86,102 @@ steps:
       output: "${inst_sub_json}"
       workers: "${workers}"
 
-  # Branch 3: Phrase-only removal (no instrument stripping)
+  # Expand temporal seed patterns from config
+  - name: expand_temporal
+    action: pattern_util
+    args:
+      expand_temporal_seeds: true
+      output: "${temporal_expanded_tsv}"
+
+  # ---- Temporal stripping (case-insensitive) ----
+  # Temporal patterns stripped separately with --ignore-case to catch
+  # title-case ("Past 7 Days") and ALL-CAPS ("LAST 4 WEEKS") forms.
+  # No anchor expansion needed (temporal patterns are self-contained).
+
+  # Branch 3a: Temporal strip on raw input (for phrase-only branch)
+  - name: strip_temporal_phrase
+    action: strip_phrases
+    args:
+      patterns: "${temporal_expanded_tsv},pattern"
+      input: "${input_json}"
+      model: "${model}"
+      output: "${temporal_phrase_tmp}"
+      workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+      no_expand_anchors: true
+      ignore_case: true
+
+  # Branch 4a: Temporal strip on full-instrument-stripped input
+  - name: strip_temporal_both_full
+    action: strip_phrases
+    args:
+      patterns: "${temporal_expanded_tsv},pattern"
+      input: "${inst_full_json}"
+      model: "${model}"
+      output: "${temporal_both_full_tmp}"
+      workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+      no_expand_anchors: true
+      ignore_case: true
+
+  # Branch 5a: Temporal strip on sub-instrument-stripped input
+  - name: strip_temporal_both_sub
+    action: strip_phrases
+    args:
+      patterns: "${temporal_expanded_tsv},pattern"
+      input: "${inst_sub_json}"
+      model: "${model}"
+      output: "${temporal_both_sub_tmp}"
+      workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+      no_expand_anchors: true
+      ignore_case: true
+
+  # ---- Curated phrase stripping (case-sensitive) ----
+  # Curated phrases use verbatim expansion for controlled matching.
+  # No anchor expansion needed (phrase patterns are self-contained).
+
+  # Branch 3b: Curated phrases on temporal-stripped input
   - name: strip_phrase_only
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${input_json}"
+      input: "${temporal_phrase_tmp}"
       model: "${model}"
       output: "${phrase_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
-  # Branch 4: Full instrument + phrases
+  # Branch 4b: Curated phrases on full-instrument + temporal-stripped input
   - name: strip_both_full
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${inst_full_json}"
+      input: "${temporal_both_full_tmp}"
       model: "${model}"
       output: "${both_full_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
-  # Branch 5: Sub-group instrument + phrases
+  # Branch 5b: Curated phrases on sub-instrument + temporal-stripped input
   - name: strip_both_sub
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${inst_sub_json}"
+      input: "${temporal_both_sub_tmp}"
       model: "${model}"
       output: "${both_sub_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
   # Quality report — scans all stripped outputs for detritus and remnants
   - name: quality_report

@@ -591,11 +591,11 @@ logger.info(f"Aggregated {len(all_matches)} entries from {n_workers} workers")
 1. Reset per-chunk state at start (workers may be reused for multiple chunks)
 2. Extend return tuple to include any data needing aggregation
 3. Use initializer to pass shared read-only data (phrase_map, config)
-4. For streaming output (trace files), fall back to sequential mode
+4. Collect entries in per-worker memory, aggregate after completion
 
 **Used By**:
 - `strip_phrases --match-log` and `--match-summary` (parallel-safe)
-- `strip_phrases --trace-matching` forces sequential (streaming file writes)
+- `strip_phrases --trace-matching` (parallel-safe, entries merged by timestamp)
 
 ---
 

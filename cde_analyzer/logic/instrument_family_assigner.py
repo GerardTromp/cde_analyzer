@@ -346,12 +346,16 @@ class InstrumentFamilyAssigner:
         """
         fieldnames = ["instrument_id", "pattern", "family_full_match", "tinyids"]
 
-        # Reuse the same verbatim grouping logic
+        # Group by (normalized_name, full_match) so each distinct verbatim
+        # form gets its own row.  The old key (normalized_name, instrument_name)
+        # silently dropped variants with different full_match but the same
+        # canonical instrument_name (e.g., "version 1.0 of 36-item SF-36"
+        # was lost when "version 2.0 of 12-item SF-12" was written first).
         verbatim_groups: Dict[str, Dict] = {}
 
         for normalized_name, matches in catalog.instruments.items():
             for match in matches:
-                verbatim_key = (normalized_name, match.instrument_name)
+                verbatim_key = (normalized_name, match.full_match)
                 if verbatim_key not in verbatim_groups:
                     family_full_match = match.full_match
                     if match.family_display_name and match.instrument_name:

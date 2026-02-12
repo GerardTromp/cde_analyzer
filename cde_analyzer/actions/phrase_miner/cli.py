@@ -123,6 +123,32 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         help="Use naive pattern matching instead of Aho-Corasick (slower, for debugging)"
     )
+    subparser.add_argument(
+        "--dedup",
+        action="store_true",
+        default=True,
+        help="Enable whole-text dedup pre-pass before k-mer mining (default: enabled). "
+             "Detects field texts shared by multiple CDEs and emits them as phrases, "
+             "then masks them to prevent redundant k-mer fragment detection.",
+    )
+    subparser.add_argument(
+        "--no-dedup",
+        dest="dedup",
+        action="store_false",
+        help="Disable whole-text dedup pre-pass.",
+    )
+    subparser.add_argument(
+        "--dedup-min-count",
+        type=int,
+        default=2,
+        help="Minimum CDEs sharing identical text for dedup emission (default: 2).",
+    )
+    subparser.add_argument(
+        "--dedup-min-tokens",
+        type=int,
+        default=3,
+        help="Minimum tokens in dedup text to emit as phrase (default: 3).",
+    )
 
     # Verbatim output options
     subparser.add_argument(

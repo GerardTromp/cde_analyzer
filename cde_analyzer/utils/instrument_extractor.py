@@ -33,6 +33,44 @@ logger = logging.getLogger(__name__)
 # Cached supplementary patterns (loaded lazily from config file)
 _supplementary_patterns_cache: Optional[List[Tuple[str, str, Optional[str]]]] = None
 
+# Cached English word set for acronym disambiguation
+_english_words_cache: Optional[Set[str]] = None
+
+
+def _load_english_words() -> Set[str]:
+    """
+    Load short English words for filtering bare acronym matches.
+
+    Short all-caps supplementary patterns (e.g., "FPI") are matched bare
+    (without anchors). To avoid false positives, patterns that are also
+    common English words (e.g., "ACE", "AID") are excluded from bare
+    matching and require an anchor prefix.
+
+    Returns cached set of lowercase words (2-5 letters).
+    """
+    global _english_words_cache
+    if _english_words_cache is not None:
+        return _english_words_cache
+
+    words: Set[str] = set()
+    for path in ['/usr/share/dict/words', '/usr/share/dict/american-english']:
+        try:
+            with open(path) as f:
+                for line in f:
+                    word = line.strip().lower()
+                    if 2 <= len(word) <= 5 and word.isalpha():
+                        words.add(word)
+            break
+        except FileNotFoundError:
+            continue
+
+    _english_words_cache = words
+    if words:
+        logger.debug(f"Loaded {len(words)} short English words for acronym filtering")
+    else:
+        logger.debug("No system dictionary found; acronym word filtering disabled")
+    return words
+
 
 def get_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
     """
@@ -512,9 +550,13 @@ class InstrumentExtractor:
     # e.g., "of", "and", "for", "the", "in", "on", "to", "a"
     CONNECTOR_WORD = r'[a-z]+'
 
-    # Any word in instrument name: ALL CAPS, Title Case, or lowercase connector
+    # Standalone number: trial identifiers, version numbers embedded in names
+    # e.g., "10172" in "Trial of ORG 10172 in Acute Stroke Treatment"
+    NUMERIC_WORD = r'\d+'
+
+    # Any word in instrument name: ALL CAPS, Title Case, lowercase connector, or number
     # IMPORTANT: ALL_CAPS_WORD must come FIRST so "TBI" matches as ALL_CAPS, not "T" as Title Case
-    INSTRUMENT_WORD = rf'(?:{ALL_CAPS_WORD}|{TITLE_CASE_WORD}|{CONNECTOR_WORD})'
+    INSTRUMENT_WORD = rf'(?:{ALL_CAPS_WORD}|{TITLE_CASE_WORD}|{CONNECTOR_WORD}|{NUMERIC_WORD})'
 
     # Instrument name: sequence starting with a capitalized word, followed by more words
     # Can start with ALL CAPS OR Title Case to handle names like "PTSD Checklist"
@@ -651,7 +693,10 @@ class InstrumentExtractor:
             word_lower = word.lower()
             alpha_part = ''.join(c for c in word if c.isalpha())
 
-            if word_lower in self.MINOR_WORDS:
+            if word.isdigit():
+                # Numeric word (e.g., "10172" in trial identifiers): neutral, count as correct
+                correct_count += 1
+            elif word_lower in self.MINOR_WORDS:
                 # Minor word: correct if lowercase (as expected in Title Case)
                 correct_count += 1
             elif alpha_part and len(alpha_part) >= 2 and alpha_part.isupper():
@@ -725,6 +770,9 @@ class InstrumentExtractor:
         These patterns were discovered in the CDE corpus but use non-standard
         capitalization (e.g., "as part of Partition test" with lowercase "test").
 
+        Supports both literal anchor prefixes and regex anchor prefixes
+        (e.g., "version \\d+(?:\\.\\d+)? of") loaded from anchor_expansions.yaml.
+
         Args:
             text: Source text to scan
             tinyId: Optional CDE identifier for tracking
@@ -737,22 +785,59 @@ class InstrumentExtractor:
             return []
 
         matches = []
+        seen_spans = set()  # Deduplicate by char_span
 
         # Load patterns from config file (cached)
         supplementary_patterns = get_supplementary_patterns()
         if not supplementary_patterns:
             return matches
 
-        # Build patterns with anchor prefixes
+        # Load regex prefixes from anchor config (lazy import to avoid circular)
+        regex_prefixes = self._get_regex_prefixes()
+
+        # Build patterns with anchor prefixes + bare matching
+        text_lower = text.lower()
         for pattern_text, display_name, acronym in supplementary_patterns:
-            # Match with various anchor prefixes (case-insensitive for anchor)
+            pattern_lower = pattern_text.lower()
+
+            # Guard: skip bare matching for short all-caps patterns that
+            # are common English words (e.g., "ACE" → false positives).
+            # Non-words like "FPI" are fine to match bare.
+            skip_bare = False
+            if (len(pattern_text) <= 5 and pattern_text.isalpha()
+                    and pattern_text.isupper()):
+                words = _load_english_words()
+                if words and pattern_lower in words:
+                    skip_bare = True
+                    logger.debug(
+                        f"Bare match disabled for '{pattern_text}' "
+                        f"(common English word; anchor required)")
+
+            # Match bare (no anchor) — supplementary patterns are manually
+            # curated instruments, so bare matching is safe for non-words
+            if not skip_bare:
+                idx = text_lower.find(pattern_lower)
+                if idx >= 0 and (idx, idx + len(pattern_text)) not in seen_spans:
+                    seen_spans.add((idx, idx + len(pattern_text)))
+                    actual_match = text[idx:idx + len(pattern_text)]
+                    match = InstrumentMatch(
+                        full_match=actual_match,
+                        instrument_name=display_name,
+                        acronym=acronym,
+                        char_span=(idx, idx + len(actual_match)),
+                        tinyId=tinyId,
+                        field_path=field_path
+                    )
+                    matches.append(match)
+
+            # Also match with anchor prefixes (catches longer spans)
             for anchor in ['as part of ', 'as a part of ', 'based on ', 'field of ']:
-                # Also try with "the " after anchor
                 for the_prefix in ['', 'the ']:
                     full_pattern = anchor + the_prefix + pattern_text
                     # Case-insensitive search for the full pattern
                     idx = text.lower().find(full_pattern.lower())
-                    if idx >= 0:
+                    if idx >= 0 and (idx, idx + len(full_pattern)) not in seen_spans:
+                        seen_spans.add((idx, idx + len(full_pattern)))
                         # Extract actual matched text (preserving original case)
                         actual_match = text[idx:idx + len(full_pattern)]
                         match = InstrumentMatch(
@@ -765,7 +850,37 @@ class InstrumentExtractor:
                         )
                         matches.append(match)
 
+            # Match with regex anchor prefixes (e.g., version patterns)
+            if regex_prefixes:
+                escaped_pattern = re.escape(pattern_text)
+                for rprefix in regex_prefixes:
+                    full_regex = rprefix + escaped_pattern
+                    m = re.search(full_regex, text, re.IGNORECASE)
+                    if m and (m.start(), m.end()) not in seen_spans:
+                        seen_spans.add((m.start(), m.end()))
+                        actual_match = m.group(0)
+                        match = InstrumentMatch(
+                            full_match=actual_match,
+                            instrument_name=display_name,
+                            acronym=acronym,
+                            char_span=(m.start(), m.end()),
+                            tinyId=tinyId,
+                            field_path=field_path
+                        )
+                        matches.append(match)
+
         return matches
+
+    def _get_regex_prefixes(self) -> List[str]:
+        """Load regex prefixes from anchor config (cached on class)."""
+        if not hasattr(self, '_regex_prefixes_cache'):
+            try:
+                from actions.strip_phrases.run import load_anchor_expansions
+                _, _, regex_prefixes = load_anchor_expansions()
+                self._regex_prefixes_cache = regex_prefixes
+            except Exception:
+                self._regex_prefixes_cache = []
+        return self._regex_prefixes_cache
 
     def compute_token_spans(
         self,

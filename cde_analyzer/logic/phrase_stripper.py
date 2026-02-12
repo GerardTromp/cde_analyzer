@@ -2,6 +2,7 @@ import json
 import csv
 import re
 import os
+import time
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any, List, Tuple, Type, Optional, Set
@@ -24,6 +25,35 @@ _source_map_global: Optional[dict] = None
 _logging_enabled_global: bool = False
 _case_insensitive_global: bool = False
 _word_boundary_global: bool = False
+_compiled_patterns_global: Optional[dict] = None  # {phrase: compiled_regex}
+
+
+def _compile_pattern_cache(
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]],
+    word_boundary: bool,
+    case_insensitive: bool,
+) -> dict:
+    """Pre-compile regex patterns for all phrases in the phrase map.
+
+    Returns a dict mapping phrase string -> compiled re.Pattern.
+    Called once per worker init (or once for sequential mode) to avoid
+    repeated re.search() compilations in the hot loop.
+    """
+    cache = {}
+    regex_flags = re.IGNORECASE if case_insensitive else 0
+    for _path, phrase, _replace, _tinyids in phrase_map:
+        if phrase in cache:
+            continue
+        if phrase.startswith('REGEX:'):
+            raw = phrase[6:]
+            cache[phrase] = re.compile(raw, regex_flags)
+        elif word_boundary or case_insensitive:
+            escaped = re.escape(phrase)
+            if word_boundary:
+                escaped = r'\b' + escaped + r'\b'
+            cache[phrase] = re.compile(escaped, regex_flags)
+        # Plain substring phrases don't need compilation
+    return cache
 
 
 # Modify to always expect replacement even if empty string
@@ -189,8 +219,11 @@ def _recurse_and_replace(
         )
 
 
-# Module-level trace file for detailed matching diagnostics
+# Module-level trace file for detailed matching diagnostics (legacy sequential)
 _trace_file = None
+
+# Module-level trace log for parallel-safe diagnostics (in-memory collection)
+_trace_log: Optional[list] = None
 
 # Module-level match log for full audit trail
 _match_log: Optional[list] = None
@@ -216,6 +249,50 @@ def close_trace_file():
     if _trace_file:
         _trace_file.close()
         _trace_file = None
+
+
+def init_trace_log():
+    """Initialize in-memory trace logging (parallel-safe)."""
+    global _trace_log
+    _trace_log = []
+
+
+def get_trace_log() -> list:
+    """Return collected trace log entries."""
+    return _trace_log if _trace_log else []
+
+
+def write_trace_log(filepath: str):
+    """
+    Write aggregated trace log to file, sorted by timestamp.
+
+    Entries from parallel workers are interleaved by timestamp to produce
+    a single chronologically ordered trace file.
+    """
+    global _trace_log
+    if not _trace_log:
+        logger.warning("No trace log entries to write")
+        return
+
+    sorted_entries = sorted(_trace_log, key=lambda e: e.get('ts', 0.0))
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write("# Phrase Stripping Trace Log\n")
+        f.write("# Format: timestamp\tMATCH\ttinyId\tphrase_len\tphrase[:50]\n\n")
+        for entry in sorted_entries:
+            ts = entry.get('ts', 0.0)
+            f.write(
+                f"{ts:.6f}\tMATCH\t{entry.get('tinyId', '-')}\t"
+                f"{entry.get('phrase_len', 0)}\t{entry.get('phrase_preview', '')}\n"
+            )
+
+    logger.info(f"Wrote {len(sorted_entries)} trace entries to {filepath}")
+
+
+def close_trace_log():
+    """Clear trace log state."""
+    global _trace_log
+    _trace_log = None
 
 
 def init_match_log(source_map: Optional[dict] = None):
@@ -279,18 +356,35 @@ def _replace_if_match(
     Args:
         container: Dict or list containing the value
         key_or_index: Key (for dict) or index (for list)
-        phrase: Phrase to find and replace
+        phrase: Phrase to find and replace. If prefixed with "REGEX:",
+                the remainder is treated as a raw regex pattern.
         replace_with: Replacement string
         tiny_id: Optional tinyId for trace output
     """
     global _trace_file, _match_log, _source_map, _case_insensitive_global, _word_boundary_global
+    global _compiled_patterns_global
     try:
         value = container[key_or_index]
         if isinstance(value, str):
-            # Build regex flags for word-boundary and case-insensitive modes
-            use_regex = _word_boundary_global or _case_insensitive_global
+            # Check for raw regex marker (from regex anchor expansion)
+            is_raw_regex = phrase.startswith('REGEX:')
 
-            if use_regex:
+            # Use pre-compiled pattern if available
+            compiled = _compiled_patterns_global.get(phrase) if _compiled_patterns_global else None
+
+            if compiled is not None:
+                match_obj = compiled.search(value)
+                found = match_obj is not None
+                use_regex = True
+            elif is_raw_regex:
+                # Raw regex pattern — use as-is (no re.escape)
+                pattern_str = phrase[6:]
+                regex_flags = re.IGNORECASE if _case_insensitive_global else 0
+                match_obj = re.search(pattern_str, value, flags=regex_flags)
+                found = match_obj is not None
+                use_regex = True
+            elif _word_boundary_global or _case_insensitive_global:
+                # Literal phrase with word-boundary/case-insensitive flags
                 regex_flags = 0
                 if _case_insensitive_global:
                     regex_flags |= re.IGNORECASE
@@ -299,8 +393,10 @@ def _replace_if_match(
                     pattern_str = r'\b' + pattern_str + r'\b'
                 match_obj = re.search(pattern_str, value, flags=regex_flags)
                 found = match_obj is not None
+                use_regex = True
             else:
                 found = phrase in value
+                use_regex = False
 
             if found:
                 log_if_verbose(f"Replacing phrase in path: {key_or_index}", 3)
@@ -308,34 +404,52 @@ def _replace_if_match(
                 # Capture verbatim text (context around the match) before replacement
                 if use_regex:
                     idx = match_obj.start()
+                    match_len = match_obj.end() - match_obj.start()
                 else:
                     idx = value.find(phrase)
+                    match_len = len(phrase)
                 start = max(0, idx - 20)
-                end = min(len(value), idx + len(phrase) + 20)
+                end = min(len(value), idx + match_len + 20)
                 verbatim = value[start:end]
                 if start > 0:
                     verbatim = "..." + verbatim
                 if end < len(value):
                     verbatim = verbatim + "..."
 
-                # Regex mode (word-boundary and/or case-insensitive); otherwise plain str.replace
+                # Regex mode or plain str.replace
                 if use_regex:
-                    result = sanitize(re.sub(pattern_str, replace_with, value, flags=regex_flags))
+                    if compiled is not None:
+                        result = sanitize(compiled.sub(replace_with, value))
+                    else:
+                        result = sanitize(re.sub(pattern_str, replace_with, value, flags=regex_flags))
                 else:
                     result = sanitize(value.replace(phrase, replace_with))
                 container[key_or_index] = result
 
+                # For logging, strip REGEX: marker for cleaner display
+                display_phrase = phrase[6:] if is_raw_regex else phrase
+
                 # Trace output for diagnosis
                 if _trace_file:
-                    phrase_preview = phrase[:50] + "..." if len(phrase) > 50 else phrase
-                    _trace_file.write(f"MATCH\t{tiny_id or '-'}\t{len(phrase)}\t{phrase_preview}\n")
+                    phrase_preview = display_phrase[:50] + "..." if len(display_phrase) > 50 else display_phrase
+                    _trace_file.write(f"MATCH\t{tiny_id or '-'}\t{match_len}\t{phrase_preview}\n")
+
+                # In-memory trace log (parallel-safe)
+                if _trace_log is not None:
+                    phrase_preview = display_phrase[:50] + "..." if len(display_phrase) > 50 else display_phrase
+                    _trace_log.append({
+                        'ts': time.time(),
+                        'tinyId': tiny_id or '-',
+                        'phrase_len': match_len,
+                        'phrase_preview': phrase_preview,
+                    })
 
                 # Match log for full audit trail
                 if _match_log is not None:
                     source_pattern = _source_map.get(phrase, phrase) if _source_map else phrase
                     _match_log.append({
                         'tinyId': tiny_id or '',
-                        'matched_pattern': phrase,
+                        'matched_pattern': display_phrase,
                         'source_pattern': source_pattern,
                         'verbatim_text': verbatim,
                     })
@@ -447,7 +561,8 @@ def _worker_init(
     source_map: Optional[dict] = None,
     logging_enabled: bool = False,
     case_insensitive: bool = False,
-    word_boundary: bool = False
+    word_boundary: bool = False,
+    trace_enabled: bool = False
 ):
     """
     Initialize worker process with shared phrase_map.
@@ -456,10 +571,18 @@ def _worker_init(
     """
     global _phrase_map_global, _model_class_global, _source_map_global
     global _logging_enabled_global, _case_insensitive_global, _word_boundary_global
-    global _match_log, _source_map
+    global _match_log, _source_map, _trace_log, _compiled_patterns_global
     _phrase_map_global = phrase_map
     _case_insensitive_global = case_insensitive
     _word_boundary_global = word_boundary
+
+    # Pre-compile regex patterns once per worker (avoids per-match compilation)
+    if word_boundary or case_insensitive:
+        _compiled_patterns_global = _compile_pattern_cache(
+            phrase_map, word_boundary, case_insensitive
+        )
+    else:
+        _compiled_patterns_global = None
 
     # Resolve model class from name
     from utils.constants import MODEL_REGISTRY
@@ -473,8 +596,14 @@ def _worker_init(
         _match_log = []
         _source_map = source_map or {}
 
+    # Initialize per-worker trace log
+    if trace_enabled:
+        _trace_log = []
+    else:
+        _trace_log = None
 
-def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[int, List[dict], List[dict]]:
+
+def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[int, List[dict], List[dict], List[dict]]:
     """
     Process a chunk of model data dicts in a worker process.
 
@@ -482,14 +611,18 @@ def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[i
         chunk_with_indices: Tuple of (chunk_index, list of model data dicts)
 
     Returns:
-        Tuple of (chunk_index, list of processed data dicts, list of match log entries)
+        Tuple of (chunk_index, processed data dicts, match log entries, trace log entries)
     """
-    global _phrase_map_global, _logging_enabled_global, _match_log
+    global _phrase_map_global, _logging_enabled_global, _match_log, _trace_log
     chunk_idx, data_list = chunk_with_indices
 
     # Reset match log for this chunk (in case worker is reused)
     if _logging_enabled_global:
         _match_log = []
+
+    # Reset trace log for this chunk (in case worker is reused)
+    if _trace_log is not None:
+        _trace_log = []
 
     processed = []
     for data in data_list:
@@ -499,7 +632,10 @@ def _worker_process_chunk(chunk_with_indices: Tuple[int, List[dict]]) -> Tuple[i
     # Collect matches from this worker
     matches = list(_match_log) if _logging_enabled_global and _match_log else []
 
-    return chunk_idx, processed, matches
+    # Collect trace entries from this worker
+    traces = list(_trace_log) if _trace_log is not None else []
+
+    return chunk_idx, processed, matches, traces
 
 
 def strip_phrases(
@@ -509,7 +645,8 @@ def strip_phrases(
     source_map: Optional[dict] = None,
     logging_enabled: bool = False,
     case_insensitive: bool = False,
-    word_boundary: bool = False
+    word_boundary: bool = False,
+    trace_enabled: bool = False
 ) -> List[BaseModel]:
     """
     Strip phrases from a list of models.
@@ -524,13 +661,23 @@ def strip_phrases(
         logging_enabled: If True, enable match logging (for parallel aggregation).
         case_insensitive: If True, use case-insensitive pattern matching.
         word_boundary: If True, use \\b word boundary anchors for matching.
+        trace_enabled: If True, enable in-memory trace logging (parallel-safe).
 
     Returns:
         List of cleaned models in original order
     """
-    global _match_log, _case_insensitive_global, _word_boundary_global
+    global _match_log, _trace_log, _case_insensitive_global, _word_boundary_global
+    global _compiled_patterns_global
     _case_insensitive_global = case_insensitive
     _word_boundary_global = word_boundary
+
+    # Pre-compile regex patterns once (for sequential mode; parallel does this in worker_init)
+    if word_boundary or case_insensitive:
+        _compiled_patterns_global = _compile_pattern_cache(
+            phrase_map, word_boundary, case_insensitive
+        )
+    else:
+        _compiled_patterns_global = None
 
     if not model_list:
         return []
@@ -580,10 +727,11 @@ def strip_phrases(
     # Process in parallel
     results = {}
     all_matches = []
+    all_traces = []
     with ProcessPoolExecutor(
         max_workers=n_workers,
         initializer=_worker_init,
-        initargs=(phrase_map, model_class_name, source_map, logging_enabled, case_insensitive, word_boundary)
+        initargs=(phrase_map, model_class_name, source_map, logging_enabled, case_insensitive, word_boundary, trace_enabled)
     ) as executor:
         futures = {
             executor.submit(_worker_process_chunk, chunk): chunk[0]
@@ -591,10 +739,12 @@ def strip_phrases(
         }
 
         for future in as_completed(futures):
-            chunk_idx, processed_data, matches = future.result()
+            chunk_idx, processed_data, matches, traces = future.result()
             results[chunk_idx] = processed_data
             if matches:
                 all_matches.extend(matches)
+            if traces:
+                all_traces.extend(traces)
 
     # Aggregate matches into global match log (if logging enabled)
     if logging_enabled and all_matches:
@@ -602,6 +752,13 @@ def strip_phrases(
             _match_log = []
         _match_log.extend(all_matches)
         logger.info(f"Aggregated {len(all_matches)} match log entries from {n_workers} workers")
+
+    # Aggregate trace entries from workers (sorted by timestamp later when writing)
+    if trace_enabled and all_traces:
+        if _trace_log is None:
+            _trace_log = []
+        _trace_log.extend(all_traces)
+        logger.info(f"Aggregated {len(all_traces)} trace entries from {n_workers} workers")
 
     # Reassemble in original order
     cleaned_models = []

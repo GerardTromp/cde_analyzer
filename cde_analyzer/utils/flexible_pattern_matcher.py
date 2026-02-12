@@ -1053,6 +1053,80 @@ def merge_verbatim_cli(
     print(f"Wrote:  {output_path}")
 
 
+def _is_np_continuation(extension: str) -> bool:
+    """Check if an extension tail looks like a noun-phrase continuation.
+
+    Instruments are almost always noun phrases. When a shorter pattern is a
+    prefix of a longer one, the extension tells us whether the longer form is
+    an instrument sub-domain (NP continuation) or greedy context gobbling
+    (clause/sentence continuation).
+
+    NP-like extensions:
+      - Title Case content words: "General Life Satisfaction"
+      - Short prepositions/articles connecting NPs: "for Children and Adults"
+      - Hyphenated compounds: "Self-Efficacy"
+
+    Clause boundaries (NOT NP):
+      - Comma followed by article/pronoun: ", a clinical test..."
+      - Parenthetical asides: "(or BBS), a ..."
+      - Verb phrases, relative clauses
+
+    Returns True if the extension looks like a noun-phrase continuation.
+    """
+    import re as _re
+
+    # Strip leading punctuation/whitespace
+    ext = extension.strip(' ,;:-')
+    if not ext:
+        return False
+
+    # Clause boundary markers — if extension starts with these, it's not NP
+    if _re.match(r'^[\(,;]', extension.strip()):
+        return False
+
+    # Split into words and classify each
+    words = ext.split()
+    if not words:
+        return False
+
+    # Short function words allowed within NPs
+    NP_CONNECTORS = {
+        'of', 'for', 'and', 'the', 'a', 'an', 'in', 'on', 'to', 'with',
+        'by', 'or', 'at', 'from', 'as', '-',
+    }
+
+    tc_or_connector = 0
+    for word in words:
+        # Strip trailing punctuation for checking
+        clean = word.rstrip('.,;:!?')
+        if not clean:
+            continue
+        # Title Case word (starts with uppercase)
+        if clean[0].isupper():
+            tc_or_connector += 1
+        # All-uppercase (acronym)
+        elif clean.isupper() and len(clean) >= 2:
+            tc_or_connector += 1
+        # Allowed connector/preposition
+        elif clean.lower() in NP_CONNECTORS:
+            tc_or_connector += 1
+        # Hyphenated compound where at least one part is Title Case
+        elif '-' in clean and any(p[0].isupper() for p in clean.split('-') if p):
+            tc_or_connector += 1
+        # Number (version numbers, counts)
+        elif _re.match(r'^\d+', clean):
+            tc_or_connector += 1
+        else:
+            # Lowercase content word — not NP-like
+            pass
+
+    # Extension is NP-like if 80%+ of words are TC/connectors
+    # and at least one word is Title Case (not all connectors)
+    ratio = tc_or_connector / len(words) if words else 0
+    has_tc = any(w.rstrip('.,;:!?')[0].isupper() for w in words if w.rstrip('.,;:!?'))
+    return ratio >= 0.8 and has_tc
+
+
 def coalesce_variants_tsv(
     input_path: str,
     output_path: str,
@@ -1257,6 +1331,7 @@ def coalesce_variants_tsv(
 
     # Track which patterns are subsumed and by what
     subsumed: Dict[str, List[str]] = {}  # subsumed_pattern -> list of covering patterns
+    prefix_kept: Dict[str, List[str]] = {}  # pattern -> covering patterns (kept because prefix)
     kept_patterns: Set[str] = set()
 
     # Process from longest to shortest
@@ -1274,11 +1349,26 @@ def coalesce_variants_tsv(
 
         # If pattern's tinyIds are covered by the union of covering patterns' tinyIds
         if covering_patterns and pattern_tinyids <= covering_tinyids:
-            subsumed[pattern] = covering_patterns
-            logger.debug(
-                f"Subsumed: '{pattern[:50]}...' ({len(pattern_tinyids)} tinyIds) "
-                f"covered by {len(covering_patterns)} longer patterns"
+            # Don't subsume if pattern is a prefix of any covering pattern.
+            # The shorter prefix is needed for stripping: text in some fields
+            # (e.g., definitions) may contain only the base name without the
+            # longer suffix (e.g., "(DHI) -") found in other fields.
+            is_prefix_of_cover = any(
+                longer.startswith(pattern) for longer in covering_patterns
             )
+            if is_prefix_of_cover:
+                kept_patterns.add(pattern)
+                prefix_kept[pattern] = covering_patterns
+                logger.debug(
+                    f"Kept prefix: '{pattern[:50]}' (prefix of covering pattern, "
+                    f"useful for stripping shorter text variants)"
+                )
+            else:
+                subsumed[pattern] = covering_patterns
+                logger.debug(
+                    f"Subsumed: '{pattern[:50]}...' ({len(pattern_tinyids)} tinyIds) "
+                    f"covered by {len(covering_patterns)} longer patterns"
+                )
         else:
             kept_patterns.add(pattern)
 
@@ -1291,6 +1381,7 @@ def coalesce_variants_tsv(
 
     if rollup_subset_tinyids and kept_patterns:
         logger.info("Phase 1b: Reverse subsumption (roll-down greedy expansions)...")
+
         # Process longest first so we can remove them
         sorted_desc = sorted(kept_patterns, key=len, reverse=True)
 
@@ -1319,6 +1410,18 @@ def coalesce_variants_tsv(
                     paren_match = _re.search(r'\([A-Z][A-Za-z0-9-]+\)', long_pattern)
                     if paren_match and paren_match.group() not in shorter:
                         continue
+                    # Skip roll-down when shorter is a prefix and the extension
+                    # is NP-like (Title Case words, short prepositions/articles).
+                    # This indicates instrument family sub-domains, not greedy
+                    # context gobbling.
+                    # E.g., "NIH Toolbox" → "NIH Toolbox General Life Satisfaction"
+                    #   extension "General Life Satisfaction" = all TC → keep both
+                    # vs. "Berg Balance Scale" → "Berg Balance Scale (or BBS), a
+                    #   clinical test..." = clause boundary → roll down is correct
+                    if long_pattern.startswith(shorter):
+                        extension = long_pattern[len(shorter):].strip()
+                        if extension and _is_np_continuation(extension):
+                            continue
                     # Prefer the longest shorter base (most specific)
                     if best_base is None or len(shorter) > len(best_base):
                         best_base = shorter
@@ -1415,8 +1518,11 @@ def coalesce_variants_tsv(
         root = PrefixNode()
 
         # Insert all kept patterns into trie
+        # Normalize trailing punctuation so "Well-Being" and "Well-Being."
+        # merge into the same trie path (the period is not part of the name)
+        _trie_punct = str.maketrans('', '', '.,;:!?')
         for pattern in kept_patterns:
-            tokens = pattern.split()
+            tokens = [t.translate(_trie_punct) or t for t in pattern.split()]
             node = root
             for i, token in enumerate(tokens):
                 if token not in node.children:
@@ -1552,6 +1658,7 @@ def coalesce_variants_tsv(
     # Falls back to first 2 words if no shared prefix found
     pattern_group_keys: Dict[str, str] = {}
     kept_list = sorted(kept_patterns)
+    _punct_strip = str.maketrans('', '', '.,;:!?\'")}]')
     for pattern in kept_list:
         tokens = pattern.split()
         best_prefix_len = 0
@@ -1561,7 +1668,7 @@ def coalesce_variants_tsv(
             other_tokens = other.split()
             common = 0
             for a, b in zip(tokens, other_tokens):
-                if a == b:
+                if a == b or a.translate(_punct_strip) == b.translate(_punct_strip):
                     common += 1
                 else:
                     break
@@ -1626,6 +1733,14 @@ def coalesce_variants_tsv(
                 cover_tids = ' '.join(sorted(pattern_to_tinyids.get(cover, set())))
                 f.write(f"rollup\t{orig}\t{orig_tids}\t{cover}\t{cover_tids}\n")
 
+            # Write prefix-kept entries (shorter patterns retained for stripping)
+            for pattern, covers in sorted(prefix_kept.items(), key=lambda x: x[0]):
+                pattern_tids = ' '.join(sorted(pattern_to_tinyids.get(pattern, set())))
+                covers_str = ' | '.join(c[:60] for c in covers[:3])
+                if len(covers) > 3:
+                    covers_str += f" ... (+{len(covers)-3} more)"
+                f.write(f"prefix-kept\t{pattern}\t{pattern_tids}\t{covers_str}\t\n")
+
             # Write anchor trimming entries
             for orig, bare in sorted(anchor_trimmed_map.items(), key=lambda x: x[0]):
                 f.write(f"anchor-trim\t{orig}\t\t{bare}\t\n")
@@ -1633,10 +1748,12 @@ def coalesce_variants_tsv(
         logger.info(f"Wrote subsumption/prefix/rollup report to {report_path}")
 
     reverse_count = len(reverse_subsumed)
+    prefix_kept_count = len(prefix_kept)
     stats = {
         'input_patterns': input_patterns,
         'output_patterns': len(kept_patterns),
         'subsumed_count': len(subsumed),
+        'prefix_kept_count': prefix_kept_count,
         'reverse_subsumed_count': reverse_count,
         'prefix_extracted_count': prefix_extracted_count,
         'rollup_count': rollup_count,
@@ -1647,12 +1764,14 @@ def coalesce_variants_tsv(
     }
 
     anchor_info = f", {anchor_trimmed_count} anchor-trimmed" if anchor_trimmed_count else ""
+    prefix_kept_info = f", {prefix_kept_count} prefix-kept" if prefix_kept_count else ""
     reverse_info = f", {reverse_count} roll-down" if reverse_count else ""
     rollup_info = f", {rollup_count} rolled-up" if rollup_count else ""
     parent_info = f", {parent_filtered_count} parent-filtered" if parent_filtered_count else ""
     logger.info(
         f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
-        f"({len(subsumed)} subsumed{anchor_info}{reverse_info}, {prefix_extracted_count} prefix-extracted{rollup_info}{parent_info})"
+        f"({len(subsumed)} subsumed{prefix_kept_info}{anchor_info}{reverse_info}, "
+        f"{prefix_extracted_count} prefix-extracted{rollup_info}{parent_info})"
     )
 
     return stats
