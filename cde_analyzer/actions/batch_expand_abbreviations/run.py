@@ -123,7 +123,7 @@ def mine_phrases_from_subset(
     )
 
     # Run mining - returns (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog)
-    phrase_objects, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
+    phrase_objects, token_seqs, vocab, verbatim_tracker, _, _dedup = mine_phrases(items, config)
 
     # Extract verbatim info from Phrase objects
     phrases = []

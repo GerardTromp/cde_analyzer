@@ -49,6 +49,7 @@ variables:
   min_field_count: "${MIN_FIELD_COUNT:-6}"
   min_tokens: "${MIN_TOKENS:-3}"
   exclude_patterns: "${EXCLUDE_PATTERNS:-}"
+  dedup_phrases_tsv: "${output_dir}/dedup_phrases.tsv"
 
   # Recall analysis (optional - provide ground truth patterns for tracking)
   # recall_source_json: original (pre-strip) JSON for ground truth matching
@@ -102,6 +103,7 @@ steps:
       min_field_count: "${min_field_count}"
       min_tokens: "${min_tokens}"
       exclude_patterns: "${exclude_patterns}"
+      dedup_phrases: "${dedup_phrases_tsv}"
 
   - name: recall_coalesced
     action: recall_analyze

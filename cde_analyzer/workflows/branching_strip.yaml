@@ -7,6 +7,9 @@
 #   4. both_full_stripped.json  — full instrument + phrase removal
 #   5. both_sub_stripped.json   — sub-group instrument + phrase removal
 #
+# Temporal phrases are automatically expanded from seed patterns in
+# config/temporal_seed_patterns.yaml and merged with curated phrase patterns.
+#
 # Prerequisites:
 #   - Curated instrument patterns processed through --generate-strip-patterns
 #     to produce {inst_patterns_base}_full.tsv and {inst_patterns_base}_sub.tsv
@@ -42,6 +45,10 @@ variables:
   # Phrase patterns (curated TSV with pattern + tinyIds columns)
   phrase_patterns: "${PHRASE_PATTERNS}"
 
+  # Temporal expansion (auto-generated from config seeds)
+  temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
+  merged_phrase_patterns: "${output_dir}/merged_phrase_patterns.tsv"
+
   # Output files
   inst_full_json: "${output_dir}/inst_full_stripped.json"
   inst_sub_json: "${output_dir}/inst_sub_stripped.json"
@@ -70,41 +77,63 @@ steps:
       output: "${inst_sub_json}"
       workers: "${workers}"
 
+  # Expand temporal seed patterns from config
+  - name: expand_temporal
+    action: pattern_util
+    args:
+      expand_temporal_seeds: true
+      output: "${temporal_expanded_tsv}"
+
+  # Merge temporal + curated phrase patterns
+  - name: merge_temporal_phrases
+    action: pattern_util
+    args:
+      merge_patterns:
+        - "${phrase_patterns}"
+        - "${temporal_expanded_tsv}"
+      output: "${merged_phrase_patterns}"
+      merge_pattern_column: pattern
+      merge_tinyids_column: tinyIds
+
   # Branch 3: Phrase-only removal (no instrument stripping)
+  # Phrase/temporal patterns don't need anchor expansion (no "from X" / "X -" variants)
   - name: strip_phrase_only
     action: strip_phrases
     args:
-      patterns: "${phrase_patterns},pattern"
+      patterns: "${merged_phrase_patterns},pattern"
       input: "${input_json}"
       model: "${model}"
       output: "${phrase_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
   # Branch 4: Full instrument + phrases
   - name: strip_both_full
     action: strip_phrases
     args:
-      patterns: "${phrase_patterns},pattern"
+      patterns: "${merged_phrase_patterns},pattern"
       input: "${inst_full_json}"
       model: "${model}"
       output: "${both_full_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
   # Branch 5: Sub-group instrument + phrases
   - name: strip_both_sub
     action: strip_phrases
     args:
-      patterns: "${phrase_patterns},pattern"
+      patterns: "${merged_phrase_patterns},pattern"
       input: "${inst_sub_json}"
       model: "${model}"
       output: "${both_sub_json}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
+      no_expand_anchors: true
 
   # Quality report — scans all stripped outputs for detritus and remnants
   - name: quality_report

@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.13] - 2026-02-11
+
+### Added
+- Universal temporal phrase stripping via `pattern_util --expand-temporal-seeds`
+  - `config/temporal_seed_patterns.yaml` — 20 seed patterns covering all observed temporal frames
+  - Expands to ~1200 variants via temporal preposition/tense/case/number/plural generators
+  - Integrated into `branching_strip.yaml` — auto-expands and merges with curated phrase patterns
+  - Covers all 59 temporal phrases (664 tinyIds) detected in allcde01 strip report
+- Whole-text dedup pre-pass in `phrase_miner`
+  - `--dedup` (default: enabled) — hashes field texts shared by N+ CDEs
+  - Only emits phrases exceeding `k_max` tokens (unreachable by k-mer mining)
+  - Shorter duplicates left to k-mer mining — no masking, no lost sub-phrase counts
+  - Outputs separate `dedup_phrases.tsv` curation template (not mixed into regular output)
+  - `--dedup-min-count N` (default: 2) and `--dedup-min-tokens N` (default: 3)
+  - `--no-dedup` to disable
+
+### Fixed
+- Workflow engine list argument handling — `build_action_args()` now emits a single
+  `--flag val1 val2` instead of `--flag val1 --flag val2`, fixing argparse `nargs="+"`
+  last-wins behavior that silently dropped earlier values (e.g., `--merge-patterns`
+  only loaded the last file, discarding curated phrases)
+- Phrase stripping performance — pre-compile regex patterns once via
+  `_compile_pattern_cache()` instead of re-compiling per match (~28x speedup);
+  combined with `no_expand_anchors` for phrase steps (178x fewer patterns),
+  reduces phrase strip from ~5 hours to ~13 seconds per step
+- Phrase strip steps in `branching_strip.yaml` now set `no_expand_anchors: true` —
+  anchor expansion (instrument-style "from X" / "X -" prefixes/suffixes) is
+  unnecessary for self-contained phrase/temporal patterns
+
+### Changed
+- `branching_strip.yaml` now includes `expand_temporal` and `merge_temporal_phrases` steps
+  before phrase stripping branches
+- Phrase strip branches use merged temporal + curated patterns instead of curated-only
+
 ## [0.5.12] - 2026-02-11
 
 ### Added

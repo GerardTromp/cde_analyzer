@@ -260,8 +260,8 @@ def build_action_args(action: str, args: Dict[str, Any]) -> List[str]:
             if value:
                 cli_args.append(f"--{cli_key}")
         elif isinstance(value, list):
+            cli_args.append(f"--{cli_key}")
             for item in value:
-                cli_args.append(f"--{cli_key}")
                 cli_args.append(str(item))
         else:
             cli_args.append(f"--{cli_key}")

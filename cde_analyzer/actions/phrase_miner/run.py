@@ -75,6 +75,9 @@ def run_action(args: Namespace):
         extract_supplementary=False,
         instrument_patterns=None,
         context_aware_masking=False,
+        dedup_enabled=getattr(args, 'dedup', True),
+        dedup_min_count=getattr(args, 'dedup_min_count', 2),
+        dedup_min_tokens=getattr(args, 'dedup_min_tokens', 3),
     )
 
     # Log configuration
@@ -83,11 +86,12 @@ def run_action(args: Namespace):
     logger.info(f"Features: debruijn={'enabled' if not skip_debruijn else 'disabled'}, "
                 f"aho_corasick={'enabled' if use_aho_corasick else 'disabled'}, "
                 f"subsumption={'enabled' if enable_subsumption else 'disabled'}, "
-                f"anchor={'enabled' if not skip_anchor else 'disabled'}")
+                f"anchor={'enabled' if not skip_anchor else 'disabled'}, "
+                f"dedup={'enabled' if config.dedup_enabled else 'disabled'}")
 
     # 3. Execute pipeline
     logger.info("Starting phrase mining pipeline...")
-    phrases, token_seqs, vocab, verbatim_tracker, _ = mine_phrases(items, config)
+    phrases, token_seqs, vocab, verbatim_tracker, _, dedup_phrases = mine_phrases(items, config)
     logger.info(f"Mined {len(phrases)} phrases (vocabulary size: {len(vocab)})")
 
     # Log verbatim tracker statistics
@@ -134,6 +138,11 @@ def run_action(args: Namespace):
     if extended_phrases:
         write_extended_tsv(extended_phrases, output_dir / "extended.tsv", vocab)
 
+    # Write dedup curation template (separate from regular phrase output)
+    if dedup_phrases:
+        write_dedup_curation_tsv(dedup_phrases, output_dir / "dedup_phrases.tsv")
+        logger.info(f"Dedup curation template: {len(dedup_phrases)} phrases written to dedup_phrases.tsv")
+
     # Log verbatim phrase statistics
     verbatim_count = sum(1 for p in phrases for occ in p.occurrences if occ.verbatim_text)
     logger.info(f"Results written to {output_dir}")
@@ -172,6 +181,39 @@ def run_action(args: Namespace):
             logger.warning(f"Cannot analyze phrase families: {verbatim_tsv} not found")
 
     return 0
+
+
+def write_dedup_curation_tsv(dedup_phrases: List, path: Path):
+    """
+    Write dedup_phrases.tsv: curation template for whole-text dedup results.
+
+    These are field texts shared verbatim by multiple CDEs. They need human
+    curation to decide which should be stripped (boilerplate) vs kept
+    (content-bearing). Sorted by tinyId count descending.
+
+    Columns:
+        verbatim_text: The exact shared text
+        n_tinyids: Number of CDEs sharing this text
+        n_words: Word count
+        field_path: Example field path where this text occurs
+        tinyIds: Pipe-delimited tinyId list
+        curate_action: Empty column for curator to fill (strip / keep / review)
+    """
+    with path.open('w', encoding='utf-8') as f:
+        f.write("verbatim_text\tn_tinyids\tn_words\tfield_path\ttinyIds\tcurate_action\n")
+        # Sort by tinyId count descending
+        sorted_phrases = sorted(dedup_phrases, key=lambda p: len(p.distinct_tinyids), reverse=True)
+        for p in sorted_phrases:
+            # Use the first occurrence's verbatim_text (the original text)
+            verbatim = ""
+            field_path = ""
+            if p.occurrences:
+                verbatim = p.occurrences[0].verbatim_text or ""
+                field_path = p.occurrences[0].field_path or ""
+            n_words = len(verbatim.split()) if verbatim else 0
+            tinyids_str = "|".join(sorted(p.distinct_tinyids))
+            f.write(f"{verbatim}\t{len(p.distinct_tinyids)}\t{n_words}\t"
+                    f"{field_path}\t{tinyids_str}\t\n")
 
 
 def write_phrases_tsv(phrases: List, path: Path, vocab):

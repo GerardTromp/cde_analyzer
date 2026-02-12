@@ -1,0 +1,93 @@
+# Temporal Seed Patterns
+#
+# Seed patterns for universal temporal phrase stripping. Each pattern is
+# expanded via --expand-temporal-seeds to generate all variants:
+#   - Preposition variants: in/over/during/for/within
+#   - Tense word variants: past/last
+#   - Case variants: In/in, Over/over, etc.
+#   - Number variants: 7/seven, 12/twelve, etc.
+#   - Plural variants: day/days, week/weeks, etc.
+#
+# Seeds should use Capitalized preposition so the temporal expander generates
+# capitalized variants (Over/During/For/Within), and the case expander then
+# adds lowercase versions. This covers both sentence-start and mid-sentence use.
+#
+# A single seed like "In the past 7 days" generates ~80+ variants covering
+# all preposition x tense x case x number x plural combinations.
+#
+# Loading order:
+#   1. Global: config/temporal_seed_patterns.yaml (this file)
+#   2. Local:  ./temporal_seed_patterns.yaml (per-dataset override, extends global)
+
+seeds:
+  # ---- Weekly / 7-day frames ----
+  - pattern: "In the past 7 days"
+    note: "PROMIS/Neuro-QOL weekly temporal prefix (212x in allcde01)"
+
+  # ---- Annual frames ----
+  - pattern: "In the last 12 months"
+    note: "Annual temporal frame (56x)"
+
+  - pattern: "In the past year"
+    note: "Annual temporal frame, no number (20x)"
+
+  # ---- Semi-annual frames ----
+  - pattern: "In the last 6 months"
+    note: "Semi-annual temporal frame (49x)"
+
+  # ---- Monthly / 4-week / 30-day frames ----
+  - pattern: "During the past 4 weeks"
+    note: "Monthly/4-week temporal frame (30x)"
+
+  - pattern: "During the past 30 days"
+    note: "Monthly/30-day temporal frame (25x)"
+
+  - pattern: "Over the past month"
+    note: "Monthly temporal frame, no number"
+
+  # ---- Biweekly / 2-week / 14-day frames ----
+  - pattern: "Over the past 2 weeks"
+    note: "Biweekly temporal frame (26x)"
+
+  - pattern: "In the past 14 days"
+    note: "Biweekly/days temporal frame"
+
+  # ---- Quarterly / 3-month frames ----
+  - pattern: "In the past 3 months"
+    note: "Quarterly temporal frame"
+
+  - pattern: "Within the last three months"
+    note: "Quarterly frame, word number (26x)"
+
+  # ---- Weekly (no number) ----
+  - pattern: "Over the past week"
+    note: "Weekly temporal frame, no number (21x)"
+
+  # ---- Multi-year frames ----
+  - pattern: "In the past 3 years"
+    note: "Multi-year temporal frame"
+
+  - pattern: "Over the past ten years"
+    note: "Decade temporal frame, word number"
+
+  # ---- 2-month frame ----
+  - pattern: "In the last two months"
+    note: "Bimonthly temporal frame, word number"
+
+  # ---- 365-day frame ----
+  - pattern: "During the last 365 days"
+    note: "Annual/days temporal frame"
+
+  # ---- Indefinite "few" quantifier ----
+  - pattern: "During the past few weeks"
+    note: "Indefinite weekly temporal frame"
+
+  - pattern: "In the last few days"
+    note: "Indefinite daily temporal frame"
+
+  - pattern: "Over the past few months"
+    note: "Indefinite monthly temporal frame"
+
+  # ---- Daily / hourly frames ----
+  - pattern: "In the past 24 hours"
+    note: "Daily/hours temporal frame"

@@ -566,6 +566,7 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
     min_field_count = getattr(args, 'min_field_count', 0)
     min_tokens = getattr(args, 'min_tokens', 0)
     exclude_path = getattr(args, 'exclude_patterns', None)
+    dedup_phrases_path = getattr(args, 'dedup_phrases', None)
 
     # Load exclusion set if provided
     exclusion_set = set()
@@ -573,6 +574,23 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
         exit_if_missing(exclude_path, "Exclusion patterns file")
         exclusion_set = _load_exclusion_set(exclude_path)
         logger.info(f"Loaded {len(exclusion_set)} exclusion patterns")
+
+    # Load dedup phrase texts for substring filtering
+    dedup_texts = []
+    if dedup_phrases_path:
+        exit_if_missing(dedup_phrases_path, "Dedup phrases file")
+        with open(dedup_phrases_path, encoding="utf-8") as df:
+            header = df.readline().strip().split('\t')
+            text_idx = 0  # verbatim_text is first column
+            for i, h in enumerate(header):
+                if h.lower() == 'verbatim_text':
+                    text_idx = i
+                    break
+            for line in df:
+                fields = line.strip().split('\t')
+                if text_idx < len(fields) and fields[text_idx].strip():
+                    dedup_texts.append(fields[text_idx].strip().lower())
+        logger.info(f"Loaded {len(dedup_texts)} dedup phrases for substring filtering")
 
     # Read the patterns TSV (preserve all columns)
     rows = []  # list of (fields_list, pattern, tinyids_set)
@@ -700,6 +718,11 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
             excluded_count += 1
             continue
 
+        # Dedup substring filter: remove patterns that are fragments of long dedup phrases
+        if dedup_texts and any(pattern.lower() in dt for dt in dedup_texts):
+            excluded_count += 1
+            continue
+
         # Min-tokens filter
         if min_tokens > 0 and len(pattern.split()) < min_tokens:
             filtered_count += 1
@@ -758,7 +781,12 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
     print(f"\nField analysis complete:")
     print(f"  Input:    {len(rows)} patterns")
     if excluded_count:
-        print(f"  Excluded: {excluded_count} (from exclusion list)")
+        excluded_sources = []
+        if exclude_path:
+            excluded_sources.append("exclusion list")
+        if dedup_texts:
+            excluded_sources.append("dedup substring")
+        print(f"  Excluded: {excluded_count} ({', '.join(excluded_sources)})")
     if filtered_count:
         print(f"  Filtered: {filtered_count} (min-field-count={min_field_count}, min-tokens={min_tokens})")
     print(f"  Output:   {written_count} patterns (sorted: group \u2192 field \u2192 pattern)")
@@ -2498,6 +2526,110 @@ def _run_expand_verbatim(args, expand_verbatim_path: str) -> int:
     return 0
 
 
+def _run_expand_temporal_seeds(args) -> int:
+    """Expand temporal seed patterns from config YAML into a strip-ready TSV.
+
+    Loads seeds from config/temporal_seed_patterns.yaml (global) and
+    ./temporal_seed_patterns.yaml (local override), then generates all
+    preposition/tense/case/number/plural variants.
+    """
+    import yaml
+    from pathlib import Path
+    from utils.pattern_variant_generator import (
+        generate_case_variants, generate_number_variants,
+        generate_plural_variants, generate_temporal_preposition_variants
+    )
+
+    output_path = getattr(args, 'output', None)
+    if not output_path:
+        logger.error("--output is required for --expand-temporal-seeds")
+        raise SystemExit(1)
+
+    # Locate config directory (where this package's config/ lives)
+    config_dir = Path(__file__).resolve().parent.parent.parent / "config"
+    global_path = config_dir / "temporal_seed_patterns.yaml"
+    local_path = Path.cwd() / "temporal_seed_patterns.yaml"
+
+    seeds = []
+    for config_path in [global_path, local_path]:
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            if config and 'seeds' in config:
+                n_before = len(seeds)
+                for item in config['seeds']:
+                    pattern = item.get('pattern', '').strip()
+                    if pattern and pattern not in seeds:
+                        seeds.append(pattern)
+                logger.info(f"Loaded {len(seeds) - n_before} seeds from {config_path}")
+
+    if not seeds:
+        logger.error("No temporal seed patterns found in config")
+        raise SystemExit(1)
+
+    logger.info(f"Total seed patterns: {len(seeds)}")
+
+    # 4-stage expansion (same order as _run_expand_verbatim)
+    stats = {'temporal': 0, 'plural': 0, 'number': 0, 'case': 0}
+    all_variants = set()
+
+    for seed in seeds:
+        variants = {seed}
+
+        # Stage 1: Temporal preposition variants
+        temporal_expanded = set()
+        for v in variants:
+            temporal_expanded.update(generate_temporal_preposition_variants(v))
+        stats['temporal'] += len(temporal_expanded) - len(variants)
+        variants = temporal_expanded
+
+        # Stage 2: Plural variants
+        plural_expanded = set()
+        for v in variants:
+            plural_expanded.update(generate_plural_variants(v))
+        stats['plural'] += len(plural_expanded) - len(variants)
+        variants = plural_expanded
+
+        # Stage 3: Number variants
+        number_expanded = set()
+        for v in variants:
+            number_expanded.update(generate_number_variants(v))
+        stats['number'] += len(number_expanded) - len(variants)
+        variants = number_expanded
+
+        # Stage 4: Case variants
+        case_expanded = set()
+        for v in variants:
+            case_expanded.update(generate_case_variants(v))
+        stats['case'] += len(case_expanded) - len(variants)
+        variants = case_expanded
+
+        all_variants.update(variants)
+
+    # Write output TSV (longest first)
+    ordered = sorted(all_variants, key=lambda v: (-len(v), v))
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("pattern\ttinyIds\n")
+        for variant in ordered:
+            f.write(f"{variant}\t\n")  # Empty tinyIds = apply to all records
+
+    logger.info(
+        f"Expanded {len(seeds)} seeds -> {len(ordered)} temporal variants "
+        f"(temporal: +{stats['temporal']}, plural: +{stats['plural']}, "
+        f"number: +{stats['number']}, case: +{stats['case']})"
+    )
+    print(f"Seeds:    {len(seeds)}")
+    print(f"Variants: {len(ordered)}")
+    print(f"  Temporal: +{stats['temporal']}")
+    print(f"  Plural:   +{stats['plural']}")
+    print(f"  Number:   +{stats['number']}")
+    print(f"  Case:     +{stats['case']}")
+    print(f"Wrote:    {output_path}")
+
+    return 0
+
+
 @graceful_interrupt
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
@@ -2569,6 +2701,11 @@ def run_action(args: Namespace):
     expand_verbatim = getattr(args, 'expand_verbatim', None)
     if expand_verbatim:
         return _run_expand_verbatim(args, expand_verbatim)
+
+    # Check for expand-temporal-seeds mode
+    expand_temporal = getattr(args, 'expand_temporal_seeds', False)
+    if expand_temporal:
+        return _run_expand_temporal_seeds(args)
 
     # Check for field-analysis mode
     field_analysis = getattr(args, 'field_analysis', None)

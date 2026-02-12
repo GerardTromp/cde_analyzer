@@ -269,6 +269,13 @@ def register_subparser(subparser: ArgumentParser):
         metavar="FILE",
         help="Filter: remove patterns matching entries in this file (one per line or TSV with 'pattern' column).",
     )
+    subparser.add_argument(
+        "--dedup-phrases",
+        type=str,
+        metavar="FILE",
+        help="Filter: remove patterns that are substrings of dedup phrases in this TSV "
+             "(dedup_phrases.tsv from phrase_miner). Prevents dedup fragments from cluttering curation.",
+    )
 
     # Semantic proxy generation mode (wireframe)
     subparser.add_argument(
@@ -379,6 +386,15 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         help="Re-scan source JSON to discover tinyIds for each expanded variant "
              "(instead of inheriting from source pattern). Requires --input and --model.",
+    )
+
+    # Temporal seed expansion mode
+    subparser.add_argument(
+        "--expand-temporal-seeds",
+        action="store_true",
+        help="Expand temporal seed patterns from config/temporal_seed_patterns.yaml. "
+             "Generates all preposition/tense/case/number/plural variants and writes "
+             "a strip-ready TSV to --output.",
     )
 
     # Interactive TSV editor mode

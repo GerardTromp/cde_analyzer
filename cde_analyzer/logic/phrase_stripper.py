@@ -25,6 +25,35 @@ _source_map_global: Optional[dict] = None
 _logging_enabled_global: bool = False
 _case_insensitive_global: bool = False
 _word_boundary_global: bool = False
+_compiled_patterns_global: Optional[dict] = None  # {phrase: compiled_regex}
+
+
+def _compile_pattern_cache(
+    phrase_map: List[Tuple[str, str, str, Optional[Set[str]]]],
+    word_boundary: bool,
+    case_insensitive: bool,
+) -> dict:
+    """Pre-compile regex patterns for all phrases in the phrase map.
+
+    Returns a dict mapping phrase string -> compiled re.Pattern.
+    Called once per worker init (or once for sequential mode) to avoid
+    repeated re.search() compilations in the hot loop.
+    """
+    cache = {}
+    regex_flags = re.IGNORECASE if case_insensitive else 0
+    for _path, phrase, _replace, _tinyids in phrase_map:
+        if phrase in cache:
+            continue
+        if phrase.startswith('REGEX:'):
+            raw = phrase[6:]
+            cache[phrase] = re.compile(raw, regex_flags)
+        elif word_boundary or case_insensitive:
+            escaped = re.escape(phrase)
+            if word_boundary:
+                escaped = r'\b' + escaped + r'\b'
+            cache[phrase] = re.compile(escaped, regex_flags)
+        # Plain substring phrases don't need compilation
+    return cache
 
 
 # Modify to always expect replacement even if empty string
@@ -333,13 +362,21 @@ def _replace_if_match(
         tiny_id: Optional tinyId for trace output
     """
     global _trace_file, _match_log, _source_map, _case_insensitive_global, _word_boundary_global
+    global _compiled_patterns_global
     try:
         value = container[key_or_index]
         if isinstance(value, str):
             # Check for raw regex marker (from regex anchor expansion)
             is_raw_regex = phrase.startswith('REGEX:')
 
-            if is_raw_regex:
+            # Use pre-compiled pattern if available
+            compiled = _compiled_patterns_global.get(phrase) if _compiled_patterns_global else None
+
+            if compiled is not None:
+                match_obj = compiled.search(value)
+                found = match_obj is not None
+                use_regex = True
+            elif is_raw_regex:
                 # Raw regex pattern — use as-is (no re.escape)
                 pattern_str = phrase[6:]
                 regex_flags = re.IGNORECASE if _case_insensitive_global else 0
@@ -381,7 +418,10 @@ def _replace_if_match(
 
                 # Regex mode or plain str.replace
                 if use_regex:
-                    result = sanitize(re.sub(pattern_str, replace_with, value, flags=regex_flags))
+                    if compiled is not None:
+                        result = sanitize(compiled.sub(replace_with, value))
+                    else:
+                        result = sanitize(re.sub(pattern_str, replace_with, value, flags=regex_flags))
                 else:
                     result = sanitize(value.replace(phrase, replace_with))
                 container[key_or_index] = result
@@ -531,10 +571,18 @@ def _worker_init(
     """
     global _phrase_map_global, _model_class_global, _source_map_global
     global _logging_enabled_global, _case_insensitive_global, _word_boundary_global
-    global _match_log, _source_map, _trace_log
+    global _match_log, _source_map, _trace_log, _compiled_patterns_global
     _phrase_map_global = phrase_map
     _case_insensitive_global = case_insensitive
     _word_boundary_global = word_boundary
+
+    # Pre-compile regex patterns once per worker (avoids per-match compilation)
+    if word_boundary or case_insensitive:
+        _compiled_patterns_global = _compile_pattern_cache(
+            phrase_map, word_boundary, case_insensitive
+        )
+    else:
+        _compiled_patterns_global = None
 
     # Resolve model class from name
     from utils.constants import MODEL_REGISTRY
@@ -619,8 +667,17 @@ def strip_phrases(
         List of cleaned models in original order
     """
     global _match_log, _trace_log, _case_insensitive_global, _word_boundary_global
+    global _compiled_patterns_global
     _case_insensitive_global = case_insensitive
     _word_boundary_global = word_boundary
+
+    # Pre-compile regex patterns once (for sequential mode; parallel does this in worker_init)
+    if word_boundary or case_insensitive:
+        _compiled_patterns_global = _compile_pattern_cache(
+            phrase_map, word_boundary, case_insensitive
+        )
+    else:
+        _compiled_patterns_global = None
 
     if not model_list:
         return []

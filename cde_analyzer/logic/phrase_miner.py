@@ -86,6 +86,14 @@ class KmerCount:
 
 
 @dataclass
+class DedupResult:
+    """Result of whole-text dedup for a single unique text."""
+    text: str                    # Normalized field text (whitespace-collapsed)
+    tinyids: Set[str]            # CDEs sharing this exact text
+    field_path_sample: str       # Example field path (for logging)
+
+
+@dataclass
 class MinerConfig:
     """Configuration for phrase mining pipeline"""
     k_max: int = 25
@@ -109,6 +117,58 @@ class MinerConfig:
     instrument_patterns: Optional[Set[str]] = None  # Patterns to pre-mask before k-mer mining
     # Context-aware masking (Option D): uses instrument names with context detection
     context_aware_masking: bool = False  # If True, use context-aware masking instead of exact patterns
+    # Whole-text dedup pre-pass
+    dedup_enabled: bool = True           # Hash field texts, emit shared ones as phrases
+    dedup_min_count: int = 2             # Min CDEs sharing identical text
+    dedup_min_tokens: int = 3            # Min tokens to emit (skip trivial matches)
+
+
+def dedup_field_texts(items: List[CDEItem], config: MinerConfig) -> List[DedupResult]:
+    """
+    Stage 0a: Identify field texts shared by multiple CDEs.
+
+    O(n) pass: hash each field text (whitespace-normalized), group by hash,
+    return texts with count >= dedup_min_count.
+
+    Args:
+        items: List of CDEItem objects
+        config: Mining configuration (uses field_names, dedup_min_count)
+
+    Returns:
+        List of DedupResult objects for texts shared by enough CDEs.
+    """
+    import hashlib
+
+    # hash -> { text, tinyids set, field_path }
+    text_groups: dict = defaultdict(lambda: {"text": None, "tinyids": set(), "field_path": ""})
+
+    for item in items:
+        if not item.tinyId:
+            continue
+        text_spans = extract_field_texts(item, config.field_names)
+        for field_path, text in text_spans:
+            normalized = " ".join(text.split())
+            if not normalized:
+                continue
+            h = hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+            group = text_groups[h]
+            if group["text"] is None:
+                group["text"] = normalized
+                group["field_path"] = field_path
+            group["tinyids"].add(item.tinyId)
+
+    results = []
+    for group in text_groups.values():
+        if len(group["tinyids"]) >= config.dedup_min_count:
+            results.append(DedupResult(
+                text=group["text"],
+                tinyids=group["tinyids"],
+                field_path_sample=group["field_path"],
+            ))
+
+    # Sort by tinyId count descending (most shared first)
+    results.sort(key=lambda r: len(r.tinyids), reverse=True)
+    return results
 
 
 def mine_phrases(items: List[CDEItem], config: MinerConfig):
@@ -120,13 +180,24 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
         config: Mining configuration
 
     Returns:
-        Tuple of (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog):
-        - phrases: List of detected phrases
+        Tuple of (phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog, dedup_phrases):
+        - phrases: List of detected k-mer phrases (excludes dedup phrases)
         - token_seqs: Token sequences for each text span (with masking state)
         - vocab: Vocabulary mapping
         - verbatim_tracker: VerbatimTracker for lemma→variants lookup
         - instrument_catalog: InstrumentCatalog if extract_instruments=True, else None
+        - dedup_phrases: List of whole-text dedup Phrase objects (for separate curation)
     """
+    # Stage 0a: Whole-text dedup pre-pass (before tokenization)
+    dedup_results = []
+    if config.dedup_enabled:
+        dedup_results = dedup_field_texts(items, config)
+        if dedup_results:
+            logger.info(
+                f"Dedup pre-pass: {len(dedup_results)} texts shared by "
+                f"{config.dedup_min_count}+ CDEs (top: {len(dedup_results[0].tinyids)} tinyIds)"
+            )
+
     # Stage 1: Extract and tokenize text spans from CDE fields
     # (optionally with instrument extraction and pre-masking)
     token_seqs, vocab, verbatim_tracker, instrument_catalog = extract_token_sequences(items, config)
@@ -138,6 +209,76 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
 
     all_phrases = []
     phrase_id_counter = 0
+
+    # Stage 0b: Convert dedup results to Phrases (only those exceeding k_max)
+    # Short duplicates (tokens <= k_max) are found naturally by k-mer mining.
+    # Long duplicates (tokens > k_max) can't be reached by k-mer mining and need
+    # dedup identification. No masking — sub-phrases within dedup'd texts remain
+    # visible to k-mer mining so their counts aren't artificially reduced.
+    if config.dedup_enabled and dedup_results:
+        # Build index: normalized_text -> [TokenSeq indices]
+        text_to_seqs: dict = defaultdict(list)
+        for idx, seq in enumerate(token_seqs):
+            if seq.original_text:
+                norm = " ".join(seq.original_text.split())
+                text_to_seqs[norm].append(idx)
+
+        dedup_phrases = []
+        n_short_skipped = 0
+        for dedup in dedup_results:
+            matching_seq_idxs = text_to_seqs.get(dedup.text, [])
+            if not matching_seq_idxs:
+                continue
+
+            # Use the first matching sequence's tokens as the phrase token_ids
+            first_seq = token_seqs[matching_seq_idxs[0]]
+            token_ids = tuple(first_seq.tokens)
+
+            if len(token_ids) < config.dedup_min_tokens:
+                continue
+
+            # Only emit phrases that exceed k_max — shorter ones are found by k-mer mining
+            if len(token_ids) <= config.k_max:
+                n_short_skipped += 1
+                continue
+
+            # Build text from vocab
+            text = " ".join(vocab.get_tokens(list(token_ids)))
+
+            # Build occurrences (no masking — let k-mer mining see sub-phrases)
+            phrase_id_str = f"dedup_{phrase_id_counter:05d}"
+            occurrences = []
+            matched_tinyids = set()
+            for seq_idx in matching_seq_idxs:
+                seq = token_seqs[seq_idx]
+                matched_tinyids.add(seq.cde_ref.tinyId)
+                occ = CDERef(
+                    tinyId=seq.cde_ref.tinyId,
+                    field_path=seq.cde_ref.field_path,
+                    token_span=(0, len(seq.tokens)),
+                    verbatim_text=seq.original_text,
+                    char_span=(0, len(seq.original_text)) if seq.original_text else None,
+                )
+                occurrences.append(occ)
+
+            phrase = Phrase(
+                phrase_id=phrase_id_str,
+                token_ids=token_ids,
+                text=text,
+                frequency=len(occurrences),
+                distinct_tinyids=matched_tinyids,
+                k=len(token_ids),
+                occurrences=occurrences,
+                extension_method="dedup",
+            )
+            dedup_phrases.append(phrase)
+            phrase_id_counter += 1
+
+        # Do NOT add dedup phrases to all_phrases — they go to separate curation output
+        logger.info(
+            f"Dedup: {len(dedup_phrases)} phrases exceeding k_max={config.k_max}, "
+            f"{n_short_skipped} short duplicates left to k-mer mining"
+        )
 
     # Initialize histogram collector if enabled
     histogram_collector = None
@@ -203,7 +344,9 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
         )
 
     logger.info(f"Total phrases detected: {len(all_phrases)}")
-    return all_phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog
+    # Collect dedup phrases (may be empty list if dedup disabled or no matches)
+    _dedup_phrases = dedup_phrases if (config.dedup_enabled and dedup_results) else []
+    return all_phrases, token_seqs, vocab, verbatim_tracker, instrument_catalog, _dedup_phrases
 
 
 def extract_instruments_only(items: List[CDEItem], config: MinerConfig):
