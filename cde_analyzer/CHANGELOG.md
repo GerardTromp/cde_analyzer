@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.14] - 2026-02-12
+
+### Fixed
+- Temporal phrases not fully stripped due to case mismatches — title-case
+  ("Past 7 Days") and ALL-CAPS ("LAST 4 WEEKS") forms in designations were
+  missed by case-sensitive matching
+- Split `branching_strip.yaml` into separate temporal (case-insensitive) and
+  curated phrase (case-sensitive) stripping passes — temporal patterns now
+  stripped with `--ignore-case` in a dedicated pass before curated phrases
+- Added bare ("Past 7 days") and article-only ("The past 7 days") temporal
+  variant forms to `generate_temporal_preposition_variants()` — catches
+  designations that omit the preposition prefix
+- Added 5 new temporal seed patterns: 90 days, 12 weeks, 3 weeks, 48 hours,
+  8 hours — covers all remaining temporal forms in allcde01 (25 seeds total,
+  ~2100 expanded variants)
+
+### Changed
+- `branching_strip.yaml` restructured from 8 to 10 steps: 3 temporal strip
+  steps (case-insensitive) + 3 curated phrase strip steps (case-sensitive),
+  replacing the previous merged-pattern approach
+- Removed `merge_temporal_phrases` step — no longer needed since temporal and
+  curated patterns are stripped in separate passes
+- `config/temporal_seed_patterns.yaml` expanded from 20 to 25 seed patterns
+- Temporal variant expansion now generates ~2100 variants (up from ~1200)
+
 ## [0.5.13] - 2026-02-11
 
 ### Added

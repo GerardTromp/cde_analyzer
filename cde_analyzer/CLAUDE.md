@@ -1,4 +1,4 @@
-# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.13)
+# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.14)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -24,17 +24,18 @@ mine_instruments → discover_verbatim → coalesce → validate_subsumption →
 mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → strip_phrases → discovery_report
 
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
-strip_inst_full/sub → expand_temporal → merge_temporal_phrases → strip_phrase_only/both_full/both_sub → quality_report
+strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.5.13)
+## Current State (v0.5.14)
 
 ### Implemented — Phrase Curation Automation
 - **`--field-analysis`**: Adds def_count, desig_count, field_profile columns + example CDE columns
 - **`--min-field-count N`**, **`--min-tokens N`**, **`--exclude-patterns FILE`**: Filtering
 - **`--validate-subsumption`**: Empirical post-coalescing validation (parallelized)
-- **`--expand-temporal-seeds`**: Universal temporal stripping from seed patterns
-- **`--merge-patterns`**: Combine temporal + curated phrase patterns
+- **`--expand-temporal-seeds`**: Universal temporal stripping from 25 seed patterns (~2100 variants)
+- **`--merge-patterns`**: Combine/deduplicate pattern TSV files
 - **`--dedup`** in phrase_miner: Identifies whole-text duplicates exceeding k_max
+- **Split temporal/curated stripping**: Temporal patterns stripped case-insensitively in dedicated pass before case-sensitive curated phrase stripping
 
 ### Dedup Design (refined)
 - Stage 0a: Hash field texts, group identical strings shared by N+ CDEs
@@ -62,7 +63,8 @@ strip_inst_full/sub → expand_temporal → merge_temporal_phrases → strip_phr
 - `actions/strip_phrases/run.py` — stripping engine
 - `utils/instrument_extractor.py` — instrument name extraction
 - `utils/flexible_pattern_matcher.py` — coalescer (Phase 1a prefix-kept, Phase 1b NP-continuity)
-- `config/temporal_seed_patterns.yaml` — 20 temporal seed patterns
+- `config/temporal_seed_patterns.yaml` — 25 temporal seed patterns (~2100 expanded variants)
+- `utils/pattern_variant_generator.py` — temporal/case/number/plural variant generators
 
 ### Workflows
 - `workflows/instrument_pipeline.yaml` — Phase 1

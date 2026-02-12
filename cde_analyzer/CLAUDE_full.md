@@ -36,6 +36,13 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Main Branch**: main (stable)
 
 **Recent Work** (Last 30 days):
+- **v0.5.14: Temporal Case-Insensitive Split Pipeline**
+  - Split `branching_strip.yaml` into separate temporal (case-insensitive) and curated phrase (case-sensitive) passes
+  - Added bare/article-only temporal variant forms; expanded to 25 seeds (~2100 variants)
+  - allcde01: 0 temporal remnants in definition/designation fields
+- **v0.5.13: Universal Temporal Stripping + Dedup Pre-Pass + Bug Fixes**
+  - `--expand-temporal-seeds`, `--merge-patterns`, `--dedup` in phrase_miner
+  - Fixed workflow engine list args, phrase strip performance (5h → 13s), anchor expansion
 - **v0.5.0: Parent Phrase Tracking & Recall Analysis**
   - `strip_discover --parent-column` propagates generic phrase info through pipeline
   - `pattern_util --min-parent-tinyids` filters low-coverage patterns during coalesce

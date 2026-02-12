@@ -3,8 +3,10 @@
 # Seed patterns for universal temporal phrase stripping. Each pattern is
 # expanded via --expand-temporal-seeds to generate all variants:
 #   - Preposition variants: in/over/during/for/within
+#   - Article-only form: "the past N days" (catches any preposition prefix)
+#   - Bare form: "past N days" (catches designation shorthand without preposition)
 #   - Tense word variants: past/last
-#   - Case variants: In/in, Over/over, etc.
+#   - Case variants: In/in, Over/over, The/the, Past/past, etc.
 #   - Number variants: 7/seven, 12/twelve, etc.
 #   - Plural variants: day/days, week/weeks, etc.
 #
@@ -12,8 +14,9 @@
 # capitalized variants (Over/During/For/Within), and the case expander then
 # adds lowercase versions. This covers both sentence-start and mid-sentence use.
 #
-# A single seed like "In the past 7 days" generates ~80+ variants covering
-# all preposition x tense x case x number x plural combinations.
+# A single seed like "In the past 7 days" generates ~100+ variants covering
+# all preposition x tense x case x number x plural combinations, plus bare
+# and article-only forms for designation shorthand.
 #
 # Loading order:
 #   1. Global: config/temporal_seed_patterns.yaml (this file)
@@ -88,6 +91,23 @@ seeds:
   - pattern: "Over the past few months"
     note: "Indefinite monthly temporal frame"
 
+  # ---- 90-day / 12-week frames ----
+  - pattern: "In the past 90 days"
+    note: "Quarterly/days temporal frame (21x)"
+
+  - pattern: "In the past 12 weeks"
+    note: "Quarterly/weeks temporal frame (9x)"
+
+  # ---- 3-week frame ----
+  - pattern: "In the last 3 weeks"
+    note: "3-week temporal frame"
+
   # ---- Daily / hourly frames ----
   - pattern: "In the past 24 hours"
     note: "Daily/hours temporal frame"
+
+  - pattern: "During the last 48 hours"
+    note: "2-day/hours temporal frame (5 tinyIds)"
+
+  - pattern: "In the last 8 hours"
+    note: "Sub-daily/hours temporal frame (insulin timing)"

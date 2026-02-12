@@ -111,6 +111,8 @@ def generate_temporal_preposition_variants(pattern: str) -> Set[str]:
     (e.g., "In the past 7 days"), generates all combinations of:
     - Prepositions: {in, over, during, for, within}
     - Tense words: {past, last}
+    - Article-only form: "the past 7 days" (matches after any preposition)
+    - Bare form: "past 7 days" (matches in designation shorthand)
 
     Preserves capitalization of the original preposition.
     Non-temporal patterns pass through unchanged.
@@ -121,6 +123,8 @@ def generate_temporal_preposition_variants(pattern: str) -> Set[str]:
         'During the past 7 days', 'During the last 7 days',
         'For the past 7 days', 'For the last 7 days',
         'Within the past 7 days', 'Within the last 7 days',
+        'The past 7 days', 'The last 7 days',
+        'Past 7 days', 'Last 7 days',
     }
 
     Args:
@@ -143,11 +147,21 @@ def generate_temporal_preposition_variants(pattern: str) -> Set[str]:
     capitalize = orig_prep[0].isupper()
     tense_capitalize = orig_tense[0].isupper()
 
+    # Full preposition variants: "In/Over/During/For/Within the past/last N days"
     for prep in TEMPORAL_PREPOSITIONS:
         prep_cased = prep.capitalize() if capitalize else prep.lower()
         for tense in TEMPORAL_TENSE_WORDS:
             tense_cased = tense.capitalize() if tense_capitalize else tense.lower()
             variants.add(prep_cased + the_part + tense_cased + rest)
+
+    # Article-only variants: "The past/last N days" (matches after any preposition)
+    # Bare variants: "past/last N days" (matches in designation shorthand)
+    for tense in TEMPORAL_TENSE_WORDS:
+        tense_cap = tense.capitalize()
+        # "The past N days" — case expander will add "the past N days"
+        variants.add("The " + tense_cap + rest)
+        # "Past N days" — case expander will add "past N days"
+        variants.add(tense_cap + rest)
 
     return variants
 
