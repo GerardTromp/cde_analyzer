@@ -54,7 +54,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 - **Instrument Detection Workflow** - Complete 4-phase, 14-step automated pipeline
   - YAML-based workflow with 3 curator checkpoints
   - Comprehensive documentation: [docs/workflows/instrument-detection-workflow.md](docs/workflows/instrument-detection-workflow.md)
-  - SVG workflow diagram: [docs/workflows/instrument-detection-workflow.svg](docs/workflows/instrument-detection-workflow.svg)
+  - SVG workflow diagram: [docs/diagrams/instrument-detection-workflow.svg](docs/diagrams/instrument-detection-workflow.svg)
 - **Prefix Extraction in Coalesce** (`--min-prefix-tinyids`)
   - Groups patterns by common word prefix (e.g., "Neuro-QOL Lower...", "Neuro-QOL Upper..." → "Neuro-QOL")
   - Dramatically reduces manual curation effort (553 patterns → ~50)

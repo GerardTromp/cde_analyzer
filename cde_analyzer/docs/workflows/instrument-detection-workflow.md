@@ -2,7 +2,7 @@
 
 This document describes the **automated instrument detection workflow** implemented in `workflows/instrument_detection.yaml`. This is a concrete instantiation of the conceptual [Instrument & Phrase Stripping Workflow](instrument-phrase-stripping-workflow.md), automated through the YAML workflow orchestrator.
 
-![Instrument Detection Workflow](instrument-detection-workflow.svg)
+![Instrument Detection Workflow](../diagrams/instrument-detection-workflow.svg)
 
 ## Overview
 

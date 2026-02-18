@@ -2,7 +2,7 @@
 
 This document describes the complete multi-phase workflow for extracting, curating, and stripping instruments and phrases from CDE text fields, including iterative refinement loops.
 
-![Workflow Diagram](instrument-phrase-stripping-workflow.svg)
+![Workflow Diagram](../diagrams/instrument-phrase-stripping-workflow.svg)
 
 ## Overview
 
