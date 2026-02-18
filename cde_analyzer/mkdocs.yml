@@ -11,7 +11,7 @@ repo_url: https://github.com/your-repo/cde-clustering
 # Navigation
 nav:
   - Home: index.md
-  - Overview: overview.md
+  - About: about.md
   - Workflows:
     - Pipeline Architecture: workflow-architecture.md
     - Instrument Detection Pipeline: workflows/instrument-detection-workflow.md

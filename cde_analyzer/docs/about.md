@@ -1,4 +1,4 @@
-# Overview
+# About
 
 CDE Analyzer is a Python CLI toolkit for parsing and analyzing Common Data Elements (CDEs) from the [National Library of Medicine](https://cde.nlm.nih.gov/api) at the National Institutes of Health.
 

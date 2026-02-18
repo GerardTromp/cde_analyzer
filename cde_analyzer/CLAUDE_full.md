@@ -36,7 +36,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 **Recent Work** (Last 30 days):
 - **v0.5.15–v0.5.17: Documentation Restructuring**
   - Reorganized `mkdocs.yml` navigation: Workflows elevated, Command Reference section, LLM section, Appendix
-  - Created `docs/overview.md` and `docs/workflow-architecture.md` (consolidated from workflow-diagram + lessons_learned)
+  - Created `docs/about.md` (renamed from overview.md) and `docs/workflow-architecture.md` (consolidated from workflow-diagram + lessons_learned)
   - Generated SVGs: `detailed-workflow-architecture.svg`, `llm-workflow.svg` (replacing ASCII art)
   - Distributed `extensions_v0.5.x.md` content into relevant help pages; archived to `docs/appendix/`
   - Standardized CLI short options across 10 actions (phrase_miner, strip_discover, strip_phrases, pattern_util, instrument_miner, phrase_grouper, recall_analyze, pipeline_report, subset, count/fix_underscores)

@@ -30,7 +30,7 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 
 ### v0.5.15–v0.5.17: Documentation Restructuring
 - **Nav restructure**: `mkdocs.yml` reorganized — Workflows elevated, Command Reference section, LLM section, Appendix
-- **Content consolidation**: `workflow-architecture.md` (new, from workflow-diagram + lessons_learned), `overview.md` (new)
+- **Content consolidation**: `workflow-architecture.md` (new, from workflow-diagram + lessons_learned), `about.md` (new, renamed from overview.md)
 - **SVG diagrams**: `detailed-workflow-architecture.svg`, `llm-workflow.svg` replacing ASCII art
 - **Extensions distributed**: `extensions_v0.5.x.md` content integrated into relevant help pages, original moved to `docs/appendix/`
 - **CLI short options**: Standardized `-k`, `-K`, `-n`, `-t`, `-S`, `-D`, `-B`, `-I`, `-T`, `-M`, `-c`, `-A`, `-e`, `-V`, `-C`, `-r`, `-p`, `-g`, `-l`, `-L`, `-x` across 10 cli.py files

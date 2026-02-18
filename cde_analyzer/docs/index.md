@@ -89,7 +89,7 @@ python cde_analyzer.py phrase-miner --help
 
 ## Documentation
 
-- [Overview](overview.md) --- Project motivation, pipeline summary, and architecture
+- [About](about.md) --- Project motivation, pipeline summary, and architecture
 - [Workflow Architecture](workflow-architecture.md) --- Pipeline diagrams and command reference
 - [Commands Overview](commands/index.md) --- All commands organized by category
 
