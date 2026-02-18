@@ -1,8 +1,15 @@
-# strip_analyze
+# `strip_analyze` Command
 
 Analyze patterns for conflicts and false negatives.
 
-## Synopsis
+## Overview
+
+The `strip_analyze` command provides analysis utilities for the pattern stripping workflow:
+
+- **Conflict Analysis**: Detect pattern containment relationships that affect stripping order
+- **False-Negative Analysis**: Find remaining anchor patterns after stripping
+
+## Usage
 
 ```bash
 # Conflict analysis
@@ -13,13 +20,6 @@ cde-analyzer strip_analyze --analyze-conflicts REPORT.tsv \
 cde-analyzer strip_analyze --analyze-false-negatives \
     -i cleaned.json -o false_negatives.tsv [--fn-anchor "as part of"]
 ```
-
-## Description
-
-The `strip_analyze` command provides analysis utilities for the pattern stripping workflow:
-
-- **Conflict Analysis**: Detect pattern containment relationships that affect stripping order
-- **False-Negative Analysis**: Find remaining anchor patterns after stripping
 
 ## Options
 
@@ -100,6 +100,6 @@ This command is typically used in the iterative pattern improvement workflow:
 
 ## Related Commands
 
-- [strip_discover](strip_discover.md) - Pattern discovery
-- [pattern_util](pattern_util.md) - TSV utilities (merge, coalesce)
-- [strip_phrases](strip_phrases.md) - Apply stripping
+- [strip_discover](strip_discover.md) — Pattern discovery
+- [pattern_util](pattern_util.md) — TSV utilities (merge, coalesce)
+- [strip_phrases](strip_phrases.md) — Apply stripping

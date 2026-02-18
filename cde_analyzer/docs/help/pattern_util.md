@@ -1,8 +1,12 @@
-# pattern_util
+# `pattern_util` Command
 
 TSV pattern utilities (merge, coalesce, field analysis, import).
 
-## Synopsis
+## Overview
+
+The `pattern_util` command provides TSV manipulation utilities for pattern files. Most operations work on TSV files only — no CDE JSON input required (except `--field-analysis`).
+
+## Usage
 
 ```bash
 # Merge duplicate patterns
@@ -36,10 +40,6 @@ cde-analyzer pattern_util --expand-verbatim FILE -o EXPANDED.tsv \
 # Import patterns to supplementary config
 cde-analyzer pattern_util --add-to-supplementary CURATED.tsv
 ```
-
-## Description
-
-The `pattern_util` command provides TSV manipulation utilities for pattern files. Most operations work on TSV files only — no CDE JSON input required (except `--field-analysis`).
 
 ## Modes
 

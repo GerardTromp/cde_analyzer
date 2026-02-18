@@ -1,17 +1,8 @@
-# batch_expand_abbreviations
+# `batch_expand_abbreviations` Command
 
 Batch expand abbreviations to discover full instrument phrases.
 
-## Synopsis
-
-```bash
-cde-analyzer batch_expand_abbreviations \
-    -i <input.json> \
-    --abbreviations <instruments.tsv> \
-    -o <output_dir>
-```
-
-## Description
+## Overview
 
 The `batch_expand_abbreviations` action discovers extended instrument phrases by iterating over abbreviations from instrument mining output. For each abbreviation, it:
 
@@ -23,6 +14,15 @@ This bootstrapping approach discovers mappings like:
 - `PROMIS` → "Patient-Reported Outcome Measure Information System"
 - `PHQ` → "Patient Health Questionnaire"
 - `SF-36` → "36-Item Short Form Health Survey"
+
+## Usage
+
+```bash
+cde-analyzer batch_expand_abbreviations \
+    -i <input.json> \
+    --abbreviations <instruments.tsv> \
+    -o <output_dir>
+```
 
 ## Options
 
@@ -179,9 +179,9 @@ For each abbreviation:
 - Skips abbreviations with fewer than `--min-subset-size` matches
 - Typical runtime: 1-5 seconds per abbreviation depending on subset size
 
-## See Also
+## Related Commands
 
-- [instrument_miner](instrument_miner.md) - Initial instrument extraction
-- [subset](subset.md) - Text-based CDE filtering (used internally)
-- [phrase_miner](phrase_miner.md) - Phrase mining algorithm
-- [strip_discover](strip_discover.md) - Pattern discovery for stripping
+- [instrument_miner](instrument_miner.md) — Initial instrument extraction
+- [subset](subset.md) — Text-based CDE filtering (used internally)
+- [phrase_miner](phrase_miner.md) — Phrase mining algorithm
+- [strip_discover](strip_discover.md) — Pattern discovery for stripping

@@ -1,8 +1,18 @@
-# workflow
+# `workflow` Command
 
 YAML-based workflow orchestrator for CDE analysis pipelines.
 
-## Synopsis
+## Overview
+
+The `workflow` command executes sequential pipelines defined in YAML files. It provides:
+
+- **Template management** - List and copy built-in workflow templates
+- **Variable substitution** - Environment variables, YAML defaults, and CLI overrides
+- **Human checkpoints** - Pause for curator review, resume later
+- **State persistence** - Track progress across sessions
+- **Dry-run mode** - Preview commands without executing
+
+## Usage
 
 ```bash
 # List and copy templates (recommended first steps)
@@ -14,16 +24,6 @@ cde-analyzer workflow run <workflow.yaml> [--set KEY=VALUE] [--dry-run]
 cde-analyzer workflow resume [--state-file FILE]
 cde-analyzer workflow status [--state-file FILE]
 ```
-
-## Description
-
-The `workflow` command executes sequential pipelines defined in YAML files. It provides:
-
-- **Template management** - List and copy built-in workflow templates
-- **Variable substitution** - Environment variables, YAML defaults, and CLI overrides
-- **Human checkpoints** - Pause for curator review, resume later
-- **State persistence** - Track progress across sessions
-- **Dry-run mode** - Preview commands without executing
 
 ## Recommended Workflow
 
@@ -257,8 +257,8 @@ The codebase includes pre-built workflow templates. Use `workflow list` to see t
 | `quick_strip` | Quick strip with minimal steps |
 | `full_pipeline` | Complete multi-phase stripping pipeline |
 
-## See Also
+## Related Commands
 
-- [Workflow Architecture](../workflow-architecture.md) - Pipeline diagrams and command reference
-- [strip_discover](strip_discover.md) - Pattern discovery command
-- [strip_phrases](strip_phrases.md) - Pattern stripping command
+- [Workflow Architecture](../workflow-architecture.md) — Pipeline diagrams and command reference
+- [strip_discover](strip_discover.md) — Pattern discovery command
+- [strip_phrases](strip_phrases.md) — Pattern stripping command
