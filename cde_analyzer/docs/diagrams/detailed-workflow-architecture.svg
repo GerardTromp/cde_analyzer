@@ -1,220 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 1850" width="820" height="1850">
-  <defs>
-    <style>
-      .title { font: bold 18px sans-serif; fill: #1a1a1a; }
-      .phase-title { font: bold 14px sans-serif; fill: #ffffff; }
-      .step-title { font: bold 11px sans-serif; fill: #333333; }
-      .step-text { font: 10px sans-serif; fill: #555555; }
-      .arrow { stroke: #666666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-      .phase-box { stroke-width: 2; rx: 8; }
-      .step-box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 4; }
-      .checkpoint-box { fill: #fef9c3; stroke: #eab308; stroke-width: 2; rx: 4; stroke-dasharray: 6,3; }
-      .input-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 8; }
-      .output-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; rx: 8; }
-      .output-label { font: italic 10px sans-serif; fill: #2563eb; }
-      .file-label { font: italic 10px sans-serif; fill: #6b7280; }
-      .checkpoint-text { font: bold 10px sans-serif; fill: #92400e; }
-      .detail-text { font: 10px sans-serif; fill: #666666; }
-    </style>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666666"/>
-    </marker>
-  </defs>
-
-  <!-- Title -->
-  <text x="410" y="28" text-anchor="middle" class="title">Detailed Workflow Architecture</text>
-
-  <!-- Input Box -->
-  <rect x="260" y="45" width="300" height="40" class="input-box"/>
-  <text x="410" y="70" text-anchor="middle" class="step-title">INPUT: cdes.json</text>
-
-  <!-- Arrow to Phase 1 -->
-  <path d="M410,85 L410,110" class="arrow"/>
-
-  <!-- ================================================================ -->
-  <!-- PHASE 1: Instrument Detection -->
-  <!-- ================================================================ -->
-  <rect x="40" y="110" width="740" height="1060" fill="#eff6ff" class="phase-box" style="stroke: #2563eb;"/>
-  <rect x="40" y="110" width="740" height="28" fill="#2563eb" class="phase-box" style="stroke: #2563eb;"/>
-  <text x="410" y="129" text-anchor="middle" class="phase-title">PHASE 1: INSTRUMENT DETECTION</text>
-
-  <!-- Step 1: Mine instruments -->
-  <rect x="70" y="150" width="500" height="36" class="step-box"/>
-  <text x="85" y="168" class="step-title">1. Mine instruments</text>
-  <text x="85" y="180" class="step-text">(abbreviation-only + supplementary)</text>
-  <text x="590" y="173" class="file-label">instruments.tsv</text>
-
-  <path d="M320,186 L320,198" class="arrow"/>
-
-  <!-- Step 2: Batch expand abbreviations -->
-  <rect x="70" y="198" width="500" height="36" class="step-box"/>
-  <text x="85" y="216" class="step-title">2. Batch expand abbreviations</text>
-  <text x="85" y="228" class="step-text">PROMIS -> "Patient-Reported Outcome..."</text>
-  <text x="590" y="221" class="file-label">expanded_phrases.tsv</text>
-
-  <path d="M320,234 L320,246" class="arrow"/>
-
-  <!-- Step 3: Discover abbreviation patterns -->
-  <rect x="70" y="246" width="500" height="36" class="step-box"/>
-  <text x="85" y="264" class="step-title">3. Discover abbreviation designation patterns</text>
-  <text x="85" y="276" class="step-text">(PROMIS - ..., [PROMIS])</text>
-  <text x="590" y="269" class="file-label">abbrev_patterns.tsv</text>
-
-  <path d="M320,282 L320,298" class="arrow"/>
-
-  <!-- Checkpoint 1 -->
-  <rect x="100" y="298" width="460" height="30" class="checkpoint-box"/>
-  <text x="330" y="318" text-anchor="middle" class="checkpoint-text">CHECKPOINT: Expansion review</text>
-
-  <path d="M320,328 L320,344" class="arrow"/>
-
-  <!-- Step 4: Discover verbatim patterns -->
-  <rect x="70" y="344" width="500" height="36" class="step-box"/>
-  <text x="85" y="362" class="step-title">4. Discover verbatim patterns</text>
-  <text x="85" y="374" class="step-text">(instruments + expanded + abbrev patterns)</text>
-  <text x="590" y="365" class="file-label">discovered_instruments.tsv</text>
-
-  <path d="M320,380 L320,392" class="arrow"/>
-
-  <!-- Step 5: Coalesce -->
-  <rect x="70" y="392" width="500" height="36" class="step-box"/>
-  <text x="85" y="410" class="step-title">5. Coalesce (subsumption + prefix extraction)</text>
-  <text x="590" y="413" class="file-label">coalesced_instruments.tsv</text>
-
-  <path d="M320,428 L320,444" class="arrow"/>
-
-  <!-- Checkpoint 2 -->
-  <rect x="100" y="444" width="460" height="30" class="checkpoint-box"/>
-  <text x="330" y="464" text-anchor="middle" class="checkpoint-text">CHECKPOINT: Curator review</text>
-  <text x="590" y="464" class="output-label">curated_instruments.tsv</text>
-
-  <path d="M320,474 L320,490" class="arrow"/>
-
-  <!-- Step 6: Family discovery -->
-  <rect x="70" y="490" width="500" height="28" class="step-box"/>
-  <text x="85" y="508" class="step-title">6. Family discovery</text>
-
-  <path d="M320,518 L320,530" class="arrow"/>
-
-  <!-- Step 7: Re-discover abbreviations -->
-  <rect x="70" y="530" width="500" height="28" class="step-box"/>
-  <text x="85" y="548" class="step-title">7. Re-discover abbreviations</text>
-
-  <path d="M320,558 L320,570" class="arrow"/>
-
-  <!-- Step 8: Final discover + coalesce -->
-  <rect x="70" y="570" width="500" height="36" class="step-box"/>
-  <text x="85" y="588" class="step-title">8. Final discover + coalesce</text>
-  <text x="85" y="600" class="step-text">(emit-def-variants, split-tiers: 3)</text>
-  <text x="590" y="591" class="file-label">final_coalesced.tsv</text>
-
-  <path d="M320,606 L320,622" class="arrow"/>
-
-  <!-- Checkpoint 3 -->
-  <rect x="100" y="622" width="460" height="30" class="checkpoint-box"/>
-  <text x="330" y="642" text-anchor="middle" class="checkpoint-text">CHECKPOINT: Final review</text>
-
-  <path d="M320,652 L320,668" class="arrow"/>
-
-  <!-- Step 9a: Strip tier-1 -->
-  <rect x="70" y="668" width="500" height="36" class="step-box"/>
-  <text x="85" y="686" class="step-title">9a. Strip tier-1 (>=3 tokens)</text>
-  <text x="590" y="686" class="output-label">tier1_stripped.json</text>
-
-  <path d="M320,704 L320,716" class="arrow"/>
-
-  <!-- Step 9b: Strip tier-2 -->
-  <rect x="70" y="716" width="500" height="36" class="step-box"/>
-  <text x="85" y="734" class="step-title">9b. Strip tier-2 (&lt;3 tokens)</text>
-  <rect x="590" y="720" width="170" height="24" class="output-box"/>
-  <text x="675" y="737" text-anchor="middle" class="step-title">no_instruments.json</text>
-
-  <path d="M320,752 L320,764" class="arrow"/>
-
-  <!-- Step 10: Sanity check -->
-  <rect x="70" y="764" width="500" height="28" class="step-box"/>
-  <text x="85" y="782" class="step-title">10. Sanity check</text>
-  <rect x="590" y="768" width="170" height="20" class="output-box"/>
-  <text x="675" y="782" text-anchor="middle" class="step-text">sanity_check.tsv</text>
-
-  <path d="M320,792 L320,804" class="arrow"/>
-
-  <!-- Step 11: Discovery report -->
-  <rect x="70" y="804" width="500" height="28" class="step-box"/>
-  <text x="85" y="822" class="step-title">11. Discovery report</text>
-  <rect x="590" y="808" width="170" height="20" class="output-box"/>
-  <text x="675" y="822" text-anchor="middle" class="step-text">discovery_report.md</text>
-
-  <!-- Output indicator for Phase 1 -->
-  <text x="770" y="695" class="detail-text" text-anchor="middle" transform="rotate(-90, 770, 695)">OUTPUTS 1-3</text>
-
-  <!-- Arrow to Phase 2 -->
-  <path d="M410,1170 L410,1200" class="arrow"/>
-
-  <!-- ================================================================ -->
-  <!-- PHASE 2: Phrase Stripping -->
-  <!-- ================================================================ -->
-  <rect x="40" y="1200" width="740" height="560" fill="#f0fdf4" class="phase-box" style="stroke: #16a34a;"/>
-  <rect x="40" y="1200" width="740" height="28" fill="#16a34a" class="phase-box" style="stroke: #16a34a;"/>
-  <text x="410" y="1219" text-anchor="middle" class="phase-title">PHASE 2: PHRASE STRIPPING</text>
-
-  <!-- Step 1: Mine phrases -->
-  <rect x="70" y="1240" width="500" height="36" class="step-box"/>
-  <text x="85" y="1258" class="step-title">1. Mine phrases (k-mer descent, k=25 to k=3)</text>
-  <text x="590" y="1261" class="file-label">verbatim_phrases.tsv</text>
-
-  <path d="M320,1276 L320,1292" class="arrow"/>
-
-  <!-- Step 2: Discover verbatim -->
-  <rect x="70" y="1292" width="500" height="28" class="step-box"/>
-  <text x="85" y="1310" class="step-title">2. Discover verbatim patterns</text>
-  <text x="590" y="1310" class="file-label">discovered.tsv</text>
-
-  <path d="M320,1320 L320,1336" class="arrow"/>
-
-  <!-- Step 3: Coalesce patterns -->
-  <rect x="70" y="1336" width="500" height="28" class="step-box"/>
-  <text x="85" y="1354" class="step-title">3. Coalesce patterns</text>
-  <text x="590" y="1354" class="file-label">coalesced.tsv</text>
-
-  <path d="M320,1364 L320,1380" class="arrow"/>
-
-  <!-- Step 4: Field analysis -->
-  <rect x="70" y="1380" width="500" height="36" class="step-box"/>
-  <text x="85" y="1398" class="step-title">4. Field analysis (enrich + filter)</text>
-  <text x="590" y="1401" class="file-label">coalesced_fields.tsv</text>
-
-  <path d="M320,1416 L320,1432" class="arrow"/>
-
-  <!-- Checkpoint 4 -->
-  <rect x="100" y="1432" width="460" height="30" class="checkpoint-box"/>
-  <text x="330" y="1452" text-anchor="middle" class="checkpoint-text">CHECKPOINT: Curator review</text>
-  <text x="590" y="1452" class="output-label">curated.tsv</text>
-
-  <path d="M320,1462 L320,1478" class="arrow"/>
-
-  <!-- Step 5: Strip phrases -->
-  <rect x="70" y="1478" width="500" height="28" class="step-box"/>
-  <text x="85" y="1496" class="step-title">5. Strip phrases</text>
-  <rect x="590" y="1482" width="170" height="20" class="output-box"/>
-  <text x="675" y="1496" text-anchor="middle" class="step-text">final_stripped.json</text>
-
-  <path d="M320,1506 L320,1522" class="arrow"/>
-
-  <!-- Step 6: Discovery report -->
-  <rect x="70" y="1522" width="500" height="28" class="step-box"/>
-  <text x="85" y="1540" class="step-title">6. Discovery report</text>
-  <rect x="590" y="1526" width="170" height="20" class="output-box"/>
-  <text x="675" y="1540" text-anchor="middle" class="step-text">discovery_report.md</text>
-
-  <!-- Output indicator for Phase 2 -->
-  <text x="770" y="1505" class="detail-text" text-anchor="middle" transform="rotate(-90, 770, 1505)">OUTPUTS 4-5</text>
-
-  <!-- Arrow to Output -->
-  <path d="M410,1760 L410,1790" class="arrow"/>
-
-  <!-- Output Box -->
-  <rect x="230" y="1790" width="360" height="40" class="output-box"/>
-  <text x="410" y="1815" text-anchor="middle" class="step-title">OUTPUT: Cleaned CDE JSON</text>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 820 1338">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <text transform="translate(276.97 28)" fill="#1a1a1a" font-family="Arial-BoldMT, Arial" font-size="18" font-weight="700" isolation="isolate"><tspan x="0" y="0">Detailed Workflow Architecture</tspan></text>
+  <rect x="260" y="45" width="300" height="40" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text transform="translate(365.38 70)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">INPUT: cdes.json</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="417 92 410 112 403 92 417 92" fill="#666"/>
+  <path d="M410,110" fill="#666"/>
+  <rect x="40" y="110" width="740" height="746" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="40" y="110" width="740" height="28" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
+  <text transform="translate(287.49 129)" fill="#fff" font-family="Arial-BoldMT, Arial" font-size="14" font-weight="700" isolation="isolate"><tspan x="0" y="0">PHASE 1: INSTRUMENT DETECTION</tspan></text>
+  <rect x="70" y="150" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 168)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">1. Mine instruments</tspan></text>
+  <text transform="translate(85 180)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">(abbreviation-only + supplementary)</tspan></text>
+  <text transform="translate(590 173)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">instruments.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 180 320 200 313 180 327 180" fill="#666"/>
+  <path d="M320,198" fill="#666"/>
+  <rect x="70" y="198" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 216)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">2. Batch expand abbreviations</tspan></text>
+  <text transform="translate(85 228)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">PROMIS -&gt; &quot;Patient-Reported Outcome...&quot;</tspan></text>
+  <text transform="translate(590 221)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">expanded_phrases.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 228 320 248 313 228 327 228" fill="#666"/>
+  <path d="M320,246" fill="#666"/>
+  <rect x="70" y="246" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 264)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">3. Discover abbreviation designation patterns</tspan></text>
+  <text transform="translate(85 276)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">(PROMIS - ..., [PROMIS])</tspan></text>
+  <text transform="translate(590 269)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">abbrev_patterns.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 280 320 300 313 280 327 280" fill="#666"/>
+  <path d="M320,298" fill="#666"/>
+  <rect x="100" y="298" width="460" height="30" fill="#fef9c3" stroke="#eab308" stroke-dasharray="6 3" stroke-width="2"/>
+  <text transform="translate(252.2 318)" fill="#92400e" font-family="Arial-BoldMT, Arial" font-size="10" font-weight="700" isolation="isolate"><tspan x="0" y="0">CHECKPOINT: Expansion review</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 326 320 346 313 326 327 326" fill="#666"/>
+  <path d="M320,344" fill="#666"/>
+  <rect x="70" y="344" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 362)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">4. Discover verbatim patterns</tspan></text>
+  <text transform="translate(85 374)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">(instruments + expanded + abbrev patterns)</tspan></text>
+  <text transform="translate(590 365)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">discovered_instruments.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 374 320 394 313 374 327 374" fill="#666"/>
+  <path d="M320,392" fill="#666"/>
+  <rect x="70" y="392" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 410)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">5. Coalesce (subsumption + prefix extraction)</tspan></text>
+  <text transform="translate(590 413)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">coalesced_instruments.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 426 320 446 313 426 327 426" fill="#666"/>
+  <path d="M320,444" fill="#666"/>
+  <rect x="100" y="444" width="460" height="30" fill="#fef9c3" stroke="#eab308" stroke-dasharray="6 3" stroke-width="2"/>
+  <text transform="translate(259.43 464)" fill="#92400e" font-family="Arial-BoldMT, Arial" font-size="10" font-weight="700" isolation="isolate"><tspan x="0" y="0">CHECKPOINT: Curator review</tspan></text>
+  <text transform="translate(590 464)" fill="#2563eb" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">curated_instruments.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 472 320 492 313 472 327 472" fill="#666"/>
+  <path d="M320,490" fill="#666"/>
+  <rect x="70" y="490" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 508)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">6. Family discovery</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 512 320 532 313 512 327 512" fill="#666"/>
+  <path d="M320,530" fill="#666"/>
+  <rect x="70" y="530" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 548)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">7. Re-discover abbreviations</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 552 320 572 313 552 327 552" fill="#666"/>
+  <path d="M320,570" fill="#666"/>
+  <rect x="70" y="570" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 588)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">8. Final discover + coalesce</tspan></text>
+  <text transform="translate(85 600)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">(emit-def-variants, split-tiers: 3)</tspan></text>
+  <text transform="translate(590 591)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">final_coalesced.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 604 320 624 313 604 327 604" fill="#666"/>
+  <path d="M320,622" fill="#666"/>
+  <rect x="100" y="622" width="460" height="30" fill="#fef9c3" stroke="#eab308" stroke-dasharray="6 3" stroke-width="2"/>
+  <text transform="translate(265.82 642)" fill="#92400e" font-family="Arial-BoldMT, Arial" font-size="10" font-weight="700" isolation="isolate"><tspan x="0" y="0">CHECKPOINT: Final review</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 650 320 670 313 650 327 650" fill="#666"/>
+  <path d="M320,668" fill="#666"/>
+  <rect x="70" y="668" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 686)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">9a. Strip tier-1 (&gt;=3 tokens)</tspan></text>
+  <text transform="translate(590 686)" fill="#2563eb" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">tier1_stripped.json</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 698 320 718 313 698 327 698" fill="#666"/>
+  <path d="M320,716" fill="#666"/>
+  <rect x="70" y="716" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 734)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">9b. Strip tier-2 (&lt;3 tokens)</tspan></text>
+  <rect x="590" y="720" width="170" height="24" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(620.91 737)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">no_instruments.json</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 746 320 766 313 746 327 746" fill="#666"/>
+  <path d="M320,764" fill="#666"/>
+  <rect x="70" y="764" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 782)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">10. Sanity check</tspan></text>
+  <rect x="590" y="768" width="170" height="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(638.32 782)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">sanity_check.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 786 320 806 313 786 327 786" fill="#666"/>
+  <path d="M320,804" fill="#666"/>
+  <rect x="70" y="804" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 822)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">11. Discovery report</tspan></text>
+  <rect x="590" y="808" width="170" height="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(629.7 822)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">discovery_report.md</tspan></text>
+  <text transform="translate(770 727.5) rotate(-90)" fill="#666" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">OUTPUTS 1-3</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="417 862 410 882 403 862 417 862" fill="#666"/>
+  <path d="M410,880" fill="#666"/>
+  <rect x="40" y="880" width="740" height="363" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <rect x="40" y="880" width="740" height="28" fill="#16a34a" stroke="#16a34a" stroke-width="2"/>
+  <text transform="translate(306.92 899)" fill="#fff" font-family="Arial-BoldMT, Arial" font-size="14" font-weight="700" isolation="isolate"><tspan x="0" y="0">PHASE 2: PHRASE STRIPPING</tspan></text>
+  <rect x="70" y="920" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 938)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">1. Mine phrases (k-mer descent, k=25 to k=3)</tspan></text>
+  <text transform="translate(590 941)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">verbatim_phrases.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 954 320 974 313 954 327 954" fill="#666"/>
+  <path d="M320,972" fill="#666"/>
+  <rect x="70" y="972" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 990)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">2. Discover verbatim patterns</tspan></text>
+  <text transform="translate(590 990)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">discovered.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 998 320 1018 313 998 327 998" fill="#666"/>
+  <path d="M320,1016" fill="#666"/>
+  <rect x="70" y="1016" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 1034)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">3. Coalesce patterns</tspan></text>
+  <text transform="translate(590 1034)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">coalesced.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 1042 320 1062 313 1042 327 1042" fill="#666"/>
+  <path d="M320,1060" fill="#666"/>
+  <rect x="70" y="1060" width="500" height="36" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 1078)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">4. Field analysis (enrich + filter)</tspan></text>
+  <text transform="translate(590 1081)" fill="#6b7280" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">coalesced_fields.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 1094 320 1114 313 1094 327 1094" fill="#666"/>
+  <path d="M320,1112" fill="#666"/>
+  <rect x="100" y="1112" width="460" height="30" fill="#fef9c3" stroke="#eab308" stroke-dasharray="6 3" stroke-width="2"/>
+  <text transform="translate(259.43 1132)" fill="#92400e" font-family="Arial-BoldMT, Arial" font-size="10" font-weight="700" isolation="isolate"><tspan x="0" y="0">CHECKPOINT: Curator review</tspan></text>
+  <text transform="translate(590 1132)" fill="#2563eb" font-family="Arial-ItalicMT, Arial" font-size="10" font-style="italic" isolation="isolate"><tspan x="0" y="0">curated.tsv</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 1140 320 1160 313 1140 327 1140" fill="#666"/>
+  <path d="M320,1158" fill="#666"/>
+  <rect x="70" y="1158" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 1176)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">5. Strip phrases</tspan></text>
+  <rect x="590" y="1162" width="170" height="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(634.7 1176)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">final_stripped.json</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="327 1184 320 1204 313 1184 327 1184" fill="#666"/>
+  <path d="M320,1202" fill="#666"/>
+  <rect x="70" y="1202" width="500" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text transform="translate(85 1220)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">6. Discovery report</tspan></text>
+  <rect x="590" y="1206" width="170" height="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(629.7 1220)" fill="#555" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">discovery_report.md</tspan></text>
+  <text transform="translate(770 1217.5) rotate(-90)" fill="#666" font-family="ArialMT, Arial" font-size="10" isolation="isolate"><tspan x="0" y="0">OUTPUTS 4-5</tspan></text>
+  <path d="" fill="none"/>
+  <polygon points="417 1250 410 1270 403 1250 417 1250" fill="#666"/>
+  <path d="M410,1268" fill="#666"/>
+  <rect x="230" y="1268" width="360" height="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text transform="translate(333.6 1293)" fill="#333" font-family="Arial-BoldMT, Arial" font-size="11" font-weight="700" isolation="isolate"><tspan x="0" y="0">OUTPUT: Cleaned CDE JSON</tspan></text>
 </svg>
