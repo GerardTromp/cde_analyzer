@@ -12,18 +12,13 @@ repo_url: https://github.com/your-repo/cde-clustering
 nav:
   - Home: index.md
   - Overview: overview.md
-  - Commands Overview: commands/index.md
   - Workflows:
-    - Architecture: workflow-architecture.md
-    - Instrument & Phrase Stripping: workflows/instrument-phrase-stripping-workflow.md
+    - Pipeline Architecture: workflow-architecture.md
     - Instrument Detection Pipeline: workflows/instrument-detection-workflow.md
-  - Guides:
-    - Curation Guide: curation-guide.md
-    - Phrase Miner Logic: phrase_miner_logic.md
-  - Vignettes:
-    - Phrase Stripping: vignettes/phrase-stripping.md
+    - Instrument & Phrase Stripping: workflows/instrument-phrase-stripping-workflow.md
   - Command Reference:
-    - All Commands: help/all-commands.md
+    - Commands Overview: commands/index.md
+    - All Commands (CLI): help/all-commands.md
     - Launcher: help/cde_analyzer.md
     - Instrument Extraction:
       - instrument_miner: help/instrument_miner.md
@@ -58,8 +53,13 @@ nav:
   - LLM Classification:
     - Overview: llm/index.md
     - llm_classify Command: llm/llm_classify.md
+    - llm_classify Reference: help/llm_classify.md
     - Configuration: llm/configuration.md
     - Query Modules: llm/query_modules.md
+  - Guides:
+    - Curation Guide: curation-guide.md
+    - Phrase Miner Logic: phrase_miner_logic.md
+    - Phrase Stripping Vignette: vignettes/phrase-stripping.md
   - Development:
     - Architecture: architecture.md
     - Data Models: data-models.md
