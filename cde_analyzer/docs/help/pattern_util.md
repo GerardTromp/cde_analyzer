@@ -181,7 +181,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 
 | Option | Description |
 |--------|-------------|
-| `--merge-patterns FILE` | Deduplicate patterns within a single TSV file, merging tinyId sets for identical patterns |
+| `--merge-patterns`, `-M` FILE | Deduplicate patterns within a single TSV file, merging tinyId sets for identical patterns |
 | `-o, --output FILE` | Output merged TSV file (required) |
 | `--merge-pattern-column` | Column name for patterns (default: `pattern`) |
 | `--merge-tinyids-column` | Column name for tinyIds (default: `tinyIds`) |
@@ -192,7 +192,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 
 | Option | Description |
 |--------|-------------|
-| `--coalesce-variants FILE` | Input TSV file for subsumption analysis |
+| `--coalesce-variants`, `-c` FILE | Input TSV file for subsumption analysis |
 | `-o, --output FILE` | Output coalesced TSV file (required) |
 | `--coalesce-report FILE` | Write subsumption report showing removed patterns |
 | `--min-prefix-tinyids N` | Enable prefix extraction (0 = disabled) |
@@ -206,7 +206,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 
 | Option | Description |
 |--------|-------------|
-| `--field-analysis FILE` | Input patterns TSV to enrich |
+| `--field-analysis`, `-A` FILE | Input patterns TSV to enrich |
 | `-i, --input FILE` | Source CDE JSON for scanning (required) |
 | `-m, --model NAME` | Pydantic model name (default: `CDE`) |
 | `--fields PATHS` | Field paths to scan (default: `definitions.*.definition designations.*.designation`) |
@@ -231,7 +231,7 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 
 | Option | Description |
 |--------|-------------|
-| `--expand-verbatim FILE` | Input curated patterns TSV to expand with variants |
+| `--expand-verbatim`, `-e` FILE | Input curated patterns TSV to expand with variants |
 | `-o, --output FILE` | Output expanded TSV file (required) |
 | `--no-case-variants` | Skip case variant generation (original + lowercase) |
 | `--no-number-variants` | Skip digit ↔ word variants (`7` ↔ `seven`) |
@@ -313,6 +313,19 @@ cde-analyzer pattern_util --add-to-supplementary false_negatives.tsv
 # 3. Re-run phrase_miner to pick up new patterns
 cde-analyzer phrase_miner -i cdes.json -o output/ --extract-supplementary
 ```
+
+## Additional Capabilities (v0.5.x)
+
+Several enhancements were added in the v0.5.x series:
+
+- **Anchor Trimming** (default on in `--coalesce-variants`): Patterns containing anchor phrases ("as part of", "based on") are trimmed to the bare instrument name. Disable with `--no-trim-anchors`.
+- **Rollup-Subset TinyIds** (`--rollup-subset-tinyids`): After text-based subsumption, removes short patterns whose tinyIds are a strict subset of a longer pattern's tinyIds.
+- **Definition-Form Variants** (`--emit-def-variants`): Emits patterns both with and without trailing separators (` -`, ` - `) so that definitions are stripped alongside designations.
+- **Tier Splitting** (`--split-tiers MIN_TOKENS`): Splits coalesced output into tier-1 (>=MIN_TOKENS) and tier-2 (<MIN_TOKENS) for two-pass stripping.
+- **Group Hierarchy** (`--group-hierarchy`): Assigns `group`, `sub_group`, `suffix` labels based on shared prefix.
+- **Verbatim Variant Expansion** (`--expand-verbatim`): Expands curated patterns with temporal/case/number/plural variants. Pipeline order: temporal -> plural -> number -> case. With `--rescan`, only variants that exist in the source data survive.
+
+See [Extensions v0.5.x](../appendix/extensions_v0.5.x.md#2-pattern_util-enhancements) for full implementation details.
 
 ## Related Commands
 

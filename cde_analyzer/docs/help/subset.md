@@ -45,14 +45,14 @@ cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 
 | Argument | Description |
 |----------|-------------|
-| `--id-list` | List of tinyIds on command line |
-| `--id-file` | File containing tinyIds (JSON, CSV, or TSV) |
+| `--id-list`, `-l` | List of tinyIds on command line |
+| `--id-file`, `-L` | File containing tinyIds (JSON, CSV, or TSV) |
 
 ### Text Filtering (NEW)
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--text-filter` | - | Text pattern to search for in specified fields |
+| `--text-filter`, `-t` | - | Text pattern to search for in specified fields |
 | `--fields, -f` | `designation definition` | Fields to search |
 | `--case-sensitive` | `false` | Enable case-sensitive matching |
 | `--regex` | `false` | Treat `--text-filter` as a regular expression |
@@ -64,7 +64,7 @@ cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 | Argument | Description |
 |----------|-------------|
 | `--output-format` | Output format: `json` (default), `csv`, `tsv` |
-| `--exclude` | Exclude matching records instead of including |
+| `--exclude`, `-x` | Exclude matching records instead of including |
 | `--no-exclude` | Include matching records (default) |
 
 ## Examples

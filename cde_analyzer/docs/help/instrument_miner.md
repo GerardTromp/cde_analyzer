@@ -43,14 +43,14 @@ cde-analyzer instrument_miner -i cdes.json -o output/ [options]
 
 | Option | Description |
 |--------|-------------|
-| `--extract-abbreviation-only` | Extract abbreviation-only references like "as part of (PHQ-9)". Maps to canonical names using first-pass acronyms. |
-| `--extract-supplementary` | Extract non-Title-Case instruments (animal models, behavioral tests). Uses patterns from `config/supplementary_patterns.yaml`. |
+| `--extract-abbreviation-only`, `-a` | Extract abbreviation-only references like "as part of (PHQ-9)". Maps to canonical names using first-pass acronyms. |
+| `--extract-supplementary`, `-s` | Extract non-Title-Case instruments (animal models, behavioral tests). Uses patterns from `config/supplementary_patterns.yaml`. |
 
 ### Family Detection
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--detect-families` | off | Enable instrument family detection (groups by family, e.g., Neuro-QOL, PROMIS) |
+| `--detect-families`, `-d` | off | Enable instrument family detection (groups by family, e.g., Neuro-QOL, PROMIS) |
 | `--family-confidence-threshold` | `0.7` | Minimum confidence for automatic family assignment. Below threshold, instruments are flagged for review. |
 | `--family-summary` | off | Generate `instrument_families.tsv` summary file |
 
@@ -113,6 +113,12 @@ This command is Phase 1 in the [Instrument & Phrase Stripping Workflow](../workf
 ```
 instrument_miner → strip_discover → strip_phrases → phrase_miner → ...
 ```
+
+## Family Detection (v0.5.x)
+
+The `--detect-families` flag activates instrument family assignment using prefix-based grouping with improved matching logic. Family confidence scores below `--family-confidence-threshold` (default: 0.7) are flagged for manual review or LLM adjudication via `llm_classify --adjudicate-instruments`.
+
+See [Extensions v0.5.x](../appendix/extensions_v0.5.x.md#6-instrument_family_assigner-enhancements) for implementation details.
 
 ## Related Commands
 

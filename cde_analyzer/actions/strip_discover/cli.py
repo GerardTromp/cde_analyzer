@@ -86,7 +86,7 @@ def register_subparser(subparser: ArgumentParser):
              "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
     subparser.add_argument(
-        "--expand-variants",
+        "--expand-variants", "-e",
         action="store_true",
         help="Generate spelling/punctuation/number variants for better matching. "
              "Handles: spacing around parentheses, trailing punctuation (including ' - ', ': '), "
@@ -107,7 +107,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Disable including bare instrument names in variant expansion.",
     )
     subparser.add_argument(
-        "--discover-bare-names",
+        "--discover-bare-names", "-b",
         action="store_true",
         help="Second pass: after discovering prefixed patterns, also discover "
              "bare instrument names (without anchor prefix). This finds occurrences "
@@ -181,7 +181,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Abbreviation discovery mode
     subparser.add_argument(
-        "--discover-abbreviations",
+        "--discover-abbreviations", "-a",
         type=str,
         metavar="FILE",
         help="Discovery mode: extract abbreviations from instruments.tsv or instrument_families.tsv, "

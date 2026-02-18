@@ -242,6 +242,17 @@ objects                Tokenize (NLTK)            - Count k-mers
 - Parallel processing for independent CDE records
 - Streaming JSON for large files
 
+## Additional Modules (v0.5.x)
+
+The following modules were added in the v0.5.x series:
+
+- **`utils/flexible_pattern_matcher.py`** --- Coalescer engine with roll-down logic (expanding prefix patterns to more specific forms with a minimum 2-word base) and tinyId-subset rollup (requiring substring match to prevent unrelated patterns from being incorrectly subsumed).
+- **`logic/group_hierarchy.py`** --- Group/sub-group hierarchy assignment using prefix-based grouping with delimiter stripping.
+- **`logic/span_boundary.py`** --- SpaCy-based semantic boundary detection for prefix group trimming. Uses POS tagging to prevent overshooting into content-bearing tokens. Supports temporal frame detection.
+- **`utils/pattern_variant_generator.py`** --- Temporal/case/number/plural variant generators for verbatim pattern expansion.
+
+See [Extensions v0.5.x](appendix/extensions_v0.5.x.md) for full implementation details.
+
 ## Related Documentation
 
 - [Data Models](data-models.md)

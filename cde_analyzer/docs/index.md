@@ -87,47 +87,25 @@ python cde_analyzer.py phrase-miner --help
 | [llm-classify](help/llm_classify.md) | Multi-LLM phrase classification |
 | [batch-expand-abbreviations](help/batch_expand_abbreviations.md) | Batch expand abbreviations in TSV files |
 
-## Guides
+## Documentation
 
-- [Curation Guide](curation-guide.md) — Decision guidelines for human pattern curation steps
-- [Phrase Miner Logic](phrase_miner_logic.md) — Algorithm internals and data flow
-- [Instrument & Phrase Workflow](workflows/instrument-phrase-stripping-workflow.md) — Complete multi-phase workflow
+- [Overview](overview.md) --- Project motivation, pipeline summary, and architecture
+- [Workflow Architecture](workflow-architecture.md) --- Pipeline diagrams and command reference
+- [Commands Overview](commands/index.md) --- All commands organized by category
 
-## Vignettes
+### Guides
 
-Step-by-step tutorials with worked examples for common workflows:
+- [Curation Guide](curation-guide.md) --- Decision guidelines for human pattern curation
+- [Phrase Miner Logic](phrase_miner_logic.md) --- Algorithm internals and data flow
 
-- [Phrase Stripping](vignettes/phrase-stripping.md) — From raw CDE JSON to cleaned output, covering six scenarios from minimal strip to full production pipeline
+### Workflows
 
-## Architecture
+- [Instrument & Phrase Stripping](workflows/instrument-phrase-stripping-workflow.md) --- 6-phase conceptual workflow
+- [Instrument Detection Pipeline](workflows/instrument-detection-workflow.md) --- Automated YAML pipeline
 
-CDE Analyzer uses a **layered monolithic** architecture with a plugin-style action system:
+### Vignettes
 
-```
-cde_analyzer.py          # Entry point with ACTION_REGISTRY
-├── actions/             # Each action has cli.py + run.py
-│   ├── phrase_miner/    # Argument parsing + orchestration
-│   └── ...
-├── logic/               # Business logic implementations
-├── utils/               # Helper functions
-└── CDE_Schema/          # Pydantic data models
-```
-
-**Key Features**:
-
-- **Lazy Loading**: Actions loaded only when invoked (fast startup)
-- **Visitor Pattern**: Single recursive engine for nested traversal
-- **Three-Layer Actions**: CLI → Orchestration → Logic separation
-
-## Data Model
-
-The CDE repository data structure is implemented as Pydantic models:
-
-- `CDEItem` - Individual data elements
-- `CDEForm` - Form structures
-- 50+ supporting models for nested structures
-
-All fields are optional to handle sparse API responses, with field aliases mapping MongoDB/API names to Python-safe names.
+- [Phrase Stripping](vignettes/phrase-stripping.md) --- From raw CDE JSON to cleaned output (6 scenarios)
 
 ## Installation
 

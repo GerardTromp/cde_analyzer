@@ -73,7 +73,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Optional: Output file listing false negative tinyIds by family."
     )
     subparser.add_argument(
-        "--markdown-report",
+        "--markdown-report", "-r",
         help="Path to output human-readable markdown report with summary and details."
     )
     subparser.add_argument(
@@ -101,7 +101,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Fields to search for patterns (default: designation definition)."
     )
     subparser.add_argument(
-        "--case-sensitive",
+        "--case-sensitive", "-C",
         action="store_true",
         help="Make pattern matching case-sensitive (default: case-insensitive)."
     )

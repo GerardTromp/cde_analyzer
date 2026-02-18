@@ -162,7 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `strip_discover --discover-abbreviations` — abbreviation-based designation pattern discovery
 - Two-pass stripping in instrument pipeline (tier-1 long patterns, then tier-2 short fragments)
 - Recall analysis steps integrated into both pipeline workflows
-- Documentation: `docs/extensions_v0.5.x.md`, `docs/lessons_learned_20260129.md`
+- Documentation: `docs/appendix/extensions_v0.5.x.md`, `docs/appendix/lessons_learned_20260129.md`
 
 ### Changed
 - `coalesce_variants_tsv()` now trims anchor phrases by default (disable with `--no-trim-anchors`)

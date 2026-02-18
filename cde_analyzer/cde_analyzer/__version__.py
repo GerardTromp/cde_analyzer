@@ -1,6 +1,6 @@
 """Version information for cde_analyzer package."""
 
-__version__ = "0.5.16"
+__version__ = "0.5.17"
 __author__ = "Gerard Tromp"
 __email__ = "gerard.tromp@example.com"
 __description__ = "A Python framework for analyzing and extracting data from the NLM Common Data Elements Repository"

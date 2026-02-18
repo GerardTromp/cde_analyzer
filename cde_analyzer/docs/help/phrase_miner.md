@@ -28,14 +28,14 @@ cde-analyzer phrase_miner --input <file.json> [options]
 |----------|---------|-------------|
 | `--output-dir`, `-o` | `phrase_output` | Output directory for results |
 | `--fields`, `-f` | `designation definition` | Field names to extract phrases from |
-| `--k-max` | `25` | Maximum k-mer length |
-| `--k-min` | `3` | Minimum k-mer length |
-| `--freq-min` | `3` | Minimum frequency threshold per k-bin |
-| `--min-tinyids` | `2` | Minimum distinct tinyIds (document support) |
+| `--k-max`, `-K` | `25` | Maximum k-mer length |
+| `--k-min`, `-k` | `3` | Minimum k-mer length |
+| `--freq-min`, `-n` | `3` | Minimum frequency threshold per k-bin |
+| `--min-tinyids`, `-t` | `2` | Minimum distinct tinyIds (document support) |
 | `--lemmatize` / `--no-lemmatize` | `True` | Apply lemmatization to tokens |
 | `--remove-stopwords` | `False` | Remove English stopwords during tokenization |
-| `--enable-debruijn` | `False` | Enable de Bruijn graph extension (Phase 5) |
-| `--enable-subsumption` | `False` | Enable subsumption filtering (Phase 6) |
+| `--enable-debruijn`, `-D` | `False` | Enable de Bruijn graph extension (Phase 5) |
+| `--enable-subsumption`, `-S` | `False` | Enable subsumption filtering (Phase 6) |
 | `--enable-anchor` | `False` | Enable anchor-based extension (Phase 7) |
 | `--no-aho-corasick` | `False` | Use naive pattern matching instead of Aho-Corasick |
 | `--verbatim-case-sensitive` | `False` | Use case-sensitive verbatim grouping |

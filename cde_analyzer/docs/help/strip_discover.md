@@ -75,10 +75,10 @@ cde-analyzer strip_discover \
 
 | Option | Description |
 |--------|-------------|
-| `--expand-variants` | Generate spelling/punctuation variants (spacing, punctuation, possessives) |
+| `--expand-variants`, `-e` | Generate spelling/punctuation variants (spacing, punctuation, possessives) |
 | `--include-name-only` | Include bare instrument names without "as part of" prefix (default: on) |
 | `--no-include-name-only` | Disable bare name inclusion |
-| `--discover-bare-names` | Second pass: discover bare names after prefixed patterns |
+| `--discover-bare-names`, `-b` | Second pass: discover bare names after prefixed patterns |
 
 ### Filtering
 
@@ -108,7 +108,7 @@ cde-analyzer strip_discover \
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--discover-abbreviations` | | Extract abbreviations from instruments.tsv and scan for designation patterns |
+| `--discover-abbreviations`, `-a` | | Extract abbreviations from instruments.tsv and scan for designation patterns |
 | `--min-pattern-tinyids` | `2` | Minimum tinyIds for abbreviation prefix patterns to be output |
 
 ## Output Format
@@ -214,6 +214,14 @@ cde-analyzer strip_phrases -i cdes.json -m CDE -o cleaned.json \
 cde-analyzer strip_analyze --analyze-false-negatives \
     -i cleaned.json -o false_negatives.tsv
 ```
+
+## Additional Capabilities (v0.5.x)
+
+- **Field Distribution Functions**: `compute_field_distribution()` and `_field_profile()` compute per-field tinyId sets for each pattern, classifying distribution as `def-only`, `desig-only`, `both-all`, or `mixed`. Reused by `pattern_util --field-analysis`.
+- **Minimum Bare-Name Words** (`--min-bare-words`): Filters short bare instrument names during `--discover-bare-names`. Default: 2 words. Prevents fragments like "Score" from producing false positives.
+- **Abbreviation Pattern Discovery** (`--discover-abbreviations`): Discovers designation patterns based on known abbreviations: `(ABBREV) - ...` separator patterns, `[ABBREV]` bracketed patterns, and open `(ANYABBREV) -` scan.
+
+See [Extensions v0.5.x](../appendix/extensions_v0.5.x.md#3-strip_discover-enhancements) for full implementation details.
 
 ## Related Commands
 

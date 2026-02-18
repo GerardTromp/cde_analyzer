@@ -259,6 +259,6 @@ The codebase includes pre-built workflow templates. Use `workflow list` to see t
 
 ## See Also
 
-- [workflow-diagram.md](../workflow-diagram.md) - Visual workflow documentation
+- [Workflow Architecture](../workflow-architecture.md) - Pipeline diagrams and command reference
 - [strip_discover](strip_discover.md) - Pattern discovery command
 - [strip_phrases](strip_phrases.md) - Pattern stripping command

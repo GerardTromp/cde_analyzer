@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 130" width="720" height="130">
+  <defs>
+    <style>
+      .box-title { font: bold 12px sans-serif; fill: #333333; }
+      .box-text { font: 10px sans-serif; fill: #555555; }
+      .arrow { stroke: #666666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .mine-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 2; rx: 8; }
+      .classify-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 8; }
+      .human-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 8; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666666"/>
+    </marker>
+  </defs>
+
+  <!-- Box 1: phrase_miner -->
+  <rect x="20" y="20" width="180" height="90" class="mine-box"/>
+  <text x="110" y="50" text-anchor="middle" class="box-title">phrase_miner</text>
+  <text x="110" y="70" text-anchor="middle" class="box-text">Extract</text>
+  <text x="110" y="84" text-anchor="middle" class="box-text">repeated phrases</text>
+
+  <!-- Arrow 1 -->
+  <path d="M200,65 L250,65" class="arrow"/>
+
+  <!-- Box 2: llm_classify -->
+  <rect x="260" y="20" width="180" height="90" class="classify-box"/>
+  <text x="350" y="50" text-anchor="middle" class="box-title">llm_classify</text>
+  <text x="350" y="70" text-anchor="middle" class="box-text">Classify with</text>
+  <text x="350" y="84" text-anchor="middle" class="box-text">multiple LLMs</text>
+
+  <!-- Arrow 2 -->
+  <path d="M440,65 L490,65" class="arrow"/>
+
+  <!-- Box 3: Human Curation -->
+  <rect x="500" y="20" width="200" height="90" class="human-box"/>
+  <text x="600" y="50" text-anchor="middle" class="box-title">Human Curation</text>
+  <text x="600" y="70" text-anchor="middle" class="box-text">Review high-</text>
+  <text x="600" y="84" text-anchor="middle" class="box-text">confidence predictions</text>
+</svg>

@@ -1,4 +1,4 @@
-# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.14)
+# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.17)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,7 +26,15 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.5.14)
+## Current State (v0.5.17)
+
+### v0.5.15–v0.5.17: Documentation Restructuring
+- **Nav restructure**: `mkdocs.yml` reorganized — Workflows elevated, Command Reference section, LLM section, Appendix
+- **Content consolidation**: `workflow-architecture.md` (new, from workflow-diagram + lessons_learned), `overview.md` (new)
+- **SVG diagrams**: `detailed-workflow-architecture.svg`, `llm-workflow.svg` replacing ASCII art
+- **Extensions distributed**: `extensions_v0.5.x.md` content integrated into relevant help pages, original moved to `docs/appendix/`
+- **CLI short options**: Standardized `-k`, `-K`, `-n`, `-t`, `-S`, `-D`, `-B`, `-I`, `-T`, `-M`, `-c`, `-A`, `-e`, `-V`, `-C`, `-r`, `-p`, `-g`, `-l`, `-L`, `-x` across 10 cli.py files
+- **Docs updated**: All `docs/help/*.md` pages and `all-commands.md` updated with short options
 
 ### Implemented — Phrase Curation Automation
 - **`--field-analysis`**: Adds def_count, desig_count, field_profile columns + example CDE columns

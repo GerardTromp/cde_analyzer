@@ -53,12 +53,12 @@ def register_subparser(subparser: ArgumentParser):
 
     # tinyId filtering - file or CLI list
     subparser.add_argument(
-        "--id-list",
+        "--id-list", "-l",
         nargs="+",
         help="List of tinyIds to include or exclude."
     )
     subparser.add_argument(
-        "--id-file",
+        "--id-file", "-L",
         help="File containing tinyIds (JSON, CSV, or TSV). "
              "Use file:column format to specify column (e.g., 'data.csv:tinyId'). "
              "Cells can contain multiple tinyIds (pipe, comma, or space separated)."
@@ -66,7 +66,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Text-based filtering
     subparser.add_argument(
-        "--text-filter",
+        "--text-filter", "-t",
         help="Text pattern to search for in specified fields. "
              "Records containing this text will be included (or excluded with --exclude)."
     )
@@ -106,7 +106,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Include/Exclude mode
     subparser.add_argument(
-        "--exclude",
+        "--exclude", "-x",
         action=BooleanOptionalAction,
         default=False,
         help="Exclude matching records (--exclude) or include them (--no-exclude, default). "

@@ -29,7 +29,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Output format.",
     )
     subparser.add_argument(
-        "--output", help="Path, including filename, to store results."
+        "--output", "-o", help="Path, including filename, to store results."
     )
     subparser.add_argument(
         "--group-by",

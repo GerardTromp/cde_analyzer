@@ -44,7 +44,7 @@ cde-analyzer recall_analyze \
 |----------|----------|-------------|
 | `-o, --output` | yes | Path to recall report TSV |
 | `--false-negatives-file` | no | Output file listing false negative tinyIds grouped by family |
-| `--markdown-report` | no | Path to human-readable markdown report with summary and details |
+| `--markdown-report`, `-r` | no | Path to human-readable markdown report with summary and details |
 | `--markdown-detail` | no | Standalone detailed report for this phase only |
 | `--report-version` | no | Version label for iteration tracking (e.g., `v1`, `iter-02`) |
 | `--report-title` | no | Title for markdown report (default: `Instrument Detection Recall Report`) |
@@ -54,7 +54,7 @@ cde-analyzer recall_analyze \
 | Argument | Default | Description |
 |----------|---------|-------------|
 | `-f, --fields` | `designation definition` | Fields to search for pattern matches |
-| `--case-sensitive` | false | Make pattern matching case-sensitive |
+| `--case-sensitive`, `-C` | false | Make pattern matching case-sensitive |
 
 ### Iteration Analysis
 

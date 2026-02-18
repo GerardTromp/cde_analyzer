@@ -31,9 +31,16 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: main (phrase-curator merged at v0.5.14)
+**Active Branch**: main (v0.5.17)
 
 **Recent Work** (Last 30 days):
+- **v0.5.15–v0.5.17: Documentation Restructuring**
+  - Reorganized `mkdocs.yml` navigation: Workflows elevated, Command Reference section, LLM section, Appendix
+  - Created `docs/overview.md` and `docs/workflow-architecture.md` (consolidated from workflow-diagram + lessons_learned)
+  - Generated SVGs: `detailed-workflow-architecture.svg`, `llm-workflow.svg` (replacing ASCII art)
+  - Distributed `extensions_v0.5.x.md` content into relevant help pages; archived to `docs/appendix/`
+  - Standardized CLI short options across 10 actions (phrase_miner, strip_discover, strip_phrases, pattern_util, instrument_miner, phrase_grouper, recall_analyze, pipeline_report, subset, count/fix_underscores)
+  - Updated all `docs/help/*.md` pages and `all-commands.md`
 - **v0.5.14: Temporal Case-Insensitive Split Pipeline**
   - Split `branching_strip.yaml` into separate temporal (case-insensitive) and curated phrase (case-sensitive) passes
   - Added bare/article-only temporal variant forms; expanded to 25 seeds (~2100 variants)
@@ -430,7 +437,7 @@ See [.claude/CHECKPOINT_SYSTEM.md](.claude/CHECKPOINT_SYSTEM.md) for complete do
 
 ### Medium Priority
 5. Merge Repeats → main after validation
-6. Standardize CLI argument names (noted inconsistency in README)
+6. ~~Standardize CLI argument names~~ - **COMPLETED in v0.5.17**: Short options added across 10 actions
 7. Document legacy kmer files explicitly
 8. Enhanced user documentation with examples
 9. ~~**Split strip_discover**~~ - **COMPLETED in v0.4.2**:
@@ -482,6 +489,6 @@ Can easily be extended to support:
 - [docs/workflows/](docs/workflows/) - Workflow documentation
   - [instrument-detection-workflow.md](docs/workflows/instrument-detection-workflow.md) - **Detailed YAML workflow guide**
   - [instrument-phrase-stripping-workflow.md](docs/workflows/instrument-phrase-stripping-workflow.md) - Conceptual workflow
-- [docs/workflow-diagram.md](docs/workflow-diagram.md) - Pipeline workflow (text)
+- [docs/workflow-architecture.md](docs/workflow-architecture.md) - Pipeline workflow architecture
 - [docs/diagrams/](docs/diagrams/) - SVG workflow diagrams for embedding
 - [.claude/context/](.claude/context/) - Comprehensive context for AI assistance

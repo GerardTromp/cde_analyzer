@@ -64,13 +64,13 @@ def register_subparser(subparser: ArgumentParser):
 
     # Extraction modes
     subparser.add_argument(
-        "--extract-abbreviation-only",
+        "--extract-abbreviation-only", "-a",
         action="store_true",
         help="Extract abbreviation-only instrument references like 'as part of (PHQ-9)'. "
              "Uses known acronyms from first pass to map to canonical instrument names."
     )
     subparser.add_argument(
-        "--extract-supplementary",
+        "--extract-supplementary", "-s",
         action="store_true",
         help="Extract non-Title-Case instruments (animal models, behavioral tests). "
              "Matches known supplementary patterns from config/supplementary_patterns.yaml."
@@ -78,7 +78,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Instrument family detection
     subparser.add_argument(
-        "--detect-families",
+        "--detect-families", "-d",
         action="store_true",
         help="Enable instrument family detection (groups instruments by family, e.g., Neuro-QOL, PROMIS)"
     )

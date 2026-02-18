@@ -48,7 +48,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Merge mode
     subparser.add_argument(
-        "--merge-patterns",
+        "--merge-patterns", "-M",
         nargs="+",
         metavar="FILE",
         help="Merge mode: read one or more curated TSV files, combine rows with "
@@ -70,7 +70,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Coalesce mode (tinyId-aware subsumption)
     subparser.add_argument(
-        "--coalesce-variants",
+        "--coalesce-variants", "-c",
         type=str,
         metavar="FILE",
         help="Coalesce mode: remove shorter patterns subsumed by longer ones. "
@@ -226,7 +226,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Field analysis mode
     subparser.add_argument(
-        "--field-analysis",
+        "--field-analysis", "-A",
         type=str,
         metavar="FILE",
         help="Field analysis mode: enrich a patterns TSV with per-field tinyId counts. "
@@ -343,7 +343,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Verbatim expansion mode
     subparser.add_argument(
-        "--expand-verbatim",
+        "--expand-verbatim", "-e",
         type=str,
         metavar="FILE",
         help="Expand curated patterns with temporal preposition, case, number, and plural variants. "
@@ -390,7 +390,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Temporal seed expansion mode
     subparser.add_argument(
-        "--expand-temporal-seeds",
+        "--expand-temporal-seeds", "-T",
         action="store_true",
         help="Expand temporal seed patterns from config/temporal_seed_patterns.yaml. "
              "Generates all preposition/tense/case/number/plural variants and writes "
@@ -484,7 +484,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Empirical subsumption validation mode
     subparser.add_argument(
-        "--validate-subsumption",
+        "--validate-subsumption", "-V",
         type=str,
         metavar="COALESCED_TSV",
         help="Empirical subsumption validation: for each coalesced group, check source "
@@ -493,7 +493,7 @@ def register_subparser(subparser: ArgumentParser):
              "Requires --input, --model, and --output. Use --workers for parallelization.",
     )
     subparser.add_argument(
-        "--workers",
+        "--workers", "-w",
         type=int,
         default=0,
         help="Number of parallel workers for validate-subsumption (0 = sequential). Default: 0.",

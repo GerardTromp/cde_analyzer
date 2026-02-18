@@ -48,7 +48,7 @@ cde-analyzer pipeline_report \
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--phase` | — | Generate report for specific phase only (1–4). Without this, generates full pipeline report |
+| `--phase`, `-p` | — | Generate report for specific phase only (1–4). Without this, generates full pipeline report |
 | `--title` | `Pipeline Execution Report` | Title for the report |
 | `--version` | — | Version label for this report (e.g., `v1`, `phase2-final`). Tracked in version history |
 
@@ -56,7 +56,7 @@ cde-analyzer pipeline_report \
 
 | Argument | Description |
 |----------|-------------|
-| `--ground-truth` | Ground truth pattern file for recall analysis. Format: `pattern<TAB>label` |
+| `--ground-truth`, `-g` | Ground truth pattern file for recall analysis. Format: `pattern<TAB>label` |
 | `--pipeline-output` | Pipeline output TSV for recall comparison. Uses `final_coalesced.tsv` by default if `--state-file` provided |
 | `--tinyid-column` | Column name for tinyIds in pipeline output (default: `tinyIds`) |
 | `--source-json` | Source CDE JSON file for recall analysis. Required if `--ground-truth` is provided |

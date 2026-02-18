@@ -116,7 +116,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Case-insensitive matching
     subparser.add_argument(
-        "--ignore-case",
+        "--ignore-case", "-I",
         action="store_true",
         default=False,
         help="Case-insensitive pattern matching. Patterns like 'In the past' "
@@ -125,7 +125,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Word boundary matching
     subparser.add_argument(
-        "--word-boundary",
+        "--word-boundary", "-B",
         action="store_true",
         default=False,
         help="Use word boundary anchors (\\b) for pattern matching. "
@@ -167,7 +167,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Diagnostics
     subparser.add_argument(
-        "--trace-matching",
+        "--trace-matching", "-T",
         type=str,
         metavar="FILE",
         help="Write detailed matching trace to FILE. "

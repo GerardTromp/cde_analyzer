@@ -16,7 +16,7 @@ def register_subparser(subparser: ArgumentParser):
         "--input", "-i", required=True, help="Full path, including name, of input JSON file."
     )
     subparser.add_argument(
-        "--output", help="Full path, including name, of output JSON file."
+        "--output", "-o", help="Full path, including name, of output JSON file."
     )
     subparser.add_argument(
         "--prefix",

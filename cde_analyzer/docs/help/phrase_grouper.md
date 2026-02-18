@@ -42,15 +42,15 @@ cde-analyzer phrase_grouper -i verbatim_phrases.tsv -o phrase_families/ [options
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--k-min` | `3` | Minimum k-mer length in tokens |
-| `--k-max` | `10` | Maximum k-mer length in tokens |
+| `--k-min`, `-k` | `3` | Minimum k-mer length in tokens |
+| `--k-max`, `-K` | `10` | Maximum k-mer length in tokens |
 | `--min-content-words` | `1` | Minimum non-stopword tokens required in pattern. Filters patterns like "of the" that are entirely stopwords. |
 
 ### Family Filtering
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--min-family-size` | `3` | Minimum phrases to form a family |
+| `--min-family-size`, `-n` | `3` | Minimum phrases to form a family |
 | `--min-pattern-freq` | `3` | Minimum frequency for pattern to be considered |
 
 ### Tree Selection

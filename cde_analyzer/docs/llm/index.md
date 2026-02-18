@@ -19,15 +19,7 @@ The LLM Classification module extends CDE Analyzer with multi-provider AI capabi
 
 ## Workflow Integration
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  phrase_miner   │────▶│  llm_classify   │────▶│  Human Curation │
-│                 │     │                 │     │                 │
-│  Extract        │     │  Classify with  │     │  Review high-   │
-│  repeated       │     │  multiple LLMs  │     │  confidence     │
-│  phrases        │     │  + aggregate    │     │  predictions    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-```
+![LLM Classification Workflow](../diagrams/llm-workflow.svg)
 
 The `llm_classify` command takes output from `phrase_miner` and classifies each phrase using one or more LLM providers. Results are aggregated into confidence quintiles to prioritize human review.
 

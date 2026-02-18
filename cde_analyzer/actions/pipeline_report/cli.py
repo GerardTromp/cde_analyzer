@@ -61,7 +61,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Report options
     subparser.add_argument(
-        "--phase",
+        "--phase", "-p",
         type=int,
         choices=[1, 2, 3, 4],
         help="Generate report for specific phase only (1-4). "
@@ -81,7 +81,7 @@ def register_subparser(subparser: ArgumentParser):
     # Optional recall analysis
     recall_group = subparser.add_argument_group("Recall analysis (optional)")
     recall_group.add_argument(
-        "--ground-truth",
+        "--ground-truth", "-g",
         help="Ground truth pattern file for recall analysis. "
              "Format: pattern<TAB>label (one per line)."
     )

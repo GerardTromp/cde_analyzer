@@ -46,8 +46,8 @@ Column matching is case-insensitive. Excel-quoted fields are automatically unquo
 | `-f, --fields` | Field paths to strip phrases from (default: `definitions.*.definition designations.*.designation`) |
 | `--sort-order` | Pattern processing order: `length` (longest-first, default), `file` (preserve TSV order), `alpha` (alphabetical) |
 | `-w, --workers` | Parallel workers: `0` = auto-detect, `1` = sequential (default), `N` = exactly N workers |
-| `--word-boundary` | Use `\b` regex word boundary anchors for pattern matching. Prevents partial-word matches: `"in the past"` will NOT match inside `"within the past"`. Composable with `--ignore-case` |
-| `--ignore-case` | Case-insensitive pattern matching via `re.IGNORECASE`. Composable with `--word-boundary` |
+| `--word-boundary`, `-B` | Use `\b` regex word boundary anchors for pattern matching. Prevents partial-word matches: `"in the past"` will NOT match inside `"within the past"`. Composable with `--ignore-case` |
+| `--ignore-case`, `-I` | Case-insensitive pattern matching via `re.IGNORECASE`. Composable with `--word-boundary` |
 
 ### Remnant Detection and Cleanup
 
@@ -73,7 +73,7 @@ Cleanup runs in a loop until the text stabilizes (up to 5 passes). In testing on
 
 | Argument | Description |
 |----------|-------------|
-| `--trace-matching FILE` | Write detailed matching trace TSV (tinyId, pattern length, pattern text per match) |
+| `--trace-matching`, `-T` FILE | Write detailed matching trace TSV (tinyId, pattern length, pattern text per match) |
 
 ### Diff Output
 
@@ -164,6 +164,14 @@ The command produces:
 - When `--clean-remnants` is used, cleanup runs after stripping but before writing
 - When both `--clean-remnants` and `--detect-remnants` are used, remnant detection runs after cleanup (measuring residual artifacts)
 - The command validates output against the Pydantic model to ensure schema compliance
+
+## Word Boundary Matching (v0.5.x)
+
+The `--word-boundary` flag adds `\b` regex word boundary anchors to prevent partial-word matches during stripping. Without word boundaries, the pattern `"in the past"` matches inside `"within the past week"`, leaving the artifact `"with week"`. With `--word-boundary`, the anchors require word boundaries at both ends.
+
+Both `--word-boundary` and `--ignore-case` can be active simultaneously. The recommended workflow is to pre-expand patterns with `pattern_util --expand-verbatim` (which handles case variants explicitly), then strip with `--word-boundary` for precision.
+
+See [Extensions v0.5.x](../appendix/extensions_v0.5.x.md#10-word-boundary-matching-strip_phrases---word-boundary--v053) for full implementation details.
 
 ## Related Commands
 

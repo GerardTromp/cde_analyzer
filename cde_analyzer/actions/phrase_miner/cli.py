@@ -55,25 +55,25 @@ def register_subparser(subparser: ArgumentParser):
 
     # K-mer parameters
     subparser.add_argument(
-        "--k-max",
+        "--k-max", "-K",
         type=int,
         default=25,
         help="Maximum k-mer length (default: 25)"
     )
     subparser.add_argument(
-        "--k-min",
+        "--k-min", "-k",
         type=int,
         default=3,
         help="Minimum k-mer length (default: 3)"
     )
     subparser.add_argument(
-        "--freq-min",
+        "--freq-min", "-n",
         type=int,
         default=3,
         help="Minimum frequency threshold per k-bin (default: 3)"
     )
     subparser.add_argument(
-        "--min-tinyids",
+        "--min-tinyids", "-t",
         type=int,
         default=2,
         help="Minimum distinct tinyIds (document support) (default: 2)"
@@ -99,12 +99,12 @@ def register_subparser(subparser: ArgumentParser):
         help="Skip de Bruijn contig extension (enabled by default)"
     )
     subparser.add_argument(
-        "--enable-debruijn",
+        "--enable-debruijn", "-D",
         action="store_true",
         help="Enable de Bruijn graph extension to merge overlapping k-mers into longer phrases"
     )
     subparser.add_argument(
-        "--enable-subsumption",
+        "--enable-subsumption", "-S",
         action="store_true",
         help="Enable subsumption filtering to remove shorter phrases contained in longer ones"
     )

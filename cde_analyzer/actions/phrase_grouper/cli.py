@@ -62,13 +62,13 @@ def register_subparser(subparser: ArgumentParser):
 
     # K-mer parameters
     subparser.add_argument(
-        "--k-min",
+        "--k-min", "-k",
         type=int,
         default=3,
         help="Minimum k-mer length in tokens (default: 3)"
     )
     subparser.add_argument(
-        "--k-max",
+        "--k-max", "-K",
         type=int,
         default=10,
         help="Maximum k-mer length in tokens (default: 10)"
@@ -83,7 +83,7 @@ def register_subparser(subparser: ArgumentParser):
 
     # Family filtering
     subparser.add_argument(
-        "--min-family-size",
+        "--min-family-size", "-n",
         type=int,
         default=3,
         help="Minimum phrases to form a family (default: 3)"

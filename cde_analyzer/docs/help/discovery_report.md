@@ -89,6 +89,20 @@ cde-analyzer discovery_report \
     --input-json cdes.json
 ```
 
+## Report Contents (v0.5.x)
+
+Reports include the following sections:
+
+- **Summary table**: per-step row counts and tinyId coverage
+- **Pipeline steps table**: status, rows, and tinyIds per output file
+- **Subsumption summary**: action type counts from coalesce reports
+- **Sanity check survivors** (instrument pipeline only): top 10 remaining patterns
+- **Version history**: accumulated across iterations, shows pattern/tinyId progression
+
+Step definitions are pipeline-specific. The instrument pipeline tracks 13 files from `instruments.tsv` through `sanity_check.tsv`; the phrase pipeline tracks 8 files from `verbatim_phrases.tsv` through `strip_trace.tsv`.
+
+See [Extensions v0.5.x](../appendix/extensions_v0.5.x.md#1-new-action-discovery_report) for full implementation details.
+
 ## Related Commands
 
 - [strip_phrases](strip_phrases.md) — Apply stripping (produces remnant reports)
