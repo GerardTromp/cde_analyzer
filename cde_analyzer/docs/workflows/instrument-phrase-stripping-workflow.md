@@ -412,27 +412,7 @@ Phase 1 ─┬─→ Phase 2 ─────────────────
 
 ## File Dependencies
 
-```
-cdes.json (original)
-    │
-    ├─[Phase 1 - ITERATE]──→ instruments.tsv, instruments_verbatim.tsv
-    │       ↑                       │
-    │       └── config/supplementary_patterns.yaml
-    │                               │
-    │                    ├─[Phase 2]──→ cdes_no_instruments.json
-    │                    │                    │
-    │                    │                    ├─[Phase 4]──→ cdes_no_families.json
-    │                    │                    │
-    │                    │                    └─[Phase 5 - ITERATE]──→ curated_phrases.tsv
-    │                    │                           ↑                       │
-    │                    │                           └── param tuning        │
-    │                    │                                                   │
-    │                    │                                        └─[Phase 6]──→ cdes_cleaned.json
-    │                    │
-    │                    └─[Phase 3]──→ curated_families.tsv
-    │
-    └─[diagnose_strip]──→ remaining.tsv (global refinement → restart workflow)
-```
+![Instrument & Phrase Stripping Dependencies](../diagrams/instrument-phrase-stripping-dependencies.svg)
 
 ---
 

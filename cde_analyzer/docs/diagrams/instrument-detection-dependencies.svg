@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 920" width="780" height="920">
+  <defs>
+    <style>
+      .title { font: bold 16px sans-serif; fill: #1a1a1a; }
+      .step-title { font: bold 11px sans-serif; fill: #333333; }
+      .step-text { font: 11px monospace; fill: #555555; }
+      .file-label { font: 11px monospace; fill: #1e40af; }
+      .file-label-opt { font: italic 11px monospace; fill: #6b7280; }
+      .arrow { stroke: #666666; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-branch { stroke: #94a3b8; stroke-width: 1.5; fill: none; }
+      .input-box { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; rx: 6; }
+      .action-box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 4; }
+      .checkpoint-box { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 4; stroke-dasharray: 5,3; }
+      .output-box { fill: #dbeafe; stroke: #3b82f6; stroke-width: 1.5; rx: 4; }
+      .manual-box { fill: #fce7f3; stroke: #ec4899; stroke-width: 1.5; rx: 4; stroke-dasharray: 4,2; }
+      .checkpoint-text { font: bold 10px sans-serif; fill: #92400e; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#666666"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="390" y="24" text-anchor="middle" class="title">Instrument Detection Pipeline — File Dependencies</text>
+
+  <!-- Input -->
+  <rect x="280" y="40" width="220" height="36" class="input-box"/>
+  <text x="390" y="63" text-anchor="middle" class="step-title">cdes.json (input)</text>
+
+  <!-- Arrow down -->
+  <path d="M390,76 L390,100" class="arrow"/>
+
+  <!-- mine_instruments -->
+  <rect x="240" y="100" width="300" height="36" class="action-box"/>
+  <text x="260" y="123" class="step-title">1. mine_instruments</text>
+  <!-- outputs -->
+  <rect x="580" y="96" width="180" height="22" class="output-box"/>
+  <text x="590" y="112" class="file-label">instruments.tsv</text>
+  <path d="M540,113 L580,113" class="arrow"/>
+  <rect x="580" y="120" width="180" height="22" class="output-box"/>
+  <text x="590" y="136" class="file-label">instruments_verbatim.tsv</text>
+
+  <!-- Arrow down -->
+  <path d="M390,136 L390,160" class="arrow"/>
+
+  <!-- expand_abbreviations -->
+  <rect x="240" y="160" width="300" height="36" class="action-box"/>
+  <text x="260" y="183" class="step-title">2. expand_abbreviations</text>
+  <rect x="580" y="164" width="180" height="22" class="output-box"/>
+  <text x="590" y="180" class="file-label">expanded_phrases.tsv</text>
+  <path d="M540,178 L580,178" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,196 L390,220" class="arrow"/>
+
+  <!-- discover_abbreviations -->
+  <rect x="240" y="220" width="300" height="36" class="action-box"/>
+  <text x="260" y="243" class="step-title">3. discover_abbreviations</text>
+  <rect x="580" y="224" width="180" height="22" class="output-box"/>
+  <text x="590" y="240" class="file-label">abbrev_patterns.tsv</text>
+  <path d="M540,238 L580,238" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,256 L390,280" class="arrow"/>
+
+  <!-- CHECKPOINT: Expansion review -->
+  <rect x="260" y="280" width="260" height="30" class="checkpoint-box"/>
+  <text x="390" y="300" text-anchor="middle" class="checkpoint-text">★ CHECKPOINT: Expansion review</text>
+
+  <!-- Arrow down -->
+  <path d="M390,310 L390,334" class="arrow"/>
+
+  <!-- discover_verbatim -->
+  <rect x="200" y="334" width="380" height="50" class="action-box"/>
+  <text x="220" y="354" class="step-title">4. discover_verbatim</text>
+  <text x="220" y="372" class="step-text">(instruments + expanded + abbrev)</text>
+  <rect x="610" y="340" width="160" height="36" class="output-box"/>
+  <text x="618" y="356" class="file-label">discovered_</text>
+  <text x="618" y="370" class="file-label">instruments.tsv</text>
+  <path d="M580,359 L610,359" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,384 L390,408" class="arrow"/>
+
+  <!-- coalesce_patterns -->
+  <rect x="200" y="408" width="380" height="36" class="action-box"/>
+  <text x="220" y="431" class="step-title">5. coalesce_patterns (subsumption + prefix)</text>
+  <rect x="610" y="412" width="160" height="22" class="output-box"/>
+  <text x="618" y="428" class="file-label">coalesced_inst.tsv</text>
+  <path d="M580,425 L610,425" class="arrow"/>
+
+  <!-- recall_phase2 (optional) -->
+  <rect x="610" y="440" width="160" height="22" class="output-box" style="stroke-dasharray: 3,2;"/>
+  <text x="618" y="456" class="file-label-opt">recall_phase2.tsv</text>
+
+  <!-- Arrow down -->
+  <path d="M390,444 L390,468" class="arrow"/>
+
+  <!-- CHECKPOINT: Curator review -->
+  <rect x="260" y="468" width="260" height="30" class="checkpoint-box"/>
+  <text x="390" y="488" text-anchor="middle" class="checkpoint-text">★ CHECKPOINT: Curator review</text>
+
+  <!-- Manual output -->
+  <rect x="560" y="470" width="210" height="26" class="manual-box"/>
+  <text x="570" y="488" class="file-label">curated_instruments.tsv</text>
+  <path d="M520,483 L560,483" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,498 L390,522" class="arrow"/>
+
+  <!-- family_discovery -->
+  <rect x="240" y="522" width="300" height="36" class="action-box"/>
+  <text x="260" y="545" class="step-title">6. family_discovery</text>
+  <rect x="580" y="526" width="100" height="22" class="output-box"/>
+  <text x="590" y="542" class="file-label">families/</text>
+  <path d="M540,540 L580,540" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,558 L390,576" class="arrow"/>
+
+  <!-- re-discover abbreviations -->
+  <rect x="200" y="576" width="380" height="36" class="action-box"/>
+  <text x="220" y="599" class="step-title">7. discover_abbreviations_final</text>
+  <rect x="610" y="580" width="160" height="22" class="output-box"/>
+  <text x="618" y="596" class="file-label">abbrev_final.tsv</text>
+  <path d="M580,593 L610,593" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,612 L390,630" class="arrow"/>
+
+  <!-- final_discover + final_coalesce -->
+  <rect x="200" y="630" width="380" height="50" class="action-box"/>
+  <text x="220" y="650" class="step-title">8. final_discover + final_coalesce</text>
+  <text x="220" y="668" class="step-text">(emit-def-variants, split-tiers: 3)</text>
+  <rect x="610" y="636" width="160" height="36" class="output-box"/>
+  <text x="618" y="652" class="file-label">final_</text>
+  <text x="618" y="666" class="file-label">coalesced.tsv</text>
+  <path d="M580,657 L610,657" class="arrow"/>
+
+  <!-- recall_phase3 (optional) -->
+  <rect x="610" y="678" width="160" height="22" class="output-box" style="stroke-dasharray: 3,2;"/>
+  <text x="618" y="694" class="file-label-opt">recall_phase3.tsv</text>
+
+  <!-- Arrow down -->
+  <path d="M390,680 L390,704" class="arrow"/>
+
+  <!-- CHECKPOINT: Final review -->
+  <rect x="260" y="704" width="260" height="30" class="checkpoint-box"/>
+  <text x="390" y="724" text-anchor="middle" class="checkpoint-text">★ CHECKPOINT: Final review</text>
+
+  <!-- Arrow down -->
+  <path d="M390,734 L390,758" class="arrow"/>
+
+  <!-- strip_instruments (two-pass) -->
+  <rect x="180" y="758" width="420" height="50" class="action-box"/>
+  <text x="200" y="778" class="step-title">9a. strip_tier1 (≥3 tokens)</text>
+  <text x="200" y="796" class="step-title">9b. strip_tier2 (&lt;3 tokens)</text>
+  <rect x="630" y="758" width="140" height="22" class="output-box"/>
+  <text x="638" y="774" class="file-label">tier1_strip.json</text>
+  <path d="M600,772 L630,772" class="arrow"/>
+  <rect x="630" y="784" width="140" height="22" class="output-box"/>
+  <text x="638" y="800" class="file-label">no_inst.json</text>
+  <path d="M600,796 L630,796" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,808 L390,832" class="arrow"/>
+
+  <!-- sanity_check -->
+  <rect x="240" y="832" width="300" height="36" class="action-box"/>
+  <text x="260" y="855" class="step-title">10. sanity_check</text>
+  <rect x="580" y="836" width="180" height="22" class="output-box"/>
+  <text x="590" y="852" class="file-label">sanity_check.tsv</text>
+  <path d="M540,849 L580,849" class="arrow"/>
+
+  <!-- Arrow down -->
+  <path d="M390,868 L390,886" class="arrow"/>
+
+  <!-- CHECKPOINT: pipeline_complete -->
+  <rect x="250" y="886" width="280" height="26" class="checkpoint-box"/>
+  <text x="390" y="904" text-anchor="middle" class="checkpoint-text">★ CHECKPOINT: pipeline_complete</text>
+
+  <!-- Legend -->
+  <rect x="10" y="40" width="14" height="14" class="action-box"/>
+  <text x="30" y="52" style="font: 10px sans-serif; fill: #555;">Action step</text>
+  <rect x="10" y="60" width="14" height="14" class="checkpoint-box"/>
+  <text x="30" y="72" style="font: 10px sans-serif; fill: #555;">Checkpoint</text>
+  <rect x="10" y="80" width="14" height="14" class="output-box"/>
+  <text x="30" y="92" style="font: 10px sans-serif; fill: #555;">Output file</text>
+  <rect x="10" y="100" width="14" height="14" class="manual-box"/>
+  <text x="30" y="112" style="font: 10px sans-serif; fill: #555;">Manual curation</text>
+</svg>

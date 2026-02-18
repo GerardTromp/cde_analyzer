@@ -6,69 +6,9 @@ The CDE Analyzer pipeline strips instrument names and generic phrases from NLM C
 
 ### Workflow Architecture (Current State)
 
-```
-                        Input: cdes.json (1,148 CDEs)
-                                  │
-                    ══════════════╪══════════════
-                    ║  PHASE 1: Instrument Detection  ║
-                    ══════════════╪══════════════
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │  1. Mine instruments       │
-                    │     (abbreviation-only +   │
-                    │      supplementary)         │
-                    ├───────────────────────────────┤
-                    │  2. Batch expand abbreviations│
-                    │     PROMIS → "Patient-        │
-                    │     Reported Outcome..."      │
-                    ├───────────────────────────────┤
-                    │  3. Discover abbreviation      │
-                    │     designation patterns       │
-                    │     (PROMIS - ..., [PROMIS])   │
-                    ├───────────────────────────────┤
-                    │  ★ CHECKPOINT: Expansion review│
-                    ├───────────────────────────────┤
-                    │  4. Discover verbatim patterns │
-                    │     (instruments + expanded    │
-                    │      + abbrev patterns)        │
-                    ├───────────────────────────────┤
-                    │  5. Coalesce (subsumption +    │
-                    │     prefix extraction)         │
-                    ├───────────────────────────────┤
-                    │  ★ CHECKPOINT: Curator review  │  → curated_instruments.tsv
-                    ├───────────────────────────────┤
-                    │  6. Family discovery           │
-                    │  7. Re-discover abbreviations  │
-                    │  8. Final discover + coalesce  │
-                    │     (emit-def-variants,        │
-                    │      split-tiers: 3)           │
-                    ├───────────────────────────────┤
-                    │  ★ CHECKPOINT: Final review    │
-                    ├───────────────────────────────┤
-                    │  9a. Strip tier-1 (≥3 tokens)  │  → tier1_stripped.json
-                    │  9b. Strip tier-2 (<3 tokens)  │  → no_instruments.json  ← OUTPUT 1
-                    ├───────────────────────────────┤
-                    │  10. Sanity check              │  → sanity_check.tsv     ← OUTPUT 2
-                    │  11. Discovery report          │  → discovery_report.md  ← OUTPUT 3
-                    └───────────────────────────────┘
-                                  │
-                    ══════════════╪══════════════
-                    ║  PHASE 2: Phrase Stripping      ║
-                    ══════════════╪══════════════
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │  1. Mine phrases (k-mer)   │
-                    │  2. Discover verbatim       │
-                    │  3. Coalesce patterns       │
-                    │  4. Field analysis          │
-                    │     (enrich + filter)       │
-                    ├───────────────────────────────┤
-                    │  ★ CHECKPOINT: Curator review │  → curated.tsv
-                    ├───────────────────────────────┤
-                    │  5. Strip phrases             │  → final_stripped.json   ← OUTPUT 4
-                    │  6. Discovery report          │  → discovery_report.md  ← OUTPUT 5
-                    └───────────────────────────────┘
-```
+![Detailed Workflow Architecture](../diagrams/detailed-workflow-architecture.svg)
+
+*See [Workflow Architecture](../workflow-architecture.md) for the full annotated reference.*
 
 ### Five Key Outputs
 

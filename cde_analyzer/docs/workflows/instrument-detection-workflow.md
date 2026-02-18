@@ -654,44 +654,7 @@ Check `expansion_summary.tsv` for per-abbreviation status.
 
 ## File Dependencies
 
-```
-cdes.json (input)
-    │
-    ├─[mine_instruments]──→ instruments.tsv
-    │                       instruments_verbatim.tsv
-    │
-    ├─[expand_abbreviations]──→ expanded_phrases.tsv
-    │
-    ├─[discover_abbreviations]──→ abbrev_patterns.tsv
-    │
-    ├─[discover_verbatim]──→ discovered_instruments.tsv
-    │         │                     │
-    │         │              ├─[coalesce_patterns]──→ coalesced_instruments.tsv
-    │         │              │                              │
-    │         │              ├─[recall_phase2]──→ recall_phase2.tsv (optional)
-    │         │              │                              │
-    │         │              │                        [CHECKPOINT: initial_review]
-    │         │              │                              │
-    │         │              │                        curated_instruments.tsv (manual)
-    │         │              │                              │
-    │         │              ├─[family_discovery]──→ families/
-    │         │              │
-    │         │              ├─[discover_abbreviations_final]──→ abbrev_patterns_final.tsv
-    │         │              │
-    │         │              ├─[final_discover]──→ final_discovered.tsv
-    │         │              │
-    │         │              ├─[final_coalesce]──→ final_coalesced.tsv
-    │         │              │                          │
-    │         │              ├─[recall_phase3]──→ recall_phase3.tsv (optional)
-    │         │              │                          │
-    │         │              │                    [CHECKPOINT: final_review]
-    │         │              │                          │
-    │         │              ├─[strip_instruments]──→ no_instruments.json
-    │         │              │                             │
-    │         │              └─[sanity_check]──→ sanity_check.tsv
-    │         │                                       │
-    │         │                                 [CHECKPOINT: pipeline_complete]
-```
+![Instrument Detection Dependencies](../diagrams/instrument-detection-dependencies.svg)
 
 ---
 
