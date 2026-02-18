@@ -1,6 +1,6 @@
 # CDE Analyzer
 
-**Version 0.5.1** | [Changelog](../CHANGELOG.md)
+**Version 0.5.17** | [Changelog](../CHANGELOG.md)
 
 A Python CLI tool for parsing and analyzing Common Data Elements (CDEs) from the National Library of Medicine (NLM) at the National Institutes of Health.
 
