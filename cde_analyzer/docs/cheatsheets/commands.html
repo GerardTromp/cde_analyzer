@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: Command Reference Cheatsheet</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-size: 10pt;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  color: #2d3748;
+  background: #dedede;
+}
+@page { size: letter landscape; margin: 1.27cm; }
+.page {
+  width: 25.4cm; height: 19.05cm;
+  margin: 0.5cm auto; padding: 0.3cm;
+  background: #fff; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.page + .page { page-break-before: always; }
+@media print {
+  html { background: #fff; }
+  .page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: 100%; }
+}
+
+.banner {
+  background: #1a202c; color: #fff;
+  padding: 0.22cm 0.5cm; margin-bottom: 0.2cm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-radius: 3px; flex-shrink: 0;
+}
+.banner h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.02em; }
+.banner h1 strong { font-weight: 700; color: #a3bffa; }
+.banner .subtitle { font-size: 0.7rem; color: #a0aec0; font-style: italic; }
+
+.columns {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25cm; align-items: start; align-content: start;
+  min-height: 0;
+}
+
+.section {
+  border-left: 4px solid #cbd5e1; background: #f7fafc;
+  padding: 0.15cm 0.2cm; margin-bottom: 0.15cm;
+  border-radius: 0 3px 3px 0;
+}
+.section:last-child { margin-bottom: 0; }
+.section h2 {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 0.06cm; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.section h3 {
+  font-size: 0.76rem; font-weight: 600;
+  margin-top: 0.08cm; margin-bottom: 0.04cm;
+}
+.section p, .section li { font-size: 0.76rem; line-height: 1.35; margin-bottom: 0.04cm; }
+.section ul { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+
+.section.purple  { border-left-color: #9f7aea; background: #faf5ff; }
+.section.blue    { border-left-color: #4299e1; background: #ebf8ff; }
+.section.green   { border-left-color: #48bb78; background: #f0fff4; }
+.section.orange  { border-left-color: #ed8936; background: #fffaf0; }
+.section.gold    { border-left-color: #eab308; background: #fefce8; }
+.section.purple h2  { color: #6b46c1; }
+.section.blue h2    { color: #2b6cb0; }
+.section.green h2   { color: #276749; }
+.section.orange h2  { color: #c05621; }
+.section.gold h2    { color: #a16207; }
+
+code {
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.72rem;
+  background: #edf2f7; color: #553c9a; padding: 0.02cm 0.06cm; border-radius: 2px;
+}
+pre {
+  background: #1a202c; color: #e2e8f0;
+  padding: 0.1cm 0.15cm; border-radius: 3px;
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.68rem;
+  line-height: 1.3; overflow-x: auto; margin: 0.06cm 0;
+}
+pre code { background: none; color: inherit; padding: 0; }
+pre .kw { color: #a3bffa; } pre .cm { color: #718096; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 0.05cm 0; }
+th {
+  background: #edf2f7; font-weight: 600; text-align: left;
+  padding: 0.04cm 0.1cm; border-bottom: 1px solid #cbd5e1;
+}
+td { padding: 0.04cm 0.1cm; border-bottom: 0.5px solid #e2e8f0; vertical-align: top; }
+tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
+
+/* Command entry */
+.cmd { margin-bottom: 0.12cm; }
+.cmd-name {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.82rem; font-weight: 700; color: #553c9a;
+}
+.cmd-desc { font-size: 0.74rem; color: #4a5568; margin: 0.02cm 0; }
+.cmd-opts { font-size: 0.7rem; color: #718096; line-height: 1.3; }
+.cmd-opts code { font-size: 0.68rem; background: #e9d8fd; color: #44337a; }
+
+.flow-row { display: flex; align-items: center; gap: 0.12cm; margin: 0.06cm 0; flex-wrap: wrap; }
+.flow-box {
+  display: inline-block; padding: 0.04cm 0.1cm; border-radius: 2px;
+  font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+}
+.flow-box.purple { background: #e9d8fd; color: #553c9a; }
+.flow-box.blue   { background: #bee3f8; color: #2a4365; }
+.flow-box.green  { background: #c6f6d5; color: #22543d; }
+.flow-box.orange { background: #feebc8; color: #7b341e; }
+.flow-box.dark   { background: #2d3748; color: #e2e8f0; }
+.flow-arrow { color: #a0aec0; font-size: 0.72rem; font-weight: bold; }
+
+.mt { margin-top: 0.08cm; }
+.small { font-size: 0.68rem; color: #718096; }
+
+.footer {
+  text-align: center; font-size: 0.62rem; color: #a0aec0;
+  margin-top: auto; padding-top: 0.08cm; border-top: 0.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="banner">
+    <h1>Command Reference <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">CDE Analyzer v0.5.17 &mdash; 26 Commands</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Mining + Instruments + LLM -->
+    <div>
+      <div class="section purple">
+        <h2>Phrase Mining</h2>
+        <div class="cmd">
+          <div class="cmd-name">phrase_miner</div>
+          <div class="cmd-desc">Iterative k-mer mining (k=25&rarr;3) with masking &amp; de Bruijn extension.</div>
+          <div class="cmd-opts">
+            <code>-i</code> input <code>-o</code> dir
+            <code>-K</code> k_max <code>-k</code> k_min
+            <code>-n</code> freq <code>-t</code> tinyids
+            <code>-D</code> deBruijn <code>-S</code> subsumption
+            <code>--dedup</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">phrase</div>
+          <div class="cmd-desc">Original n-gram detection (simpler, single-pass).</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-o</code> <code>--fields</code> <code>--min-words</code> <code>--min-ids</code> <code>--lemmatize</code> <code>--verbatim</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">phrase_builder</div>
+          <div class="cmd-desc">K-mer frequency visualization charts.</div>
+          <div class="cmd-opts"><code>-i</code> <code>-m</code> model <code>-o</code></div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">phrase_grouper</div>
+          <div class="cmd-desc">Bottom-up family analysis (prefix/suffix/infix).</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-o</code> <code>-K</code> <code>-k</code> <code>--min-family-size</code> <code>--assignment</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="section purple">
+        <h2>Instrument Extraction</h2>
+        <div class="cmd">
+          <div class="cmd-name">instrument_miner</div>
+          <div class="cmd-desc">Extract &ldquo;as part of &lt;Instrument&gt;&rdquo; patterns.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-o</code>
+            <code>-a</code> abbreviations <code>-s</code> supplementary <code>-d</code> families
+            <code>--family-summary</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">batch_expand_abbreviations</div>
+          <div class="cmd-desc">Iterate abbreviation discovery for full instrument names.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>--abbreviations</code> FILE <code>-o</code>
+            <code>--k-max</code> <code>--k-min</code> <code>--top-phrases</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="section orange">
+        <h2>LLM Classification</h2>
+        <div class="cmd">
+          <div class="cmd-name">llm_classify</div>
+          <div class="cmd-desc">Multi-provider LLM phrase classification.</div>
+          <div class="cmd-opts">
+            <code>-i</code> dir <code>-m</code> {instrument,temporal,instrument_family}
+            <code>-o</code> dir <code>--providers</code> {claude,openai,google}
+            <code>--batch-size</code> <code>--context-window</code> <code>--dry-run</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Discovery + Stripping + Diagnostic + Cleaning -->
+    <div>
+      <div class="section green">
+        <h2>Discovery &amp; Stripping</h2>
+        <div class="cmd">
+          <div class="cmd-name">strip_discover</div>
+          <div class="cmd-desc">Find pattern occurrences in CDE text fields (verbatim + variants).</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code>
+            <code>-p</code> patterns <code>-e</code> expand <code>-b</code> bare
+            <code>-a</code> abbreviations <code>-w</code> workers
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">strip_phrases</div>
+          <div class="cmd-desc">Apply curated patterns to remove matching text from fields.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code>
+            <code>-p</code> / <code>--phrases</code>
+            <code>-I</code> ignore-case <code>-B</code> word-boundary
+            <code>-T</code> trace <code>--clean-remnants</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">strip_analyze</div>
+          <div class="cmd-desc">Detect conflicts, overlaps, and false negatives.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-o</code> <code>-p</code>
+            <code>--analyze-conflicts</code> <code>--analyze-false-negatives</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">strip_html</div>
+          <div class="cmd-desc">Remove HTML markup from CDE text fields.</div>
+          <div class="cmd-opts">
+            <code>--input</code> <code>--output</code> <code>-m</code> <code>--pretty</code> <code>--tables</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="section green">
+        <h2>Diagnostic</h2>
+        <div class="cmd">
+          <div class="cmd-name">diagnose_strip</div>
+          <div class="cmd-desc">Find remaining anchor patterns after stripping (residuals).</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code>
+            <code>--anchors</code> <code>--fields</code> <code>--min-count</code>
+            <code>--suggest-patterns</code> <code>--emit-tinyids</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="section gold">
+        <h2>Data Cleaning</h2>
+        <div class="cmd">
+          <div class="cmd-name">fix_underscores</div>
+          <div class="cmd-desc">Fix Pydantic-incompatible underscore-prefixed keys.</div>
+          <div class="cmd-opts"><code>-i</code> <code>-o</code> <code>--prefix</code> CHAR <code>--depth</code> N</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: Pattern Utilities (split into Analysis + Tools) -->
+    <div>
+      <div class="section blue">
+        <h2>Pattern Utilities: Analysis</h2>
+        <p class="cmd-desc">Multi-mode tool &mdash; one mode per invocation.</p>
+
+        <h3>Coalesce Variants</h3>
+        <div class="cmd-opts">
+          <code>-c</code> FILE <code>-o</code> OUT &mdash; subsumption + prefix trie<br>
+          <code>--coalesce-report</code> FILE &ensp; <code>--min-prefix-tinyids</code> N
+        </div>
+
+        <h3>Merge Patterns</h3>
+        <div class="cmd-opts">
+          <code>-M</code> FILE FILE <code>-o</code> OUT &mdash; deduplicate/merge TSVs<br>
+          <code>--merge-pattern-column</code> &ensp; <code>--merge-tinyids-column</code>
+        </div>
+
+        <h3>Field Analysis</h3>
+        <div class="cmd-opts">
+          <code>-A</code> FILE <code>-i</code> JSON <code>-m</code> MODEL <code>-o</code> OUT<br>
+          <code>--min-field-count</code> N &ensp; <code>--min-tokens</code> N &ensp; <code>--exclude-patterns</code>
+        </div>
+
+        <h3>Validate Subsumption</h3>
+        <div class="cmd-opts"><code>-V</code> FILE <code>-i</code> JSON <code>-o</code> OUT &ensp; <code>-w</code> workers</div>
+      </div>
+
+      <div class="section blue">
+        <h2>Pattern Utilities (cont.)</h2>
+
+        <h3>Temporal Seeds</h3>
+        <div class="cmd-opts"><code>-T</code> <code>-o</code> OUT &mdash; expand 25 seeds &rarr; ~2,100 variants</div>
+
+        <h3>Expand Verbatim</h3>
+        <div class="cmd-opts"><code>-e</code> FILE <code>-o</code> OUT &mdash; generate pattern variants</div>
+
+        <h3>TSV Editor</h3>
+        <div class="cmd-opts"><code>--edit</code> FILE &ensp; <code>--port</code> N &mdash; browser-based editor</div>
+
+        <h3>Supplementary Management</h3>
+        <div class="cmd-opts">
+          <code>--harvest-to-supplementary</code> FILE &mdash; auto-ingest<br>
+          <code>--promote-supplementary</code> &mdash; local &rarr; global<br>
+          <code>--clean-local</code> &mdash; remove promoted entries
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Command Reference &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="banner">
+    <h1>Command Reference <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">Reporting, Data, Workflow &amp; Options</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Reporting + Data Extraction -->
+    <div>
+      <div class="section blue">
+        <h2>Reporting &amp; Analysis</h2>
+        <div class="cmd">
+          <div class="cmd-name">discovery_report</div>
+          <div class="cmd-desc">Markdown summary of a pipeline execution.</div>
+          <div class="cmd-opts">
+            <code>-d</code> dir <code>-p</code> {instrument,phrase} <code>-o</code> output <code>--version</code> <code>-i</code> json
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">pipeline_report</div>
+          <div class="cmd-desc">Comprehensive multi-phase execution report.</div>
+          <div class="cmd-opts">
+            <code>-s</code> state_file / <code>-d</code> dir <code>-o</code>
+            <code>-p</code> {1,2,3,4} <code>--title</code> <code>--version</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">strip_report</div>
+          <div class="cmd-desc">Quality report for stripped outputs (remnant detection).</div>
+          <div class="cmd-opts">
+            <code>-d</code> dir <code>-o</code> <code>-i</code> json <code>--version</code> <code>--no-temporal-scan</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">recall_analyze</div>
+          <div class="cmd-desc">Detection recall vs ground-truth patterns.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code> <code>-F</code> pattern_file
+            <code>--pipeline-output</code> <code>-r</code> report <code>--suggest-patterns</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="section gold">
+        <h2>Data Extraction</h2>
+        <div class="cmd">
+          <div class="cmd-name">subset</div>
+          <div class="cmd-desc">Extract CDE records by tinyId or text content.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-o</code> <code>-m</code>
+            <code>-l</code> id_list / <code>-L</code> id_file
+            <code>-t</code> text <code>--regex</code> <code>-x</code> exclude
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">extract_embed</div>
+          <div class="cmd-desc">Extract fields for transformer embeddings.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code>
+            <code>--path-file</code> <code>--output-format</code> {json,csv,tsv} <code>--concatenate</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">count</div>
+          <div class="cmd-desc">Count field occurrences and unique values.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>--fields</code> <code>-o</code>
+            <code>--match-type</code> {non_null,null,fixed,regex} <code>--group-by</code>
+          </div>
+        </div>
+        <div class="cmd">
+          <div class="cmd-name">lemma_fasta</div>
+          <div class="cmd-desc">Lemmatized text &rarr; FASTA format for sequence tools.</div>
+          <div class="cmd-opts">
+            <code>-i</code> <code>-m</code> <code>-o</code> <code>-l</code>/<code>-L</code> <code>--remove-stopwords</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Workflow + Short Options (I/O & Mining) -->
+    <div>
+      <div class="section green">
+        <h2>Workflow Orchestration</h2>
+        <h3>Run a Pipeline</h3>
+        <pre><code>cde-analyzer workflow run FILE.yaml \
+  <span class="kw">-s</span> input_json=data.json \
+  <span class="kw">-s</span> output_dir=output/ \
+  <span class="kw">--dry-run</span>      <span class="cm"># validate only</span>
+  <span class="kw">--from-step</span> N  <span class="cm"># partial re-run</span></code></pre>
+        <h3>Resume / Status / Copy</h3>
+        <table>
+          <tr><td><code>workflow resume</code></td><td>Continue after checkpoint</td></tr>
+          <tr><td><code>workflow status</code></td><td>Show pipeline progress (<code>-v</code>)</td></tr>
+          <tr><td><code>workflow list</code></td><td>Available workflow YAML files</td></tr>
+          <tr><td><code>workflow copy</code></td><td>Copy template to local dir</td></tr>
+        </table>
+      </div>
+
+      <div class="section gold">
+        <h2>Short Options: I/O &amp; Mining</h2>
+        <table>
+          <tr><th>Short</th><th>Long</th><th>Meaning</th></tr>
+          <tr><td><code>-i</code></td><td><code>--input</code></td><td>Input file</td></tr>
+          <tr><td><code>-o</code></td><td><code>--output</code></td><td>Output file/dir</td></tr>
+          <tr><td><code>-m</code></td><td><code>--model</code></td><td>Pydantic model</td></tr>
+          <tr><td><code>-f</code></td><td><code>--fields</code></td><td>Field paths</td></tr>
+          <tr><td><code>-p</code></td><td><code>--pattern-list</code></td><td>Pattern file</td></tr>
+          <tr><td><code>-w</code></td><td><code>--workers</code></td><td>Parallelism</td></tr>
+          <tr><td><code>-K</code></td><td><code>--k-max</code></td><td>Max k-mer len</td></tr>
+          <tr><td><code>-k</code></td><td><code>--k-min</code></td><td>Min k-mer len</td></tr>
+          <tr><td><code>-n</code></td><td><code>--freq-min</code></td><td>Min frequency</td></tr>
+          <tr><td><code>-t</code></td><td><code>--min-tinyids</code></td><td>Min CDE count</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 3: Short Options (Flags) + I/O Patterns + Invocation -->
+    <div>
+      <div class="section gold">
+        <h2>Short Options: Flags</h2>
+        <table>
+          <tr><th>Short</th><th>Long</th><th>Meaning</th></tr>
+          <tr><td><code>-S</code></td><td><code>--subsumption</code></td><td>Subsumption on</td></tr>
+          <tr><td><code>-D</code></td><td><code>--debruijn</code></td><td>De Bruijn on</td></tr>
+          <tr><td><code>-I</code></td><td><code>--ignore-case</code></td><td>Case-insensitive</td></tr>
+          <tr><td><code>-B</code></td><td><code>--word-boundary</code></td><td>Word boundary</td></tr>
+          <tr><td><code>-T</code></td><td><code>--trace</code></td><td>Trace / temporal</td></tr>
+          <tr><td><code>-M</code></td><td><code>--merge</code></td><td>Merge TSVs</td></tr>
+          <tr><td><code>-c</code></td><td><code>--coalesce</code></td><td>Coalesce</td></tr>
+          <tr><td><code>-A</code></td><td><code>--field-analysis</code></td><td>Field counts</td></tr>
+          <tr><td><code>-V</code></td><td><code>--validate</code></td><td>Validate subs.</td></tr>
+          <tr><td><code>-e</code></td><td><code>--expand</code></td><td>Expand variants</td></tr>
+        </table>
+        <p class="small mt">Also: <code>-x</code> exclude, <code>-l</code>/<code>-L</code> id-list/file,
+        <code>-C</code> case, <code>-r</code> report, <code>-g</code> ground-truth</p>
+      </div>
+
+      <div class="section">
+        <h2>Input/Output Patterns</h2>
+        <table>
+          <tr><th>Pattern</th><th>Description</th></tr>
+          <tr><td><code>-i FILE -o FILE</code></td><td>Single input &rarr; single output</td></tr>
+          <tr><td><code>-i FILE -o DIR</code></td><td>Input &rarr; directory of outputs</td></tr>
+          <tr><td><code>-p TSV -i JSON</code></td><td>Patterns + source data</td></tr>
+          <tr><td><code>-d DIR</code></td><td>Output directory (reporting)</td></tr>
+          <tr><td><code>-s FILE</code></td><td>Workflow state file</td></tr>
+        </table>
+        <p class="small mt">Models: <code>-m CDE</code> (default), <code>-m Form</code>, <code>-m EmbedText</code></p>
+      </div>
+
+      <div class="section orange">
+        <h2>Available Workflows</h2>
+        <table>
+          <tr><th>File</th><th>Ph</th><th>Steps</th></tr>
+          <tr><td><code>instrument_pipeline.yaml</code></td><td style="color:#6b46c1;font-weight:600;">1</td><td>9 (mine&rarr;strip&rarr;sanity)</td></tr>
+          <tr><td><code>phrase_pipeline.yaml</code></td><td style="color:#2b6cb0;font-weight:600;">2</td><td>7 (mine&rarr;strip&rarr;report)</td></tr>
+          <tr><td><code>branching_strip.yaml</code></td><td style="color:#276749;font-weight:600;">3</td><td>10 (5-way branch)</td></tr>
+        </table>
+      </div>
+
+      <div class="section orange">
+        <h2>Common Invocation</h2>
+        <pre><code><span class="cm"># Full pipeline</span>
+cde-analyzer workflow run \
+  instrument_pipeline.yaml \
+  <span class="kw">-s</span> input_json=allcde.json
+
+<span class="cm"># Manual single-step</span>
+cde-analyzer phrase_miner \
+  <span class="kw">-i</span> data.json <span class="kw">-o</span> out/ \
+  <span class="kw">-K</span> 25 <span class="kw">-k</span> 3 <span class="kw">-n</span> 5 <span class="kw">-t</span> 3</code></pre>
+        <p class="small mt"><code>cde-analyzer &lt;command&gt; --help</code> for full options.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Command Reference &bull; Page 2 of 2</div>
+</div>
+
+</body>
+</html>

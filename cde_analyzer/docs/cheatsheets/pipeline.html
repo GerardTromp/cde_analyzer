@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: Pipeline &amp; Workflow Cheatsheet</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-size: 10pt;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  color: #2d3748;
+  background: #dedede;
+}
+@page { size: letter landscape; margin: 1.27cm; }
+.page {
+  width: 25.4cm; height: 19.05cm;
+  margin: 0.5cm auto; padding: 0.3cm;
+  background: #fff; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.page + .page { page-break-before: always; }
+@media print {
+  html { background: #fff; }
+  .page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: 100%; }
+}
+
+.banner {
+  background: #1a202c; color: #fff;
+  padding: 0.22cm 0.5cm; margin-bottom: 0.2cm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-radius: 3px; flex-shrink: 0;
+}
+.banner h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.02em; }
+.banner h1 strong { font-weight: 700; color: #a3bffa; }
+.banner .subtitle { font-size: 0.7rem; color: #a0aec0; font-style: italic; }
+
+.columns {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25cm; align-items: start; align-content: start;
+  min-height: 0;
+}
+
+.section {
+  border-left: 4px solid #cbd5e1; background: #f7fafc;
+  padding: 0.15cm 0.2cm; margin-bottom: 0.15cm;
+  border-radius: 0 3px 3px 0;
+}
+.section:last-child { margin-bottom: 0; }
+.section h2 {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 0.06cm; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.section h3 {
+  font-size: 0.76rem; font-weight: 600;
+  margin-top: 0.08cm; margin-bottom: 0.04cm;
+}
+.section p, .section li { font-size: 0.76rem; line-height: 1.35; margin-bottom: 0.04cm; }
+.section ul, .section ol { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+.section ul li, .section ol li { margin-bottom: 0.02cm; }
+
+.section.purple  { border-left-color: #9f7aea; background: #faf5ff; }
+.section.blue    { border-left-color: #4299e1; background: #ebf8ff; }
+.section.green   { border-left-color: #48bb78; background: #f0fff4; }
+.section.orange  { border-left-color: #ed8936; background: #fffaf0; }
+.section.gold    { border-left-color: #eab308; background: #fefce8; }
+.section.purple h2  { color: #6b46c1; }
+.section.blue h2    { color: #2b6cb0; }
+.section.green h2   { color: #276749; }
+.section.orange h2  { color: #c05621; }
+.section.gold h2    { color: #a16207; }
+
+code {
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.72rem;
+  background: #edf2f7; color: #553c9a; padding: 0.02cm 0.06cm; border-radius: 2px;
+}
+pre {
+  background: #1a202c; color: #e2e8f0;
+  padding: 0.1cm 0.15cm; border-radius: 3px;
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.68rem;
+  line-height: 1.3; overflow-x: auto; margin: 0.06cm 0;
+}
+pre code { background: none; color: inherit; padding: 0; }
+pre .kw { color: #a3bffa; } pre .cm { color: #718096; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 0.05cm 0; }
+th {
+  background: #edf2f7; font-weight: 600; text-align: left;
+  padding: 0.04cm 0.1cm; border-bottom: 1px solid #cbd5e1;
+}
+td { padding: 0.04cm 0.1cm; border-bottom: 0.5px solid #e2e8f0; vertical-align: top; }
+tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
+
+.flow-row { display: flex; align-items: center; gap: 0.12cm; margin: 0.06cm 0; flex-wrap: wrap; }
+.flow-box {
+  display: inline-block; padding: 0.04cm 0.1cm; border-radius: 2px;
+  font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+}
+.flow-box.purple { background: #e9d8fd; color: #553c9a; }
+.flow-box.blue   { background: #bee3f8; color: #2a4365; }
+.flow-box.green  { background: #c6f6d5; color: #22543d; }
+.flow-box.orange { background: #feebc8; color: #7b341e; }
+.flow-box.dark   { background: #2d3748; color: #e2e8f0; }
+.flow-box.gold   { background: #fef3c7; color: #92400e; border: 1px dashed #d97706; }
+.flow-arrow { color: #a0aec0; font-size: 0.72rem; font-weight: bold; }
+
+/* Pipeline step list */
+.step-list {
+  list-style: none; padding: 0; margin: 0.06cm 0;
+  counter-reset: step;
+}
+.step-list li {
+  position: relative; padding-left: 0.55cm;
+  margin-bottom: 0.04cm; font-size: 0.76rem; line-height: 1.3;
+}
+.step-list li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: 0;
+  width: 0.35cm; height: 0.35cm; border-radius: 50%;
+  background: #e2e8f0; color: #4a5568;
+  font-size: 0.58rem; font-weight: 700;
+  text-align: center; line-height: 0.35cm;
+}
+.step-list.purple li::before { background: #e9d8fd; color: #553c9a; }
+.step-list.blue li::before   { background: #bee3f8; color: #2a4365; }
+.step-list.green li::before  { background: #c6f6d5; color: #22543d; }
+.step-list li.checkpoint { font-weight: 600; color: #92400e; }
+.step-list li.checkpoint::before {
+  background: #fef3c7; color: #92400e;
+  border: 1px dashed #d97706; content: "\2713";
+}
+
+.branch-grid {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 0.02cm 0.15cm; margin: 0.06cm 0; font-size: 0.72rem;
+}
+.branch-label { font-weight: 600; white-space: nowrap; }
+
+.mt { margin-top: 0.08cm; }
+.small { font-size: 0.68rem; color: #718096; }
+
+.footer {
+  text-align: center; font-size: 0.62rem; color: #a0aec0;
+  margin-top: auto; padding-top: 0.08cm; border-top: 0.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="banner">
+    <h1>Pipeline &amp; Workflow <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">CDE Analyzer v0.5.17 &mdash; 3-Phase Pipeline</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Overview + Phase 1 -->
+    <div>
+      <div class="section">
+        <h2>Pipeline Overview</h2>
+        <p>Three-phase pipeline: raw NLM CDE JSON &rarr; cleaned, stripped outputs.</p>
+        <div class="flow-row mt">
+          <span class="flow-box purple">Phase 1: Instruments</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">Phase 2: Phrases</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box green">Phase 3: Branch</span>
+        </div>
+        <table class="mt">
+          <tr><th>Phase</th><th>Input</th><th>Output</th></tr>
+          <tr><td style="color:#6b46c1;font-weight:600;">1</td><td><code>allcde.json</code></td><td><code>inst_stripped.json</code></td></tr>
+          <tr><td style="color:#2b6cb0;font-weight:600;">2</td><td><code>inst_stripped.json</code></td><td><code>curated_phrases.tsv</code></td></tr>
+          <tr><td style="color:#276749;font-weight:600;">3</td><td><code>allcde.json</code> + patterns</td><td>5 stripped JSON variants</td></tr>
+        </table>
+      </div>
+
+      <div class="section purple">
+        <h2>Phase 1: Instrument Pipeline</h2>
+        <p class="small"><code>instrument_pipeline.yaml</code></p>
+        <ol class="step-list purple">
+          <li><code>mine_instruments</code> &mdash; &ldquo;as part of&rdquo; patterns</li>
+          <li><code>discover_abbreviations</code> &mdash; abbreviated references</li>
+          <li><code>discover_verbatim</code> &mdash; verbatim + variant matching</li>
+          <li><code>coalesce_patterns</code> &mdash; remove subsumed</li>
+          <li><code>validate_subsumption</code> &mdash; empirical per-tinyId</li>
+          <li><code>enrich_fields</code> &mdash; add field distribution counts</li>
+          <li class="checkpoint"><strong>CHECKPOINT</strong> &mdash; curator reviews TSV</li>
+          <li><code>strip_instruments</code> &mdash; apply curated patterns</li>
+          <li><code>sanity_check</code> &mdash; diagnose remaining anchors</li>
+        </ol>
+        <h3>Key Outputs</h3>
+        <table>
+          <tr><td><code>inst_stripped.json</code></td><td>Instruments removed from fields</td></tr>
+          <tr><td><code>curated.tsv</code></td><td>Curator-approved patterns</td></tr>
+          <tr><td><code>inst_full.tsv</code> / <code>inst_sub.tsv</code></td><td>Strip patterns (full / sub-group)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 2: Phase 2 + Curation -->
+    <div>
+      <div class="section blue">
+        <h2>Phase 2: Phrase Pipeline</h2>
+        <p class="small"><code>phrase_pipeline.yaml</code></p>
+        <ol class="step-list blue">
+          <li><code>mine_phrases</code> &mdash; k-mer mining (k=25&rarr;3)</li>
+          <li><code>discover_verbatim</code> &mdash; find verbatim occurrences</li>
+          <li><code>coalesce_patterns</code> &mdash; remove subsumed phrases</li>
+          <li><code>field_analysis</code> &mdash; add field counts + filtering</li>
+          <li class="checkpoint"><strong>CHECKPOINT</strong> &mdash; curator reviews TSV</li>
+          <li><code>strip_phrases</code> &mdash; apply curated patterns</li>
+          <li><code>discovery_report</code> &mdash; generate summary</li>
+        </ol>
+        <h3>Configuration</h3>
+        <table>
+          <tr><th>Variable</th><th>Default</th><th>Purpose</th></tr>
+          <tr><td><code>k_max</code></td><td>25</td><td>Longest phrase</td></tr>
+          <tr><td><code>k_min</code></td><td>3</td><td>Shortest phrase</td></tr>
+          <tr><td><code>min_field_count</code></td><td>1</td><td>Min CDEs per field</td></tr>
+          <tr><td><code>min_tokens</code></td><td>2</td><td>Min tokens</td></tr>
+        </table>
+        <h3>Key Outputs</h3>
+        <table>
+          <tr><td><code>curated_phrases.tsv</code></td><td>Curator-approved phrases</td></tr>
+          <tr><td><code>dedup_phrases.tsv</code></td><td>Whole-text duplicates (&gt; k_max)</td></tr>
+          <tr><td><code>verbatim_phrases.tsv</code></td><td>Verbatim surface forms</td></tr>
+        </table>
+      </div>
+
+      <div class="section orange">
+        <h2>Curation Workflow</h2>
+        <p>Human-in-the-loop iterative refinement at each checkpoint:</p>
+        <div class="flow-row">
+          <span class="flow-box blue">discover</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box orange">edit</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">coalesce</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">validate</span>
+        </div>
+        <div class="flow-row">
+          <span class="flow-box green">diagnose</span>
+          <span class="flow-arrow">&larr;</span>
+          <span class="flow-box green">strip</span>
+          <span class="flow-arrow">&larr;</span>
+          <span class="flow-box blue">enrich</span>
+          <span class="flow-arrow">&uarr;</span>
+        </div>
+        <h3>Curation Tools</h3>
+        <ul>
+          <li><code>pattern_util --edit FILE</code> &mdash; browser-based TSV editor</li>
+          <li><code>--harvest-to-supplementary</code> &mdash; auto-ingest patterns</li>
+          <li><code>--promote-supplementary</code> &mdash; local &rarr; global config</li>
+          <li><code>workflow resume</code> &mdash; continue after checkpoint</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 3: Phase 3 + Quick Execution -->
+    <div>
+      <div class="section green">
+        <h2>Phase 3: Branching Strip</h2>
+        <p class="small"><code>branching_strip.yaml</code> &mdash; 10 steps, 5 outputs</p>
+        <ol class="step-list green">
+          <li><code>strip_inst_full</code> &mdash; full instrument removal</li>
+          <li><code>strip_inst_sub</code> &mdash; sub-group removal</li>
+          <li><code>expand_temporal</code> &mdash; generate temporal variants</li>
+          <li><code>strip_temporal_*</code> &mdash; temporal from 3 inputs</li>
+          <li><code>strip_phrase/both_*</code> &mdash; curated from 3 inputs</li>
+          <li><code>quality_report</code> &mdash; remnant detection</li>
+        </ol>
+        <h3>5 Output Branches</h3>
+        <div class="branch-grid">
+          <span class="branch-label" style="color:#6b46c1;">inst_full</span><span>Full instrument removal only</span>
+          <span class="branch-label" style="color:#6b46c1;">inst_sub</span><span>Sub-group instrument removal only</span>
+          <span class="branch-label" style="color:#2b6cb0;">phrase</span><span>Curated phrases only (no instruments)</span>
+          <span class="branch-label" style="color:#276749;">both_full</span><span>Full instruments + phrases</span>
+          <span class="branch-label" style="color:#276749;">both_sub</span><span>Sub-group instruments + phrases</span>
+        </div>
+        <h3>Split Temporal / Curated</h3>
+        <div class="flow-row">
+          <span class="flow-box green">Temporal</span>
+          <span class="small">case-insensitive</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">Curated</span>
+          <span class="small">case-sensitive</span>
+        </div>
+        <p class="small">Temporal (~2,100 auto) stripped first with <code>-I</code>;
+        then curated phrases with verbatim case matching.</p>
+      </div>
+
+      <div class="section gold">
+        <h2>Quick Execution</h2>
+        <pre><code><span class="cm"># Phase 1</span>
+cde-analyzer workflow run \
+  instrument_pipeline.yaml \
+  <span class="kw">-s</span> input_json=allcde.json
+
+<span class="cm"># Phase 2</span>
+cde-analyzer workflow run \
+  phrase_pipeline.yaml \
+  <span class="kw">-s</span> input_json=inst_stripped.json
+
+<span class="cm"># Phase 3</span>
+cde-analyzer workflow run \
+  branching_strip.yaml \
+  <span class="kw">-s</span> input_json=allcde.json \
+  <span class="kw">-s</span> inst_patterns_base=inst \
+  <span class="kw">-s</span> phrase_patterns=curated.tsv</code></pre>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Pipeline &amp; Workflow &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="banner">
+    <h1>Pipeline &amp; Workflow <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">Workflow Engine, Configuration &amp; Recipes</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Workflow Engine + Config Priority -->
+    <div>
+      <div class="section green">
+        <h2>Workflow Engine</h2>
+        <p>YAML-based pipeline orchestrator with checkpoints and resume.</p>
+        <h3>YAML Structure</h3>
+        <pre><code><span class="kw">name</span>: my_pipeline
+<span class="kw">variables</span>:
+  input_json: <span class="cm">"data.json"</span>
+  output_dir: <span class="cm">"output/"</span>
+
+<span class="kw">steps</span>:
+  - <span class="kw">name</span>: mine_phrases
+    <span class="kw">action</span>: phrase_miner
+    <span class="kw">args</span>:
+      input: <span class="cm">"${input_json}"</span>
+      output: <span class="cm">"${output_dir}"</span>
+      k-max: 25
+
+  - <span class="kw">name</span>: curator_review
+    <span class="kw">action</span>: checkpoint
+    <span class="kw">message</span>: <span class="cm">"Review patterns"</span>
+
+  - <span class="kw">name</span>: strip
+    <span class="kw">action</span>: strip_phrases
+    <span class="kw">depends_on</span>: [mine_phrases]</code></pre>
+        <h3>Key Features</h3>
+        <table>
+          <tr><td><code>variables</code></td><td>Template substitution via <code>${var}</code></td></tr>
+          <tr><td><code>depends_on</code></td><td>Explicit step dependencies</td></tr>
+          <tr><td><code>checkpoint</code></td><td>Pause for human curation</td></tr>
+          <tr><td><code>--set KEY=VAL</code></td><td>Override variables at runtime</td></tr>
+          <tr><td><code>--from-step</code></td><td>Start from a specific step</td></tr>
+          <tr><td><code>--dry-run</code></td><td>Validate without executing</td></tr>
+        </table>
+      </div>
+
+      <div class="section green">
+        <h2>Config Priority</h2>
+        <p>Variables resolved in order (last wins):</p>
+        <ol>
+          <li>YAML <code>variables:</code> block (defaults)</li>
+          <li>Auto-discovered <code>{output_dir}/{name}_config.yaml</code></li>
+          <li>CLI <code>--set KEY=VALUE</code> overrides</li>
+        </ol>
+        <p class="small mt">Auto-discovery: project-local config without modifying shared YAML.</p>
+      </div>
+    </div>
+
+    <!-- COL 2: Workflow Commands + Available Workflows -->
+    <div>
+      <div class="section blue">
+        <h2>Workflow Commands</h2>
+        <h3>Run a Workflow</h3>
+        <pre><code>cde-analyzer workflow run FILE.yaml \
+  <span class="kw">-s</span> input_json=allcde.json \
+  <span class="kw">-s</span> output_dir=phase1_output/ \
+  <span class="kw">-s</span> workers=4</code></pre>
+        <h3>Resume After Checkpoint</h3>
+        <pre><code>cde-analyzer workflow resume \
+  <span class="kw">--state-file</span> out/.workflow_state.json</code></pre>
+        <h3>Check Status</h3>
+        <pre><code>cde-analyzer workflow status \
+  <span class="kw">--state-file</span> out/.workflow_state.json <span class="kw">-v</span></code></pre>
+        <h3>List &amp; Copy</h3>
+        <pre><code><span class="cm"># List available workflows</span>
+cde-analyzer workflow list
+<span class="cm"># Copy template to current directory</span>
+cde-analyzer workflow copy \
+  instrument_pipeline <span class="kw">-a</span> my_pipe <span class="kw">-d</span> ./</code></pre>
+        <h3>Partial Re-run</h3>
+        <pre><code>cde-analyzer workflow run FILE.yaml \
+  <span class="kw">--from-step</span> strip_phrases</code></pre>
+      </div>
+
+      <div class="section orange">
+        <h2>Available Workflows</h2>
+        <table>
+          <tr><th>File</th><th>Ph</th><th>Steps</th></tr>
+          <tr><td><code>instrument_pipeline.yaml</code></td><td style="color:#6b46c1;font-weight:600;">1</td><td>9 (mine&rarr;strip&rarr;sanity)</td></tr>
+          <tr><td><code>phrase_pipeline.yaml</code></td><td style="color:#2b6cb0;font-weight:600;">2</td><td>7 (mine&rarr;strip&rarr;report)</td></tr>
+          <tr><td><code>branching_strip.yaml</code></td><td style="color:#276749;font-weight:600;">3</td><td>10 (5-way branch)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 3: Recipes (split into two) + One-Liners -->
+    <div>
+      <div class="section gold">
+        <h2>Recipe: Discover &amp; Curate</h2>
+        <pre><code><span class="cm"># 1. Discover patterns</span>
+cde-analyzer strip_discover \
+  <span class="kw">-i</span> input.json <span class="kw">-p</span> inst.tsv \
+  <span class="kw">-e</span> <span class="kw">-o</span> discovered.tsv
+
+<span class="cm"># 2. Curate (browser editor)</span>
+cde-analyzer pattern_util \
+  <span class="kw">--edit</span> discovered.tsv
+
+<span class="cm"># 3. Coalesce (remove subsumed)</span>
+cde-analyzer pattern_util \
+  <span class="kw">-c</span> discovered.tsv <span class="kw">-o</span> coal.tsv
+
+<span class="cm"># 4. Validate empirically</span>
+cde-analyzer pattern_util \
+  <span class="kw">-V</span> coal.tsv <span class="kw">-i</span> input.json \
+  <span class="kw">-o</span> validated.tsv</code></pre>
+      </div>
+
+      <div class="section gold">
+        <h2>Recipe: Enrich &amp; Strip</h2>
+        <pre><code><span class="cm"># 5. Enrich with field counts</span>
+cde-analyzer pattern_util \
+  <span class="kw">-A</span> validated.tsv <span class="kw">-i</span> input.json \
+  <span class="kw">-o</span> enriched.tsv
+
+<span class="cm"># 6. Strip matching text</span>
+cde-analyzer strip_phrases \
+  <span class="kw">-i</span> input.json <span class="kw">-p</span> enriched.tsv \
+  <span class="kw">-o</span> stripped.json
+
+<span class="cm"># 7. Check residuals</span>
+cde-analyzer diagnose_strip \
+  <span class="kw">-i</span> stripped.json \
+  <span class="kw">-o</span> residuals.tsv</code></pre>
+      </div>
+
+      <div class="section">
+        <h2>Common One-Liners</h2>
+        <pre><code><span class="cm"># Subset by tinyId</span>
+cde-analyzer subset <span class="kw">-i</span> d.json \
+  <span class="kw">-l</span> id1,id2 <span class="kw">-o</span> sub.json
+<span class="cm"># Count non-null definitions</span>
+cde-analyzer count <span class="kw">-i</span> d.json \
+  <span class="kw">--fields</span> definitions.*.definition
+<span class="cm"># Extract for embeddings</span>
+cde-analyzer extract_embed \
+  <span class="kw">-i</span> d.json <span class="kw">-o</span> embed.csv
+<span class="cm"># Merge pattern TSVs</span>
+cde-analyzer pattern_util \
+  <span class="kw">-M</span> f1.tsv f2.tsv <span class="kw">-o</span> m.tsv
+<span class="cm"># Generate temporal variants</span>
+cde-analyzer pattern_util <span class="kw">-T</span> <span class="kw">-o</span> t.tsv</code></pre>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Pipeline &amp; Workflow &bull; Page 2 of 2 &bull; <code>cde-analyzer workflow --help</code></div>
+</div>
+
+</body>
+</html>

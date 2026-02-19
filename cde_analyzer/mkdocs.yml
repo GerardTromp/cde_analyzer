@@ -56,6 +56,8 @@ nav:
     - llm_classify Reference: help/llm_classify.md
     - Configuration: llm/configuration.md
     - Query Modules: llm/query_modules.md
+  - Cheatsheets:
+    - Overview: cheatsheets/index.md
   - Guides:
     - Curation Guide: curation-guide.md
     - Phrase Miner Logic: phrase_miner_logic.md

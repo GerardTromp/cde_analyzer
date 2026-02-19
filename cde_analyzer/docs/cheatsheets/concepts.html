@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: Concepts &amp; Data Model Cheatsheet</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-size: 10pt;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  color: #2d3748;
+  background: #dedede;
+}
+@page { size: letter landscape; margin: 1.27cm; }
+.page {
+  width: 25.4cm; height: 19.05cm;
+  margin: 0.5cm auto; padding: 0.3cm;
+  background: #fff; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.page + .page { page-break-before: always; }
+@media print {
+  html { background: #fff; }
+  .page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: 100%; }
+}
+
+.banner {
+  background: #1a202c; color: #fff;
+  padding: 0.22cm 0.5cm; margin-bottom: 0.2cm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-radius: 3px; flex-shrink: 0;
+}
+.banner h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.02em; }
+.banner h1 strong { font-weight: 700; color: #a3bffa; }
+.banner .subtitle { font-size: 0.7rem; color: #a0aec0; font-style: italic; }
+
+.columns {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25cm; align-items: start; align-content: start;
+  min-height: 0;
+}
+
+.section {
+  border-left: 4px solid #cbd5e1; background: #f7fafc;
+  padding: 0.15cm 0.2cm; margin-bottom: 0.15cm;
+  border-radius: 0 3px 3px 0;
+}
+.section:last-child { margin-bottom: 0; }
+.section h2 {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 0.06cm; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.section h3 {
+  font-size: 0.76rem; font-weight: 600;
+  margin-top: 0.08cm; margin-bottom: 0.04cm;
+}
+.section p, .section li { font-size: 0.76rem; line-height: 1.35; margin-bottom: 0.04cm; }
+.section ul { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+.section ul li, .section ol li { margin-bottom: 0.02cm; }
+.section ol { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+
+.section.purple  { border-left-color: #9f7aea; background: #faf5ff; }
+.section.blue    { border-left-color: #4299e1; background: #ebf8ff; }
+.section.green   { border-left-color: #48bb78; background: #f0fff4; }
+.section.orange  { border-left-color: #ed8936; background: #fffaf0; }
+.section.gold    { border-left-color: #eab308; background: #fefce8; }
+.section.purple h2  { color: #6b46c1; }
+.section.blue h2    { color: #2b6cb0; }
+.section.green h2   { color: #276749; }
+.section.orange h2  { color: #c05621; }
+.section.gold h2    { color: #a16207; }
+
+code {
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.72rem;
+  background: #edf2f7; color: #553c9a; padding: 0.02cm 0.06cm; border-radius: 2px;
+}
+pre {
+  background: #1a202c; color: #e2e8f0;
+  padding: 0.1cm 0.15cm; border-radius: 3px;
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.68rem;
+  line-height: 1.3; overflow-x: auto; margin: 0.06cm 0;
+}
+pre code { background: none; color: inherit; padding: 0; }
+pre .kw { color: #a3bffa; } pre .str { color: #9ae6b4; } pre .cm { color: #718096; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 0.05cm 0; }
+th {
+  background: #edf2f7; font-weight: 600; text-align: left;
+  padding: 0.04cm 0.1cm; border-bottom: 1px solid #cbd5e1;
+}
+td { padding: 0.04cm 0.1cm; border-bottom: 0.5px solid #e2e8f0; vertical-align: top; }
+tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
+
+.flow-row { display: flex; align-items: center; gap: 0.12cm; margin: 0.06cm 0; flex-wrap: wrap; }
+.flow-box {
+  display: inline-block; padding: 0.04cm 0.1cm; border-radius: 2px;
+  font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+}
+.flow-box.purple { background: #e9d8fd; color: #553c9a; }
+.flow-box.blue   { background: #bee3f8; color: #2a4365; }
+.flow-box.green  { background: #c6f6d5; color: #22543d; }
+.flow-box.orange { background: #feebc8; color: #7b341e; }
+.flow-box.dark   { background: #2d3748; color: #e2e8f0; }
+.flow-arrow { color: #a0aec0; font-size: 0.72rem; font-weight: bold; }
+
+.mt { margin-top: 0.08cm; }
+.small { font-size: 0.68rem; color: #718096; }
+
+.footer {
+  text-align: center; font-size: 0.62rem; color: #a0aec0;
+  margin-top: auto; padding-top: 0.08cm; border-top: 0.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="banner">
+    <h1>Core Concepts &amp; Data Model <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">CDE Analyzer v0.5.17</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1 -->
+    <div>
+      <div class="section purple">
+        <h2>What Are CDEs?</h2>
+        <p><strong>Common Data Elements</strong> &mdash; standardized data fields
+        from the NIH/NLM CDE Repository. Each CDE defines a reusable
+        question, variable, or measurement used across clinical studies.</p>
+        <h3>CDE Record Structure</h3>
+        <ul>
+          <li><code>tinyId</code> &mdash; unique short identifier (e.g. <code>"XyZ4k2"</code>)</li>
+          <li><code>designations[]</code> &mdash; alternative names / display labels</li>
+          <li><code>definitions[]</code> &mdash; explanatory text descriptions</li>
+          <li><code>valueDomain</code> &mdash; permitted values, data type</li>
+          <li><code>sources[]</code>, <code>properties[]</code> &mdash; provenance metadata</li>
+        </ul>
+        <h3>Key Field Paths</h3>
+        <table>
+          <tr><td><code>designations.*.designation</code></td><td>CDE names</td></tr>
+          <tr><td><code>definitions.*.definition</code></td><td>CDE descriptions</td></tr>
+          <tr><td><code>valueDomain.permissibleValues.*.valueMeaningName</code></td><td>Value labels</td></tr>
+          <tr><td><code>valueDomain.permissibleValues.*.valueMeaningDefinition</code></td><td>Value defs</td></tr>
+        </table>
+      </div>
+
+      <div class="section blue">
+        <h2>Pydantic Data Models</h2>
+        <p>Defined in <code>CDE_Schema/</code>; selected via <code>-m MODEL</code>:</p>
+        <table>
+          <tr><th>Model</th><th>Use</th></tr>
+          <tr><td><code>CDE</code></td><td>Full CDE records (primary)</td></tr>
+          <tr><td><code>Form</code></td><td>CDE forms / questionnaires</td></tr>
+          <tr><td><code>EmbedText</code></td><td>Pre-extracted text for embeddings</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>Three-Layer Architecture</h2>
+        <div class="flow-row">
+          <span class="flow-box dark">cli.py</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box dark">run.py</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box dark">logic/*.py</span>
+        </div>
+        <table class="mt">
+          <tr><td><strong>CLI</strong></td><td>Argument parsing only</td></tr>
+          <tr><td><strong>Orchestration</strong></td><td>File I/O, coordination, formatting</td></tr>
+          <tr><td><strong>Logic</strong></td><td>Core algorithms (stateless, testable)</td></tr>
+        </table>
+        <p class="small">Entry: <code>cde_analyzer.py</code> &mdash; lazy-loaded, ~26 actions.</p>
+      </div>
+    </div>
+
+    <!-- COL 2 -->
+    <div>
+      <div class="section green">
+        <h2>Pattern TSV Format</h2>
+        <p>Tab-separated files are the interchange format between pipeline steps.</p>
+        <h3>Standard Columns</h3>
+        <table>
+          <tr><th>Column</th><th>Description</th></tr>
+          <tr><td><code>pattern</code></td><td>Detected text pattern</td></tr>
+          <tr><td><code>tinyIds</code></td><td>Pipe-separated CDE ids</td></tr>
+          <tr><td><code>type</code></td><td>Detection method</td></tr>
+          <tr><td><code>source_pattern</code></td><td>Original form before expansion</td></tr>
+        </table>
+        <h3>Enriched Columns (post field-analysis)</h3>
+        <table>
+          <tr><td><code>def_count</code></td><td>CDEs matched in definitions</td></tr>
+          <tr><td><code>desig_count</code></td><td>CDEs matched in designations</td></tr>
+          <tr><td><code>field_profile</code></td><td><code>def_only</code>, <code>desig_only</code>, or <code>both</code></td></tr>
+          <tr><td><code>example_name</code></td><td>First matching CDE name</td></tr>
+          <tr><td><code>example_definition</code></td><td>First matching definition (120 chars)</td></tr>
+        </table>
+        <h3>Hierarchy Columns (coalesced)</h3>
+        <table>
+          <tr><td><code>group</code></td><td>Parent instrument family</td></tr>
+          <tr><td><code>sub_group</code></td><td>Specific sub-domain variant</td></tr>
+          <tr><td><code>suffix</code></td><td>Distinguishing suffix text</td></tr>
+        </table>
+        <h3>Strip-Ready Files</h3>
+        <ul>
+          <li><code>{base}_full.tsv</code> &mdash; full pattern removal</li>
+          <li><code>{base}_sub.tsv</code> &mdash; sub-group only (suffix retained)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 3 -->
+    <div>
+      <div class="section gold">
+        <h2>File Types Reference</h2>
+        <table>
+          <tr><th>Ext</th><th>Content</th><th>Used By</th></tr>
+          <tr><td><code>.json</code></td><td>CDE records (list of objects)</td><td>All actions (<code>-i</code>)</td></tr>
+          <tr><td><code>.tsv</code></td><td>Patterns / phrases</td><td>Mining, strip, pattern_util</td></tr>
+          <tr><td><code>.yaml</code></td><td>Workflows, config files</td><td>workflow engine, seeds</td></tr>
+          <tr><td><code>.md</code></td><td>Reports (Markdown)</td><td>discovery/pipeline_report</td></tr>
+          <tr><td><code>.fasta</code></td><td>Lemmatized sequences</td><td>lemma_fasta</td></tr>
+          <tr><td><code>.csv</code></td><td>Tabular export</td><td>extract_embed, count</td></tr>
+        </table>
+        <p class="small mt">Workflow state: <code>.workflow_state.json</code> &mdash; enables <code>workflow resume</code>.</p>
+      </div>
+
+      <div class="section orange">
+        <h2>Configuration Files</h2>
+        <table>
+          <tr><th>File</th><th>Purpose</th></tr>
+          <tr><td><code>config/temporal_seed_patterns.yaml</code></td><td>25 temporal seed patterns</td></tr>
+          <tr><td><code>config/supplementary_patterns.yaml</code></td><td>Global curated instruments</td></tr>
+          <tr><td><code>config/anchor_expansions.yaml</code></td><td>Context prefix/suffix expansions</td></tr>
+          <tr><td><code>./supplementary_patterns.yaml</code></td><td>Local project override</td></tr>
+        </table>
+        <h3>Config Auto-Discovery</h3>
+        <p>Workflow engine loads
+        <code>{output_dir}/{workflow_name}_config.yaml</code>
+        between YAML defaults and <code>--set</code> overrides.</p>
+      </div>
+
+      <div class="section green">
+        <h2>Supplementary Patterns</h2>
+        <p>Instrument patterns from external sources or manual curation.</p>
+        <ul>
+          <li><strong>Global</strong>: <code>config/supplementary_patterns.yaml</code></li>
+          <li><strong>Local</strong>: <code>./supplementary_patterns.yaml</code> (project override)</li>
+        </ul>
+        <pre><code><span class="cm"># Auto-ingest from sanity check</span>
+pattern_util <span class="kw">--harvest-to-supplementary</span> sanity.tsv
+<span class="cm"># Promote local &rarr; global</span>
+pattern_util <span class="kw">--promote-supplementary</span></code></pre>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Core Concepts &amp; Data Model &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="banner">
+    <h1>Core Concepts &amp; Data Model <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">Algorithms &amp; Patterns</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1 -->
+    <div>
+      <div class="section purple">
+        <h2>K-mer Phrase Mining</h2>
+        <p>Iterative descending extraction of shared text phrases from CDE fields.</p>
+        <h3>Algorithm</h3>
+        <pre><code><span class="kw">for</span> k = k_max <span class="kw">down to</span> k_min:
+  phrases = extract_kmers(texts, k)
+  phrases = filter(freq &ge; n, tinyids &ge; t)
+  emit(phrases)
+  texts = mask(texts, phrases) <span class="cm"># prevent re-counting</span></code></pre>
+        <h3>Key Parameters</h3>
+        <table>
+          <tr><td><code>-K</code></td><td>k_max (default 25)</td><td>Longest phrase</td></tr>
+          <tr><td><code>-k</code></td><td>k_min (default 3)</td><td>Shortest phrase</td></tr>
+          <tr><td><code>-n</code></td><td>freq_min</td><td>Min frequency</td></tr>
+          <tr><td><code>-t</code></td><td>min_tinyids</td><td>Min distinct CDEs</td></tr>
+          <tr><td><code>-D</code></td><td>de Bruijn</td><td>Extend via overlap graph</td></tr>
+          <tr><td><code>-S</code></td><td>subsumption</td><td>Remove subsumed</td></tr>
+        </table>
+        <h3>Masking</h3>
+        <p>After each k, detected phrases replaced with placeholders.
+        Prevents redundant shorter fragments at lower k values.</p>
+      </div>
+
+      <div class="section purple">
+        <h2>Dedup Pre-Pass</h2>
+        <p>Before k-mer mining (Stage 0):</p>
+        <ol>
+          <li><strong>Hash</strong> field texts &mdash; group identical strings shared by N+ CDEs</li>
+          <li><strong>Filter</strong> &mdash; only emit phrases with tokens &gt; k_max</li>
+          <li><strong>No masking</strong> &mdash; sub-phrases remain visible to k-mer loop</li>
+        </ol>
+        <p class="small mt">Output: separate <code>dedup_phrases.tsv</code>.
+        Short duplicates found naturally by k-mer mining.</p>
+      </div>
+
+      <div class="section orange">
+        <h2>Anchor Expansion</h2>
+        <p>Context prefix/suffix expansion for instrument discovery:</p>
+        <ul>
+          <li>Defined in <code>config/anchor_expansions.yaml</code></li>
+          <li>Generates &ldquo;as part of &lt;X&gt;&rdquo;, &ldquo;using the &lt;X&gt;&rdquo;, etc.</li>
+          <li><strong>Instrument-specific only</strong> &mdash; phrase/temporal patterns use <code>\b</code> word boundaries instead</li>
+        </ul>
+        <p class="small">Phase 1 uses anchor expansion; Phase 2 phrases are self-contained.</p>
+      </div>
+    </div>
+
+    <!-- COL 2 -->
+    <div>
+      <div class="section blue">
+        <h2>Subsumption</h2>
+        <p>Removing redundant shorter patterns covered by longer ones.</p>
+        <h3>Text-Based Subsumption</h3>
+        <p>Pattern A subsumed by B when:</p>
+        <ul>
+          <li>A is a <strong>substring</strong> of B, AND</li>
+          <li>every tinyId of A is <strong>covered</strong> by union of tinyIds of all longer patterns containing A</li>
+        </ul>
+        <h3>Empirical Validation</h3>
+        <p>Per-tinyId, per-field verification after coalescing:</p>
+        <ul>
+          <li>Check if short pattern matches text <strong>not</strong> already covered by any longer group member</li>
+          <li>Keep only if it matches <strong>independently</strong></li>
+        </ul>
+        <pre><code>pattern_util <span class="kw">-V</span> coalesced.tsv \
+  <span class="kw">-i</span> input.json <span class="kw">-o</span> validated.tsv</code></pre>
+      </div>
+
+      <div class="section blue">
+        <h2>Coalescer Phases</h2>
+        <p>Three-phase consolidation (<code>flexible_pattern_matcher.py</code>):</p>
+        <h3>Phase 1a &mdash; Prefix-Kept</h3>
+        <p>Keep shorter A alongside longer B when <code>B.startswith(A)</code>
+        and A has tinyIds not covered by B.</p>
+        <h3>Phase 1b &mdash; NP-Continuity</h3>
+        <p>If extension tail is <strong>NP-like</strong> (80%+ Title Case words),
+        keep B intact &mdash; preserves instrument sub-domain names.</p>
+        <pre><code><span class="cm"># Kept: "Neuro-QOL Sleep Disturbance"</span>
+<span class="cm"># Rolled down: "PHQ-9, which is a"</span></code></pre>
+        <h3>Phase 2 &mdash; Prefix Trie</h3>
+        <p>Group patterns sharing common prefix. Merge groups where
+        shorter prefix covers same tinyIds.</p>
+      </div>
+    </div>
+
+    <!-- COL 3 -->
+    <div>
+      <div class="section green">
+        <h2>Temporal Seed Patterns</h2>
+        <p>25 seeds in <code>config/temporal_seed_patterns.yaml</code>:</p>
+        <table>
+          <tr><th>Category</th><th>Examples</th></tr>
+          <tr><td>Recency</td><td><code>In the past {N} {days|weeks|months}</code></td></tr>
+          <tr><td>Duration</td><td><code>For {N} {years|months|weeks}</code></td></tr>
+          <tr><td>Frequency</td><td><code>{N} times per {week|month|year}</code></td></tr>
+          <tr><td>Specific</td><td><code>In the past 7 days</code>, <code>48 hours</code></td></tr>
+        </table>
+      </div>
+
+      <div class="section green">
+        <h2>Temporal Variant Expansion</h2>
+        <p>Each seed expands via 4 generators:</p>
+        <ul>
+          <li><strong>Temporal prepositions</strong>: In the past / Over the last / During the previous</li>
+          <li><strong>Case</strong>: lowercase, Title Case</li>
+          <li><strong>Number</strong>: singular &harr; plural units</li>
+          <li><strong>Article</strong>: bare, with &ldquo;the&rdquo;, with &ldquo;a&rdquo;</li>
+        </ul>
+        <p class="small">25 seeds &rarr; ~2,100 expanded variants</p>
+        <pre><code>pattern_util <span class="kw">-T</span> <span class="kw">-o</span> temporal.tsv</code></pre>
+      </div>
+
+      <div class="section green">
+        <h2>Split Temporal / Curated</h2>
+        <p>Phase 3 branching pipeline uses <strong>two separate passes</strong>:</p>
+        <div class="flow-row">
+          <span class="flow-box green">Temporal</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">Curated</span>
+        </div>
+        <table class="mt">
+          <tr><th>Pass</th><th>Case</th><th>Patterns</th></tr>
+          <tr><td>1. Temporal</td><td>Case-insensitive (<code>-I</code>)</td><td>~2,100 auto-generated</td></tr>
+          <tr><td>2. Curated</td><td>Case-sensitive</td><td>Human-curated phrases</td></tr>
+        </table>
+        <p class="small mt">Temporal uses <code>re.IGNORECASE</code>;
+        curated uses verbatim expansion for controlled matching.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.5.17 &bull; Core Concepts &amp; Data Model &bull; Page 2 of 2</div>
+</div>
+
+</body>
+</html>
