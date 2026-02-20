@@ -1,0 +1,37 @@
+# Rare Word Whitelist
+#
+# Words listed here are excluded from rare-word detection (--detect-rare-words).
+# These are legitimate domain terms that appear rare in general English
+# (low Zipf frequency) but are meaningful in CDE/clinical/research context.
+#
+# Organize by category for readability.  All categories are merged at load time.
+# Matching is case-insensitive (words are lowercased before comparison).
+#
+# Loading order:
+#   1. Global: config/rare_word_whitelist.yaml (this file)
+#   2. Local:  ./rare_word_whitelist.yaml (per-dataset override, extends global)
+#
+# To add words: append to the appropriate category, or create a new one.
+# Use lowercase preferred (matching is case-insensitive).
+# Use --no-whitelist to skip whitelist loading for comparison runs.
+
+# ── Medical / Anatomical Terms ──────────────────────────────────────
+# Rare in general English but standard medical vocabulary.
+medical:
+  - thymoma
+  - supraclavicular
+
+# ── Scientific / Methodological Terms ───────────────────────────────
+# Research methodology, study design, statistical terms.
+methodology: []
+
+# ── Domain Abbreviations (NOT instrument acronyms) ──────────────────
+# Legitimate shorthand used across clinical/research literature.
+# Do NOT add instrument acronyms here — those belong in supplementary_patterns.yaml.
+abbreviations: []
+
+# ── Pharmacological / Chemical Terms ────────────────────────────────
+pharmacological: []
+
+# ── Neurological / Psychiatric Terms ────────────────────────────────
+neurological: []

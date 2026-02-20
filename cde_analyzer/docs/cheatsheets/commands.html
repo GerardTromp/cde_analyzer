@@ -130,7 +130,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 <div class="page">
   <div class="banner">
     <h1>Command Reference <strong>:: CHEATSHEET</strong></h1>
-    <span class="subtitle">CDE Analyzer v0.5.17 &mdash; 26 Commands</span>
+    <span class="subtitle">CDE Analyzer v0.5.18 &mdash; 26 Commands</span>
   </div>
   <div class="columns">
 
@@ -294,6 +294,12 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 
         <h3>Validate Subsumption</h3>
         <div class="cmd-opts"><code>-V</code> FILE <code>-i</code> JSON <code>-o</code> OUT &ensp; <code>-w</code> workers</div>
+
+        <h3>Detect Rare Words</h3>
+        <div class="cmd-opts">
+          <code>-R</code> <code>-i</code> JSON <code>-o</code> OUT &mdash; wordfreq Zipf scores<br>
+          <code>--zipf-threshold</code> &ensp; <code>--caps-penalty</code> &ensp; <code>--no-whitelist</code>
+        </div>
       </div>
 
       <div class="section blue">
@@ -318,7 +324,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.5.17 &bull; Command Reference &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+  <div class="footer">CDE Analyzer v0.5.18 &bull; Command Reference &bull; Page 1 of 2 &bull; Print landscape for best results</div>
 </div>
 
 <!-- PAGE 2 -->
@@ -455,6 +461,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
           <tr><td><code>-A</code></td><td><code>--field-analysis</code></td><td>Field counts</td></tr>
           <tr><td><code>-V</code></td><td><code>--validate</code></td><td>Validate subs.</td></tr>
           <tr><td><code>-e</code></td><td><code>--expand</code></td><td>Expand variants</td></tr>
+          <tr><td><code>-R</code></td><td><code>--detect-rare-words</code></td><td>Rare words</td></tr>
         </table>
         <p class="small mt">Also: <code>-x</code> exclude, <code>-l</code>/<code>-L</code> id-list/file,
         <code>-C</code> case, <code>-r</code> report, <code>-g</code> ground-truth</p>
@@ -499,7 +506,7 @@ cde-analyzer phrase_miner \
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.5.17 &bull; Command Reference &bull; Page 2 of 2</div>
+  <div class="footer">CDE Analyzer v0.5.18 &bull; Command Reference &bull; Page 2 of 2</div>
 </div>
 
 </body>

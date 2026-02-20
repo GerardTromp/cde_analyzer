@@ -532,6 +532,54 @@ def _load_exclusion_set(exclude_path: str) -> set:
     return exclusions
 
 
+def _load_rare_word_whitelist(explicit_path: str = None) -> set:
+    """Load rare-word whitelist from YAML config(s).
+
+    Loading order (all merged):
+      1. Global: config/rare_word_whitelist.yaml
+      2. Local:  ./rare_word_whitelist.yaml (per-dataset override)
+      3. Explicit: --rare-word-whitelist path (if provided)
+
+    YAML format: top-level keys are category names mapping to lists of words.
+    All categories are merged into a single set.  Words are lowercased.
+    """
+    import yaml
+    from pathlib import Path
+
+    words = set()
+
+    def _read_yaml(path: Path) -> None:
+        if not path.is_file():
+            return
+        with open(path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        if not isinstance(data, dict):
+            return
+        for category, word_list in data.items():
+            if isinstance(word_list, list):
+                for w in word_list:
+                    if isinstance(w, str) and w.strip():
+                        words.add(w.strip().lower())
+        logger.info(f"  Whitelist loaded: {path} ({len(words)} cumulative)")
+
+    # Global config
+    config_dir = Path(__file__).resolve().parent.parent.parent / "config"
+    _read_yaml(config_dir / "rare_word_whitelist.yaml")
+
+    # Local override (extends global)
+    _read_yaml(Path.cwd() / "rare_word_whitelist.yaml")
+
+    # Explicit path (if provided via --rare-word-whitelist)
+    if explicit_path:
+        p = Path(explicit_path)
+        if not p.is_file():
+            logger.warning(f"Whitelist file not found: {explicit_path}")
+        else:
+            _read_yaml(p)
+
+    return words
+
+
 def _run_field_analysis(args, field_analysis_path: str) -> int:
     """
     Enrich a patterns TSV with per-field tinyId counts and field_profile.
@@ -2630,6 +2678,129 @@ def _run_expand_temporal_seeds(args) -> int:
     return 0
 
 
+def _run_detect_rare_words(args) -> int:
+    """
+    Detect rare words in CDE fields and write a curation TSV.
+
+    Scans all CDE field texts for single words that appear across many CDEs
+    but are rare in general English (low Zipf frequency).  ALL-CAPS words
+    receive a configurable penalty to catch acronyms that spell common words.
+    """
+    import json
+    from pydantic import ValidationError
+    from utils.constants import MODEL_REGISTRY
+    from utils.file_utils import exit_if_missing
+    from logic.rare_word_detector import detect_rare_words, RareWordConfig
+
+    # Validate required args
+    input_json = getattr(args, 'input', None)
+    output_path = getattr(args, 'output', None)
+    if not input_json:
+        logger.error("--input (CDE JSON) is required for --detect-rare-words")
+        raise SystemExit(1)
+    if not output_path:
+        logger.error("--output is required for --detect-rare-words")
+        raise SystemExit(1)
+
+    exit_if_missing(input_json, "Input JSON")
+
+    model_name = getattr(args, 'model', 'CDE')
+    field_paths = getattr(args, 'fields',
+                          ["definitions.*.definition", "designations.*.designation"])
+    zipf_threshold = getattr(args, 'zipf_threshold', 1.5)
+    caps_penalty = getattr(args, 'caps_penalty', 2.5)
+    min_tinyids = getattr(args, 'min_tinyids', 0) or 3  # 0 = group-hierarchy sentinel → use 3
+    exclude_path = getattr(args, 'exclude_patterns', None)
+
+    # Load exclusion patterns (words already in instrument/phrase patterns)
+    exclude_set = set()
+    if exclude_path:
+        exit_if_missing(exclude_path, "Exclusion patterns file")
+        exclude_set = _load_exclusion_set(exclude_path)
+        logger.info(f"Loaded {len(exclude_set)} exclusion patterns")
+
+    # Load rare-word whitelist (legitimate domain terms to skip)
+    no_whitelist = getattr(args, 'no_whitelist', False)
+    whitelist_path = getattr(args, 'rare_word_whitelist', None)
+    whitelist_words = set()
+    if not no_whitelist:
+        whitelist_words = _load_rare_word_whitelist(whitelist_path)
+        if whitelist_words:
+            exclude_set.update(whitelist_words)
+            logger.info(f"Whitelist: {len(whitelist_words)} words excluded")
+
+    # Load and parse CDE JSON
+    model_class = MODEL_REGISTRY[model_name]
+    with open(input_json, encoding="utf-8") as f:
+        data = json.load(f)
+
+    try:
+        parsed = [model_class.model_validate(obj) for obj in data]
+    except ValidationError as e:
+        for error in e.errors():
+            logger.error(f"{error['type']}: {error['msg']} at {error['loc']}")
+        raise SystemExit(1)
+
+    logger.info(f"Loaded {len(parsed)} CDE records from {input_json}")
+
+    # Build config
+    config = RareWordConfig(
+        zipf_threshold=zipf_threshold,
+        caps_penalty=caps_penalty,
+        min_tinyids=min_tinyids,
+        field_names=field_paths,
+        exclude_patterns=exclude_set,
+    )
+
+    # Run detection
+    results = detect_rare_words(parsed, config)
+
+    # Write curation TSV
+    with open(output_path, 'w', encoding='utf-8') as f:
+        headers = [
+            'word', 'cde_count', 'raw_zipf', 'effective_zipf',
+            'is_allcaps', 'field_profile', 'tinyIds', 'example_context',
+            'curate_action',
+        ]
+        f.write('\t'.join(headers) + '\n')
+
+        for rw in results:
+            tinyids_str = '|'.join(sorted(rw.tinyids))
+            # Join example contexts with " /// " separator
+            examples_str = ' /// '.join(rw.example_contexts)
+            row = [
+                rw.word,
+                str(rw.cde_count),
+                f"{rw.raw_zipf:.2f}",
+                f"{rw.effective_zipf:.2f}",
+                str(rw.is_allcaps),
+                rw.field_profile,
+                tinyids_str,
+                examples_str,
+                '',  # curate_action — for curator to fill in
+            ]
+            f.write('\t'.join(row) + '\n')
+
+    whitelist_count = len(whitelist_words) if not no_whitelist and whitelist_words else 0
+    print(f"Rare word detection complete:")
+    print(f"  CDEs scanned:    {len(parsed)}")
+    print(f"  Zipf threshold:  {zipf_threshold}")
+    print(f"  Caps penalty:    {caps_penalty}")
+    print(f"  Min tinyIds:     {min_tinyids}")
+    if whitelist_count:
+        print(f"  Whitelisted:     {whitelist_count}")
+    print(f"  Words detected:  {len(results)}")
+    if results:
+        print(f"  Top 10:")
+        for rw in results[:10]:
+            caps_tag = " [CAPS]" if rw.is_allcaps else ""
+            print(f"    {rw.word:<25s}  cde={rw.cde_count:>5d}  "
+                  f"zipf={rw.raw_zipf:.1f}→{rw.effective_zipf:.1f}{caps_tag}")
+    print(f"  Wrote: {output_path}")
+
+    return 0
+
+
 @graceful_interrupt
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
@@ -2726,6 +2897,11 @@ def run_action(args: Namespace):
     validate_sub = getattr(args, 'validate_subsumption', None)
     if validate_sub:
         return _run_validate_subsumption(args, validate_sub)
+
+    # Check for rare-word detection mode
+    detect_rare = getattr(args, 'detect_rare_words', False)
+    if detect_rare:
+        return _run_detect_rare_words(args)
 
     # Check for merge mode (supports multiple files)
     merge_patterns = getattr(args, 'merge_patterns', None)
@@ -2919,4 +3095,5 @@ def run_action(args: Namespace):
     print("  cde-analyzer pattern_util --add-to-supplementary FILE")
     print("  cde-analyzer pattern_util --harvest-to-supplementary HARVEST.tsv")
     print("  cde-analyzer pattern_util --promote-supplementary [--clean-local]")
+    print("  cde-analyzer pattern_util --detect-rare-words -i JSON -o OUTPUT")
     raise SystemExit(1)

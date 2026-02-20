@@ -499,6 +499,50 @@ def register_subparser(subparser: ArgumentParser):
         help="Number of parallel workers for validate-subsumption (0 = sequential). Default: 0.",
     )
 
+    # Rare word detection mode
+    subparser.add_argument(
+        "--detect-rare-words", "-R",
+        action="store_true",
+        help="Detect rare words: scan CDE fields for single words that are frequent "
+             "across CDEs but rare in general English (via wordfreq Zipf scores). "
+             "ALL-CAPS words receive a penalty (likely acronyms, not common words). "
+             "Outputs a curation TSV for review before stripping. "
+             "Requires --input, --model, and --output.",
+    )
+    subparser.add_argument(
+        "--zipf-threshold",
+        type=float,
+        default=1.5,
+        help="Maximum effective Zipf score to be considered rare. "
+             "Lower = stricter (fewer candidates). The Zipf scale is log10 of "
+             "frequency per billion words: 0=absent, 3=uncommon, 5=common. "
+             "Default: 1.5.",
+    )
+    subparser.add_argument(
+        "--caps-penalty",
+        type=float,
+        default=2.5,
+        help="Zipf penalty for ALL-CAPS words (len >= 2). Treats TOAST (3.96) as "
+             "effectively 1.46, catching acronyms that spell common words. "
+             "Default: 2.5.",
+    )
+    subparser.add_argument(
+        "--rare-word-whitelist",
+        type=str,
+        metavar="YAML",
+        help="Path to rare-word whitelist YAML. Words in this file are excluded "
+             "from detection (legitimate domain terms). "
+             "Default: auto-discovers config/rare_word_whitelist.yaml (global) "
+             "and ./rare_word_whitelist.yaml (local override).",
+    )
+    subparser.add_argument(
+        "--no-whitelist",
+        action="store_true",
+        help="Skip whitelist loading entirely (detect ALL rare words for comparison).",
+    )
+    # Note: --min-tinyids is already defined above (shared with group-hierarchy).
+    # --input, --model, --output, --fields, --exclude-patterns are also shared.
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",
