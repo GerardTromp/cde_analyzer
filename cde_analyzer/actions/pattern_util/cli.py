@@ -586,6 +586,37 @@ def register_subparser(subparser: ArgumentParser):
              "(used with --promote-supplementary).",
     )
 
+    # ──────────────────────────────────────────────────────────────
+    # Multi-curator curation workflow
+    # ──────────────────────────────────────────────────────────────
+
+    subparser.add_argument(
+        "--init-curation", "-C",
+        type=str,
+        metavar="FILE",
+        help="Initialize multi-curator curation: create per-curator copies of a "
+             "patterns TSV with added decision/modification/notes/curator columns. "
+             "Each copy is named {stem}.{curator}.tsv. "
+             "Requires --curators (comma-separated names). "
+             "Use --output to set the output directory (default: same as input).",
+    )
+    subparser.add_argument(
+        "--curators",
+        type=str,
+        help="Comma-separated list of curator names (e.g., 'alice,bob,carol'). "
+             "Used with --init-curation to create per-curator copies.",
+    )
+    subparser.add_argument(
+        "--merge-curation",
+        nargs="+",
+        metavar="FILE",
+        help="Merge curated files from multiple curators and generate a consensus "
+             "report. Accepts 2+ curator TSV files. Writes to --output directory: "
+             "consensus.tsv (majority decisions), discrepancies.tsv (disagreements), "
+             "inter_rater_report.md (statistics), discrepancies.html (visual diff). "
+             "Row matching is by 'pattern' column (exact, case-sensitive).",
+    )
+
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""
         return _get_run_action()(args)

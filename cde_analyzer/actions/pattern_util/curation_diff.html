@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: Curation Discrepancies</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f7fafc;
+  --bg-card: #ffffff;
+  --border: #e2e8f0;
+  --text: #2d3748;
+  --text-muted: #718096;
+  --primary: #4299e1;
+  --success: #388e3c;
+  --success-bg: #c6f6d5;
+  --success-text: #22543d;
+  --danger: #d32f2f;
+  --danger-bg: #fed7d7;
+  --danger-text: #9b2c2c;
+  --warning: #f57c00;
+  --warning-bg: #feebc8;
+  --warning-text: #7b341e;
+  --empty-bg: #edf2f7;
+  --empty-text: #a0aec0;
+  --split-bg: #fed7e2;
+  --split-text: #97266d;
+  --majority-bg: #fefcbf;
+  --majority-text: #975a16;
+  --font: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  --mono: Consolas, 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg-alt);
+  line-height: 1.5;
+}
+
+/* ── Header ── */
+.header {
+  background: #1a202c;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.header h1 {
+  font-size: 1.25rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+.header h1 strong { font-weight: 700; color: #a3bffa; }
+.header-stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e0;
+}
+.header-stats .stat-value {
+  font-weight: 700;
+  color: #fff;
+  font-size: 1rem;
+}
+
+/* ── Stat Cards ── */
+.stat-bar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  min-width: 120px;
+}
+.stat-card .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-card .value { font-size: 1.1rem; font-weight: 700; }
+.stat-card.kappa .value { font-family: var(--mono); }
+
+/* ── Filters ── */
+.filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.6rem 1.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filter-bar label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.filter-bar input, .filter-bar select {
+  font-family: var(--font);
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+}
+.filter-bar input { width: 250px; }
+.filter-bar .count-badge {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ── Cards ── */
+.card-list {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  transition: box-shadow 0.15s;
+}
+.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.card-pattern {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+.card-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.agreement-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.agreement-badge.majority { background: var(--majority-bg); color: var(--majority-text); }
+.agreement-badge.split { background: var(--split-bg); color: var(--split-text); }
+
+.consensus-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.consensus-label strong {
+  color: var(--text);
+}
+
+/* ── Curator Row ── */
+.curator-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+.curator-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+}
+.curator-badge .curator-name {
+  font-weight: 600;
+  opacity: 0.7;
+  font-size: 0.75rem;
+}
+.curator-badge .curator-decision { font-weight: 700; }
+.curator-badge.keep { background: var(--success-bg); color: var(--success-text); border-color: #9ae6b4; }
+.curator-badge.remove { background: var(--danger-bg); color: var(--danger-text); border-color: #feb2b2; }
+.curator-badge.modify { background: var(--warning-bg); color: var(--warning-text); border-color: #fbd38d; }
+.curator-badge.empty { background: var(--empty-bg); color: var(--empty-text); border-color: #e2e8f0; }
+
+.curator-detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-left: 0.2rem;
+}
+.curator-detail .modification { font-style: italic; color: var(--warning-text); }
+.curator-detail .note { opacity: 0.8; }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* ── Print ── */
+@media print {
+  body { background: #fff; }
+  .filter-bar { display: none; }
+  .card { break-inside: avoid; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<!--DATA_PLACEHOLDER-->
+
+<div class="header">
+  <h1>Curation Discrepancies <strong>:: CDE Analyzer</strong></h1>
+  <div class="header-stats" id="headerStats"></div>
+</div>
+
+<div class="stat-bar" id="statBar"></div>
+
+<div class="filter-bar">
+  <label>Filter:</label>
+  <input type="text" id="filterText" placeholder="Search patterns... (! to negate, | for OR)">
+  <label>Level:</label>
+  <select id="filterLevel">
+    <option value="">All</option>
+    <option value="majority">Majority</option>
+    <option value="split">Split</option>
+  </select>
+  <label>Consensus:</label>
+  <select id="filterConsensus">
+    <option value="">All</option>
+  </select>
+  <span class="count-badge" id="countBadge"></span>
+</div>
+
+<div class="card-list" id="cardList"></div>
+
+<script>
+(function() {
+  // Data is embedded by the merge-curation command
+  if (typeof DIFF_DATA === 'undefined') {
+    document.getElementById('cardList').innerHTML =
+      '<div class="empty-state">No data loaded. This file should be generated by:<br>' +
+      '<code>cde-analyzer pattern_util --merge-curation FILE1 FILE2 ... -o DIR/</code></div>';
+    return;
+  }
+
+  const data = DIFF_DATA;
+  const stats = data.stats;
+  const curators = data.curators;
+  const discrepancies = data.discrepancies;
+
+  // ── Header Stats ──
+  const hs = document.getElementById('headerStats');
+  hs.innerHTML =
+    `<span><span class="stat-value">${stats.n_discrepancies}</span> discrepancies</span>` +
+    `<span><span class="stat-value">${stats.n_reviewed}</span> reviewed</span>` +
+    `<span><span class="stat-value">${stats.overall_agreement_pct}%</span> agreement</span>`;
+
+  // ── Stat Bar ──
+  const sb = document.getElementById('statBar');
+  let statHtml = '';
+
+  // Kappa cards
+  if (stats.pairwise_kappas) {
+    stats.pairwise_kappas.forEach(pk => {
+      statHtml += `<div class="stat-card kappa">
+        <span class="label">\u03BA ${pk.curator_a} vs ${pk.curator_b}</span>
+        <span class="value">${pk.kappa.toFixed(4)}</span>
+      </div>`;
+    });
+  }
+
+  // Alpha card
+  if (stats.krippendorff_alpha !== null && stats.krippendorff_alpha !== undefined) {
+    statHtml += `<div class="stat-card kappa">
+      <span class="label">\u03B1 Krippendorff</span>
+      <span class="value">${stats.krippendorff_alpha.toFixed(4)}</span>
+    </div>`;
+  }
+
+  // Unanimous / majority / split counts
+  statHtml += `<div class="stat-card">
+    <span class="label">Unanimous</span>
+    <span class="value" style="color:var(--success)">${stats.n_unanimous}</span>
+  </div>`;
+  statHtml += `<div class="stat-card">
+    <span class="label">Majority</span>
+    <span class="value" style="color:var(--warning)">${stats.n_discrepancies - (stats.n_discrepancies - discrepancies.filter(d => d.agreement_level === 'majority').length)}</span>
+  </div>`;
+  statHtml += `<div class="stat-card">
+    <span class="label">Split</span>
+    <span class="value" style="color:var(--danger)">${discrepancies.filter(d => d.agreement_level === 'split').length}</span>
+  </div>`;
+
+  sb.innerHTML = statHtml;
+
+  // ── Populate consensus filter ──
+  const consensusSet = new Set(discrepancies.map(d => d.consensus));
+  const filterConsensus = document.getElementById('filterConsensus');
+  consensusSet.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    filterConsensus.appendChild(opt);
+  });
+
+  // ── Render Cards ──
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function renderCards() {
+    const textFilter = document.getElementById('filterText').value.toLowerCase().trim();
+    const levelFilter = document.getElementById('filterLevel').value;
+    const consFilter = document.getElementById('filterConsensus').value;
+
+    let filtered = discrepancies;
+
+    // Text filter (supports ! negation and | OR)
+    if (textFilter) {
+      if (textFilter.startsWith('!')) {
+        const term = textFilter.slice(1);
+        filtered = filtered.filter(d => !d.pattern.toLowerCase().includes(term));
+      } else if (textFilter.includes('|')) {
+        const terms = textFilter.split('|').map(t => t.trim()).filter(Boolean);
+        filtered = filtered.filter(d => terms.some(t => d.pattern.toLowerCase().includes(t)));
+      } else {
+        filtered = filtered.filter(d => d.pattern.toLowerCase().includes(textFilter));
+      }
+    }
+
+    if (levelFilter) {
+      filtered = filtered.filter(d => d.agreement_level === levelFilter);
+    }
+    if (consFilter) {
+      filtered = filtered.filter(d => d.consensus === consFilter);
+    }
+
+    const container = document.getElementById('cardList');
+    document.getElementById('countBadge').textContent =
+      `Showing ${filtered.length} of ${discrepancies.length}`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-state">No discrepancies match the current filters.</div>';
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(d => {
+      html += '<div class="card">';
+      html += `<div class="card-pattern">${escapeHtml(d.pattern)}</div>`;
+
+      // Meta row
+      html += '<div class="card-meta">';
+      html += `<span class="agreement-badge ${d.agreement_level}">${d.agreement_level}</span>`;
+      html += `<span class="consensus-label">Consensus: <strong>${escapeHtml(d.consensus)}</strong></span>`;
+      html += '</div>';
+
+      // Curator badges
+      html += '<div class="curator-row">';
+      curators.forEach(c => {
+        const info = d.decisions[c] || {};
+        const dec = info.decision || '';
+        const cls = dec || 'empty';
+        html += `<div class="curator-badge ${cls}">`;
+        html += `<span class="curator-name">${escapeHtml(c)}:</span> `;
+        html += `<span class="curator-decision">${dec || '\u2014'}</span>`;
+
+        // Modification and notes inline
+        let details = '';
+        if (info.modification) {
+          details += ` <span class="modification">\u2192 ${escapeHtml(info.modification)}</span>`;
+        }
+        if (info.notes) {
+          details += ` <span class="note">(${escapeHtml(info.notes)})</span>`;
+        }
+        if (details) {
+          html += `<span class="curator-detail">${details}</span>`;
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+
+      html += '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ── Event Listeners ──
+  document.getElementById('filterText').addEventListener('input', renderCards);
+  document.getElementById('filterLevel').addEventListener('change', renderCards);
+  document.getElementById('filterConsensus').addEventListener('change', renderCards);
+
+  // Initial render
+  renderCards();
+})();
+</script>
+
+</body>
+</html>

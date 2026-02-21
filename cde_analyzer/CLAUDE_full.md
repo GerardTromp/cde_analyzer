@@ -31,9 +31,18 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: main (v0.5.17)
+**Active Branch**: main (v0.6.0)
 
 **Recent Work** (Last 30 days):
+- **v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes**
+  - `--init-curation` / `--merge-curation` in pattern_util for multi-curator workflows
+  - `logic/inter_rater.py` — Cohen's kappa, Fleiss' kappa, Krippendorff's alpha
+  - `actions/pattern_util/curation_diff.html` — browser-based visual diff viewer
+  - `workflow scaffold` command — generates project-specific pipeline orchestration scripts
+  - Auto Windows→WSL path conversion, phase subset support, `--with-iterate`
+  - 5 new vignettes: quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, index
+  - `mkdocs.yml` nav: "Guides" → "Guides & Vignettes"
+  - Rare word detection with wordfreq Zipf scoring and whitelist
 - **v0.5.15–v0.5.17: Documentation Restructuring**
   - Reorganized `mkdocs.yml` navigation: Workflows elevated, Command Reference section, LLM section, Appendix
   - Created `docs/about.md` (renamed from overview.md) and `docs/workflow-architecture.md` (consolidated from workflow-diagram + lessons_learned)

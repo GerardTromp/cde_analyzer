@@ -6,9 +6,30 @@
 
 **Note**: phrase-curator branch merged into main at v0.5.14 (2026-02-12)
 
-**Version**: 0.5.14
+**Version**: 0.6.0
 
-## Current State (v0.5.14, 2026-02-12)
+## Current State (v0.6.0, 2026-02-21)
+
+### v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes
+
+#### Multi-Curator Curation Workflow
+- `--init-curation` / `--merge-curation` in pattern_util for multi-curator workflows
+- `logic/inter_rater.py` — Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, pairwise agreement
+- `actions/pattern_util/curation_diff.html` — browser-based visual diff viewer
+- Rare word detection with wordfreq Zipf scoring and whitelist
+
+#### Workflow Scaffold
+- `workflow scaffold PROJECT -i JSON -d DIR` generates project-specific pipeline bash scripts
+- Auto Windows→WSL path conversion, phase subset support, iterative harvesting loop
+- Generated script: PARAMETERS → DERIVED PATHS → HELPERS → phase functions → DISPATCH
+
+#### Documentation: Vignettes (5 new pages)
+- `docs/vignettes/index.md` — landing page with decision table
+- `docs/vignettes/quickstart.md` — full pipeline end-to-end walkthrough
+- `docs/vignettes/instrument-detection.md` — Phase 1 deep dive
+- `docs/vignettes/pipeline-orchestration.md` — workflow engine power user guide
+- `docs/vignettes/parameter-tuning.md` — small vs large dataset comparison
+- `mkdocs.yml` nav: "Guides" → "Guides & Vignettes"
 
 ### Phase 3 Branching Strip — Complete
 - 5-way branching strip pipeline producing distinct normalized outputs
@@ -31,6 +52,8 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.6.0 | 2026-02-21 | Multi-curator curation, workflow scaffold, vignettes |
+| 0.5.17 | 2026-02-15 | Documentation restructuring, CLI short options |
 | 0.5.14 | 2026-02-12 | Split temporal/curated strip, bare/article-only variants, 5 new seeds |
 | 0.5.13 | 2026-02-11 | Universal temporal stripping, dedup pre-pass, 3 critical bug fixes |
 | 0.5.12 | 2026-02-11 | Empirical subsumption validation, coalescer punctuation fix |
@@ -41,8 +64,8 @@
 ## Branches
 
 ### Active: main (CURRENT)
-- **Contains**: All v0.5.x features merged from phrase-curator
-- **Status**: Phase 3 complete, ready for embedding/clustering evaluation
+- **Contains**: All v0.5.x features merged from phrase-curator + v0.6.0 features
+- **Status**: Phase 3 complete, multi-curator + scaffold + vignettes added
 
 ### Retired: phrase-curator (merged at v0.5.14)
 - Merged into main on 2026-02-12

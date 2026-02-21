@@ -435,6 +435,605 @@ def _write_supplementary_yaml(path, config: dict):
                 f.write("\n")
 
 
+# ──────────────────────────────────────────────────────────────
+# Multi-curator curation workflow
+# ──────────────────────────────────────────────────────────────
+
+def _run_init_curation(args, init_path: str) -> int:
+    """
+    Create per-curator copies of a patterns TSV with curation columns.
+
+    For each curator name, copies the source TSV and adds four columns:
+        decision      — empty (curator fills: keep/remove/modify)
+        modification  — empty (free-text when decision=modify)
+        notes         — empty (optional commentary)
+        curator       — pre-filled with curator name
+
+    All original columns are preserved.  Output files are named
+    ``{stem}.{curator_name}.tsv``.
+    """
+    import csv
+    import re
+    from pathlib import Path
+
+    # Validate --curators
+    curators_raw = getattr(args, 'curators', None)
+    if not curators_raw:
+        logger.error("--curators is required with --init-curation "
+                      "(comma-separated list of names)")
+        raise SystemExit(1)
+
+    curators = [c.strip() for c in curators_raw.split(',') if c.strip()]
+    if len(curators) < 2:
+        logger.error("At least 2 curator names are required")
+        raise SystemExit(1)
+
+    # Validate curator names: alphanumeric + underscore
+    name_re = re.compile(r'^[A-Za-z0-9_]+$')
+    for name in curators:
+        if not name_re.match(name):
+            logger.error(f"Invalid curator name '{name}': "
+                          "use only letters, digits, and underscores")
+            raise SystemExit(1)
+
+    if len(set(curators)) != len(curators):
+        logger.error("Duplicate curator names detected")
+        raise SystemExit(1)
+
+    # Read source TSV
+    init_p = Path(init_path)
+    if not init_p.is_file():
+        logger.error(f"Source file not found: {init_path}")
+        raise SystemExit(1)
+
+    with open(init_p, encoding='utf-8') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        original_fields = list(reader.fieldnames or [])
+        rows = list(reader)
+
+    if not rows:
+        logger.error("Source TSV is empty")
+        raise SystemExit(1)
+
+    # Determine output directory
+    output_dir = Path(getattr(args, 'output', None) or init_p.parent)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Curation columns to add (skip if already present)
+    curation_cols = ['decision', 'modification', 'notes', 'curator']
+    existing_curation = [c for c in curation_cols if c in original_fields]
+    new_cols = [c for c in curation_cols if c not in original_fields]
+    if existing_curation:
+        logger.warning(f"Source already has curation columns: {existing_curation} "
+                        "(will be preserved, not duplicated)")
+
+    output_fields = original_fields + new_cols
+
+    # Write one copy per curator
+    stem = init_p.stem
+    created = []
+    for curator_name in curators:
+        out_path = output_dir / f"{stem}.{curator_name}.tsv"
+        with open(out_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=output_fields,
+                                     delimiter='\t', lineterminator='\n')
+            writer.writeheader()
+            for row in rows:
+                out_row = dict(row)
+                # Set curation columns
+                if 'decision' in new_cols:
+                    out_row['decision'] = ''
+                if 'modification' in new_cols:
+                    out_row['modification'] = ''
+                if 'notes' in new_cols:
+                    out_row['notes'] = ''
+                if 'curator' in new_cols:
+                    out_row['curator'] = curator_name
+                elif 'curator' in original_fields:
+                    out_row['curator'] = curator_name
+                writer.writerow(out_row)
+        created.append(str(out_path))
+        logger.info(f"Created: {out_path}")
+
+    print(f"\n  Init curation: {len(curators)} curator copies created")
+    print(f"  Source:      {init_path} ({len(rows)} patterns)")
+    print(f"  Curators:    {', '.join(curators)}")
+    print(f"  Output dir:  {output_dir}")
+    for p in created:
+        print(f"    {p}")
+    print(f"\n  Next: cde-analyzer pattern_util --edit <curator_file>.tsv")
+
+    return 0
+
+
+def _run_merge_curation(args, curation_files: list) -> int:
+    """
+    Merge curated files from multiple curators, generate consensus and reports.
+
+    Reads 2+ curator TSV files, matches rows by 'pattern' column, computes
+    inter-rater statistics, and writes:
+        consensus.tsv           — All patterns with majority decision
+        discrepancies.tsv       — Only patterns where curators disagree
+        inter_rater_report.md   — Statistics report
+        discrepancies.html      — Interactive visual diff
+    """
+    import csv
+    import json
+    from datetime import datetime
+    from pathlib import Path
+
+    from logic.inter_rater import compute_agreement_stats
+
+    # Validate output directory
+    output_dir_raw = getattr(args, 'output', None)
+    if not output_dir_raw:
+        logger.error("--output is required for --merge-curation (directory path)")
+        raise SystemExit(1)
+    output_dir = Path(output_dir_raw)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if len(curation_files) < 2:
+        logger.error("At least 2 curator files are required for --merge-curation")
+        raise SystemExit(1)
+
+    # Read each curator file
+    curator_data: dict = {}       # curator_name → {pattern: row_dict}
+    all_patterns_ordered = []     # preserve order from first file
+    pattern_set = set()
+    base_fields = None            # original columns (before curation cols)
+
+    for fpath in curation_files:
+        fp = Path(fpath)
+        if not fp.is_file():
+            logger.error(f"Curator file not found: {fpath}")
+            raise SystemExit(1)
+
+        with open(fp, encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            fields = list(reader.fieldnames or [])
+            rows = list(reader)
+
+        if not rows:
+            logger.warning(f"Empty curator file: {fpath}")
+            continue
+
+        # Detect curator name: from 'curator' column or filename
+        curator_name = rows[0].get('curator', '').strip()
+        if not curator_name:
+            # Infer from filename: stem.curator_name.tsv
+            parts = fp.stem.rsplit('.', 1)
+            curator_name = parts[-1] if len(parts) > 1 else fp.stem
+
+        if curator_name in curator_data:
+            logger.error(f"Duplicate curator name '{curator_name}' "
+                          f"(from {fpath})")
+            raise SystemExit(1)
+
+        # Track base fields (exclude curation columns)
+        curation_cols = {'decision', 'modification', 'notes', 'curator'}
+        if base_fields is None:
+            base_fields = [f for f in fields if f not in curation_cols]
+
+        # Index by pattern
+        pattern_rows = {}
+        for row in rows:
+            pat = row.get('pattern', '').strip()
+            if pat:
+                pattern_rows[pat] = row
+                if pat not in pattern_set:
+                    all_patterns_ordered.append(pat)
+                    pattern_set.add(pat)
+
+        curator_data[curator_name] = pattern_rows
+        logger.info(f"Loaded curator '{curator_name}': {len(pattern_rows)} patterns "
+                     f"from {fpath}")
+
+    curators = list(curator_data.keys())
+    if len(curators) < 2:
+        logger.error("Need at least 2 non-empty curator files")
+        raise SystemExit(1)
+
+    # Build decisions matrix: {pattern: {curator: decision}}
+    decisions: dict = {}
+    full_data: dict = {}  # {pattern: {curator: full_row_dict}}
+
+    for pattern in all_patterns_ordered:
+        decisions[pattern] = {}
+        full_data[pattern] = {}
+        for curator_name in curators:
+            row = curator_data[curator_name].get(pattern)
+            if row:
+                decisions[pattern][curator_name] = row.get('decision', '').strip()
+                full_data[pattern][curator_name] = row
+            else:
+                decisions[pattern][curator_name] = ''
+
+    # Compute statistics
+    stats = compute_agreement_stats(decisions, curators)
+
+    # ── Generate consensus.tsv ──
+    consensus_path = output_dir / "consensus.tsv"
+    consensus_fields = list(base_fields or [])
+    consensus_fields.extend([
+        'consensus_decision', 'agreement_level',
+    ])
+    for c in curators:
+        consensus_fields.append(f"decision_{c}")
+
+    with open(consensus_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=consensus_fields,
+                                 delimiter='\t', lineterminator='\n',
+                                 extrasaction='ignore')
+        writer.writeheader()
+        for pattern in all_patterns_ordered:
+            # Use first available curator's row as base
+            base_row = {}
+            for c in curators:
+                if pattern in curator_data[c]:
+                    base_row = dict(curator_data[c][pattern])
+                    break
+
+            # Remove curation-specific columns from base
+            for col in ('decision', 'modification', 'notes', 'curator'):
+                base_row.pop(col, None)
+
+            # Determine agreement level
+            non_empty = {c: d for c, d in decisions[pattern].items() if d}
+            if len(non_empty) < 2:
+                agreement_level = "single"
+            elif len(set(non_empty.values())) == 1:
+                agreement_level = "unanimous"
+            else:
+                counts = {}
+                for v in non_empty.values():
+                    counts[v] = counts.get(v, 0) + 1
+                max_count = max(counts.values())
+                if max_count > len(non_empty) / 2:
+                    agreement_level = "majority"
+                else:
+                    agreement_level = "split"
+
+            consensus = stats.consensus_decisions.get(pattern, '')
+            base_row['consensus_decision'] = consensus
+            base_row['agreement_level'] = agreement_level
+            for c in curators:
+                base_row[f"decision_{c}"] = decisions[pattern].get(c, '')
+
+            writer.writerow(base_row)
+
+    logger.info(f"Wrote consensus: {consensus_path}")
+
+    # ── Generate discrepancies.tsv ──
+    discrepancy_path = output_dir / "discrepancies.tsv"
+    disc_fields = list(consensus_fields)
+    # Add modification columns for discrepancy detail
+    for c in curators:
+        disc_fields.append(f"modification_{c}")
+        disc_fields.append(f"notes_{c}")
+
+    with open(discrepancy_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=disc_fields,
+                                 delimiter='\t', lineterminator='\n',
+                                 extrasaction='ignore')
+        writer.writeheader()
+        for disc in stats.discrepancies:
+            pattern = disc['pattern']
+            base_row = {}
+            for c in curators:
+                if pattern in curator_data[c]:
+                    base_row = dict(curator_data[c][pattern])
+                    break
+
+            for col in ('decision', 'modification', 'notes', 'curator'):
+                base_row.pop(col, None)
+
+            base_row['consensus_decision'] = disc['consensus']
+            base_row['agreement_level'] = disc['agreement_level']
+            for c in curators:
+                base_row[f"decision_{c}"] = decisions[pattern].get(c, '')
+                row = full_data[pattern].get(c, {})
+                base_row[f"modification_{c}"] = row.get('modification', '')
+                base_row[f"notes_{c}"] = row.get('notes', '')
+
+            writer.writerow(base_row)
+
+    logger.info(f"Wrote discrepancies: {discrepancy_path} "
+                f"({len(stats.discrepancies)} rows)")
+
+    # ── Generate inter_rater_report.md ──
+    report_path = output_dir / "inter_rater_report.md"
+    report_lines = _generate_inter_rater_report(stats, curators, str(output_dir))
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(report_lines))
+    logger.info(f"Wrote report: {report_path}")
+
+    # ── Generate discrepancies.html ──
+    html_path = output_dir / "discrepancies.html"
+    _generate_discrepancy_html(stats, curators, decisions, full_data,
+                                all_patterns_ordered, html_path)
+    logger.info(f"Wrote HTML: {html_path}")
+
+    # Summary
+    print(f"\n  Merge curation: {len(curators)} curators, "
+          f"{stats.n_patterns} patterns")
+    print(f"  Reviewed:        {stats.n_reviewed} "
+          f"(with 2+ decisions)")
+    print(f"  Unanimous:       {stats.n_unanimous} "
+          f"({stats.overall_agreement_pct}%)")
+    print(f"  Majority:        {stats.n_majority}")
+    print(f"  Split:           {stats.n_split}")
+    if stats.krippendorff_alpha is not None:
+        print(f"  Krippendorff α:  {stats.krippendorff_alpha}")
+    for pk in stats.pairwise_kappas:
+        print(f"  Cohen κ ({pk.curator_a} vs {pk.curator_b}): "
+              f"{pk.kappa}")
+    print(f"\n  Output:")
+    print(f"    {consensus_path}")
+    print(f"    {discrepancy_path}")
+    print(f"    {report_path}")
+    print(f"    {html_path}")
+
+    return 0
+
+
+def _generate_inter_rater_report(
+    stats,
+    curators: list,
+    output_dir: str,
+) -> list:
+    """Build inter-rater report as a list of markdown lines."""
+    from datetime import datetime
+    from collections import Counter
+
+    lines = []
+    lines.append("# Inter-Rater Curation Report")
+    lines.append("")
+    lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    lines.append(f"**Curators**: {', '.join(curators)}")
+    lines.append(f"**Output Directory**: `{output_dir}`")
+    lines.append("")
+
+    # Summary table
+    lines.append("## Summary")
+    lines.append("")
+    lines.append("| Metric | Value |")
+    lines.append("|--------|------:|")
+    lines.append(f"| Total patterns | {stats.n_patterns} |")
+    lines.append(f"| Reviewed (2+ decisions) | {stats.n_reviewed} |")
+    lines.append(f"| Unanimous agreement | {stats.n_unanimous} "
+                 f"({stats.overall_agreement_pct}%) |")
+    lines.append(f"| Majority agreement | {stats.n_majority} |")
+    lines.append(f"| Split (no majority) | {stats.n_split} |")
+    lines.append("")
+
+    # Consensus distribution
+    if stats.consensus_decisions:
+        dist = Counter(stats.consensus_decisions.values())
+        total = sum(dist.values())
+        lines.append("## Consensus Distribution")
+        lines.append("")
+        lines.append("| Decision | Count | % |")
+        lines.append("|----------|------:|--:|")
+        for cat in ["keep", "remove", "modify"]:
+            cnt = dist.get(cat, 0)
+            pct = round(cnt / total * 100, 1) if total > 0 else 0
+            lines.append(f"| {cat} | {cnt} | {pct}% |")
+        # Any other categories
+        for cat, cnt in sorted(dist.items()):
+            if cat not in ("keep", "remove", "modify"):
+                pct = round(cnt / total * 100, 1) if total > 0 else 0
+                lines.append(f"| {cat} | {cnt} | {pct}% |")
+        lines.append("")
+
+    # Per-category agreement
+    if stats.per_category_agreement:
+        lines.append("## Per-Category Agreement")
+        lines.append("")
+        lines.append("| Category | Agreement % |")
+        lines.append("|----------|------------|")
+        for cat, pct in stats.per_category_agreement.items():
+            lines.append(f"| {cat} | {pct}% |")
+        lines.append("")
+
+    # Pairwise Cohen's Kappa
+    if stats.pairwise_kappas:
+        lines.append("## Pairwise Cohen's Kappa")
+        lines.append("")
+        lines.append("| Curator A | Curator B | Kappa | Observed | Expected | Items |")
+        lines.append("|-----------|-----------|------:|---------:|---------:|------:|")
+        for pk in stats.pairwise_kappas:
+            lines.append(
+                f"| {pk.curator_a} | {pk.curator_b} | "
+                f"{pk.kappa:.4f} | {pk.observed_agreement:.4f} | "
+                f"{pk.expected_agreement:.4f} | {pk.n_items} |"
+            )
+        lines.append("")
+        lines.append("**Interpretation**: "
+                     "\u03BA > 0.80 = almost perfect; "
+                     "0.60\u20130.80 = substantial; "
+                     "0.40\u20130.60 = moderate; "
+                     "< 0.40 = fair to poor.")
+        lines.append("")
+
+    # Krippendorff's Alpha
+    if stats.krippendorff_alpha is not None:
+        lines.append("## Krippendorff's Alpha")
+        lines.append("")
+        lines.append("| Metric | Value |")
+        lines.append("|--------|------:|")
+        lines.append(f"| Alpha (nominal) | {stats.krippendorff_alpha:.4f} |")
+        lines.append(f"| Raters | {stats.n_curators} |")
+        lines.append(f"| Items rated | {stats.n_reviewed} |")
+        lines.append("")
+        lines.append("**Interpretation**: "
+                     "\u03B1 > 0.80 = reliable; "
+                     "0.67\u20130.80 = tentatively acceptable; "
+                     "< 0.67 = unreliable for drawing conclusions.")
+        lines.append("")
+
+    # Top discrepancies
+    if stats.discrepancies:
+        max_show = min(20, len(stats.discrepancies))
+        lines.append("## Top Discrepancies")
+        lines.append("")
+        header = "| Pattern |"
+        separator = "|---------|"
+        for c in curators:
+            header += f" {c} |"
+            separator += "------|"
+        header += " Consensus |"
+        separator += "-----------|"
+        lines.append(header)
+        lines.append(separator)
+
+        for disc in stats.discrepancies[:max_show]:
+            pat_display = disc['pattern']
+            if len(pat_display) > 50:
+                pat_display = pat_display[:47] + "..."
+            row = f"| `{pat_display}` |"
+            for c in curators:
+                d = disc['decisions'].get(c, '')
+                row += f" {d} |"
+            row += f" {disc['consensus']} |"
+            lines.append(row)
+
+        lines.append("")
+        if len(stats.discrepancies) > max_show:
+            lines.append(f"*Showing top {max_show} of "
+                         f"{len(stats.discrepancies)} discrepancies. "
+                         f"See `discrepancies.tsv` and `discrepancies.html` "
+                         f"for full details.*")
+            lines.append("")
+
+    # Files generated
+    lines.append("---")
+    lines.append("")
+    lines.append("## Files Generated")
+    lines.append("")
+    lines.append("| File | Description |")
+    lines.append("|------|-------------|")
+    lines.append("| `consensus.tsv` | All patterns with consensus decisions |")
+    lines.append("| `discrepancies.tsv` | Disagreement rows only |")
+    lines.append("| `inter_rater_report.md` | This report |")
+    lines.append("| `discrepancies.html` | Interactive discrepancy viewer |")
+    lines.append("")
+
+    return lines
+
+
+def _generate_discrepancy_html(
+    stats,
+    curators: list,
+    decisions: dict,
+    full_data: dict,
+    all_patterns_ordered: list,
+    output_path,
+) -> None:
+    """Generate standalone discrepancy HTML viewer with embedded data."""
+    import json
+    from pathlib import Path
+
+    # Build data payload
+    disc_items = []
+    for disc in stats.discrepancies:
+        pattern = disc['pattern']
+        item = {
+            "pattern": pattern,
+            "decisions": {},
+            "consensus": disc['consensus'],
+            "agreement_level": disc['agreement_level'],
+        }
+        for c in curators:
+            row = full_data.get(pattern, {}).get(c, {})
+            item["decisions"][c] = {
+                "decision": decisions.get(pattern, {}).get(c, ''),
+                "modification": row.get('modification', ''),
+                "notes": row.get('notes', ''),
+            }
+        disc_items.append(item)
+
+    payload = {
+        "curators": curators,
+        "categories": ["keep", "remove", "modify"],
+        "stats": {
+            "n_patterns": stats.n_patterns,
+            "n_reviewed": stats.n_reviewed,
+            "n_unanimous": stats.n_unanimous,
+            "n_discrepancies": len(stats.discrepancies),
+            "overall_agreement_pct": stats.overall_agreement_pct,
+            "pairwise_kappas": [
+                {
+                    "curator_a": pk.curator_a,
+                    "curator_b": pk.curator_b,
+                    "kappa": pk.kappa,
+                    "n_items": pk.n_items,
+                }
+                for pk in stats.pairwise_kappas
+            ],
+            "krippendorff_alpha": stats.krippendorff_alpha,
+        },
+        "discrepancies": disc_items,
+    }
+
+    # Read HTML template and embed data
+    template_path = Path(__file__).resolve().parent / "curation_diff.html"
+    if template_path.is_file():
+        with open(template_path, encoding='utf-8') as f:
+            html = f.read()
+        data_script = f"<script>const DIFF_DATA = {json.dumps(payload, ensure_ascii=False)};</script>"
+        html = html.replace("<!--DATA_PLACEHOLDER-->", data_script)
+    else:
+        # Fallback: generate inline HTML if template is missing
+        logger.warning(f"Template not found: {template_path}, generating inline HTML")
+        html = _generate_inline_discrepancy_html(payload)
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+
+def _generate_inline_discrepancy_html(payload: dict) -> str:
+    """Fallback: generate a minimal inline HTML if the template is missing."""
+    import json
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Curation Discrepancies</title>
+<style>
+body {{ font-family: 'Segoe UI', sans-serif; margin: 2em; color: #2d3748; }}
+.card {{ border: 1px solid #e2e8f0; border-radius: 6px; padding: 1em; margin-bottom: 1em; }}
+.badge {{ display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.85em; font-weight: 600; margin-right: 0.5em; }}
+.badge-keep {{ background: #c6f6d5; color: #22543d; }}
+.badge-remove {{ background: #fed7d7; color: #9b2c2c; }}
+.badge-modify {{ background: #feebc8; color: #7b341e; }}
+</style>
+</head>
+<body>
+<h1>Curation Discrepancies</h1>
+<p>{payload['stats']['n_discrepancies']} discrepancies out of {payload['stats']['n_reviewed']} reviewed patterns
+(agreement: {payload['stats']['overall_agreement_pct']}%)</p>
+<div id="cards"></div>
+<script>
+const DIFF_DATA = {json.dumps(payload, ensure_ascii=False)};
+const container = document.getElementById('cards');
+DIFF_DATA.discrepancies.forEach(d => {{
+  let html = '<div class="card"><strong style="font-family:monospace">' +
+    d.pattern + '</strong> <em>(' + d.agreement_level + ')</em><br>';
+  for (const [curator, info] of Object.entries(d.decisions)) {{
+    const cls = 'badge-' + (info.decision || 'empty');
+    html += '<span class="badge ' + cls + '">' + curator + ': ' +
+      (info.decision || '\u2014') + '</span>';
+    if (info.modification) html += ' \u2192 <em>' + info.modification + '</em>';
+    if (info.notes) html += ' <small>(' + info.notes + ')</small>';
+  }}
+  html += '<br>Consensus: <strong>' + d.consensus + '</strong></div>';
+  container.innerHTML += html;
+}});
+</script>
+</body>
+</html>"""
+
+
 def _run_to_minimal(args, input_path: str) -> int:
     """
     Normalize any pattern TSV to minimal 2-column format: pattern<TAB>tinyIds
@@ -2853,6 +3452,16 @@ def run_action(args: Namespace):
     if promote_supp:
         return _run_promote_supplementary(args)
 
+    # Check for init-curation mode
+    init_curation = getattr(args, 'init_curation', None)
+    if init_curation:
+        return _run_init_curation(args, init_curation)
+
+    # Check for merge-curation mode
+    merge_curation = getattr(args, 'merge_curation', None)
+    if merge_curation:
+        return _run_merge_curation(args, merge_curation)
+
     # Check for generate-strip-patterns mode
     gen_strip = getattr(args, 'generate_strip_patterns', None)
     if gen_strip:
@@ -3096,4 +3705,6 @@ def run_action(args: Namespace):
     print("  cde-analyzer pattern_util --harvest-to-supplementary HARVEST.tsv")
     print("  cde-analyzer pattern_util --promote-supplementary [--clean-local]")
     print("  cde-analyzer pattern_util --detect-rare-words -i JSON -o OUTPUT")
+    print("  cde-analyzer pattern_util --init-curation FILE --curators a,b -o DIR")
+    print("  cde-analyzer pattern_util --merge-curation F1.tsv F2.tsv -o DIR")
     raise SystemExit(1)

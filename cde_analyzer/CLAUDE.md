@@ -1,4 +1,4 @@
-# CDE Analyzer — Focused Context: Phase 2 Phrase Pipeline (v0.5.17)
+# CDE Analyzer — Context (v0.6.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,15 +26,36 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.5.17)
+## Current State (v0.6.0)
+
+### v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes
+
+#### Multi-Curator Curation Workflow
+- **`--init-curation FILE`**: Initialize multi-curator curation from enriched TSV (copies to `FILE.curator_N.tsv`)
+- **`--merge-curation FILE`**: Merge multiple curator TSVs with inter-rater statistics
+- **Inter-rater statistics**: `logic/inter_rater.py` — Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, pairwise agreement
+- **Curation diff HTML**: `actions/pattern_util/curation_diff.html` — browser-based visual diff viewer
+- **Workflow**: init-curation → distribute → curators annotate → merge-curation → review diff → finalize
+
+#### Workflow Scaffold Command
+- **`workflow scaffold PROJECT -i JSON -d DIR`**: Generates project-specific pipeline orchestration bash scripts
+- **Auto Windows→WSL path conversion**: `D:\foo\bar` → `/mnt/d/foo/bar`
+- **Phase subset support**: `--phases 2,3` generates only selected phases with TODO placeholders
+- **Iterative harvesting**: `--with-iterate` includes residual harvesting loop
+- **Generated script structure**: PARAMETERS → DERIVED PATHS → HELPERS → phase functions → DISPATCH
+
+#### Documentation: Vignettes
+- **`docs/vignettes/index.md`**: Landing page with decision table
+- **`docs/vignettes/quickstart.md`**: Full pipeline end-to-end walkthrough (scaffold → Phase 1-3)
+- **`docs/vignettes/instrument-detection.md`**: Phase 1 deep dive — curation decisions, iterative harvesting, supplementary patterns
+- **`docs/vignettes/pipeline-orchestration.md`**: Workflow engine power user guide — variable chain, config files, scaffold, checkpoints, recipes
+- **`docs/vignettes/parameter-tuning.md`**: Small vs large dataset comparison (scheuermann08 vs allcde01), `min_parent_tinyids` deep dive
+- **`mkdocs.yml`**: "Guides" → "Guides & Vignettes" with 6 entries
 
 ### v0.5.15–v0.5.17: Documentation Restructuring
 - **Nav restructure**: `mkdocs.yml` reorganized — Workflows elevated, Command Reference section, LLM section, Appendix
-- **Content consolidation**: `workflow-architecture.md` (new, from workflow-diagram + lessons_learned), `about.md` (new, renamed from overview.md)
 - **SVG diagrams**: `detailed-workflow-architecture.svg`, `llm-workflow.svg` replacing ASCII art
-- **Extensions distributed**: `extensions_v0.5.x.md` content integrated into relevant help pages, original moved to `docs/appendix/`
-- **CLI short options**: Standardized `-k`, `-K`, `-n`, `-t`, `-S`, `-D`, `-B`, `-I`, `-T`, `-M`, `-c`, `-A`, `-e`, `-V`, `-C`, `-r`, `-p`, `-g`, `-l`, `-L`, `-x` across 10 cli.py files
-- **Docs updated**: All `docs/help/*.md` pages and `all-commands.md` updated with short options
+- **CLI short options**: Standardized across 10 cli.py files
 
 ### Implemented — Phrase Curation Automation
 - **`--field-analysis`**: Adds def_count, desig_count, field_profile columns + example CDE columns
@@ -43,28 +64,20 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - **`--expand-temporal-seeds`**: Universal temporal stripping from 25 seed patterns (~2100 variants)
 - **`--merge-patterns`**: Combine/deduplicate pattern TSV files
 - **`--dedup`** in phrase_miner: Identifies whole-text duplicates exceeding k_max
-- **Split temporal/curated stripping**: Temporal patterns stripped case-insensitively in dedicated pass before case-sensitive curated phrase stripping
-
-### Dedup Design (refined)
-- Stage 0a: Hash field texts, group identical strings shared by N+ CDEs
-- Stage 0b: Only emit phrases with **tokens > k_max** (unreachable by k-mer mining)
-- **No masking** — sub-phrases within dedup'd texts remain visible to k-mer mining
-- Short duplicates found naturally by k-mer mining
-- Output: separate `dedup_phrases.tsv` curation template (not in regular phrase output)
-- allcde01: 1003 shared texts → 4 dedup phrases (>25 tokens), 13640 k-mer phrases
+- **Split temporal/curated stripping**: Temporal patterns stripped case-insensitively before case-sensitive curated phrase stripping
 
 ### What Remains
-- **Priority 3 — LLM-assisted classification** (not started):
-  - Use `llm_classify` infrastructure to classify remaining patterns
-  - Categories: temporal_boilerplate, definition_template, lab_nomenclature, instrument_residual, content_bearing
-- **Priority 4 — Field-aware stripping** (not started):
-  - `--split-by-field` or field_profile-aware strip_phrases
+- **Priority 3 — LLM-assisted classification** (not started)
+- **Priority 4 — Field-aware stripping** (not started)
 
 ## Key Files
 
 ### Source Code (cde_analyzer/)
-- `actions/pattern_util/cli.py` — CLI definitions for pattern_util
-- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds)
+- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation)
+- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation)
+- `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold)
+- `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status)
+- `logic/inter_rater.py` — inter-rater reliability statistics (Cohen's/Fleiss' kappa, Krippendorff's alpha)
 - `actions/phrase_miner/run.py` — phrase miner runner + `write_dedup_curation_tsv()`
 - `logic/phrase_miner.py` — core mining: `dedup_field_texts()`, `mine_phrases()`, k-mer loop, masking
 - `actions/strip_discover/run.py` — `compute_field_distribution()`, `build_field_text_index()`
@@ -78,6 +91,11 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - `workflows/instrument_pipeline.yaml` — Phase 1
 - `workflows/phrase_pipeline.yaml` — Phase 2
 - `workflows/branching_strip.yaml` — Phase 3 (5-way branch)
+
+### Documentation
+- `docs/vignettes/` — 6 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping)
+- `docs/help/` — 22 per-command reference pages
+- `docs/workflow-architecture.md` — pipeline diagrams + design rationale
 
 ### Data (allcde01/)
 - `phase1_output/inst_stripped.json` — instrument-stripped JSON (22,743 CDEs)
@@ -103,4 +121,17 @@ cde-analyzer pattern_util --expand-temporal-seeds -o OUT          # temporal see
 cde-analyzer pattern_util --harvest-to-supplementary FILE         # ingest to local supplementary
 cde-analyzer pattern_util --promote-supplementary                 # promote to global config
 cde-analyzer pattern_util --edit FILE                             # browser-based TSV editor
+cde-analyzer pattern_util --init-curation FILE -o DIR             # initialize multi-curator curation
+cde-analyzer pattern_util --merge-curation FILE -o OUT            # merge curator annotations + stats
+```
+
+## `workflow` Capabilities
+
+```bash
+cde-analyzer workflow run YAML [--set K=V] [--from-step S] [--dry-run]  # execute pipeline
+cde-analyzer workflow resume --state-file FILE                          # resume after checkpoint
+cde-analyzer workflow status [--state-file FILE] [-v]                   # check pipeline state
+cde-analyzer workflow list                                              # list built-in workflows
+cde-analyzer workflow copy NAME [--as FILE]                             # copy template to project
+cde-analyzer workflow scaffold PROJECT -i JSON -d DIR [--phases 1,2,3] [--with-iterate]  # generate orchestration script
 ```

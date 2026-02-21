@@ -155,6 +155,52 @@ def register_subparser(subparser: ArgumentParser):
         help="Overwrite existing file without prompting"
     )
 
+    # ===== SCAFFOLD command =====
+    scaffold_parser = workflow_subparsers.add_parser(
+        "scaffold",
+        help="Generate a project-specific pipeline orchestration script"
+    )
+    scaffold_parser.add_argument(
+        "project_name",
+        help="Short project name for header/directories (e.g., 'allcde01')"
+    )
+    scaffold_parser.add_argument(
+        "--input-json", "-i",
+        required=True,
+        help="Path to raw CDE JSON input file"
+    )
+    scaffold_parser.add_argument(
+        "--output-dir", "-d",
+        default=".",
+        help="Base output directory for all phases (default: current directory)"
+    )
+    scaffold_parser.add_argument(
+        "--output", "-o",
+        type=str,
+        default=None,
+        help="Script output path (default: {output_dir}/run_pipeline.sh)"
+    )
+    scaffold_parser.add_argument(
+        "--cde-command",
+        default="cde-analyzer",
+        help="How to invoke cde-analyzer (default: cde-analyzer)"
+    )
+    scaffold_parser.add_argument(
+        "--phases",
+        default="1,2,3",
+        help="Comma-separated phase numbers to include (default: 1,2,3)"
+    )
+    scaffold_parser.add_argument(
+        "--with-iterate",
+        action="store_true",
+        help="Include iterative residual harvesting loop for Phase 1"
+    )
+    scaffold_parser.add_argument(
+        "--force", "-f",
+        action="store_true",
+        help="Overwrite existing script without prompting"
+    )
+
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""
         return _get_run_action()(args)

@@ -58,10 +58,15 @@ nav:
     - Query Modules: llm/query_modules.md
   - Cheatsheets:
     - Overview: cheatsheets/index.md
-  - Guides:
+  - Guides & Vignettes:
+    - Overview: vignettes/index.md
+    - Full Pipeline Quickstart: vignettes/quickstart.md
+    - Instrument Detection: vignettes/instrument-detection.md
+    - Pipeline Orchestration: vignettes/pipeline-orchestration.md
+    - Parameter Tuning: vignettes/parameter-tuning.md
+    - Phrase Stripping: vignettes/phrase-stripping.md
     - Curation Guide: curation-guide.md
     - Phrase Miner Logic: phrase_miner_logic.md
-    - Phrase Stripping Vignette: vignettes/phrase-stripping.md
   - Development:
     - Architecture: architecture.md
     - Data Models: data-models.md
