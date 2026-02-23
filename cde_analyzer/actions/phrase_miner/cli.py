@@ -41,7 +41,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--output-dir", "-o",
         default="phrase_output",
-        help="Output directory for results (default: phrase_output)"
+        help="Output directory for results"
     )
 
     # Field selection (reuse existing pattern from phrase action)
@@ -49,7 +49,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Field names to extract phrases from (default: designation definition). "
+        help="Field names to extract phrases from. "
              "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
@@ -58,25 +58,25 @@ def register_subparser(subparser: ArgumentParser):
         "--k-max", "-K",
         type=int,
         default=25,
-        help="Maximum k-mer length (default: 25)"
+        help="Maximum k-mer length"
     )
     subparser.add_argument(
         "--k-min", "-k",
         type=int,
         default=3,
-        help="Minimum k-mer length (default: 3)"
+        help="Minimum k-mer length"
     )
     subparser.add_argument(
         "--freq-min", "-n",
         type=int,
         default=3,
-        help="Minimum frequency threshold per k-bin (default: 3)"
+        help="Minimum frequency threshold per k-bin"
     )
     subparser.add_argument(
         "--min-tinyids", "-t",
         type=int,
         default=2,
-        help="Minimum distinct tinyIds (document support) (default: 2)"
+        help="Minimum distinct tinyIds (document support)"
     )
 
     # Text processing (match existing actions)
@@ -84,7 +84,7 @@ def register_subparser(subparser: ArgumentParser):
         "--lemmatize",
         action=BooleanOptionalAction,
         default=True,
-        help="Apply lemmatization to tokens (default: True, creates --no-lemmatize)"
+        help="Apply lemmatization to tokens (use --no-lemmatize to disable)"
     )
     subparser.add_argument(
         "--remove-stopwords",
@@ -127,7 +127,7 @@ def register_subparser(subparser: ArgumentParser):
         "--dedup",
         action="store_true",
         default=True,
-        help="Enable whole-text dedup pre-pass before k-mer mining (default: enabled). "
+        help="Enable whole-text dedup pre-pass before k-mer mining. "
              "Detects field texts shared by multiple CDEs and emits them as phrases, "
              "then masks them to prevent redundant k-mer fragment detection.",
     )
@@ -141,13 +141,13 @@ def register_subparser(subparser: ArgumentParser):
         "--dedup-min-count",
         type=int,
         default=2,
-        help="Minimum CDEs sharing identical text for dedup emission (default: 2).",
+        help="Minimum CDEs sharing identical text for dedup emission.",
     )
     subparser.add_argument(
         "--dedup-min-tokens",
         type=int,
         default=3,
-        help="Minimum tokens in dedup text to emit as phrase (default: 3).",
+        help="Minimum tokens in dedup text to emit as phrase.",
     )
 
     # Verbatim output options
@@ -168,25 +168,25 @@ def register_subparser(subparser: ArgumentParser):
         "--min-prefix-words",
         type=int,
         default=2,
-        help="Minimum words for prefix pattern detection (default: 2)"
+        help="Minimum words for prefix pattern detection"
     )
     subparser.add_argument(
         "--min-suffix-words",
         type=int,
         default=1,
-        help="Minimum words for suffix pattern detection (default: 1)"
+        help="Minimum words for suffix pattern detection"
     )
     subparser.add_argument(
         "--min-family-size",
         type=int,
         default=3,
-        help="Minimum number of phrases to form a family (default: 3)"
+        help="Minimum number of phrases to form a family"
     )
     subparser.add_argument(
         "--max-families",
         type=int,
         default=100,
-        help="Maximum number of families to report (default: 100)"
+        help="Maximum number of families to report"
     )
 
     # Optional features

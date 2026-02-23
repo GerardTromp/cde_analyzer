@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name
+synAIR001	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM2.5 concentration
+synAIR002	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM10 concentration
+synAIR003	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Ground-level ozone
+synAIR004	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Nitrogen dioxide level
+synAIR005	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Sulfur dioxide level
+synAIR006	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Carbon monoxide level
+synAIR007	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Air Quality Index
+synAIR008	air_quality	Air Quality Monitoring	Heavy Metals	terse	xd:heavy_metals	Airborne lead concentration
+synAIR009	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Benzene level
+synAIR010	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	VOC concentration
+synAIR011	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Ambient temperature
+synAIR012	air_quality	Air Quality Monitoring	Meteorological	terse	air	Relative humidity
+synAIR013	air_quality	Air Quality Monitoring	Meteorological	terse	air	Wind speed
+synAIR014	air_quality	Air Quality Monitoring	Meteorological	terse	air	Atmospheric pressure
+synAIR015	air_quality	Air Quality Monitoring	Meteorological	terse	air	Visibility distance
+synAIR016	air_quality	Air Quality Monitoring	Sampling	terse	xd:sampling	Sampling frequency
+synAIR017	air_quality	Air Quality Monitoring	Sampling	terse	xd:coordinates	Station coordinates
+synAIR018	air_quality	Air Quality Monitoring	Compliance	terse	xd:regulatory	Exceedance day count
+synAIR019	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Acidity of precipitation
+synAIR020	air_quality	Air Quality Monitoring	Seasonal Patterns	terse	xd:seasonal	Seasonal pollutant trend
+synWAT001	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen concentration
+synWAT002	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Water pH measurement
+synWAT003	water_quality	Water Quality Assessment	Core Parameters	informational	water	Turbidity of water sample
+synWAT004	water_quality	Water Quality Assessment	Nutrients	informational	water	Nitrate concentration in water
+synWAT005	water_quality	Water Quality Assessment	Nutrients	informational	water	Phosphate level in water
+synWAT006	water_quality	Water Quality Assessment	Microbiology	informational	water	Escherichia coli count
+synWAT007	water_quality	Water Quality Assessment	Microbiology	informational	water	Total coliform bacteria count
+synWAT008	water_quality	Water Quality Assessment	Core Parameters	informational	water	Electrical conductivity of water
+synWAT009	water_quality	Water Quality Assessment	Temperature	informational	xd:temperature	Water temperature at sampling point
+synWAT010	water_quality	Water Quality Assessment	Core Parameters	informational	water	Biochemical oxygen demand
+synWAT011	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chemical oxygen demand
+synWAT012	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Lead concentration in water
+synWAT013	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Mercury level in water
+synWAT014	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chlorophyll-a concentration
+synWAT015	water_quality	Water Quality Assessment	Core Parameters	informational	water	Total dissolved solids
+synWAT016	water_quality	Water Quality Assessment	Sampling	informational	xd:sampling	Water sampling method
+synWAT017	water_quality	Water Quality Assessment	Sampling	informational	xd:coordinates	Sampling site geographic coordinates
+synWAT018	water_quality	Water Quality Assessment	Compliance	informational	xd:regulatory	Regulatory threshold exceedance
+synWAT019	water_quality	Water Quality Assessment	Core Parameters	informational	water	Salinity measurement
+synWAT020	water_quality	Water Quality Assessment	Seasonal Patterns	informational	xd:seasonal	Seasonal water quality variation
+synSOL001	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Soil organic matter content by weight
+synSOL002	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Total nitrogen content of the soil sample
+synSOL003	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Plant-available phosphorus concentration in soil
+synSOL004	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Exchangeable potassium in the soil matrix
+synSOL005	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH measured in aqueous suspension
+synSOL006	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Cation exchange capacity of the soil
+synSOL007	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil bulk density at the sampling location
+synSOL008	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Gravimetric soil moisture content
+synSOL009	soil_composition	Soil Composition Analysis	Microbiology	expansive	soil	Microbial biomass carbon in the soil
+synSOL010	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Lead concentration in the soil sample
+synSOL011	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Cadmium contamination level in the soil
+synSOL012	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil texture classification based on particle size distribution
+synSOL013	soil_composition	Soil Composition Analysis	Temperature	expansive	xd:temperature	Soil temperature profile at the sampling depth
+synSOL014	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Electrical conductivity of the soil saturation extract
+synSOL015	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:sampling	Depth of soil sample collection below the surface
+synSOL016	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:coordinates	Geographic coordinates of the soil sampling point
+synSOL017	soil_composition	Soil Composition Analysis	Compliance	expansive	xd:regulatory	Regulatory contamination threshold exceedance for the soil sample
+synSOL018	soil_composition	Soil Composition Analysis	Seasonal Patterns	expansive	xd:seasonal	Seasonal variation in soil organic matter content
+synSOL019	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Carbon-to-nitrogen ratio of the soil organic fraction
+synSOL020	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Aggregate stability of the soil structure

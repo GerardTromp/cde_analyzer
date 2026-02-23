@@ -42,6 +42,9 @@ def _get_run_action():
 
 
 def register_subparser(subparser: ArgumentParser):
+    # Inherit formatter (ArgumentDefaultsHelpFormatter) from parent parser
+    _fmt = subparser.formatter_class
+
     # Create subcommands
     workflow_subparsers = subparser.add_subparsers(
         dest="workflow_command",
@@ -52,7 +55,8 @@ def register_subparser(subparser: ArgumentParser):
     # ===== RUN command =====
     run_parser = workflow_subparsers.add_parser(
         "run",
-        help="Execute a workflow from YAML file"
+        help="Execute a workflow from YAML file",
+        formatter_class=_fmt,
     )
     run_parser.add_argument(
         "workflow_file",
@@ -73,7 +77,7 @@ def register_subparser(subparser: ArgumentParser):
     run_parser.add_argument(
         "--state-dir",
         type=str,
-        help="Directory to store workflow state (default: workflow's output_dir or current dir)"
+        help="Directory to store workflow state (auto: workflow's output_dir or current dir)"
     )
     run_parser.add_argument(
         "--from-step",
@@ -85,13 +89,14 @@ def register_subparser(subparser: ArgumentParser):
     # ===== RESUME command =====
     resume_parser = workflow_subparsers.add_parser(
         "resume",
-        help="Resume workflow after checkpoint"
+        help="Resume workflow after checkpoint",
+        formatter_class=_fmt,
     )
     resume_parser.add_argument(
         "--state-file",
         type=str,
         default=".workflow_state.json",
-        help="Path to workflow state file (default: .workflow_state.json)"
+        help="Path to workflow state file"
     )
     resume_parser.add_argument(
         "--dry-run",
@@ -102,13 +107,14 @@ def register_subparser(subparser: ArgumentParser):
     # ===== STATUS command =====
     status_parser = workflow_subparsers.add_parser(
         "status",
-        help="Show workflow execution status"
+        help="Show workflow execution status",
+        formatter_class=_fmt,
     )
     status_parser.add_argument(
         "--state-file",
         type=str,
         default=".workflow_state.json",
-        help="Path to workflow state file (default: .workflow_state.json)"
+        help="Path to workflow state file"
     )
     status_parser.add_argument(
         "--verbose", "-v",
@@ -119,19 +125,21 @@ def register_subparser(subparser: ArgumentParser):
     # ===== LIST command =====
     list_parser = workflow_subparsers.add_parser(
         "list",
-        help="List available workflow templates"
+        help="List available workflow templates",
+        formatter_class=_fmt,
     )
     list_parser.add_argument(
         "--dir",
         type=str,
         default="workflows",
-        help="Directory to search for workflow files (default: workflows/)"
+        help="Directory to search for workflow files"
     )
 
     # ===== COPY command =====
     copy_parser = workflow_subparsers.add_parser(
         "copy",
-        help="Copy a workflow template to current directory for customization"
+        help="Copy a workflow template to current directory for customization",
+        formatter_class=_fmt,
     )
     copy_parser.add_argument(
         "workflow_name",
@@ -141,13 +149,13 @@ def register_subparser(subparser: ArgumentParser):
         "--as", "-a",
         dest="output_name",
         type=str,
-        help="Output filename (default: same as source)"
+        help="Output filename (auto: same as source)"
     )
     copy_parser.add_argument(
         "--dest", "-d",
         type=str,
         default=".",
-        help="Destination directory (default: current directory)"
+        help="Destination directory"
     )
     copy_parser.add_argument(
         "--force", "-f",
@@ -158,7 +166,8 @@ def register_subparser(subparser: ArgumentParser):
     # ===== SCAFFOLD command =====
     scaffold_parser = workflow_subparsers.add_parser(
         "scaffold",
-        help="Generate a project-specific pipeline orchestration script"
+        help="Generate a project-specific pipeline orchestration script",
+        formatter_class=_fmt,
     )
     scaffold_parser.add_argument(
         "project_name",
@@ -172,23 +181,23 @@ def register_subparser(subparser: ArgumentParser):
     scaffold_parser.add_argument(
         "--output-dir", "-d",
         default=".",
-        help="Base output directory for all phases (default: current directory)"
+        help="Base output directory for all phases"
     )
     scaffold_parser.add_argument(
         "--output", "-o",
         type=str,
         default=None,
-        help="Script output path (default: {output_dir}/run_pipeline.sh)"
+        help="Script output path (auto: {output_dir}/run_pipeline.sh)"
     )
     scaffold_parser.add_argument(
         "--cde-command",
         default="cde-analyzer",
-        help="How to invoke cde-analyzer (default: cde-analyzer)"
+        help="How to invoke cde-analyzer"
     )
     scaffold_parser.add_argument(
         "--phases",
         default="1,2,3",
-        help="Comma-separated phase numbers to include (default: 1,2,3)"
+        help="Comma-separated phase numbers to include"
     )
     scaffold_parser.add_argument(
         "--with-iterate",

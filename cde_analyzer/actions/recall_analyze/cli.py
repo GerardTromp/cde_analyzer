@@ -59,7 +59,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--pipeline-tinyid-column",
         default="tinyIds",
-        help="Column name for tinyIds in pipeline output (default: tinyIds)."
+        help="Column name for tinyIds in pipeline output."
     )
 
     # Output
@@ -90,7 +90,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--report-title",
         default="Instrument Detection Recall Report",
-        help="Title for the markdown report (default: 'Instrument Detection Recall Report')."
+        help="Title for the markdown report."
     )
 
     # Search options
@@ -98,12 +98,12 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Fields to search for patterns (default: designation definition)."
+        help="Fields to search for patterns."
     )
     subparser.add_argument(
         "--case-sensitive", "-C",
         action="store_true",
-        help="Make pattern matching case-sensitive (default: case-insensitive)."
+        help="Make pattern matching case-sensitive."
     )
 
     # Recall threshold
@@ -111,7 +111,7 @@ def register_subparser(subparser: ArgumentParser):
         "--min-recall",
         type=float,
         default=0.0,
-        help="Minimum recall threshold to flag families needing attention (default: 0.0)."
+        help="Minimum recall threshold to flag families needing attention."
     )
 
     # Iterative analysis / stopping criterion
@@ -124,7 +124,7 @@ def register_subparser(subparser: ArgumentParser):
         "--stopping-threshold",
         type=int,
         default=2,
-        help="Stop iterating when marginal gain <= this value (default: 2). "
+        help="Stop iterating when marginal gain <= this value. "
              "Reports when diminishing returns reached."
     )
 
@@ -141,7 +141,7 @@ def register_subparser(subparser: ArgumentParser):
         "--suggest-min-matches",
         type=int,
         default=2,
-        help="Minimum false negatives a suggested pattern must match (default: 2). "
+        help="Minimum false negatives a suggested pattern must match. "
              "Patterns matching fewer tinyIds are filtered out."
     )
 

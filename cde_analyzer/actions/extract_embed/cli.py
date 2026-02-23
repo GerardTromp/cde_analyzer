@@ -37,13 +37,13 @@ def register_subparser(subparser: ArgumentParser):
              "Cells can contain multiple tinyIds (pipe, comma, or space separated).",
     )
     subparser.add_argument(
-        "--id-type", default=None, help="The type of ID, e.g., tinyId (default=None)."
+        "--id-type", default=None, help="The type of ID, e.g., tinyId."
     )
     subparser.add_argument(
         "--output-format",
         choices=["json", "csv", "tsv"],
         default="json",
-        help="Choose output format. (default JSON)",
+        help="Choose output format.",
     )
     subparser.add_argument(
         "-o",

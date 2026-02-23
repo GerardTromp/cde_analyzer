@@ -58,8 +58,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
-        help="Field paths to search for remaining patterns "
-             "(default: definitions.*.definition designations.*.designation). "
+        help="Field paths to search for remaining patterns. "
              "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
              "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
@@ -80,14 +79,14 @@ def register_subparser(subparser: ArgumentParser):
         "--context-chars",
         type=int,
         default=100,
-        help="Characters of context to capture after anchor (default: 100)",
+        help="Characters of context to capture after anchor",
     )
 
     subparser.add_argument(
         "--min-count",
         type=int,
         default=1,
-        help="Minimum occurrence count to include in output (default: 1)",
+        help="Minimum occurrence count to include in output",
     )
 
     subparser.add_argument(

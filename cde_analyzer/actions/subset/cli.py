@@ -48,7 +48,7 @@ def register_subparser(subparser: ArgumentParser):
         "--output-format",
         choices=["json", "csv", "tsv"],
         default="json",
-        help="Output format (default: json)."
+        help="Output format."
     )
 
     # tinyId filtering - file or CLI list
@@ -74,13 +74,13 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Fields to search for text filter (default: designation definition). "
+        help="Fields to search for text filter. "
              "Also supports: valueMeaningName, valueMeaningDefinition"
     )
     subparser.add_argument(
         "--case-sensitive",
         action="store_true",
-        help="Make text filter case-sensitive (default: case-insensitive)."
+        help="Make text filter case-sensitive."
     )
     subparser.add_argument(
         "--regex",

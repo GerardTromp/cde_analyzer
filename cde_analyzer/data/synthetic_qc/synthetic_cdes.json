@@ -1,0 +1,2582 @@
+[
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR001",
+    "designations": [
+      {
+        "designation": "PM2.5 concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Measured PM2.5 level",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Mass of fine particulate matter per cubic meter of air.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR002",
+    "designations": [
+      {
+        "designation": "PM10 concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Measured PM10 level",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Mass of coarse particulate matter per cubic meter.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR003",
+    "designations": [
+      {
+        "designation": "Ground-level ozone",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ozone reading at surface",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Tropospheric ozone concentration at ground level.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR004",
+    "designations": [
+      {
+        "designation": "Nitrogen dioxide level",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ambient NO2 concentration",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Nitrogen dioxide in ambient air.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR005",
+    "designations": [
+      {
+        "designation": "Sulfur dioxide level",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ambient SO2 concentration",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Sulfur dioxide detected at the monitoring station.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR006",
+    "designations": [
+      {
+        "designation": "Carbon monoxide level",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ambient CO concentration",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Carbon monoxide in ambient air.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR007",
+    "designations": [
+      {
+        "designation": "Air Quality Index",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Composite AQI score",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Aggregate index summarizing overall air quality.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR008",
+    "designations": [
+      {
+        "designation": "Airborne lead concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Lead in ambient air",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Lead particulate mass per cubic meter.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR009",
+    "designations": [
+      {
+        "designation": "Benzene level",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ambient benzene concentration",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Benzene vapor detected at the monitoring site.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR010",
+    "designations": [
+      {
+        "designation": "VOC concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Total volatile organics",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Sum of volatile organic compounds in air.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR011",
+    "designations": [
+      {
+        "designation": "Ambient temperature",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Air temperature at site",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Temperature recorded at the monitoring station.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR012",
+    "designations": [
+      {
+        "designation": "Relative humidity",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Humidity percentage",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Water vapor saturation ratio of ambient air.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR013",
+    "designations": [
+      {
+        "designation": "Wind speed",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Wind velocity at station",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Horizontal wind speed at sensor height.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR014",
+    "designations": [
+      {
+        "designation": "Atmospheric pressure",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Barometric pressure reading",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Station-level atmospheric pressure.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR015",
+    "designations": [
+      {
+        "designation": "Visibility distance",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Optical visibility range",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Maximum distance at which objects are visible.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR016",
+    "designations": [
+      {
+        "designation": "Sampling frequency",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Measurement interval",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Time interval between consecutive air samples.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR017",
+    "designations": [
+      {
+        "designation": "Station coordinates",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Geographic location of station",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Latitude and longitude of the air monitoring site.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR018",
+    "designations": [
+      {
+        "designation": "Exceedance day count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Days exceeding threshold",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Number of days the pollutant exceeded the regulatory limit.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR019",
+    "designations": [
+      {
+        "designation": "Acidity of precipitation",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Rainwater pH value",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "pH of collected precipitation samples.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synAIR020",
+    "designations": [
+      {
+        "designation": "Seasonal pollutant trend",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Seasonal concentration pattern",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Directional change in pollutant levels across seasons.",
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT001",
+    "designations": [
+      {
+        "designation": "Dissolved oxygen concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Amount of oxygen dissolved in the water sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of molecular oxygen present in the water column, measured in milligrams per liter. Dissolved oxygen is essential for aquatic organism respiration and serves as an indicator of ecosystem health.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT002",
+    "designations": [
+      {
+        "designation": "Water pH measurement",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the water sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The hydrogen ion activity in the water expressed on a logarithmic scale from 0 to 14. Values below 7 indicate acidic conditions, values above 7 indicate alkaline conditions.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT003",
+    "designations": [
+      {
+        "designation": "Turbidity of water sample",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Clarity of the water measured by light scattering",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A measure of water clarity determined by the amount of light scattered by suspended particles. Reported in nephelometric turbidity units and used to assess sediment load and treatment effectiveness.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT004",
+    "designations": [
+      {
+        "designation": "Nitrate concentration in water",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Dissolved nitrate level in the sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of nitrate ions present in the water, typically reported in milligrams of nitrogen per liter. Elevated nitrate often indicates agricultural runoff or wastewater influence.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT005",
+    "designations": [
+      {
+        "designation": "Phosphate level in water",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Dissolved phosphate concentration in the sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The amount of orthophosphate dissolved in the water column, measured in milligrams per liter. Excessive phosphate promotes algal blooms and contributes to eutrophication of surface waters.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT006",
+    "designations": [
+      {
+        "designation": "Escherichia coli count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Number of E. coli colonies per volume of water",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The enumeration of Escherichia coli bacteria in a water sample, expressed as colony-forming units per 100 milliliters. E. coli serves as an indicator of fecal contamination.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT007",
+    "designations": [
+      {
+        "designation": "Total coliform bacteria count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Total coliform colonies detected in the water sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The number of coliform bacteria per unit volume of water, used as a general indicator of sanitary quality. Includes both fecal and environmental coliform species.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT008",
+    "designations": [
+      {
+        "designation": "Electrical conductivity of water",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ability of the water sample to conduct an electric current",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A measure of the ionic content of water, reflecting the total concentration of dissolved salts. Higher conductivity indicates greater dissolved mineral content.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT009",
+    "designations": [
+      {
+        "designation": "Water temperature at sampling point",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Temperature of the water at the time and location of collection",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The thermal state of the water body at the point of sample collection, measured in degrees Celsius. Temperature influences dissolved oxygen levels, chemical reaction rates, and biological activity.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT010",
+    "designations": [
+      {
+        "designation": "Biochemical oxygen demand",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Oxygen consumed by microorganisms decomposing organic matter",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The amount of dissolved oxygen required by aerobic microorganisms to decompose organic material in a water sample over a standard incubation period. A key indicator of organic pollution load.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT011",
+    "designations": [
+      {
+        "designation": "Chemical oxygen demand",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Oxygen equivalent of chemically oxidizable matter in the sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The quantity of oxygen required to chemically oxidize organic and inorganic substances in water. Chemical oxygen demand provides a broader measure of pollution than biochemical oxygen demand alone.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT012",
+    "designations": [
+      {
+        "designation": "Lead concentration in water",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Dissolved lead level in the water sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The mass of dissolved lead per unit volume of water, typically reported in micrograms per liter. Lead is a regulated heavy metal due to its neurotoxic effects at low concentrations.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT013",
+    "designations": [
+      {
+        "designation": "Mercury level in water",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Dissolved mercury concentration in the sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of total mercury in the water column, measured in nanograms per liter. Mercury bioaccumulates in aquatic food webs and poses risks to both wildlife and human health.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT014",
+    "designations": [
+      {
+        "designation": "Chlorophyll-a concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Photosynthetic pigment level indicating algal abundance",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of chlorophyll-a extracted from filtered water samples, measured in micrograms per liter. Chlorophyll-a provides an estimate of phytoplankton biomass and trophic state.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT015",
+    "designations": [
+      {
+        "designation": "Total dissolved solids",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Combined content of all dissolved substances in the water",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The total mass of dissolved inorganic and organic substances present in the water, measured in milligrams per liter. Includes minerals, salts, metals, and organic matter that pass through a standard filter.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT016",
+    "designations": [
+      {
+        "designation": "Water sampling method",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Technique used to collect the water sample",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The standardized procedure employed to obtain a representative water sample from the target water body. Includes grab sampling, composite sampling, and depth-integrated collection methods.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT017",
+    "designations": [
+      {
+        "designation": "Sampling site geographic coordinates",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Latitude and longitude of the water sampling location",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The geographic position of the water sampling point, expressed as decimal degrees of latitude and longitude. Coordinates enable spatial analysis and comparison across monitoring networks.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT018",
+    "designations": [
+      {
+        "designation": "Regulatory threshold exceedance",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Whether the measured parameter exceeds the applicable regulatory limit",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "An indicator of whether the measured concentration or count exceeds the regulatory standard established for the parameter. Exceedance triggers reporting requirements and may necessitate remedial action.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT019",
+    "designations": [
+      {
+        "designation": "Salinity measurement",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Salt content of the water expressed as practical salinity units",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of dissolved salts in the water sample, reported in practical salinity units or parts per thousand. Salinity affects water density, aquatic species distribution, and irrigation suitability.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synWAT020",
+    "designations": [
+      {
+        "designation": "Seasonal water quality variation",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Pattern of water quality change associated with seasonal cycles",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The recurring pattern of change in water quality parameters that corresponds to seasonal environmental cycles. Seasonal variation reflects the combined influence of temperature, precipitation, runoff, and biological activity on water chemistry.",
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL001",
+    "designations": [
+      {
+        "designation": "Soil organic matter content by weight",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Proportion of organic material present in the soil sample expressed as a percentage of total dry weight",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil organic matter encompasses all living and dead biological material within the soil matrix, including decomposed plant residues, animal remains, microbial biomass, and humic substances. The organic matter fraction is determined by loss-on-ignition or wet oxidation methods and reported as a percentage of oven-dried soil mass. Organic matter content governs nutrient cycling, water retention capacity, and soil structure.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL002",
+    "designations": [
+      {
+        "designation": "Total nitrogen content of the soil sample",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Combined mass of all nitrogen forms present in the soil including organic nitrogen, ammonium, and nitrate fractions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total nitrogen represents the sum of organic nitrogen bound in humus and biological residues plus inorganic nitrogen species including ammonium and nitrate. The measurement is performed using Kjeldahl digestion or combustion analysis and reported in milligrams of nitrogen per kilogram of dry soil. Nitrogen availability is a primary determinant of plant productivity and microbial community composition.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL003",
+    "designations": [
+      {
+        "designation": "Plant-available phosphorus concentration in soil",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Amount of phosphorus in the soil that is accessible for uptake by plant root systems under standard extraction conditions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Plant-available phosphorus is the fraction of total soil phosphorus that can be extracted by standard chemical procedures such as the Olsen or Bray methods and is considered accessible for plant absorption. The concentration is reported in milligrams per kilogram and varies with soil pH, clay content, and organic matter. Phosphorus availability limits plant growth in many terrestrial ecosystems and influences fertilizer management decisions.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL004",
+    "designations": [
+      {
+        "designation": "Exchangeable potassium in the soil matrix",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Concentration of potassium ions adsorbed onto soil particle surfaces that are available for exchange with the soil solution",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Exchangeable potassium refers to potassium ions held on the cation exchange sites of clay minerals and organic matter that can be displaced by other cations in the soil solution. This fraction is extracted using ammonium acetate and measured by flame photometry or atomic absorption spectroscopy. Exchangeable potassium is the primary reservoir supplying potassium to plant roots and is a key parameter in soil fertility assessment.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL005",
+    "designations": [
+      {
+        "designation": "Soil pH measured in aqueous suspension",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the soil determined by measuring the hydrogen ion activity in a standardized soil-water mixture",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil pH is measured by suspending a known mass of air-dried soil in deionized water at a standard ratio, typically one part soil to two parts water, and recording the hydrogen ion activity with a calibrated glass electrode. The pH value influences nutrient solubility, microbial activity, and the bioavailability of both essential elements and potentially toxic metals. Soil pH ranges from strongly acidic values below 4.5 to strongly alkaline values above 8.5.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL006",
+    "designations": [
+      {
+        "designation": "Cation exchange capacity of the soil",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Total capacity of the soil to retain and exchange positively charged nutrient ions on its particle surfaces",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Cation exchange capacity quantifies the total negative charge available on soil colloid surfaces for adsorbing cations such as calcium, magnesium, potassium, and sodium. The measurement is performed by saturating exchange sites with a standard index cation and then displacing and quantifying it. Cation exchange capacity is expressed in centimoles of charge per kilogram and reflects the combined contribution of clay minerals and organic matter to the soil's nutrient-holding ability.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL007",
+    "designations": [
+      {
+        "designation": "Soil bulk density at the sampling location",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Mass of oven-dried soil per unit volume of undisturbed soil collected using a core sampling device at the designated depth interval",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Bulk density is determined by extracting an intact cylindrical soil core of known volume, drying it at 105 degrees Celsius to constant weight, and dividing the dry mass by the core volume. The result, expressed in grams per cubic centimeter, reflects the degree of soil compaction and the proportion of pore space. Bulk density affects root penetration, water infiltration, and gas exchange within the soil profile.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL008",
+    "designations": [
+      {
+        "designation": "Gravimetric soil moisture content",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Mass of water contained in the soil sample expressed as a proportion of the oven-dry soil mass at the time of collection",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Gravimetric moisture content is calculated by weighing a field-moist soil sample, drying it at 105 degrees Celsius until the mass stabilizes, and expressing the mass of water lost as a percentage of the dry soil mass. This measurement captures the water available for plant uptake and microbial processes at the moment of sampling. Moisture content varies with recent precipitation, soil texture, organic matter content, and landscape position.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL009",
+    "designations": [
+      {
+        "designation": "Microbial biomass carbon in the soil",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Mass of carbon contained within the living microbial community of the soil sample expressed per unit dry weight of soil",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Microbial biomass carbon is estimated using the chloroform fumigation extraction method, in which paired fumigated and unfumigated soil subsamples are extracted with potassium sulfate and the difference in extractable organic carbon is converted to biomass carbon using an empirical factor. The result, reported in milligrams of carbon per kilogram of dry soil, provides an index of the size and metabolic potential of the soil microbial community.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL010",
+    "designations": [
+      {
+        "designation": "Lead concentration in the soil sample",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Total mass of lead present per unit dry weight of soil as determined by acid digestion and instrumental analysis",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total lead concentration is measured by digesting a dried and ground soil sample in concentrated acid, filtering the digest, and analyzing the filtrate by inductively coupled plasma mass spectrometry or atomic absorption spectroscopy. The concentration is reported in milligrams per kilogram. Lead is a persistent heavy metal contaminant whose accumulation in soil poses risks to human health through direct contact, dust inhalation, and uptake into food crops.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL011",
+    "designations": [
+      {
+        "designation": "Cadmium contamination level in the soil",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Total cadmium content of the soil sample measured after complete acid digestion of the dried and homogenized material",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Cadmium concentration in soil is determined by total acid digestion followed by instrumental quantification using inductively coupled plasma optical emission spectrometry. The result, expressed in milligrams per kilogram, reflects both natural geochemical background and anthropogenic inputs from phosphate fertilizers, sewage sludge, and industrial emissions. Cadmium is readily taken up by crops and is subject to regulatory soil screening levels due to its carcinogenic properties.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL012",
+    "designations": [
+      {
+        "designation": "Soil texture classification based on particle size distribution",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Categorization of the soil into a textural class determined by the relative proportions of sand, silt, and clay-sized particles",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil texture classification assigns the sample to one of the standard textural classes defined by the proportions of sand, silt, and clay fractions as plotted on the soil texture triangle. Particle size fractions are determined by sieve and hydrometer analysis following organic matter removal and chemical dispersion. Texture governs water retention, drainage, aeration, and nutrient-holding capacity and is considered the most stable physical property of the soil.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL013",
+    "designations": [
+      {
+        "designation": "Soil temperature profile at the sampling depth",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Temperature of the soil measured at the designated depth below the surface at the time of sample collection",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil temperature is recorded using a calibrated thermocouple or thermistor probe inserted to the specified sampling depth. The measurement, reported in degrees Celsius, reflects the thermal regime at that depth and influences the rates of organic matter decomposition, nutrient mineralization, seed germination, and root growth. Soil temperature varies with depth, time of day, season, vegetation cover, and soil moisture status.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL014",
+    "designations": [
+      {
+        "designation": "Electrical conductivity of the soil saturation extract",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ability of the soil saturation paste extract to conduct electrical current as an indicator of total soluble salt concentration",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Electrical conductivity is measured on a saturation paste extract prepared by adding deionized water to the soil until a glistening paste is formed, extracting the solution under vacuum, and measuring conductivity with a calibrated electrode. The result, expressed in decisiemens per meter, indicates the total concentration of soluble salts and is the primary criterion for classifying soils as saline. Elevated conductivity restricts plant water uptake through osmotic stress.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL015",
+    "designations": [
+      {
+        "designation": "Depth of soil sample collection below the surface",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Vertical distance from the soil surface to the midpoint of the sampling interval from which the soil core or grab sample was obtained",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Sampling depth is recorded as the depth interval in centimeters below the mineral soil surface from which the sample was extracted. Standard depths include the surface horizon, typically zero to fifteen centimeters, and one or more subsurface horizons extending to the depth of interest. Accurate depth recording is essential for interpreting vertical gradients in chemical and biological soil properties.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL016",
+    "designations": [
+      {
+        "designation": "Geographic coordinates of the soil sampling point",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Latitude and longitude of the exact location from which the soil sample was collected recorded using a global positioning system",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The geographic position of the sampling point is recorded in decimal degrees of latitude and longitude using a survey-grade or consumer-grade global positioning system receiver. Positional accuracy should be reported alongside the coordinates. Georeferenced sampling locations enable spatial interpolation, geostatistical analysis, and integration with remote sensing data for landscape-scale soil mapping.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL017",
+    "designations": [
+      {
+        "designation": "Regulatory contamination threshold exceedance for the soil sample",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Whether the measured concentration of a regulated contaminant in the soil exceeds the applicable screening level or action level",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Regulatory threshold exceedance is determined by comparing the measured contaminant concentration to the screening level or maximum allowable concentration established by the governing environmental authority. Exceedance of the threshold triggers further investigation, risk assessment, and potentially remediation under applicable environmental regulations. The applicable threshold varies by jurisdiction, land use classification, and the specific contaminant.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL018",
+    "designations": [
+      {
+        "designation": "Seasonal variation in soil organic matter content",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Pattern of change in the soil organic matter fraction that corresponds to annual cycles of plant growth, decomposition, and temperature",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Seasonal variation in organic matter reflects the balance between fresh organic inputs from root exudates, leaf litter, and crop residues and losses through microbial decomposition, leaching, and erosion. Organic matter content typically peaks following the main growing season when fresh residues are incorporated and declines during warm periods of accelerated decomposition. Quantifying seasonal dynamics requires repeated sampling at consistent depths and locations throughout the annual cycle.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL019",
+    "designations": [
+      {
+        "designation": "Carbon-to-nitrogen ratio of the soil organic fraction",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Ratio of the mass of organic carbon to the mass of total nitrogen in the soil sample indicating the decomposition status of organic matter",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The carbon-to-nitrogen ratio is calculated by dividing the total organic carbon concentration by the total nitrogen concentration of the same soil sample. A ratio below twenty generally indicates that nitrogen mineralization exceeds immobilization, making inorganic nitrogen available to plants, while a ratio above thirty suggests net nitrogen immobilization. The ratio provides insight into the quality and decomposability of soil organic matter and guides fertilizer management.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synSOL020",
+    "designations": [
+      {
+        "designation": "Aggregate stability of the soil structure",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Resistance of soil aggregates to disintegration when subjected to the disruptive forces of water and mechanical stress",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Aggregate stability is assessed by wet-sieving a set of air-dried soil aggregates through a stack of sieves under standardized wetting and agitation conditions and expressing the mass of water-stable aggregates as a percentage of the initial sample mass. Stable aggregates protect organic matter from rapid decomposition, maintain pore continuity for water infiltration and root growth, and resist erosion. Aggregate stability integrates the effects of organic matter, clay mineralogy, biological activity, and management practices on soil physical quality.",
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  }
+]

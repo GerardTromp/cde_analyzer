@@ -70,7 +70,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--title",
         default="Pipeline Execution Report",
-        help="Title for the report (default: 'Pipeline Execution Report')."
+        help="Title for the report."
     )
     subparser.add_argument(
         "--version",
@@ -93,7 +93,7 @@ def register_subparser(subparser: ArgumentParser):
     recall_group.add_argument(
         "--tinyid-column",
         default="tinyIds",
-        help="Column name for tinyIds in pipeline output (default: tinyIds)."
+        help="Column name for tinyIds in pipeline output."
     )
     recall_group.add_argument(
         "--source-json",

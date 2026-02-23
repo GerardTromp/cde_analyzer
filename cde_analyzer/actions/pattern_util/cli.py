@@ -59,13 +59,13 @@ def register_subparser(subparser: ArgumentParser):
         "--merge-pattern-column",
         type=str,
         default="pattern",
-        help="Column name for patterns in merge mode (default: 'pattern').",
+        help="Column name for patterns in merge mode.",
     )
     subparser.add_argument(
         "--merge-tinyids-column",
         type=str,
         default="tinyIds",
-        help="Column name for tinyIds in merge mode (default: 'tinyIds').",
+        help="Column name for tinyIds in merge mode.",
     )
 
     # Coalesce mode (tinyId-aware subsumption)
@@ -94,7 +94,7 @@ def register_subparser(subparser: ArgumentParser):
              "and replaces them with the shortest prefix meeting this tinyId threshold. "
              "Example: 'as part of Neuro-QOL Lower...' and 'as part of Neuro-QOL Upper...' "
              "become 'as part of Neuro-QOL' if it covers enough tinyIds. "
-             "Use with --coalesce-variants. Default 0 = disabled.",
+             "Use with --coalesce-variants. 0 = disabled.",
     )
     subparser.add_argument(
         "--min-parent-tinyids",
@@ -103,7 +103,7 @@ def register_subparser(subparser: ArgumentParser):
         help="Filter patterns by parent phrase tinyId count during coalesce. "
              "Drops patterns whose parent_tinyid_count < this threshold. "
              "Requires input TSV with parent_phrase and parent_tinyid_count columns "
-             "(produced by strip_discover --parent-column). Default 0 = disabled.",
+             "(produced by strip_discover --parent-column). 0 = disabled.",
     )
     subparser.add_argument(
         "--no-trim-anchors",
@@ -145,7 +145,7 @@ def register_subparser(subparser: ArgumentParser):
              "Tier-2 (<MIN_TOKENS tokens) written to {output_base}_short.tsv. "
              "Use with --coalesce-variants for two-pass stripping: "
              "strip long instrument patterns first, then short fragments. "
-             "Default 0 = disabled (single output file).",
+             "0 = disabled (single output file).",
     )
 
     # Group hierarchy mode
@@ -167,7 +167,7 @@ def register_subparser(subparser: ArgumentParser):
              "Removes noise patterns that appear on very few CDEs. "
              "This is the base minimum; if --min-tinyids-scale is set, the effective "
              "threshold is: base + floor(scale * sqrt(corpus_size)). "
-             "Use with --group-hierarchy. Default 0 = disabled.",
+             "Use with --group-hierarchy. 0 = disabled.",
     )
     subparser.add_argument(
         "--min-tinyids-scale",
@@ -177,7 +177,7 @@ def register_subparser(subparser: ArgumentParser):
              "effective_min = min_tinyids + floor(scale * sqrt(N)), where N is the "
              "total unique tinyIds (corpus size). Incidental groupings increase as "
              "sqrt(N), so this adjusts the noise floor proportionally. "
-             "Use with --group-hierarchy. Default 0.0 = disabled (use fixed --min-tinyids only).",
+             "Use with --group-hierarchy. 0.0 = disabled (use fixed --min-tinyids only).",
     )
 
     # Generate strip pattern files from hierarchy
@@ -206,13 +206,13 @@ def register_subparser(subparser: ArgumentParser):
         "--min-group-size",
         type=int,
         default=2,
-        help="Minimum patterns per semantic group (default: 2).",
+        help="Minimum patterns per semantic group.",
     )
     subparser.add_argument(
         "--min-prefix-words",
         type=int,
         default=2,
-        help="Minimum words in shared prefix to form a group (default: 2).",
+        help="Minimum words in shared prefix to form a group.",
     )
     subparser.add_argument(
         "--no-temporal-implied",
@@ -242,26 +242,26 @@ def register_subparser(subparser: ArgumentParser):
         "--model", "-m",
         type=str,
         default="CDE",
-        help="Model type for parsing JSON (default: CDE). See MODEL_REGISTRY.",
+        help="Model type for parsing JSON. See MODEL_REGISTRY.",
     )
     subparser.add_argument(
         "--fields",
         type=str,
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
-        help="Field paths to scan (default: definitions.*.definition designations.*.designation).",
+        help="Field paths to scan.",
     )
     subparser.add_argument(
         "--min-field-count",
         type=int,
         default=0,
-        help="Filter: drop patterns below this count in BOTH fields. Default 0 = disabled.",
+        help="Filter: drop patterns below this count in BOTH fields. 0 = disabled.",
     )
     subparser.add_argument(
         "--min-tokens",
         type=int,
         default=0,
-        help="Filter: drop patterns with fewer than N tokens. Default 0 = disabled.",
+        help="Filter: drop patterns with fewer than N tokens. 0 = disabled.",
     )
     subparser.add_argument(
         "--exclude-patterns",
@@ -294,7 +294,7 @@ def register_subparser(subparser: ArgumentParser):
         type=str,
         default="claude",
         choices=["claude", "openai", "google"],
-        help="LLM provider for proxy generation (default: claude).",
+        help="LLM provider for proxy generation.",
     )
     subparser.add_argument(
         "--llm-model",
@@ -305,7 +305,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--config-file",
         type=str,
-        help="Path to LLM config file (default: ~/.cde_analyzer/llm_config.json).",
+        help="Path to LLM config file (auto: ~/.cde_analyzer/llm_config.json).",
     )
     subparser.add_argument(
         "--api-keys",
@@ -316,13 +316,13 @@ def register_subparser(subparser: ArgumentParser):
         "--context-window",
         type=int,
         default=150,
-        help="Characters of surrounding text to include as context (default: 150).",
+        help="Characters of surrounding text to include as context.",
     )
     subparser.add_argument(
         "--max-contexts",
         type=int,
         default=3,
-        help="Maximum CDE contexts to show per pattern (default: 3).",
+        help="Maximum CDE contexts to show per pattern.",
     )
     subparser.add_argument(
         "--dry-run",
@@ -357,21 +357,21 @@ def register_subparser(subparser: ArgumentParser):
         dest="case_variants",
         action="store_false",
         default=True,
-        help="Skip case variant generation (original + lowercase). Default: enabled.",
+        help="Skip case variant generation (original + lowercase).",
     )
     subparser.add_argument(
         "--no-number-variants",
         dest="number_variants",
         action="store_false",
         default=True,
-        help="Skip digit↔word variants (7↔seven). Default: enabled.",
+        help="Skip digit↔word variants (7↔seven).",
     )
     subparser.add_argument(
         "--no-plural-variants",
         dest="plural_variants",
         action="store_false",
         default=True,
-        help="Skip singular↔plural variants (day↔days). Default: enabled.",
+        help="Skip singular↔plural variants (day↔days).",
     )
     subparser.add_argument(
         "--no-temporal-variants",
@@ -411,7 +411,7 @@ def register_subparser(subparser: ArgumentParser):
         "--port",
         type=int,
         default=0,
-        help="Port for the editor server (default: auto-assign). Use with --edit.",
+        help="Port for the editor server. Use with --edit.",
     )
     subparser.add_argument(
         "--no-browser",
@@ -473,13 +473,13 @@ def register_subparser(subparser: ArgumentParser):
         "--source",
         type=str,
         default="unknown",
-        help="Source label for ledger entries (e.g., mined, harvested). Default: unknown.",
+        help="Source label for ledger entries (e.g., mined, harvested).",
     )
     subparser.add_argument(
         "--round",
         type=int,
         default=1,
-        help="Iteration round number for ledger entries. Default: 1.",
+        help="Iteration round number for ledger entries.",
     )
 
     # Empirical subsumption validation mode
@@ -496,7 +496,7 @@ def register_subparser(subparser: ArgumentParser):
         "--workers", "-w",
         type=int,
         default=0,
-        help="Number of parallel workers for validate-subsumption (0 = sequential). Default: 0.",
+        help="Number of parallel workers for validate-subsumption (0 = sequential).",
     )
 
     # Rare word detection mode
@@ -557,7 +557,7 @@ def register_subparser(subparser: ArgumentParser):
         "--supplementary-section",
         type=str,
         default="added_patterns",
-        help="YAML section name for imported patterns (default: 'added_patterns').",
+        help="YAML section name for imported patterns.",
     )
 
     # Harvest → local supplementary mode
@@ -598,7 +598,7 @@ def register_subparser(subparser: ArgumentParser):
              "patterns TSV with added decision/modification/notes/curator columns. "
              "Each copy is named {stem}.{curator}.tsv. "
              "Requires --curators (comma-separated names). "
-             "Use --output to set the output directory (default: same as input).",
+             "Use --output to set the output directory.",
     )
     subparser.add_argument(
         "--curators",

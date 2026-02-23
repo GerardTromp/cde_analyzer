@@ -80,8 +80,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
-        help="Field paths to search for patterns "
-             "(default: definitions.*.definition designations.*.designation). "
+        help="Field paths to search for patterns. "
              "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
              "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
@@ -98,7 +97,7 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         default=True,
         help="When expanding variants, also include bare instrument names "
-             "without 'as part of' prefix. (default: True)",
+             "without 'as part of' prefix.",
     )
     subparser.add_argument(
         "--no-include-name-only",
@@ -117,7 +116,7 @@ def register_subparser(subparser: ArgumentParser):
         "--min-bare-words",
         type=int,
         default=2,
-        help="Minimum word count for bare instrument names (default: 2). "
+        help="Minimum word count for bare instrument names. "
              "Filters out short fragments like 'Score' that produce false positives "
              "during bare-name discovery. Only applies with --discover-bare-names.",
     )
@@ -152,7 +151,7 @@ def register_subparser(subparser: ArgumentParser):
         default=1,
         help="Number of parallel workers for discovery. "
              "Use 0 for auto-detect with headroom (n-1 CPUs for <=10 cores, n-2 for >10). "
-             "Use 1 for sequential (default). "
+             "Use 1 for sequential. "
              "Positive values override to use exactly N workers. "
              "Auto-detects optimal dimension: texts vs patterns.",
     )
@@ -195,7 +194,7 @@ def register_subparser(subparser: ArgumentParser):
         "--min-pattern-tinyids",
         type=int,
         default=2,
-        help="Minimum tinyIds for abbreviation prefix patterns to be output (default: 2). "
+        help="Minimum tinyIds for abbreviation prefix patterns to be output. "
              "Patterns with fewer tinyIds are filtered out. Use with --discover-abbreviations.",
     )
 

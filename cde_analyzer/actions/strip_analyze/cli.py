@@ -89,7 +89,7 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         default=True,
         help="When expanding variants, also include bare instrument names "
-             "without 'as part of' prefix. (default: True)",
+             "without 'as part of' prefix.",
     )
     subparser.add_argument(
         "--no-include-name-only",
@@ -111,7 +111,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fn-anchor",
         type=str,
         default="as part of",
-        help="Anchor phrase to search for in false-negative analysis (default: 'as part of').",
+        help="Anchor phrase to search for in false-negative analysis.",
     )
 
     def _lazy_run_action(args):

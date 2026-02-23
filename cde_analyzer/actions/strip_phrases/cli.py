@@ -68,8 +68,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["definitions.*.definition", "designations.*.designation"],
-        help="Field paths to strip phrases from "
-             "(default: definitions.*.definition designations.*.designation). "
+        help="Field paths to strip phrases from. "
              "Also supports: valueDomain.permissibleValues.*.valueMeaningName, "
              "valueDomain.permissibleValues.*.valueMeaningDefinition",
     )
@@ -89,7 +88,7 @@ def register_subparser(subparser: ArgumentParser):
         default=1,
         help="Number of parallel workers for phrase stripping. "
              "Use 0 for auto-detect with headroom (n-1 CPUs for ≤10 cores, n-2 for >10). "
-             "Use 1 for sequential (default). "
+             "Use 1 for sequential. "
              "Positive values override to use exactly N workers.",
     )
 
@@ -140,7 +139,7 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         default=True,
         help="Expand patterns with anchor prefixes (e.g., 'as part of the X'). "
-             "Enables cleaner stripping by matching longer context. Default: enabled.",
+             "Enables cleaner stripping by matching longer context.",
     )
     subparser.add_argument(
         "--no-expand-anchors",
@@ -156,7 +155,7 @@ def register_subparser(subparser: ArgumentParser):
         action="store_true",
         default=True,
         help="Merge patterns from config/verbatim_strip_patterns.yaml and local override. "
-             "These are pre-curated patterns that escape discovery logic. Default: enabled.",
+             "These are pre-curated patterns that escape discovery logic.",
     )
     subparser.add_argument(
         "--no-verbatim-patterns",

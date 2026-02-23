@@ -31,13 +31,13 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--outdir",
         default=".",
-        help="Directory for output files (default: current directory)",
+        help="Directory for output files",
     )
     subparser.add_argument(
         "--output-format",
         choices=["json", "yaml", "csv"],
         default="json",
-        help="Output format (default: json)",
+        help="Output format",
     )
     subparser.add_argument(
         "--dry-run", action="store_true", help="Do not write output files"
@@ -54,7 +54,7 @@ def register_subparser(subparser: ArgumentParser):
         "--pretty",
         action=BooleanOptionalAction,
         default=True,
-        help="Produce pretty (default: --pretty) or minified (--no-pretty) JSON (no whitespace)",
+        help="Produce pretty or minified (--no-pretty) JSON (no whitespace)",
     )
     subparser.add_argument(
         "--set-keys",
@@ -66,13 +66,13 @@ def register_subparser(subparser: ArgumentParser):
         "--tables",
         action=BooleanOptionalAction,
         default=True,
-        help="Convert html tables to JSON representation (default: --tables, i.e., true) or munged text (--no-tables)",
+        help="Convert html tables to JSON representation or munged text (--no-tables)",
     )
     subparser.add_argument(
         "--colnames",
         action="store_true",
         default=False,
-        help="Use first row of table as column names (default: false). Only relevant if --tables.",
+        help="Use first row of table as column names. Only relevant if --tables.",
     )
     subparser.set_defaults(
         _runner="actions.strip_html.run"

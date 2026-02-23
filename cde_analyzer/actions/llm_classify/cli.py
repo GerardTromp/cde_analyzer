@@ -37,7 +37,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "-o", "--output-dir",
         default="llm_output",
-        help="Output directory for classification results (default: llm_output)."
+        help="Output directory for classification results."
     )
     subparser.add_argument(
         "--original-cdes",
@@ -67,7 +67,7 @@ def register_subparser(subparser: ArgumentParser):
         "--adjudicate-threshold",
         type=float,
         default=0.7,
-        help="Adjudicate instruments with family_confidence below this threshold (default: 0.7)."
+        help="Adjudicate instruments with family_confidence below this threshold."
     )
 
     # LLM provider configuration
@@ -76,11 +76,11 @@ def register_subparser(subparser: ArgumentParser):
         nargs="+",
         default=["claude"],
         choices=["claude", "openai", "google"],
-        help="LLM providers to use (default: claude)."
+        help="LLM providers to use."
     )
     subparser.add_argument(
         "--config-file",
-        help="Path to LLM config file (default: ~/.cde_analyzer/llm_config.json)."
+        help="Path to LLM config file (auto: ~/.cde_analyzer/llm_config.json)."
     )
     subparser.add_argument(
         "--api-keys",
@@ -93,7 +93,7 @@ def register_subparser(subparser: ArgumentParser):
         "--aggregation-method",
         choices=["unanimous", "majority", "weighted_majority", "confidence_weighted"],
         default="majority",
-        help="Method for combining multi-LLM results (default: majority)."
+        help="Method for combining multi-LLM results."
     )
 
     # Processing parameters
@@ -101,19 +101,19 @@ def register_subparser(subparser: ArgumentParser):
         "--batch-size",
         type=int,
         default=20,
-        help="Number of phrases per LLM batch request (default: 20)."
+        help="Number of phrases per LLM batch request."
     )
     subparser.add_argument(
         "--min-frequency",
         type=int,
         default=1,
-        help="Minimum phrase frequency to process (default: 1)."
+        help="Minimum phrase frequency to process."
     )
     subparser.add_argument(
         "--context-window",
         type=int,
         default=200,
-        help="Characters of context around each phrase occurrence (default: 200)."
+        help="Characters of context around each phrase occurrence."
     )
 
     # Working directory and checkpointing

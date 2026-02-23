@@ -36,7 +36,7 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--output-dir", "-o",
         default="instrument_output",
-        help="Output directory for results (default: instrument_output)"
+        help="Output directory for results"
     )
 
     # Field selection
@@ -44,7 +44,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Field names to extract instruments from (default: designation definition). "
+        help="Field names to extract instruments from. "
              "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
@@ -53,13 +53,13 @@ def register_subparser(subparser: ArgumentParser):
         "--min-tinyids",
         type=int,
         default=2,
-        help="Minimum distinct tinyIds (document support) (default: 2)"
+        help="Minimum distinct tinyIds (document support)"
     )
     subparser.add_argument(
         "--min-instrument-words",
         type=int,
         default=3,
-        help="Minimum words required in instrument name (default: 3)"
+        help="Minimum words required in instrument name"
     )
 
     # Extraction modes
@@ -86,7 +86,7 @@ def register_subparser(subparser: ArgumentParser):
         "--family-confidence-threshold",
         type=float,
         default=0.7,
-        help="Minimum confidence for automatic family assignment (default: 0.7). "
+        help="Minimum confidence for automatic family assignment. "
              "Below threshold, instruments are flagged for review."
     )
     subparser.add_argument(

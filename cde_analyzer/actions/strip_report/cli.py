@@ -68,7 +68,7 @@ def register_subparser(subparser: ArgumentParser):
         dest="temporal_scan",
         action="store_false",
         default=True,
-        help="Skip scanning for remaining temporal phrases. Default: enabled.",
+        help="Skip scanning for remaining temporal phrases.",
     )
     subparser.add_argument(
         "--json-pattern",

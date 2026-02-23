@@ -51,7 +51,7 @@ def register_subparser(subparser: ArgumentParser):
              "Cells can contain multiple tinyIds (pipe, comma, or space separated).",
     )
     subparser.add_argument(
-        "--id-type", default=str, help="The type of ID (default=tinyId)."
+        "--id-type", default=str, help="The type of ID."
     )
     subparser.add_argument(
         "-o",
@@ -63,7 +63,7 @@ def register_subparser(subparser: ArgumentParser):
         "--output-format",
         choices=["pfasta", "lfasta"],
         default="pfasta",
-        help="Choose output format (default 'pfasta')",
+        help="Choose output format",
     )
     subparser.add_argument(
         "-m",
@@ -88,7 +88,7 @@ def register_subparser(subparser: ArgumentParser):
         "--remove-spaces",
         action=BooleanOptionalAction,
         default=True,
-        help="Remove spaces, return lemmatized content as string with no spaces (default=True)",
+        help="Remove spaces, return lemmatized content as string with no spaces",
     )
     subparser.add_argument(
         "--remove-stopwords",

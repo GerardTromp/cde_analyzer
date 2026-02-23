@@ -40,24 +40,24 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--output-dir", "-o",
         default="phrase_families",
-        help="Output directory for results (default: phrase_families)"
+        help="Output directory for results"
     )
 
     # Column selection (for flexible input formats)
     subparser.add_argument(
         "--text-column",
         default="verbatim_text",
-        help="Column name containing phrase text (default: verbatim_text)"
+        help="Column name containing phrase text"
     )
     subparser.add_argument(
         "--id-column",
         default="phrase_id",
-        help="Column name for phrase identifier (default: phrase_id)"
+        help="Column name for phrase identifier"
     )
     subparser.add_argument(
         "--tinyid-column",
         default="tinyids",
-        help="Column name for document IDs (default: tinyids)"
+        help="Column name for document IDs"
     )
 
     # K-mer parameters
@@ -65,19 +65,19 @@ def register_subparser(subparser: ArgumentParser):
         "--k-min", "-k",
         type=int,
         default=3,
-        help="Minimum k-mer length in tokens (default: 3)"
+        help="Minimum k-mer length in tokens"
     )
     subparser.add_argument(
         "--k-max", "-K",
         type=int,
         default=10,
-        help="Maximum k-mer length in tokens (default: 10)"
+        help="Maximum k-mer length in tokens"
     )
     subparser.add_argument(
         "--min-content-words",
         type=int,
         default=1,
-        help="Minimum non-stopword tokens required in pattern (default: 1). "
+        help="Minimum non-stopword tokens required in pattern. "
              "Filters patterns like 'of the' that are entirely stopwords."
     )
 
@@ -86,13 +86,13 @@ def register_subparser(subparser: ArgumentParser):
         "--min-family-size", "-n",
         type=int,
         default=3,
-        help="Minimum phrases to form a family (default: 3)"
+        help="Minimum phrases to form a family"
     )
     subparser.add_argument(
         "--min-pattern-freq",
         type=int,
         default=3,
-        help="Minimum frequency for pattern to be considered (default: 3)"
+        help="Minimum frequency for pattern to be considered"
     )
 
     # Tree selection
@@ -101,7 +101,7 @@ def register_subparser(subparser: ArgumentParser):
         nargs="+",
         choices=["prefix", "suffix", "infix"],
         default=["prefix", "suffix", "infix"],
-        help="Which trees to build (default: all three)"
+        help="Which trees to build"
     )
 
     # Assignment strategy

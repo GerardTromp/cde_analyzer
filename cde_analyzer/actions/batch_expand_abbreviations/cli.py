@@ -43,14 +43,14 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--acronym-column",
         default="acronym",
-        help="Column name containing abbreviations (default: acronym)"
+        help="Column name containing abbreviations"
     )
 
     # Output
     subparser.add_argument(
         "--output-dir", "-o",
         default="abbreviation_expansions",
-        help="Output directory for expansion results (default: abbreviation_expansions)"
+        help="Output directory for expansion results"
     )
 
     # Fields to search
@@ -58,7 +58,7 @@ def register_subparser(subparser: ArgumentParser):
         "--fields", "-f",
         nargs="+",
         default=["designation", "definition"],
-        help="Fields to search for abbreviations (default: designation definition). "
+        help="Fields to search for abbreviations. "
              "Also supports: valueMeaningName, valueMeaningDefinition"
     )
 
@@ -67,25 +67,25 @@ def register_subparser(subparser: ArgumentParser):
         "--k-max",
         type=int,
         default=15,
-        help="Maximum k-mer length for phrase mining (default: 15)"
+        help="Maximum k-mer length for phrase mining"
     )
     subparser.add_argument(
         "--k-min",
         type=int,
         default=3,
-        help="Minimum k-mer length for phrase mining (default: 3)"
+        help="Minimum k-mer length for phrase mining"
     )
     subparser.add_argument(
         "--min-tinyids",
         type=int,
         default=2,
-        help="Minimum distinct tinyIds for phrase to be reported (default: 2)"
+        help="Minimum distinct tinyIds for phrase to be reported"
     )
     subparser.add_argument(
         "--top-phrases",
         type=int,
         default=10,
-        help="Number of top phrases to report per abbreviation (default: 10)"
+        help="Number of top phrases to report per abbreviation"
     )
 
     # Filtering
@@ -93,7 +93,7 @@ def register_subparser(subparser: ArgumentParser):
         "--min-subset-size",
         type=int,
         default=3,
-        help="Minimum CDEs in subset to run phrase mining (default: 3). "
+        help="Minimum CDEs in subset to run phrase mining. "
              "Abbreviations with fewer matches are skipped."
     )
     subparser.add_argument(
