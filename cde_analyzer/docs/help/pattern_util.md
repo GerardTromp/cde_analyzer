@@ -42,6 +42,10 @@ cde-analyzer pattern_util --add-to-supplementary CURATED.tsv
 
 # Interactive browser-based TSV editor
 cde-analyzer pattern_util --edit FILE [--port N] [--no-browser]
+
+# Multi-curator curation
+cde-analyzer pattern_util --init-curation FILE --curators "a,b,c" [-o DIR]
+cde-analyzer pattern_util --merge-curation FILE1 FILE2 ... -o DIR
 ```
 
 ## Modes
@@ -230,6 +234,64 @@ cde-analyzer pattern_util --edit supplementary.tsv
 cde-analyzer pattern_util --tsv-to-yaml supplementary.tsv -o config/supplementary_patterns.yaml
 ```
 
+### Multi-Curator Curation
+
+Distribute a patterns TSV to multiple curators, then merge their independent
+annotations with inter-rater agreement statistics.
+
+**Initialize** — create per-curator copies with annotation columns:
+
+```bash
+cde-analyzer pattern_util --init-curation coalesced_fields.tsv \
+    --curators "alice,bob,carol" -o curation/
+```
+
+Each curator receives a file like `coalesced_fields.alice.tsv` containing the
+original columns plus `decision`, `modification`, `notes`, and `curator`.
+
+**Merge** — combine annotated files and produce statistics:
+
+```bash
+cde-analyzer pattern_util --merge-curation \
+    curation/coalesced_fields.alice.tsv \
+    curation/coalesced_fields.bob.tsv \
+    curation/coalesced_fields.carol.tsv \
+    -o curation/results/
+```
+
+Outputs:
+
+| File | Contents |
+|------|----------|
+| `consensus.tsv` | All patterns with majority decision and per-curator columns |
+| `discrepancies.tsv` | Only patterns where curators disagree |
+| `inter_rater_report.md` | Cohen's kappa, Krippendorff's alpha, agreement breakdown |
+| `discrepancies.html` | Interactive browser-based visual diff viewer |
+
+See [Distributed Curation](../vignettes/distributed-curation.md) for the
+full workflow including the standalone editor.
+
+### Standalone Editor (Zipapp)
+
+The editor can be packaged as a self-contained `.pyz` archive for distribution
+to curators who do not have `cde-analyzer` installed. Only Python 3.8+ is required.
+
+**Build the archive:**
+
+```bash
+python scripts/build_editor_zipapp.py
+# → dist/cde_editor.pyz (~59 KB)
+```
+
+**Curator usage:**
+
+```bash
+python cde_editor.pyz patterns.tsv            # edit + save
+python cde_editor.pyz                          # blank editor (drag-drop)
+python cde_editor.pyz patterns.tsv --port 8080 # specific port
+python cde_editor.pyz --version                # show version
+```
+
 ## Options
 
 ### Merge Options
@@ -315,6 +377,15 @@ cde-analyzer pattern_util --tsv-to-yaml supplementary.tsv -o config/supplementar
 | `--edit FILE` | Open interactive browser-based TSV editor. Without a file, opens blank for drag-drop |
 | `--port N` | Port for the editor server (default: 0 = auto-assign) |
 | `--no-browser` | Start server without opening the browser |
+
+### Multi-Curator Options
+
+| Option | Description |
+|--------|-------------|
+| `--init-curation FILE` | Initialize multi-curator curation from enriched TSV |
+| `--curators "a,b,c"` | Comma-separated curator names (min 2, alphanumeric + underscore) |
+| `--merge-curation FILE ...` | Merge 2+ annotated curator TSV files |
+| `-o, --output DIR` | Output directory for init-curation or merge-curation |
 
 ### Conversion Options
 

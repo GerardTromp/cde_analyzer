@@ -1,0 +1,138 @@
+phrase_id	tinyId	field_path	token_start	token_end	verbatim_text
+phrase_00000	synWAT001	definitions[0].definition	6	12	in the water column, measured in
+phrase_00000	synWAT005	definitions[0].definition	5	11	in the water column, measured in
+phrase_00000	synWAT013	definitions[0].definition	5	11	in the water column, measured in
+phrase_00001	synAIR017	definitions[0].definition	0	5	Latitude and longitude of the
+phrase_00001	synWAT017	designations[1].designation	0	5	Latitude and longitude of the
+phrase_00001	synSOL016	designations[1].designation	0	5	Latitude and longitude of the
+phrase_00002	synWAT001	designations[1].designation	4	8	in the water sample
+phrase_00002	synWAT007	designations[1].designation	4	8	in the water sample
+phrase_00002	synWAT012	designations[1].designation	3	7	in the water sample
+phrase_00002	synWAT019	definitions[0].definition	5	9	in the water sample,
+phrase_00003	synWAT001	definitions[0].definition	25	29	as an indicator of
+phrase_00003	synWAT006	definitions[0].definition	18	22	as an indicator of
+phrase_00003	synSOL014	designations[1].designation	11	15	as an indicator of
+phrase_00004	synWAT002	designations[1].designation	3	7	of the water sample
+phrase_00004	synWAT008	designations[1].designation	1	5	of the water sample
+phrase_00004	synWAT017	definitions[0].definition	3	7	of the water sampling
+phrase_00005	synWAT002	definitions[0].definition	0	4	The hydrogen ion activity
+phrase_00005	synSOL005	designations[1].designation	9	13	the hydrogen ion activity
+phrase_00005	synSOL005	definitions[0].definition	28	32	the hydrogen ion activity
+phrase_00006	synWAT004	definitions[0].definition	10	14	reported in milligrams of
+phrase_00006	synSOL002	definitions[0].definition	33	37	reported in milligrams of
+phrase_00006	synSOL009	definitions[0].definition	42	46	reported in milligrams of
+phrase_00007	synWAT007	definitions[0].definition	5	9	per unit volume of
+phrase_00007	synWAT012	definitions[0].definition	5	9	per unit volume of
+phrase_00007	synSOL007	designations[1].designation	3	7	per unit volume of
+phrase_00008	synSOL001	designations[1].designation	5	9	in the soil sample
+phrase_00008	synSOL008	designations[1].designation	4	8	in the soil sample
+phrase_00008	synSOL010	designations[0].designation	2	6	in the soil sample
+phrase_00008	synSOL019	designations[1].designation	13	17	in the soil sample
+phrase_00009	synSOL001	designations[1].designation	6	10	the soil sample expressed
+phrase_00009	synSOL008	designations[1].designation	5	9	the soil sample expressed
+phrase_00009	synSOL009	designations[1].designation	10	14	the soil sample expressed
+phrase_00010	synSOL001	designations[1].designation	10	14	as a percentage of
+phrase_00010	synSOL001	definitions[0].definition	38	42	as a percentage of
+phrase_00010	synSOL008	definitions[0].definition	27	31	as a percentage of
+phrase_00010	synSOL020	definitions[0].definition	27	31	as a percentage of
+phrase_00011	synSOL002	designations[0].designation	3	7	of the soil sample
+phrase_00011	synSOL009	designations[1].designation	9	13	of the soil sample
+phrase_00011	synSOL011	designations[1].designation	3	7	of the soil sample
+phrase_00012	synSOL003	definitions[0].definition	34	38	in milligrams per kilogram
+phrase_00012	synSOL010	definitions[0].definition	37	41	in milligrams per kilogram.
+phrase_00012	synSOL011	definitions[0].definition	24	28	in milligrams per kilogram,
+phrase_00013	synSOL007	definitions[0].definition	32	36	The result, expressed in
+phrase_00013	synSOL011	definitions[0].definition	21	25	The result, expressed in
+phrase_00013	synSOL014	definitions[0].definition	35	39	The result, expressed in
+phrase_00014	synAIR001	definitions[0].definition	5	8	per cubic meter
+phrase_00014	synAIR002	definitions[0].definition	5	8	per cubic meter.
+phrase_00014	synAIR008	definitions[0].definition	3	6	per cubic meter.
+phrase_00015	synAIR004	definitions[0].definition	2	5	in ambient air.
+phrase_00015	synAIR006	definitions[0].definition	2	5	in ambient air.
+phrase_00015	synAIR008	designations[1].designation	1	4	in ambient air
+phrase_00016	synAIR005	definitions[0].definition	3	6	at the monitoring
+phrase_00016	synAIR009	definitions[0].definition	3	6	at the monitoring
+phrase_00016	synAIR011	definitions[0].definition	2	5	at the monitoring
+phrase_00017	synWAT001	definitions[0].definition	0	3	The concentration of
+phrase_00017	synWAT004	definitions[0].definition	0	3	The concentration of
+phrase_00017	synWAT013	definitions[0].definition	0	3	The concentration of
+phrase_00017	synWAT014	definitions[0].definition	0	3	The concentration of
+phrase_00017	synWAT019	definitions[0].definition	0	3	The concentration of
+phrase_00018	synWAT001	definitions[0].definition	12	15	milligrams per liter.
+phrase_00018	synWAT005	definitions[0].definition	11	14	milligrams per liter.
+phrase_00018	synWAT015	definitions[0].definition	15	18	milligrams per liter.
+phrase_00019	synWAT002	definitions[0].definition	4	7	in the water
+phrase_00019	synWAT004	definitions[0].definition	6	9	in the water,
+phrase_00019	synWAT015	designations[1].designation	6	9	in the water
+phrase_00019	synWAT015	definitions[0].definition	10	13	in the water,
+phrase_00020	synWAT003	designations[1].designation	1	4	of the water
+phrase_00020	synWAT009	designations[1].designation	1	4	of the water
+phrase_00020	synWAT009	definitions[0].definition	3	6	of the water
+phrase_00020	synWAT019	designations[1].designation	2	5	of the water
+phrase_00021	synWAT003	definitions[0].definition	7	10	the amount of
+phrase_00021	synWAT005	definitions[0].definition	0	3	The amount of
+phrase_00021	synWAT010	definitions[0].definition	0	3	The amount of
+phrase_00022	synWAT004	designations[1].designation	3	6	in the sample
+phrase_00022	synWAT005	designations[1].designation	3	6	in the sample
+phrase_00022	synWAT011	designations[1].designation	6	9	in the sample
+phrase_00022	synWAT013	designations[1].designation	3	6	in the sample
+phrase_00023	synWAT004	definitions[0].definition	5	8	present in the
+phrase_00023	synWAT015	definitions[0].definition	9	12	present in the
+phrase_00023	synSOL002	designations[1].designation	6	9	present in the
+phrase_00024	synWAT009	designations[1].designation	4	7	at the time
+phrase_00024	synSOL008	designations[1].designation	16	19	at the time
+phrase_00024	synSOL013	designations[1].designation	12	15	at the time
+phrase_00025	synWAT012	definitions[0].definition	0	3	The mass of
+phrase_00025	synSOL008	definitions[0].definition	22	25	the mass of
+phrase_00025	synSOL019	designations[1].designation	2	5	the mass of
+phrase_00025	synSOL019	designations[1].designation	8	11	the mass of
+phrase_00025	synSOL020	definitions[0].definition	23	26	the mass of
+phrase_00026	synWAT015	definitions[0].definition	22	25	and organic matter
+phrase_00026	synSOL003	definitions[0].definition	45	48	and organic matter.
+phrase_00026	synSOL004	definitions[0].definition	15	18	and organic matter
+phrase_00026	synSOL006	definitions[0].definition	61	64	and organic matter
+phrase_00027	synWAT018	designations[1].designation	0	3	Whether the measured
+phrase_00027	synWAT018	definitions[0].definition	3	6	whether the measured
+phrase_00027	synSOL017	designations[1].designation	0	3	Whether the measured
+phrase_00028	synSOL001	designations[0].designation	0	3	Soil organic matter
+phrase_00028	synSOL001	definitions[0].definition	0	3	Soil organic matter
+phrase_00028	synSOL018	designations[0].designation	3	6	soil organic matter
+phrase_00028	synSOL018	designations[1].designation	5	8	soil organic matter
+phrase_00028	synSOL019	definitions[0].definition	57	60	soil organic matter
+phrase_00029	synSOL001	designations[0].designation	1	4	organic matter content
+phrase_00029	synSOL001	definitions[0].definition	44	47	Organic matter content
+phrase_00029	synSOL008	definitions[0].definition	60	63	organic matter content,
+phrase_00029	synSOL018	designations[0].designation	4	7	organic matter content
+phrase_00029	synSOL018	definitions[0].definition	28	31	Organic matter content
+phrase_00030	synSOL001	definitions[0].definition	29	32	is determined by
+phrase_00030	synSOL007	definitions[0].definition	2	5	is determined by
+phrase_00030	synSOL011	definitions[0].definition	4	7	is determined by
+phrase_00030	synSOL012	definitions[0].definition	33	36	are determined by
+phrase_00030	synSOL017	definitions[0].definition	3	6	is determined by
+phrase_00031	synSOL002	designations[1].designation	7	10	in the soil
+phrase_00031	synSOL003	designations[1].designation	3	6	in the soil
+phrase_00031	synSOL004	designations[0].designation	2	5	in the soil
+phrase_00031	synSOL004	definitions[0].definition	25	28	in the soil
+phrase_00031	synSOL009	designations[0].designation	3	6	in the soil
+phrase_00031	synSOL011	designations[0].designation	3	6	in the soil
+phrase_00031	synSOL017	designations[1].designation	8	11	in the soil
+phrase_00031	synSOL018	designations[1].designation	3	6	in the soil
+phrase_00032	synSOL005	designations[1].designation	3	6	of the soil
+phrase_00032	synSOL006	designations[0].designation	3	6	of the soil
+phrase_00032	synSOL006	designations[1].designation	2	5	of the soil
+phrase_00032	synSOL008	designations[1].designation	12	15	of the oven-dry soil
+phrase_00032	synSOL009	definitions[0].definition	61	64	of the soil
+phrase_00032	synSOL012	designations[1].designation	1	4	of the soil
+phrase_00032	synSOL012	definitions[0].definition	63	66	of the soil.
+phrase_00032	synSOL013	designations[1].designation	1	4	of the soil
+phrase_00032	synSOL014	designations[0].designation	2	5	of the soil
+phrase_00032	synSOL014	designations[1].designation	1	4	of the soil
+phrase_00032	synSOL016	designations[0].designation	2	5	of the soil
+phrase_00032	synSOL019	designations[0].designation	1	4	of the soil
+phrase_00032	synSOL020	designations[0].designation	2	5	of the soil
+phrase_00034	synSOL013	definitions[0].definition	34	37	of organic matter
+phrase_00034	synSOL019	designations[1].designation	21	24	of organic matter
+phrase_00034	synSOL020	definitions[0].definition	60	63	of organic matter,
+phrase_00035	synSOL015	designations[1].designation	13	16	from which the
+phrase_00035	synSOL015	definitions[0].definition	15	18	from which the
+phrase_00035	synSOL016	designations[1].designation	7	10	from which the

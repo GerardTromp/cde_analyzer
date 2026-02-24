@@ -1,0 +1,9 @@
+phrase_id	lemma_text	n_variants	core	template_regex	prefix_slot	prefix_variants	suffix_slot	suffix_variants	infix1_slot	infix1_variants	infix2_slot	infix2_variants
+phrase_00004	of the water sample	2	of the water sampl	of\ the\ water\ sampl(ing|e)			(ing|e)	ing|e				
+phrase_00005	the hydrogen ion activity	2	The hydrogen ion activity	The\ hydrogen\ ion\ activity								
+phrase_00012	in milligram per kilogram	2	in milligrams per kilogram	in\ milligrams\ per\ kilogram(,|\.)			(,|\.)	,|.				
+phrase_00021	the amount of	2	the amount of	the\ amount\ of								
+phrase_00025	the mass of	2	The mass of	The\ mass\ of								
+phrase_00028	soil organic matter	2	Soil organic matter	Soil\ organic\ matter								
+phrase_00030	be determine by	2	 determined by	(are|is)\ determined\ by	(are|is)	are|is						
+phrase_00032	of the soil	2	of the oven-dry soil	of\ the\ oven\-dry\ soil								

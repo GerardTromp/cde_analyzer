@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.6.0)
+# CDE Analyzer — Context (v0.7.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,7 +26,18 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.6.0)
+## Current State (v0.7.0)
+
+### v0.7.0: Standalone Editor Zipapp + Synthetic QC Data + Rare Words
+
+#### Standalone Editor (Zipapp Distribution)
+- **`tools/editor_standalone/__main__.py`**: Self-contained TSV editor server (zero cde_analyzer imports, stdlib only)
+- **`scripts/build_editor_zipapp.py`**: Build script → `dist/cde_editor.pyz` (~59 KB)
+- **CLI**: `python cde_editor.pyz [FILE] [--port N] [--no-browser] [--version]`
+- **Resource loading**: `_load_html()` reads `tsv_editor.html` from filesystem (dev) or zipapp archive (distribution)
+- **HTTP endpoints**: GET `/` (HTML), GET `/info` (metadata), GET `/data` (TSV content), POST `/save` (write file)
+- **Distributed curation workflow**: build zipapp → init-curation → distribute → curate → merge → resolve → finalize
+- **Vignette**: `docs/vignettes/distributed-curation.md` — full multi-curator workflow guide
 
 ### v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes
 
@@ -50,7 +61,8 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - **`docs/vignettes/instrument-detection.md`**: Phase 1 deep dive — curation decisions, iterative harvesting, supplementary patterns
 - **`docs/vignettes/pipeline-orchestration.md`**: Workflow engine power user guide — variable chain, config files, scaffold, checkpoints, recipes
 - **`docs/vignettes/parameter-tuning.md`**: Small vs large dataset comparison (scheuermann08 vs allcde01), `min_parent_tinyids` deep dive
-- **`mkdocs.yml`**: "Guides" → "Guides & Vignettes" with 6 entries
+- **`docs/vignettes/distributed-curation.md`**: Multi-curator workflow with standalone editor zipapp
+- **`mkdocs.yml`**: "Guides" → "Guides & Vignettes" with 7 entries
 
 ### v0.5.15–v0.5.17: Documentation Restructuring
 - **Nav restructure**: `mkdocs.yml` reorganized — Workflows elevated, Command Reference section, LLM section, Appendix
@@ -86,6 +98,8 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - `utils/flexible_pattern_matcher.py` — coalescer (Phase 1a prefix-kept, Phase 1b NP-continuity)
 - `config/temporal_seed_patterns.yaml` — 25 temporal seed patterns (~2100 expanded variants)
 - `utils/pattern_variant_generator.py` — temporal/case/number/plural variant generators
+- `tools/editor_standalone/__main__.py` — standalone TSV editor server (zipapp entry point)
+- `scripts/build_editor_zipapp.py` — build script for `dist/cde_editor.pyz`
 
 ### Workflows
 - `workflows/instrument_pipeline.yaml` — Phase 1
@@ -93,7 +107,7 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - `workflows/branching_strip.yaml` — Phase 3 (5-way branch)
 
 ### Documentation
-- `docs/vignettes/` — 6 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping)
+- `docs/vignettes/` — 7 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation)
 - `docs/help/` — 22 per-command reference pages
 - `docs/workflow-architecture.md` — pipeline diagrams + design rationale
 

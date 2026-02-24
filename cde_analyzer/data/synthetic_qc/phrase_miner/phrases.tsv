@@ -1,0 +1,36 @@
+phrase_id	text	k	frequency	n_tinyids	extension_method
+phrase_00000	in the water column measure in	6	3	3	kmer
+phrase_00001	latitude and longitude of the	5	3	3	kmer
+phrase_00002	in the water sample	4	4	4	kmer
+phrase_00003	as an indicator of	4	3	3	kmer
+phrase_00004	of the water sample	4	3	3	kmer
+phrase_00005	the hydrogen ion activity	4	3	2	kmer
+phrase_00006	report in milligram of	4	3	3	kmer
+phrase_00007	per unit volume of	4	3	3	kmer
+phrase_00008	in the soil sample	4	4	4	kmer
+phrase_00009	the soil sample express	4	3	3	kmer
+phrase_00010	as a percentage of	4	4	3	kmer
+phrase_00011	of the soil sample	4	3	3	kmer
+phrase_00012	in milligram per kilogram	4	3	3	kmer
+phrase_00013	the result express in	4	3	3	kmer
+phrase_00014	per cubic meter	3	3	3	kmer
+phrase_00015	in ambient air	3	3	3	kmer
+phrase_00016	at the monitoring	3	3	3	kmer
+phrase_00017	the concentration of	3	5	5	kmer
+phrase_00018	milligram per liter	3	3	3	kmer
+phrase_00019	in the water	3	4	3	kmer
+phrase_00020	of the water	3	4	3	kmer
+phrase_00021	the amount of	3	3	3	kmer
+phrase_00022	in the sample	3	4	4	kmer
+phrase_00023	present in the	3	3	3	kmer
+phrase_00024	at the time	3	3	3	kmer
+phrase_00025	the mass of	3	5	4	kmer
+phrase_00026	and organic matter	3	4	4	kmer
+phrase_00027	whether the measured	3	3	2	kmer
+phrase_00028	soil organic matter	3	5	3	kmer
+phrase_00029	organic matter content	3	5	3	kmer
+phrase_00030	be determine by	3	5	5	kmer
+phrase_00031	in the soil	3	8	7	kmer
+phrase_00032	of the soil	3	13	10	kmer
+phrase_00034	of organic matter	3	3	3	kmer
+phrase_00035	from which the	3	3	2	kmer

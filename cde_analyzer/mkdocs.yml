@@ -65,6 +65,7 @@ nav:
     - Pipeline Orchestration: vignettes/pipeline-orchestration.md
     - Parameter Tuning: vignettes/parameter-tuning.md
     - Phrase Stripping: vignettes/phrase-stripping.md
+    - Distributed Curation: vignettes/distributed-curation.md
     - Synthetic QC Data: vignettes/synthetic-data.md
     - Curation Guide: curation-guide.md
     - Phrase Miner Logic: phrase_miner_logic.md

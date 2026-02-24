@@ -301,6 +301,9 @@ Including one variant but missing others:
 | `llm_classify -m temporal` | LLM-assisted temporal pattern classification |
 | `llm_classify -m instrument` | LLM-assisted instrument detection |
 | `strip_analyze --analyze-conflicts` | Find ordering/containment conflicts |
+| `pattern_util --init-curation` | Create per-curator annotated copies for multi-reviewer curation |
+| `pattern_util --merge-curation` | Merge curator annotations with inter-rater statistics |
+| `cde_editor.pyz` | Standalone editor for curators without cde-analyzer (see [Distributed Curation](vignettes/distributed-curation.md)) |
 
 ---
 
@@ -324,3 +327,4 @@ Including one variant but missing others:
 - [strip_phrases](help/strip_phrases.md) — Stripping engine
 - [Instrument & Phrase Stripping Workflow](workflows/instrument-phrase-stripping-workflow.md) — Complete workflow
 - [LLM Classification](llm/index.md) — Automated classification support
+- [Distributed Curation](vignettes/distributed-curation.md) — Multi-curator workflow with standalone editor

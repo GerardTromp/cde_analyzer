@@ -1,0 +1,44 @@
+phrase_id	lemma_text	verbatim_text	verbatim_count	tinyids	prefix_diff	suffix_diff	diff_summary
+phrase_00000	in the water column measure in	in the water column, measured in	3	synWAT001|synWAT005|synWAT013			
+phrase_00001	latitude and longitude of the	Latitude and longitude of the	3	synAIR017|synSOL016|synWAT017			
+phrase_00002	in the water sample	in the water sample,	4	synWAT001|synWAT007|synWAT012|synWAT019			
+phrase_00003	as an indicator of	as an indicator of	3	synSOL014|synWAT001|synWAT006			
+phrase_00004	of the water sample	of the water sample	2	synWAT002|synWAT008			[no significant overlap with longest]
+phrase_00004	of the water sample	of the water sampling	1	synWAT017			[longest form]
+phrase_00005	the hydrogen ion activity	the hydrogen ion activity	2	synSOL005			[exact match]
+phrase_00005	the hydrogen ion activity	The hydrogen ion activity	1	synWAT002			[longest form]
+phrase_00006	report in milligram of	reported in milligrams of	3	synSOL002|synSOL009|synWAT004			
+phrase_00007	per unit volume of	per unit volume of	3	synSOL007|synWAT007|synWAT012			
+phrase_00008	in the soil sample	in the soil sample	4	synSOL001|synSOL008|synSOL010|synSOL019			
+phrase_00009	the soil sample express	the soil sample expressed	3	synSOL001|synSOL008|synSOL009			
+phrase_00010	as a percentage of	as a percentage of	4	synSOL001|synSOL008|synSOL020			
+phrase_00011	of the soil sample	of the soil sample	3	synSOL002|synSOL009|synSOL011			
+phrase_00012	in milligram per kilogram	in milligrams per kilogram.	2	synSOL003|synSOL010			[longest form]
+phrase_00012	in milligram per kilogram	in milligrams per kilogram,	1	synSOL011		,	suffix: "," vs "."
+phrase_00013	the result express in	The result, expressed in	3	synSOL007|synSOL011|synSOL014			
+phrase_00014	per cubic meter	per cubic meter.	3	synAIR001|synAIR002|synAIR008			
+phrase_00015	in ambient air	in ambient air.	3	synAIR004|synAIR006|synAIR008			
+phrase_00016	at the monitoring	at the monitoring	3	synAIR005|synAIR009|synAIR011			
+phrase_00017	the concentration of	The concentration of	5	synWAT001|synWAT004|synWAT013|synWAT014|synWAT019			
+phrase_00018	milligram per liter	milligrams per liter.	3	synWAT001|synWAT005|synWAT015			
+phrase_00019	in the water	in the water,	2	synWAT004|synWAT015			
+phrase_00020	of the water	of the water	4	synWAT003|synWAT009|synWAT019			
+phrase_00021	the amount of	The amount of	2	synWAT005|synWAT010			[exact match]
+phrase_00021	the amount of	the amount of	1	synWAT003			[longest form]
+phrase_00022	in the sample	in the sample	4	synWAT004|synWAT005|synWAT011|synWAT013			
+phrase_00023	present in the	present in the	3	synSOL002|synWAT004|synWAT015			
+phrase_00024	at the time	at the time	3	synSOL008|synSOL013|synWAT009			
+phrase_00025	the mass of	the mass of	4	synSOL008|synSOL019|synSOL020			[exact match]
+phrase_00025	the mass of	The mass of	1	synWAT012			[longest form]
+phrase_00026	and organic matter	and organic matter.	4	synSOL003|synSOL004|synSOL006|synWAT015			
+phrase_00027	whether the measured	Whether the measured	2	synSOL017|synWAT018			
+phrase_00028	soil organic matter	soil organic matter	3	synSOL018|synSOL019			[exact match]
+phrase_00028	soil organic matter	Soil organic matter	2	synSOL001			[longest form]
+phrase_00029	organic matter content	organic matter content,	5	synSOL001|synSOL008|synSOL018			
+phrase_00030	be determine by	is determined by	4	synSOL001|synSOL007|synSOL011|synSOL017			[no significant overlap with longest]
+phrase_00030	be determine by	are determined by	1	synSOL012			[longest form]
+phrase_00031	in the soil	in the soil	8	synSOL002|synSOL003|synSOL004|synSOL009|synSOL011|synSOL017|synSOL018			
+phrase_00032	of the soil	of the oven-dry soil	1	synSOL008			[longest form]
+phrase_00032	of the soil	of the soil.	1	synSOL012			[no significant overlap with longest]
+phrase_00034	of organic matter	of organic matter,	3	synSOL013|synSOL019|synSOL020			
+phrase_00035	from which the	from which the	3	synSOL015|synSOL016			
