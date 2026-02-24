@@ -382,6 +382,21 @@ def run_workflow(
 
         # Check for checkpoint
         if step.get("checkpoint"):
+            # Conditional skip: if skip_if_file exists, skip checkpoint
+            skip_file = step.get("skip_if_file")
+            if skip_file:
+                resolved_skip = resolve_variables(str(skip_file), variables)
+                if Path(resolved_skip).exists():
+                    print(f"\n  Checkpoint '{step_name}' skipped: "
+                          f"{resolved_skip} exists (all patterns auto-resolved)")
+                    if not dry_run:
+                        state.mark_step_completed(step_name, {
+                            "status": "skipped",
+                            "skip_reason": "skip_if_file exists",
+                            "skip_file": resolved_skip,
+                        })
+                    continue  # Proceed to next step
+
             message = step.get("message", "Workflow paused for human review")
             message = resolve_variables(message, variables)
 

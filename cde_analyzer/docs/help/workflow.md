@@ -148,6 +148,14 @@ steps:
       Review ${output_dir}/coalesced.tsv
       When ready, run: cde-analyzer workflow resume
 
+  # Conditional checkpoint - skips if a file already exists
+  - name: curator_review
+    checkpoint: true
+    skip_if_file: "${output_dir}/curated.tsv"
+    message: |
+      Review ${output_dir}/needs_review.tsv
+      When ready, run: cde-analyzer workflow resume
+
   # More action steps after checkpoint
   - name: strip_instruments
     action: strip_phrases
@@ -183,6 +191,27 @@ server blocks until Ctrl-C, then the workflow continues:
 ```
 
 See [Distributed Curation — Centralized Mode](../vignettes/distributed-curation.md#centralized-server-mode) for setup details.
+
+### Conditional Checkpoints
+
+Checkpoints can be conditionally skipped using the `skip_if_file` property.
+If the specified file exists when the checkpoint is reached, the workflow
+proceeds to the next step without pausing:
+
+```yaml
+  - name: curator_review
+    checkpoint: true
+    skip_if_file: "${output_dir}/curated.tsv"
+    message: |
+      Review ${output_dir}/needs_review.tsv
+```
+
+This is used by the incremental curation feature: the `curation_gate` step
+writes `curated.tsv` when all patterns are auto-resolved from the ledger,
+causing the checkpoint to be skipped. When new patterns require human review,
+`curated.tsv` is not written and the checkpoint pauses as usual.
+
+The `skip_if_file` path supports variable substitution (`${var}`).
 
 ## Variable Resolution
 

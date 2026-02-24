@@ -645,6 +645,47 @@ def register_subparser(subparser: ArgumentParser):
              "(reads .curation_state.yaml from the given directory).",
     )
 
+    # ──────────────────────────────────────────────────────────────
+    # Incremental curation (curation gate / finalize)
+    # ──────────────────────────────────────────────────────────────
+
+    subparser.add_argument(
+        "--curation-gate",
+        type=str,
+        metavar="FILE",
+        help="Curation gate: compare enriched patterns TSV against the curation "
+             "ledger and classify patterns as auto-resolved or needs-review. "
+             "Writes auto_resolved.tsv + needs_review.tsv (or curated.tsv if "
+             "all patterns are auto-resolved). "
+             "Requires --ledger-dir, --input, --model, --phase, and -o (directory).",
+    )
+
+    subparser.add_argument(
+        "--finalize-curation",
+        type=str,
+        metavar="DIR",
+        help="Finalize curation: merge auto-resolved patterns with human-curated "
+             "needs_review.tsv to produce curated.tsv, then update the curation "
+             "ledger. DIR is the output directory containing gate_result.json. "
+             "Requires --ledger-dir, --input, and --phase.",
+    )
+
+    subparser.add_argument(
+        "--ledger-dir",
+        type=str,
+        help="Path to curation ledger directory. Used with --curation-gate and "
+             "--finalize-curation. Default: sibling of output dir named "
+             "'.curation_ledger'.",
+    )
+
+    subparser.add_argument(
+        "--phase",
+        type=str,
+        choices=["instrument", "phrase"],
+        help="Pipeline phase for ledger operations (instrument = Phase 1, "
+             "phrase = Phase 2). Used with --curation-gate and --finalize-curation.",
+    )
+
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""
         return _get_run_action()(args)

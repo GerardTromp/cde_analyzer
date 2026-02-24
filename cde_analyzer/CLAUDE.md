@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.7.0)
+# CDE Analyzer — Context (v0.8.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,7 +26,36 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.7.0)
+## Current State (v0.8.0)
+
+### v0.8.0: Incremental Curation (Curation Ledger & Gate)
+
+#### Curation Ledger (`logic/curation_ledger.py`)
+- **`CurationLedger`**: Persistent record of keep/remove/modify decisions across pipeline runs
+- **Storage**: `{ledger_dir}/ledger_meta.yaml` (run history) + `instrument_decisions.tsv` / `phrase_decisions.tsv`
+- **`classify_patterns()`**: Compares current patterns against prior decisions
+  - keep + any tinyIds → auto_keep (validity is inherent)
+  - remove + same tinyIds → auto_remove; remove + new tinyIds → needs_review
+  - modify + same tinyIds → auto_modify; modify + new tinyIds → needs_review
+  - new pattern (not in ledger) → needs_review
+
+#### Curation Gate (`--curation-gate`)
+- **Runs before checkpoint**: Classifies patterns as auto-resolved or needs-review
+- **Outputs**: `gate_result.json`, `auto_resolved.tsv`, `needs_review.tsv`, and optionally `curated.tsv`
+- **If all auto-resolved**: Writes `curated.tsv` directly → checkpoint is skipped
+- **If needs review**: Only new/changed patterns presented to curators
+
+#### Finalize Curation (`--finalize-curation`)
+- **Runs after checkpoint**: Merges auto-resolved + human-curated → `curated.tsv`, updates ledger
+- **Records all decisions** in the curation ledger for future runs
+
+#### Conditional Checkpoint (`skip_if_file`)
+- **Workflow engine extension**: `skip_if_file: "${curated_tsv}"` on checkpoint steps
+- **If file exists**: Checkpoint is skipped, workflow continues to next step
+
+#### Workflow Integration
+- Both `instrument_pipeline.yaml` and `phrase_pipeline.yaml` updated with gate/finalize steps
+- **New variable**: `curation_ledger_dir: "${CURATION_LEDGER:-../.curation_ledger}"`
 
 ### v0.7.0: Standalone Editor Zipapp + Synthetic QC Data + Rare Words
 
@@ -95,13 +124,14 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 ## Key Files
 
 ### Source Code (cde_analyzer/)
-- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation, serve-curation)
-- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation, serve-curation)
+- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation, serve-curation, curation-gate, finalize-curation)
+- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation, serve-curation, curation-gate, finalize-curation)
 - `actions/pattern_util/centralized_server.py` — centralized multi-curator curation server (CurationState, CuratorSession, serve_curation)
 - `actions/pattern_util/editor_config.py` — curation server config parsing (CurationServerConfig, load_config)
 - `actions/pattern_util/editor_security.py` — token gen/verify, RateLimiter, TLS setup
 - `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold)
-- `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status)
+- `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status, skip_if_file)
+- `logic/curation_ledger.py` — CurationLedger, CurationDecision, classify_patterns (incremental curation)
 - `logic/inter_rater.py` — inter-rater reliability statistics (Cohen's/Fleiss' kappa, Krippendorff's alpha)
 - `actions/phrase_miner/run.py` — phrase miner runner + `write_dedup_curation_tsv()`
 - `logic/phrase_miner.py` — core mining: `dedup_field_texts()`, `mine_phrases()`, k-mer loop, masking
@@ -152,6 +182,8 @@ cde-analyzer pattern_util --init-curation FILE -o DIR             # initialize m
 cde-analyzer pattern_util --merge-curation FILE -o OUT            # merge curator annotations + stats
 cde-analyzer pattern_util --serve-curation CONFIG --curation-source FILE  # centralized server
 cde-analyzer pattern_util --curation-status DIR                   # check centralized session status
+cde-analyzer pattern_util --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR  # incremental curation gate
+cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i JSON      # finalize + update ledger
 ```
 
 ## `workflow` Capabilities

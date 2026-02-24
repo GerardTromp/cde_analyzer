@@ -50,6 +50,10 @@ cde-analyzer pattern_util --merge-curation FILE1 FILE2 ... -o DIR
 # Centralized curation server
 cde-analyzer pattern_util --serve-curation CONFIG.yaml --curation-source FILE
 cde-analyzer pattern_util --curation-status DIR
+
+# Incremental curation (re-run optimization)
+cde-analyzer pattern_util --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR
+cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i JSON
 ```
 
 ## Modes
@@ -356,6 +360,99 @@ python cde_editor.pyz patterns.tsv --port 8080 # specific port
 python cde_editor.pyz --version                # show version
 ```
 
+### Incremental Curation
+
+When the CDE repository is expanded with new CDEs, the full pipeline must
+re-run. The **curation gate** and **finalize curation** commands eliminate
+redundant curation by persistently recording decisions in a **curation ledger**
+and auto-applying them on re-runs. Only genuinely new or changed patterns are
+presented to curators.
+
+**Curation gate** — classify patterns against the ledger before a checkpoint:
+
+```bash
+cde-analyzer pattern_util --curation-gate enriched.tsv \
+    --ledger-dir .curation_ledger --phase instrument \
+    -i cdes.json -o gate_output/
+```
+
+Outputs:
+
+| File | Contents |
+|------|----------|
+| `gate_result.json` | Classification summary: counts, file paths, skip flag |
+| `auto_resolved.tsv` | Patterns resolved from prior decisions (keep/remove/modify) |
+| `needs_review.tsv` | New or changed patterns requiring human curation |
+| `curated.tsv` | Written ONLY when needs_review is empty (signals checkpoint skip) |
+
+**Finalize curation** — merge results and update the ledger after the checkpoint:
+
+```bash
+cde-analyzer pattern_util --finalize-curation gate_output/ \
+    --ledger-dir .curation_ledger --phase instrument -i cdes.json
+```
+
+If the checkpoint was skipped (all auto-resolved), `curated.tsv` already exists
+and the ledger is updated with timestamps. If the checkpoint paused for human
+review, `auto_resolved.tsv` and the human-curated `needs_review.tsv` are
+merged into `curated.tsv`, and all new decisions are recorded in the ledger.
+
+**Decision rules:**
+
+| Prior decision | Current tinyIds vs prior | Action |
+|---------------|------------------------|--------|
+| (not in ledger) | — | needs_review (new pattern) |
+| keep | any | auto_keep (validity is inherent) |
+| remove | same or subset | auto_remove |
+| remove | has new tinyIds | needs_review (new context) |
+| modify | same or subset | auto_modify (apply stored modification) |
+| modify | has new tinyIds | needs_review (new context) |
+
+**Ledger storage** (`--ledger-dir`):
+
+```
+.curation_ledger/
+  ledger_meta.yaml              # run history + tinyId hashes
+  instrument_decisions.tsv      # Phase 1 pattern decisions
+  phrase_decisions.tsv           # Phase 2 pattern decisions
+```
+
+**Pipeline integration** — the instrument and phrase pipeline workflows include
+`curation_gate` and `finalize_curation` steps automatically. The checkpoint
+between them uses `skip_if_file` to skip when all patterns are auto-resolved:
+
+```yaml
+# In instrument_pipeline.yaml / phrase_pipeline.yaml
+- name: curation_gate
+  action: pattern_util
+  args:
+    curation_gate: "${field_enriched_tsv}"
+    ledger_dir: "${curation_ledger_dir}"
+    phase: instrument
+    input: "${input_json}"
+    output: "${output_dir}"
+
+- name: curator_review
+  checkpoint: true
+  skip_if_file: "${curated_tsv}"
+  message: |
+    Review ${output_dir}/needs_review.tsv
+
+- name: finalize_curation
+  action: pattern_util
+  args:
+    finalize_curation: "${output_dir}"
+    ledger_dir: "${curation_ledger_dir}"
+    phase: instrument
+    input: "${input_json}"
+```
+
+**Typical scenarios:**
+
+- **First run** (no ledger): All patterns go to `needs_review.tsv`. Full curation required (same as current behavior).
+- **Re-run, same CDEs**: All patterns auto-resolved. Checkpoint skipped entirely.
+- **Re-run, new CDEs**: Prior keep/remove/modify decisions auto-applied; only new patterns presented to curators.
+
 ## Options
 
 ### Merge Options
@@ -459,6 +556,15 @@ python cde_editor.pyz --version                # show version
 | `--curation-source FILE` | Source patterns TSV (required with `--serve-curation`) |
 | `--curation-status DIR` | Show status of a centralized curation session |
 | `--no-browser` | Start server without opening admin dashboard |
+
+### Incremental Curation Options
+
+| Option | Description |
+|--------|-------------|
+| `--curation-gate FILE` | Enriched TSV to classify against the curation ledger |
+| `--finalize-curation DIR` | Gate output directory to merge and update ledger |
+| `--ledger-dir DIR` | Curation ledger directory (default: `../.curation_ledger`) |
+| `--phase {instrument,phrase}` | Pipeline phase for ledger key |
 
 ### Conversion Options
 

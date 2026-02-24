@@ -1098,6 +1098,402 @@ def _run_curation_status(args, status_dir: str) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# Incremental curation: gate + finalize
+# ---------------------------------------------------------------------------
+
+def _read_enriched_tsv(path: str):
+    """Read an enriched TSV into a list of dicts, preserving all columns."""
+    import csv
+    rows = []
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row in reader:
+            rows.append(dict(row))
+    return rows
+
+
+def _compute_input_tinyids_hash(input_json: str, model_name: str):
+    """Load JSON, extract all tinyIds, return (hash, n_cdes)."""
+    import json as _json
+    from logic.curation_ledger import CurationLedger
+
+    with open(input_json, encoding="utf-8") as f:
+        data = _json.load(f)
+
+    tinyids = set()
+    for obj in data:
+        tid = obj.get("tinyId", "")
+        if tid:
+            tinyids.add(tid)
+
+    return CurationLedger.compute_tinyids_hash(tinyids), len(data)
+
+
+def _write_gate_tsv(path, rows, extra_cols):
+    """Write a list of dicts as TSV, adding extra empty columns if missing."""
+    import csv
+
+    if not rows:
+        # Write header-only file
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write("\t".join(extra_cols) + "\n")
+        return
+
+    # Determine column order: original columns + extra
+    all_keys = list(rows[0].keys())
+    for col in extra_cols:
+        if col not in all_keys:
+            all_keys.append(col)
+
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f, fieldnames=all_keys,
+            delimiter="\t", lineterminator="\n",
+            extrasaction="ignore",
+        )
+        writer.writeheader()
+        for row in rows:
+            out = {k: row.get(k, "") for k in all_keys}
+            writer.writerow(out)
+
+
+def _build_curated_from_auto(auto_resolved):
+    """Filter auto_resolved to kept + modified patterns for curated.tsv."""
+    curated = []
+    for row in auto_resolved:
+        decision = row.get("prior_decision", "keep")
+        if decision == "keep":
+            curated.append(row)
+        elif decision == "modify":
+            modified = dict(row)
+            mod_text = row.get("modification", "").strip()
+            if mod_text:
+                modified["pattern"] = mod_text
+            curated.append(modified)
+        # decision == "remove" -> excluded
+    return curated
+
+
+def _write_curated_tsv(path, rows):
+    """Write curated.tsv — only the columns needed by the strip step."""
+    import csv
+
+    if not rows:
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write("pattern\ttinyIds\n")
+        return
+
+    # Preserve all original columns except gate-internal ones
+    skip_cols = {"prior_decision", "resolution_source", "decision",
+                 "modification", "notes"}
+    all_keys = [k for k in rows[0].keys() if k not in skip_cols]
+
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f, fieldnames=all_keys,
+            delimiter="\t", lineterminator="\n",
+            extrasaction="ignore",
+        )
+        writer.writeheader()
+        for row in rows:
+            out = {k: row.get(k, "") for k in all_keys}
+            writer.writerow(out)
+
+
+def _extract_decisions_from_auto(path):
+    """Convert auto_resolved.tsv rows into CurationDecision list."""
+    import csv
+    import re as _re
+    from datetime import datetime
+    from logic.curation_ledger import CurationDecision
+
+    decisions = []
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row in reader:
+            pattern = row.get("pattern", "")
+            if not pattern:
+                continue
+            prior = row.get("prior_decision", "keep")
+            modification = row.get("modification", "")
+            tinyids_str = row.get("tinyIds", "")
+            tinyids = set(t for t in _re.split(r"[\s|]+", tinyids_str) if t)
+            decisions.append(CurationDecision(
+                pattern=pattern,
+                decision=prior,
+                modification=modification,
+                tinyIds=tinyids,
+                n_tinyIds=len(tinyids),
+                decided_at=datetime.now().isoformat(),
+                run_id="",
+                notes=row.get("notes", ""),
+            ))
+    return decisions
+
+
+def _extract_decisions_from_review(path):
+    """Convert human-reviewed needs_review.tsv into CurationDecision list."""
+    import csv
+    import re as _re
+    from datetime import datetime
+    from logic.curation_ledger import CurationDecision
+
+    decisions = []
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row in reader:
+            pattern = row.get("pattern", "")
+            if not pattern:
+                continue
+            decision = row.get("decision", "").strip().lower()
+            if not decision:
+                decision = "keep"
+            modification = row.get("modification", "")
+            tinyids_str = row.get("tinyIds", "")
+            tinyids = set(t for t in _re.split(r"[\s|]+", tinyids_str) if t)
+            decisions.append(CurationDecision(
+                pattern=pattern,
+                decision=decision,
+                modification=modification,
+                tinyIds=tinyids,
+                n_tinyIds=len(tinyids),
+                decided_at=datetime.now().isoformat(),
+                run_id="",
+                notes=row.get("notes", ""),
+            ))
+    return decisions
+
+
+def _run_curation_gate(args, enriched_tsv_path: str) -> int:
+    """
+    Compare current enriched patterns against the curation ledger.
+
+    Outputs (all in --output directory):
+        gate_result.json    — Classification summary + paths
+        auto_resolved.tsv   — Patterns auto-resolved from ledger
+        needs_review.tsv    — Patterns requiring human curation
+        curated.tsv         — Written ONLY when needs_review is empty
+    """
+    import json as _json
+    from datetime import datetime
+    from pathlib import Path
+    from logic.curation_ledger import CurationLedger, classify_patterns
+    from utils.file_utils import exit_if_missing
+
+    output_dir = Path(getattr(args, 'output', None) or '.')
+    ledger_dir = getattr(args, 'ledger_dir', None)
+    if not ledger_dir:
+        ledger_dir = str(output_dir.parent / '.curation_ledger')
+    phase = getattr(args, 'phase', None)
+    input_json = getattr(args, 'input', None)
+    model_name = getattr(args, 'model', 'CDE')
+
+    if not phase:
+        logger.error("--phase is required for --curation-gate")
+        raise SystemExit(1)
+    exit_if_missing(enriched_tsv_path, "Enriched patterns TSV")
+
+    phase_key = "phase1" if phase == "instrument" else "phase2"
+
+    # Load curation ledger
+    ledger = CurationLedger(ledger_dir)
+    ledger_exists = ledger.load()
+
+    # Read current enriched patterns
+    current_patterns = _read_enriched_tsv(enriched_tsv_path)
+    logger.info(f"Loaded {len(current_patterns)} patterns from {enriched_tsv_path}")
+
+    # Compute tinyIds hash from input JSON
+    tinyids_hash = ""
+    n_cdes = 0
+    if input_json:
+        exit_if_missing(input_json, "Input JSON")
+        tinyids_hash, n_cdes = _compute_input_tinyids_hash(input_json, model_name)
+        logger.info(f"Input: {n_cdes} CDEs, tinyIds hash: {tinyids_hash[:16]}...")
+
+    # Fast path: identical tinyId set → use prior curation as-is
+    if ledger_exists and tinyids_hash and ledger.has_same_tinyids(tinyids_hash):
+        prior = ledger.get_decisions(phase_key)
+        if prior:
+            logger.info("Fast path: tinyIds hash matches prior run")
+
+    # Generate run_id
+    run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    # Classify patterns
+    prior_decisions = ledger.get_decisions(phase_key) if ledger_exists else {}
+    auto_resolved, needs_review, summary = classify_patterns(
+        current_patterns, prior_decisions
+    )
+
+    # Write outputs
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    _write_gate_tsv(
+        output_dir / "auto_resolved.tsv", auto_resolved,
+        extra_cols=["prior_decision", "resolution_source", "modification"],
+    )
+
+    if needs_review:
+        _write_gate_tsv(
+            output_dir / "needs_review.tsv", needs_review,
+            extra_cols=["decision", "modification", "notes"],
+        )
+    else:
+        # All auto-resolved — write curated.tsv directly
+        curated = _build_curated_from_auto(auto_resolved)
+        _write_curated_tsv(output_dir / "curated.tsv", curated)
+
+    # Write gate_result.json
+    gate_result = {
+        "run_id": run_id,
+        "phase": phase,
+        "phase_key": phase_key,
+        "timestamp": datetime.now().isoformat(),
+        "input_json": str(input_json) if input_json else "",
+        "n_cdes": n_cdes,
+        "tinyids_hash": tinyids_hash,
+        "enriched_tsv": str(enriched_tsv_path),
+        "ledger_dir": str(ledger_dir),
+        "summary": summary,
+        "all_auto_resolved": len(needs_review) == 0,
+        "paths": {
+            "auto_resolved": str(output_dir / "auto_resolved.tsv"),
+            "needs_review": str(output_dir / "needs_review.tsv") if needs_review else None,
+            "curated": str(output_dir / "curated.tsv") if not needs_review else None,
+        },
+    }
+    with open(output_dir / "gate_result.json", "w", encoding="utf-8") as f:
+        _json.dump(gate_result, f, indent=2)
+
+    # Print summary
+    total = len(current_patterns)
+    print(f"\n  Curation gate ({phase}):")
+    print(f"    Total patterns:      {total}")
+    if ledger_exists:
+        print(f"    Auto-keep:           {summary['auto_keep']}")
+        print(f"    Auto-remove:         {summary['auto_remove']}")
+        print(f"    Auto-modify:         {summary['auto_modify']}")
+        print(f"    New patterns:        {summary['new_pattern']}")
+        n_changed = summary['changed_tinyids_remove'] + summary['changed_tinyids_modify']
+        if n_changed:
+            print(f"    Changed (re-review): {n_changed}")
+    else:
+        print(f"    Ledger:              not found (first run)")
+        print(f"    Needs review:        {len(needs_review)}")
+
+    if not needs_review:
+        print(f"\n    All patterns auto-resolved. Checkpoint will be skipped.")
+        print(f"    Wrote: {output_dir / 'curated.tsv'}")
+    else:
+        print(f"\n    {len(needs_review)} pattern(s) need review.")
+        print(f"    Review:        {output_dir / 'needs_review.tsv'}")
+        print(f"    Auto-resolved: {output_dir / 'auto_resolved.tsv'}")
+
+    return 0
+
+
+def _run_finalize_curation(args, gate_dir: str) -> int:
+    """
+    Merge auto-resolved patterns with human-curated needs_review.tsv,
+    then update the curation ledger.
+
+    Runs after the checkpoint (whether skipped or resumed after human review).
+    """
+    import json as _json
+    from pathlib import Path
+    from logic.curation_ledger import CurationLedger
+
+    gate_dir_p = Path(gate_dir)
+    gate_result_path = gate_dir_p / "gate_result.json"
+
+    if not gate_result_path.exists():
+        logger.error(f"gate_result.json not found in {gate_dir}")
+        raise SystemExit(1)
+
+    with open(gate_result_path, encoding="utf-8") as f:
+        gate_result = _json.load(f)
+
+    ledger_dir = getattr(args, 'ledger_dir', None) or gate_result.get("ledger_dir", "")
+    phase = getattr(args, 'phase', None) or gate_result.get("phase", "")
+    input_json = getattr(args, 'input', None) or gate_result.get("input_json", "")
+    phase_key = gate_result.get("phase_key", "phase1" if phase == "instrument" else "phase2")
+
+    ledger = CurationLedger(ledger_dir)
+    ledger.load()
+
+    curated_path = gate_dir_p / "curated.tsv"
+    auto_resolved_path = gate_dir_p / "auto_resolved.tsv"
+    needs_review_path = gate_dir_p / "needs_review.tsv"
+
+    if gate_result.get("all_auto_resolved"):
+        # Checkpoint was skipped. curated.tsv already written by gate.
+        all_decisions = _extract_decisions_from_auto(str(auto_resolved_path))
+        logger.info("Finalize: checkpoint was skipped (all auto-resolved)")
+    else:
+        # Curator reviewed needs_review.tsv. Merge auto + human.
+        if not needs_review_path.exists():
+            logger.error(
+                f"needs_review.tsv not found in {gate_dir}; "
+                f"curation may not be complete"
+            )
+            raise SystemExit(1)
+
+        auto_rows = _read_enriched_tsv(str(auto_resolved_path))
+        review_rows = _read_enriched_tsv(str(needs_review_path))
+
+        # Build curated.tsv from auto + reviewed
+        curated_rows = _build_curated_from_auto(auto_rows)
+
+        for row in review_rows:
+            decision = row.get("decision", "").strip().lower()
+            if not decision:
+                decision = "keep"
+            if decision == "keep":
+                curated_rows.append(row)
+            elif decision == "modify":
+                modified = dict(row)
+                mod_text = row.get("modification", "").strip()
+                if mod_text:
+                    modified["pattern"] = mod_text
+                curated_rows.append(modified)
+            # decision == "remove" -> excluded
+
+        _write_curated_tsv(curated_path, curated_rows)
+        logger.info(f"Merged {len(auto_rows)} auto + {len(review_rows)} reviewed "
+                     f"→ {len(curated_rows)} curated patterns")
+
+        # Collect all decisions for ledger
+        all_decisions = _extract_decisions_from_auto(str(auto_resolved_path))
+        all_decisions.extend(_extract_decisions_from_review(str(needs_review_path)))
+
+    # Update ledger
+    run_id = gate_result.get("run_id", "unknown")
+    for d in all_decisions:
+        d.run_id = run_id
+
+    summary = gate_result.get("summary", {})
+    ledger.update_decisions(phase_key, all_decisions)
+    ledger.record_run(
+        run_id=run_id,
+        input_json=input_json,
+        n_cdes=gate_result.get("n_cdes", 0),
+        tinyids_hash=gate_result.get("tinyids_hash", ""),
+        phase=phase,
+        summary=summary,
+    )
+    ledger.save()
+
+    print(f"\n  Finalize curation ({phase}):")
+    print(f"    Curated patterns: {curated_path}")
+    print(f"    Ledger updated:   {ledger_dir}")
+    print(f"    Decisions stored:  {len(all_decisions)}")
+    print(f"    Run recorded:     {run_id}")
+
+    return 0
+
+
 def _run_to_minimal(args, input_path: str) -> int:
     """
     Normalize any pattern TSV to minimal 2-column format: pattern<TAB>tinyIds
@@ -3535,6 +3931,16 @@ def run_action(args: Namespace):
     curation_status_dir = getattr(args, 'curation_status', None)
     if curation_status_dir:
         return _run_curation_status(args, curation_status_dir)
+
+    # Check for curation-gate mode (incremental curation)
+    curation_gate = getattr(args, 'curation_gate', None)
+    if curation_gate:
+        return _run_curation_gate(args, curation_gate)
+
+    # Check for finalize-curation mode (incremental curation)
+    finalize_curation = getattr(args, 'finalize_curation', None)
+    if finalize_curation:
+        return _run_finalize_curation(args, finalize_curation)
 
     # Check for generate-strip-patterns mode
     gen_strip = getattr(args, 'generate_strip_patterns', None)

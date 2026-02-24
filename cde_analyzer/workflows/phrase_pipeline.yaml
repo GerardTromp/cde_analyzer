@@ -5,8 +5,10 @@
 # 2. Discover verbatim occurrences with variants
 # 3. Coalesce redundant patterns
 # 4. Field analysis — enrich with per-field counts, apply filters
-# 5. [CHECKPOINT] Human curator review
-# 6. Strip patterns from CDE JSON
+# 5. Curation gate (auto-resolve from prior ledger or present new patterns)
+# 6. [CHECKPOINT] Human curator review (skipped if all auto-resolved)
+# 7. Finalize curation (merge + update ledger)
+# 8. Strip patterns from CDE JSON
 #
 # Prerequisites:
 #   - Run instrument_pipeline.yaml first to get inst_stripped.json
@@ -30,6 +32,10 @@ variables:
 
   # Parallelization (0 = auto-detect with headroom)
   workers: 0
+
+  # Curation ledger directory (persistent across re-runs)
+  # Override with --set or CURATION_LEDGER env var
+  curation_ledger_dir: "${CURATION_LEDGER:-../.curation_ledger}"
 
   # Intermediate files
   phrases_tsv: "${output_dir}/verbatim_phrases.tsv"
@@ -120,24 +126,46 @@ steps:
       report_version: "coalesced"
       min_recall: 0.7
 
+  - name: curation_gate
+    action: pattern_util
+    args:
+      curation_gate: "${field_enriched_tsv}"
+      ledger_dir: "${curation_ledger_dir}"
+      input: "${input_json}"
+      model: CDE
+      phase: phrase
+      output: "${output_dir}/"
+
   - name: curator_review
     checkpoint: true
+    skip_if_file: "${curated_tsv}"
     message: |
       Phrase pattern curation required.
 
-      Files to review:
-        - ${field_enriched_tsv} (patterns with field counts, filtered)
-        - ${coalesce_report} (subsumption details)
-        - ${recall_report_md} (recall analysis, if recall_patterns set)
+      New or changed patterns need review:
+        - Review:        ${output_dir}/needs_review.tsv
+        - Auto-resolved: ${output_dir}/auto_resolved.tsv
+        - Gate summary:  ${output_dir}/gate_result.json
+        - Coalesce report: ${coalesce_report}
+        - Recall report: ${recall_report_md} (if recall_patterns set)
 
-      Actions:
-        1. Open ${field_enriched_tsv} in spreadsheet
-        2. Remove false positives (accidental phrase matches)
-        3. Verify coverage is complete
-        4. Save as ${curated_tsv}
+      Open the editor:
+        cde-analyzer pattern_util --edit ${output_dir}/needs_review.tsv
+
+      Fill in the 'decision' column (keep / remove / modify) for each
+      pattern. If decision = modify, enter the replacement text in
+      the 'modification' column.
 
       When ready, resume with:
         cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
+
+  - name: finalize_curation
+    action: pattern_util
+    args:
+      finalize_curation: "${output_dir}/"
+      ledger_dir: "${curation_ledger_dir}"
+      input: "${input_json}"
+      phase: phrase
 
   - name: strip_phrases
     action: strip_phrases
