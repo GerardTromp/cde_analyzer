@@ -11,13 +11,22 @@ pipelines. When multiple curators review the same pattern set independently,
 inter-rater agreement statistics quantify reliability and highlight patterns
 that need discussion.
 
-This vignette covers:
+This vignette covers two approaches:
+
+**File-based** (§1–7): Distribute standalone editor + TSV files via email.
 
 - Building the standalone editor for distribution
 - Initializing and distributing per-curator files
 - Collecting and merging annotations
 - Interpreting agreement statistics
 - Resolving disagreements in a joint session
+
+**Centralized server** (§9–13): Host an HTTPS server — curators open a URL.
+
+- Writing a server config (curators, TLS, timespan)
+- Starting and monitoring the centralized server
+- Security model (HMAC tokens, rate limiting, TLS)
+- Merging results after submission
 
 **Prerequisites**: Enriched patterns from Phase 1 or Phase 2
 (`coalesced_fields.tsv`). Familiarity with the
@@ -265,6 +274,176 @@ Master curator:
   │ 7. Save final curated.tsv → resume pipeline             │
   └─────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Centralized Server Mode
+
+When curators have network access to a shared machine (e.g., a lab server
+or cloud VM), you can skip file distribution entirely. A centralized
+curation server hosts per-curator editor sessions — each curator opens a
+unique URL in their browser.
+
+### 9. Write a Server Config
+
+Create `curation_server.yaml`:
+
+```yaml
+curators:
+  - name: Alice Smith
+    email: alice@example.com
+  - name: Bob Jones
+    email: bob@example.com
+  - name: Carol Lee
+    email: carol@example.com
+
+server:
+  host: 0.0.0.0        # listen on all interfaces
+  port: 8443            # HTTPS port
+  output_dir: ./curation_output
+  timespan: 24h         # curation window
+
+tls:
+  mode: auto            # auto-generate self-signed cert
+
+security:
+  secret_key: auto      # auto-generated per session
+  max_attempts: 5       # lockout after 5 failed attempts
+```
+
+**TLS modes:**
+
+- **`auto`** — generates a self-signed certificate on first run
+  (stored in `{output_dir}/.tls/`). Curators see a browser warning once.
+- **`custom`** — provide your own cert/key (e.g., Let's Encrypt):
+  ```yaml
+  tls:
+    mode: custom
+    cert: /etc/letsencrypt/live/example.com/fullchain.pem
+    key: /etc/letsencrypt/live/example.com/privkey.pem
+  ```
+- **`proxy`** — plain HTTP behind nginx/caddy with TLS termination
+  (see [§14](#14-reverse-proxy-setup-optional)).
+
+### 10. Start the Server
+
+```bash
+cde-analyzer pattern_util --serve-curation curation_server.yaml \
+    --curation-source phase1_output/coalesced_fields.tsv
+```
+
+Output:
+
+```
+CDE Centralized Curation Server
+  Admin:    https://127.0.0.1:8443/admin/
+  Source:   phase1_output/coalesced_fields.tsv
+  Output:   ./curation_output
+  Expires:  2026-02-25 10:00 UTC
+  TLS:      auto
+
+  Curator URLs:
+    Alice Smith: https://127.0.0.1:8443/c/alice_smith_67BD.../
+    Bob Jones:   https://127.0.0.1:8443/c/bob_jones_67BD.../
+    Carol Lee:   https://127.0.0.1:8443/c/carol_lee_67BD.../
+
+  Press Ctrl-C to stop.
+```
+
+Send each curator their personal URL. The admin dashboard opens
+automatically in your browser.
+
+### 11. Monitor Progress
+
+The admin dashboard at `/admin/` shows real-time curator statuses
+with auto-refresh every 10 seconds.
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Curator has not accessed their URL yet |
+| `in_progress` | Curator has opened the editor |
+| `submitted` | Curator has saved their work |
+| `expired` | Curation window ended before submission |
+
+Check status from the CLI:
+
+```bash
+cde-analyzer pattern_util --curation-status ./curation_output
+```
+
+When all curators submit, the server prints:
+
+```
+All curators have submitted. Ready for merge.
+```
+
+### 12. Security Model
+
+**Token authentication**: Each curator URL contains an HMAC-authenticated
+token with format `{slug}_{expiry_hex}_{hmac_hex}`:
+
+- Bound to the curator's name and email
+- Time-limited (expiry embedded in the token)
+- Verified on every request via HMAC-SHA256
+- 5-minute grace period after expiry for a final save
+
+**Rate limiting**: After `max_attempts` failed authentication attempts
+from an IP, progressive lockout kicks in (`lockout_base` seconds,
+doubling each cycle).
+
+**Directory isolation**: Each curator can only read/write their own
+designated TSV file. No file listing or directory traversal is possible.
+
+### 13. Collect and Merge
+
+After all curators submit (or the timespan expires), press **Ctrl-C** to
+stop the server. Then merge:
+
+```bash
+cde-analyzer pattern_util --merge-curation \
+    curation_output/*.tsv \
+    -o curation_output/results/
+```
+
+This produces the same output as the file-based workflow (§4):
+`consensus.tsv`, `discrepancies.tsv`, `inter_rater_report.md`, and
+`discrepancies.html`. Continue with [§5](#5-interpret-agreement-statistics)
+to review agreement and [§6](#6-resolve-disagreements) to resolve splits.
+
+### 14. Reverse Proxy Setup (Optional)
+
+For production deployments with `tls.mode: proxy`, put the server behind
+nginx:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name curation.example.com;
+    ssl_certificate /etc/letsencrypt/live/.../fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/.../privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+With this setup, use `port: 8080` and `tls.mode: proxy` in your config.
+
+### Centralized vs File-Based
+
+| Aspect | File-based (§1–7) | Centralized (§9–13) |
+|--------|-------------------|---------------------|
+| Curator setup | Install Python + receive zipapp | Open a URL |
+| File exchange | Email/share files back and forth | None — server manages files |
+| Real-time monitoring | No | Admin dashboard with auto-refresh |
+| Network required | No — fully offline | Yes — curators need server access |
+| TLS/security | N/A | HMAC tokens, rate limiting, TLS |
+| Best for | Remote curators, air-gapped environments | Lab/team settings, cloud VMs |
 
 ---
 

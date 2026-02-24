@@ -37,7 +37,17 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - **Resource loading**: `_load_html()` reads `tsv_editor.html` from filesystem (dev) or zipapp archive (distribution)
 - **HTTP endpoints**: GET `/` (HTML), GET `/info` (metadata), GET `/data` (TSV content), POST `/save` (write file)
 - **Distributed curation workflow**: build zipapp → init-curation → distribute → curate → merge → resolve → finalize
-- **Vignette**: `docs/vignettes/distributed-curation.md` — full multi-curator workflow guide
+
+#### Centralized Curation Server
+- **`actions/pattern_util/centralized_server.py`**: Multi-curator HTTP server with token-scoped routes
+- **`actions/pattern_util/editor_config.py`**: YAML config parsing (curators, server, TLS, security)
+- **`actions/pattern_util/editor_security.py`**: HMAC token gen/verify, rate limiting, TLS setup
+- **CLI**: `--serve-curation CONFIG --curation-source FILE`, `--curation-status DIR`
+- **Token auth**: `{slug}_{expiry_hex}_{hmac[:16]}` — per-curator HMAC-SHA256 tokens with expiry
+- **Routes**: `/c/{token}/` (editor), `/c/{token}/data|info|save` (API), `/admin/` (dashboard)
+- **TLS modes**: `auto` (self-signed), `custom` (user certs), `proxy` (reverse proxy)
+- **Security**: Rate limiting with exponential backoff, directory isolation, expiry watchdog
+- **Vignette**: `docs/vignettes/distributed-curation.md` — file-based and centralized workflows
 
 ### v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes
 
@@ -85,8 +95,11 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 ## Key Files
 
 ### Source Code (cde_analyzer/)
-- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation)
-- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation)
+- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation, serve-curation)
+- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation, serve-curation)
+- `actions/pattern_util/centralized_server.py` — centralized multi-curator curation server (CurationState, CuratorSession, serve_curation)
+- `actions/pattern_util/editor_config.py` — curation server config parsing (CurationServerConfig, load_config)
+- `actions/pattern_util/editor_security.py` — token gen/verify, RateLimiter, TLS setup
 - `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold)
 - `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status)
 - `logic/inter_rater.py` — inter-rater reliability statistics (Cohen's/Fleiss' kappa, Krippendorff's alpha)
@@ -137,6 +150,8 @@ cde-analyzer pattern_util --promote-supplementary                 # promote to g
 cde-analyzer pattern_util --edit FILE                             # browser-based TSV editor
 cde-analyzer pattern_util --init-curation FILE -o DIR             # initialize multi-curator curation
 cde-analyzer pattern_util --merge-curation FILE -o OUT            # merge curator annotations + stats
+cde-analyzer pattern_util --serve-curation CONFIG --curation-source FILE  # centralized server
+cde-analyzer pattern_util --curation-status DIR                   # check centralized session status
 ```
 
 ## `workflow` Capabilities

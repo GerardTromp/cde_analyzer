@@ -157,6 +157,33 @@ steps:
       patterns: "${output_dir}/curated.tsv"
 ```
 
+### Centralized Curation Step
+
+Instead of a checkpoint (which pauses for manual file-based review), you can
+use a `serve_curation` action step that starts a centralized server. The
+server blocks until Ctrl-C, then the workflow continues:
+
+```yaml
+  # Centralized curation (replaces a checkpoint step)
+  - name: centralized_review
+    action: pattern_util
+    args:
+      serve_curation: "${curation_config}"
+      curation_source: "${field_enriched_tsv}"
+      no_browser: false
+
+  # After the server stops, merge curator submissions
+  - name: merge_curation
+    action: pattern_util
+    args:
+      merge_curation:
+        - "${curation_output}/curator_1.tsv"
+        - "${curation_output}/curator_2.tsv"
+      output: "${curation_output}/results/"
+```
+
+See [Distributed Curation — Centralized Mode](../vignettes/distributed-curation.md#centralized-server-mode) for setup details.
+
 ## Variable Resolution
 
 Variables are resolved in this order (later overrides earlier):

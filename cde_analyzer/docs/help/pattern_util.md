@@ -46,6 +46,10 @@ cde-analyzer pattern_util --edit FILE [--port N] [--no-browser]
 # Multi-curator curation
 cde-analyzer pattern_util --init-curation FILE --curators "a,b,c" [-o DIR]
 cde-analyzer pattern_util --merge-curation FILE1 FILE2 ... -o DIR
+
+# Centralized curation server
+cde-analyzer pattern_util --serve-curation CONFIG.yaml --curation-source FILE
+cde-analyzer pattern_util --curation-status DIR
 ```
 
 ## Modes
@@ -269,7 +273,67 @@ Outputs:
 | `discrepancies.html` | Interactive browser-based visual diff viewer |
 
 See [Distributed Curation](../vignettes/distributed-curation.md) for the
-full workflow including the standalone editor.
+full workflow including the standalone editor and centralized server.
+
+### Centralized Curation Server
+
+Host a single server that serves per-curator editor sessions via unique
+token URLs. Curators access their session in a browser — no file exchange
+or `cde-analyzer` installation needed.
+
+**Start the server:**
+
+```bash
+cde-analyzer pattern_util --serve-curation curation_server.yaml \
+    --curation-source coalesced_fields.tsv
+```
+
+The server:
+
+1. Reads curator list, TLS settings, and timespan from the YAML config
+2. Generates HMAC-authenticated token URLs for each curator
+3. Serves per-curator TSV editors at `https://host:port/c/{token}/`
+4. Provides an admin dashboard at `https://host:port/admin/`
+5. Tracks session state in `.curation_state.yaml`
+
+**Configuration file** (`curation_server.yaml`):
+
+```yaml
+curators:
+  - name: Alice Smith
+    email: alice@example.com
+  - name: Bob Jones
+    email: bob@example.com
+
+server:
+  host: 0.0.0.0
+  port: 8443
+  output_dir: ./curation_output
+  timespan: 24h
+
+tls:
+  mode: auto          # auto | custom | proxy
+
+security:
+  secret_key: auto    # auto-generated per session
+  max_attempts: 5     # failed auth before lockout
+```
+
+**TLS modes:**
+
+| Mode | Behavior |
+|------|----------|
+| `auto` | Generate self-signed cert on first run (stored in `{output_dir}/.tls/`) |
+| `custom` | Use provided `cert` and `key` paths |
+| `proxy` | Plain HTTP (behind nginx/caddy reverse proxy with TLS termination) |
+
+**Check session status:**
+
+```bash
+cde-analyzer pattern_util --curation-status ./curation_output
+```
+
+See [Distributed Curation — Centralized Mode](../vignettes/distributed-curation.md#centralized-server-mode) for the full workflow.
 
 ### Standalone Editor (Zipapp)
 
@@ -386,6 +450,15 @@ python cde_editor.pyz --version                # show version
 | `--curators "a,b,c"` | Comma-separated curator names (min 2, alphanumeric + underscore) |
 | `--merge-curation FILE ...` | Merge 2+ annotated curator TSV files |
 | `-o, --output DIR` | Output directory for init-curation or merge-curation |
+
+### Centralized Server Options
+
+| Option | Description |
+|--------|-------------|
+| `--serve-curation CONFIG` | Start centralized curation server from YAML config |
+| `--curation-source FILE` | Source patterns TSV (required with `--serve-curation`) |
+| `--curation-status DIR` | Show status of a centralized curation session |
+| `--no-browser` | Start server without opening admin dashboard |
 
 ### Conversion Options
 
