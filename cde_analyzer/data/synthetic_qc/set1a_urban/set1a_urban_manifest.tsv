@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	instrument	temporal_phrase	injection_site
+synUHI001	urban_heat_island	Urban Heat Island Assessment	Heat Metrics	terse	uhi	Surface temperature anomaly	ESI Heat Exposure	Over the past 30 days	name+question+definition
+synUHI002	urban_heat_island	Urban Heat Island Assessment	Heat Metrics	terse	uhi	Heat wave intensity index	ESI Heat Exposure	During the last 12 months	name+question+definition
+synUHI003	urban_heat_island	Urban Heat Island Assessment	Land Cover	terse	uhi	Impervious surface fraction	ESI Heat Exposure	In the past 7 days	name+question+definition
+synUHI004	urban_heat_island	Urban Heat Island Assessment	Building Properties	terse	uhi	Building albedo value	ESI Heat Exposure	Over the past 30 days	name+question+definition
+synUHI005	urban_heat_island	Urban Heat Island Assessment	Energy Balance	terse	uhi	Anthropogenic heat flux	ESI Heat Exposure	During the last 12 months	name+question+definition
+synUHI006	urban_heat_island	Urban Heat Island Assessment	Health Impact	terse	xd1a:health_impact	Heat-related health impact score	ESI Heat Exposure	In the past 7 days	name+question+definition
+synUHI007	urban_heat_island	Urban Heat Island Assessment	Infrastructure	terse	uhi	Infrastructure thermal stress rating	CRAT Infrastructure Vulnerability	Over the past 30 days	name+question+definition
+synUHI008	urban_heat_island	Urban Heat Island Assessment	Infrastructure	terse	uhi	Pavement surface temperature	CRAT Infrastructure Vulnerability	During the last 12 months	name+question+definition
+synUHI009	urban_heat_island	Urban Heat Island Assessment	Green Infrastructure	terse	uhi	Green roof coverage area	CRAT Infrastructure Vulnerability	In the past 7 days	name+question+definition
+synUHI010	urban_heat_island	Urban Heat Island Assessment	Vegetation	terse	uhi	Urban tree canopy extent	CRAT Infrastructure Vulnerability	Over the past 30 days	name+question+definition
+synUHI011	urban_heat_island	Urban Heat Island Assessment	Temperature	terse	xd1a:temperature	Surface temperature at monitoring point	CRAT Infrastructure Vulnerability	During the last 12 months	name+question+definition
+synUHI012	urban_heat_island	Urban Heat Island Assessment	Thermal Comfort	terse	uhi	Pedestrian thermal comfort index	CRAT Infrastructure Vulnerability	In the past 7 days	name+question+definition
+synUHI013	urban_heat_island	Urban Heat Island Assessment	Particulates	terse	xd1a:particulates	Airborne particulate concentration	ESI Heat Exposure		definition_only
+synUHI014	urban_heat_island	Urban Heat Island Assessment	Remote Sensing	terse	uhi	Heat island spatial extent	ESI Heat Exposure		definition_only
+synUHI015	urban_heat_island	Urban Heat Island Assessment	Climate Zones	terse	uhi	Microclimate zone classification	ESI Heat Exposure		definition_only
+synUHI016	urban_heat_island	Urban Heat Island Assessment	Monitoring	terse	xd1a:coordinates	Monitoring station coordinates		Over the past 30 days	temporal_only
+synUHI017	urban_heat_island	Urban Heat Island Assessment	Seasonal Patterns	terse	xd1a:seasonal	Seasonal urban heat pattern		During the last 12 months	temporal_only
+synUHI018	urban_heat_island	Urban Heat Island Assessment	Compliance	terse	xd1a:regulatory	Heat threshold exceedance count			clean
+synUHI019	urban_heat_island	Urban Heat Island Assessment	Sampling	terse	xd1a:sampling	Thermal sampling methodology			clean
+synUHI020	urban_heat_island	Urban Heat Island Assessment	Mitigation	terse	uhi	Cool pavement adoption rate			clean
+synSRM001	stormwater_runoff	Stormwater Runoff Monitoring	Discharge	informational	srm	Peak discharge volume	ESI Water Stress	Over the past 30 days	name+question+definition
+synSRM002	stormwater_runoff	Stormwater Runoff Monitoring	Hydrology	informational	srm	Runoff coefficient	ESI Water Stress	During the last 12 months	name+question+definition
+synSRM003	stormwater_runoff	Stormwater Runoff Monitoring	Water Quality	informational	srm	First flush pollutant concentration	ESI Water Stress	In the past 7 days	name+question+definition
+synSRM004	stormwater_runoff	Stormwater Runoff Monitoring	Water Quality	informational	srm	Total suspended solids in runoff	ESI Water Stress	Over the past 30 days	name+question+definition
+synSRM005	stormwater_runoff	Stormwater Runoff Monitoring	Pollutant Loading	informational	srm	Pollutant loading rate	ESI Water Stress	During the last 12 months	name+question+definition
+synSRM006	stormwater_runoff	Stormwater Runoff Monitoring	Health Impact	informational	xd1a:health_impact	Runoff public health risk score	ESI Water Stress	In the past 7 days	name+question+definition
+synSRM007	stormwater_runoff	Stormwater Runoff Monitoring	Infrastructure	informational	srm	Storm drain network capacity	CRAT Environmental Burden	Over the past 30 days	name+question+definition
+synSRM008	stormwater_runoff	Stormwater Runoff Monitoring	Land Cover	informational	srm	Impervious area ratio	CRAT Environmental Burden	During the last 12 months	name+question+definition
+synSRM009	stormwater_runoff	Stormwater Runoff Monitoring	Green Infrastructure	informational	srm	Green infrastructure retention volume	CRAT Environmental Burden	In the past 7 days	name+question+definition
+synSRM010	stormwater_runoff	Stormwater Runoff Monitoring	Green Infrastructure	informational	srm	Bioswale infiltration rate	CRAT Environmental Burden	Over the past 30 days	name+question+definition
+synSRM011	stormwater_runoff	Stormwater Runoff Monitoring	Temperature	informational	xd1a:temperature	Runoff water temperature	CRAT Environmental Burden	During the last 12 months	name+question+definition
+synSRM012	stormwater_runoff	Stormwater Runoff Monitoring	Infrastructure	informational	srm	Curb inlet hydraulic efficiency	CRAT Environmental Burden	In the past 7 days	name+question+definition
+synSRM013	stormwater_runoff	Stormwater Runoff Monitoring	Particulates	informational	xd1a:particulates	Suspended sediment concentration in runoff	ESI Water Stress		definition_only
+synSRM014	stormwater_runoff	Stormwater Runoff Monitoring	Design Storms	informational	srm	Rainfall intensity-duration curve	ESI Water Stress		definition_only
+synSRM015	stormwater_runoff	Stormwater Runoff Monitoring	Watershed	informational	srm	Watershed delineation boundary	ESI Water Stress		definition_only
+synSRM016	stormwater_runoff	Stormwater Runoff Monitoring	Monitoring	informational	xd1a:coordinates	Outfall monitoring coordinates		Over the past 30 days	temporal_only
+synSRM017	stormwater_runoff	Stormwater Runoff Monitoring	Seasonal Patterns	informational	xd1a:seasonal	Seasonal rainfall-runoff pattern		During the last 12 months	temporal_only
+synSRM018	stormwater_runoff	Stormwater Runoff Monitoring	Compliance	informational	xd1a:regulatory	Discharge permit compliance status			clean
+synSRM019	stormwater_runoff	Stormwater Runoff Monitoring	Sampling	informational	xd1a:sampling	Stormwater sampling protocol			clean
+synSRM020	stormwater_runoff	Stormwater Runoff Monitoring	Overflow	informational	srm	Combined sewer overflow frequency			clean
+synIAQ001	indoor_air_quality	Indoor Air Quality Evaluation	Chemical Agents	expansive	iaq	Indoor carbon dioxide concentration	ESI Air Contamination	Over the past 30 days	name+question+definition
+synIAQ002	indoor_air_quality	Indoor Air Quality Evaluation	Chemical Agents	expansive	iaq	Formaldehyde emission level	ESI Air Contamination	During the last 12 months	name+question+definition
+synIAQ003	indoor_air_quality	Indoor Air Quality Evaluation	Radiological	expansive	iaq	Indoor radon activity concentration	ESI Air Contamination	In the past 7 days	name+question+definition
+synIAQ004	indoor_air_quality	Indoor Air Quality Evaluation	Biological Agents	expansive	iaq	Viable mold spore count	ESI Air Contamination	Over the past 30 days	name+question+definition
+synIAQ005	indoor_air_quality	Indoor Air Quality Evaluation	Particulates	expansive	iaq	Indoor PM2.5 mass concentration	ESI Air Contamination	During the last 12 months	name+question+definition
+synIAQ006	indoor_air_quality	Indoor Air Quality Evaluation	Health Impact	expansive	xd1a:health_impact	Occupant health symptom prevalence	ESI Air Contamination	In the past 7 days	name+question+definition
+synIAQ007	indoor_air_quality	Indoor Air Quality Evaluation	Ventilation	expansive	iaq	Mechanical ventilation rate	CRAT Health Impact	Over the past 30 days	name+question+definition
+synIAQ008	indoor_air_quality	Indoor Air Quality Evaluation	Chemical Agents	expansive	iaq	Total volatile organic compound mixture	CRAT Health Impact	During the last 12 months	name+question+definition
+synIAQ009	indoor_air_quality	Indoor Air Quality Evaluation	Exposure	expansive	iaq	Occupant pollutant exposure duration	CRAT Health Impact	In the past 7 days	name+question+definition
+synIAQ010	indoor_air_quality	Indoor Air Quality Evaluation	Ventilation	expansive	iaq	Air change rate per hour	CRAT Health Impact	Over the past 30 days	name+question+definition
+synIAQ011	indoor_air_quality	Indoor Air Quality Evaluation	Temperature	expansive	xd1a:temperature	Indoor air temperature	CRAT Health Impact	During the last 12 months	name+question+definition
+synIAQ012	indoor_air_quality	Indoor Air Quality Evaluation	Humidity	expansive	iaq	Relative humidity control effectiveness	CRAT Health Impact	In the past 7 days	name+question+definition
+synIAQ013	indoor_air_quality	Indoor Air Quality Evaluation	Particulates	expansive	xd1a:particulates	Respirable dust concentration indoors	ESI Air Contamination		definition_only
+synIAQ014	indoor_air_quality	Indoor Air Quality Evaluation	Filtration	expansive	iaq	HVAC filter particulate removal efficiency	ESI Air Contamination		definition_only
+synIAQ015	indoor_air_quality	Indoor Air Quality Evaluation	Source Assessment	expansive	iaq	Pollutant source identification category	ESI Air Contamination		definition_only
+synIAQ016	indoor_air_quality	Indoor Air Quality Evaluation	Monitoring	expansive	xd1a:coordinates	Indoor monitoring sensor location		Over the past 30 days	temporal_only
+synIAQ017	indoor_air_quality	Indoor Air Quality Evaluation	Seasonal Patterns	expansive	xd1a:seasonal	Seasonal indoor air quality variation		During the last 12 months	temporal_only
+synIAQ018	indoor_air_quality	Indoor Air Quality Evaluation	Compliance	expansive	xd1a:regulatory	Indoor air standard compliance			clean
+synIAQ019	indoor_air_quality	Indoor Air Quality Evaluation	Sampling	expansive	xd1a:sampling	Indoor air sampling protocol			clean
+synIAQ020	indoor_air_quality	Indoor Air Quality Evaluation	Building Envelope	expansive	iaq	Building envelope airtightness			clean

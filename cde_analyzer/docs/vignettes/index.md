@@ -13,6 +13,7 @@ your current goal.
 | Understanding the workflow engine, config files, and scaffold | [Pipeline Orchestration](pipeline-orchestration.md) |
 | Adjusting parameters for small vs large datasets | [Parameter Tuning](parameter-tuning.md) |
 | Already have curated patterns; want to strip and diagnose | [Phrase Stripping](phrase-stripping.md) |
+| Testing embedding/clustering with controlled noise | [Synthetic QC Data](synthetic-data.md) |
 
 ## Pipeline flow
 

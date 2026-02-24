@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	instrument	temporal_phrase	injection_site
+synPAN001	pain_assessment	Pain Assessment	Pain Intensity	terse	pan	Pain intensity numeric rating	SSS Pain Interference	In the past 7 days	name+question+definition
+synPAN002	pain_assessment	Pain Assessment	Pain Location	terse	pan	Pain location body region	SSS Pain Interference	Over the past 2 weeks	name+question+definition
+synPAN003	pain_assessment	Pain Assessment	Pain Frequency	terse	pan	Pain episode frequency	SSS Pain Interference	During the past 4 weeks	name+question+definition
+synPAN004	pain_assessment	Pain Assessment	Pain Timing	terse	pan	Pain onset timing	SSS Pain Interference	In the past 7 days	name+question+definition
+synPAN005	pain_assessment	Pain Assessment	Pain Duration	terse	pan	Pain duration per episode	SSS Pain Interference	Over the past 2 weeks	name+question+definition
+synPAN006	pain_assessment	Pain Assessment	Severity	terse	xd1b:severity	Overall symptom severity rating	SSS Pain Interference	During the past 4 weeks	name+question+definition
+synPAN007	pain_assessment	Pain Assessment	Physical Function	terse	pan	Grip strength measurement	FAB Physical Function	In the past 7 days	name+question+definition
+synPAN008	pain_assessment	Pain Assessment	Physical Function	terse	pan	Walking distance achieved	FAB Physical Function	Over the past 2 weeks	name+question+definition
+synPAN009	pain_assessment	Pain Assessment	Physical Function	terse	pan	Stair climbing ability	FAB Physical Function	During the past 4 weeks	name+question+definition
+synPAN010	pain_assessment	Pain Assessment	Physical Function	terse	pan	Lifting capacity assessment	FAB Physical Function	In the past 7 days	name+question+definition
+synPAN011	pain_assessment	Pain Assessment	Function	terse	xd1b:function	Functional impairment score	FAB Physical Function	Over the past 2 weeks	name+question+definition
+synPAN012	pain_assessment	Pain Assessment	Physical Function	terse	pan	Joint range of motion	FAB Physical Function	During the past 4 weeks	name+question+definition
+synPAN013	pain_assessment	Pain Assessment	Medication	terse	xd1b:medication	Analgesic medication usage	SSS Pain Interference		definition_only
+synPAN014	pain_assessment	Pain Assessment	Psychological	terse	pan	Pain catastrophizing score	SSS Pain Interference		definition_only
+synPAN015	pain_assessment	Pain Assessment	Triggers	terse	pan	Pain trigger identification	SSS Pain Interference		definition_only
+synPAN016	pain_assessment	Pain Assessment	Demographics	terse	xd1b:demographics	Age at assessment		In the past 7 days	temporal_only
+synPAN017	pain_assessment	Pain Assessment	Comorbidity	terse	xd1b:comorbidity	Comorbidity count		Over the past 2 weeks	temporal_only
+synPAN018	pain_assessment	Pain Assessment	Quality of Life	terse	xd1b:qol	Quality of life impact rating			clean
+synPAN019	pain_assessment	Pain Assessment	Treatment	terse	xd1b:treatment	Treatment response classification			clean
+synPAN020	pain_assessment	Pain Assessment	Pain Characteristics	terse	pan	Referred pain distribution			clean
+synCOG001	cognitive_function	Cognitive Function Evaluation	Memory	informational	cog	Working memory span score	SSS Cognitive Difficulty	In the past 7 days	name+question+definition
+synCOG002	cognitive_function	Cognitive Function Evaluation	Attention	informational	cog	Sustained attention duration	SSS Cognitive Difficulty	Over the past 2 weeks	name+question+definition
+synCOG003	cognitive_function	Cognitive Function Evaluation	Processing Speed	informational	cog	Processing speed index	SSS Cognitive Difficulty	During the past 4 weeks	name+question+definition
+synCOG004	cognitive_function	Cognitive Function Evaluation	Language	informational	cog	Verbal fluency word count	SSS Cognitive Difficulty	In the past 7 days	name+question+definition
+synCOG005	cognitive_function	Cognitive Function Evaluation	Executive Function	informational	cog	Executive function composite rating	SSS Cognitive Difficulty	Over the past 2 weeks	name+question+definition
+synCOG006	cognitive_function	Cognitive Function Evaluation	Severity	informational	xd1b:severity	Cognitive symptom severity level	SSS Cognitive Difficulty	During the past 4 weeks	name+question+definition
+synCOG007	cognitive_function	Cognitive Function Evaluation	Daily Function	informational	cog	Task completion time	FAB Daily Living Activities	In the past 7 days	name+question+definition
+synCOG008	cognitive_function	Cognitive Function Evaluation	Daily Function	informational	cog	Instrumental activities score	FAB Daily Living Activities	Over the past 2 weeks	name+question+definition
+synCOG009	cognitive_function	Cognitive Function Evaluation	Social Function	informational	cog	Social participation frequency	FAB Daily Living Activities	During the past 4 weeks	name+question+definition
+synCOG010	cognitive_function	Cognitive Function Evaluation	Communication	informational	cog	Communication effectiveness rating	FAB Daily Living Activities	In the past 7 days	name+question+definition
+synCOG011	cognitive_function	Cognitive Function Evaluation	Function	informational	xd1b:function	Daily functional independence level	FAB Daily Living Activities	Over the past 2 weeks	name+question+definition
+synCOG012	cognitive_function	Cognitive Function Evaluation	Reasoning	informational	cog	Problem solving accuracy	FAB Daily Living Activities	During the past 4 weeks	name+question+definition
+synCOG013	cognitive_function	Cognitive Function Evaluation	Medication	informational	xd1b:medication	Cognitive medication usage	SSS Cognitive Difficulty		definition_only
+synCOG014	cognitive_function	Cognitive Function Evaluation	Longitudinal	informational	cog	Cognitive decline trajectory	SSS Cognitive Difficulty		definition_only
+synCOG015	cognitive_function	Cognitive Function Evaluation	Assessment	informational	cog	Neuropsychological battery composite	SSS Cognitive Difficulty		definition_only
+synCOG016	cognitive_function	Cognitive Function Evaluation	Demographics	informational	xd1b:demographics	Participant age at evaluation		In the past 7 days	temporal_only
+synCOG017	cognitive_function	Cognitive Function Evaluation	Comorbidity	informational	xd1b:comorbidity	Concurrent medical condition count		Over the past 2 weeks	temporal_only
+synCOG018	cognitive_function	Cognitive Function Evaluation	Quality of Life	informational	xd1b:qol	Cognitive quality of life impact			clean
+synCOG019	cognitive_function	Cognitive Function Evaluation	Treatment	informational	xd1b:treatment	Cognitive treatment response rating			clean
+synCOG020	cognitive_function	Cognitive Function Evaluation	Memory Subtests	informational	cog	Digit span forward and backward			clean
+synSLP001	sleep_quality	Sleep Quality Measurement	Sleep Initiation	expansive	slp	Sleep onset latency	SSS Sleep Disturbance	In the past 7 days	name+question+definition
+synSLP002	sleep_quality	Sleep Quality Measurement	Sleep Efficiency	expansive	slp	Sleep efficiency percentage	SSS Sleep Disturbance	Over the past 2 weeks	name+question+definition
+synSLP003	sleep_quality	Sleep Quality Measurement	Sleep Duration	expansive	slp	Total sleep time	SSS Sleep Disturbance	During the past 4 weeks	name+question+definition
+synSLP004	sleep_quality	Sleep Quality Measurement	Sleep Continuity	expansive	slp	Number of nocturnal awakenings	SSS Sleep Disturbance	In the past 7 days	name+question+definition
+synSLP005	sleep_quality	Sleep Quality Measurement	Sleep Architecture	expansive	slp	Sleep stage distribution	SSS Sleep Disturbance	Over the past 2 weeks	name+question+definition
+synSLP006	sleep_quality	Sleep Quality Measurement	Severity	expansive	xd1b:severity	Sleep disturbance severity rating	SSS Sleep Disturbance	During the past 4 weeks	name+question+definition
+synSLP007	sleep_quality	Sleep Quality Measurement	Daytime Impact	expansive	slp	Daytime sleepiness score	FAB Emotional Well-Being	In the past 7 days	name+question+definition
+synSLP008	sleep_quality	Sleep Quality Measurement	Daytime Impact	expansive	slp	Fatigue impact level	FAB Emotional Well-Being	Over the past 2 weeks	name+question+definition
+synSLP009	sleep_quality	Sleep Quality Measurement	Sleep Behavior	expansive	slp	Napping frequency and duration	FAB Emotional Well-Being	During the past 4 weeks	name+question+definition
+synSLP010	sleep_quality	Sleep Quality Measurement	Sleep Behavior	expansive	slp	Bedtime regularity index	FAB Emotional Well-Being	In the past 7 days	name+question+definition
+synSLP011	sleep_quality	Sleep Quality Measurement	Function	expansive	xd1b:function	Sleep-related functional impairment	FAB Emotional Well-Being	Over the past 2 weeks	name+question+definition
+synSLP012	sleep_quality	Sleep Quality Measurement	Sleep Environment	expansive	slp	Sleep environment adequacy rating	FAB Emotional Well-Being	During the past 4 weeks	name+question+definition
+synSLP013	sleep_quality	Sleep Quality Measurement	Medication	expansive	xd1b:medication	Sleep medication usage record	SSS Sleep Disturbance		definition_only
+synSLP014	sleep_quality	Sleep Quality Measurement	Diagnostics	expansive	slp	Polysomnography apnea-hypopnea index	SSS Sleep Disturbance		definition_only
+synSLP015	sleep_quality	Sleep Quality Measurement	Circadian	expansive	slp	Circadian rhythm phase marker	SSS Sleep Disturbance		definition_only
+synSLP016	sleep_quality	Sleep Quality Measurement	Demographics	expansive	xd1b:demographics	Subject age at sleep assessment		In the past 7 days	temporal_only
+synSLP017	sleep_quality	Sleep Quality Measurement	Comorbidity	expansive	xd1b:comorbidity	Sleep-relevant comorbidity count		Over the past 2 weeks	temporal_only
+synSLP018	sleep_quality	Sleep Quality Measurement	Quality of Life	expansive	xd1b:qol	Sleep-related quality of life			clean
+synSLP019	sleep_quality	Sleep Quality Measurement	Treatment	expansive	xd1b:treatment	Sleep intervention response rating			clean
+synSLP020	sleep_quality	Sleep Quality Measurement	Movement Disorders	expansive	slp	Restless leg symptom severity			clean

@@ -1,0 +1,181 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	noise_tier	instrument	temporal_phrase	anchor_phrase	source_tinyId
+synAIR001_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM2.5 concentration	light		Over the past 30 days		synAIR001
+synAIR002_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM10 concentration	light		Over the past 30 days		synAIR002
+synAIR003_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Ground-level ozone	light		Over the past 30 days		synAIR003
+synAIR004_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Nitrogen dioxide level	light		Over the past 30 days		synAIR004
+synAIR005_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Sulfur dioxide level	light		Over the past 30 days		synAIR005
+synAIR006_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Carbon monoxide level	light		Over the past 30 days		synAIR006
+synAIR007_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Air Quality Index	light		Over the past 30 days		synAIR007
+synAIR008_t1	air_quality	Air Quality Monitoring	Heavy Metals	terse	xd:heavy_metals	Airborne lead concentration	light		Over the past 30 days		synAIR008
+synAIR009_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Benzene level	light		Over the past 30 days		synAIR009
+synAIR010_t1	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	VOC concentration	light		Over the past 30 days		synAIR010
+synAIR011_t1	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Ambient temperature	light		Over the past 30 days		synAIR011
+synAIR012_t1	air_quality	Air Quality Monitoring	Meteorological	terse	air	Relative humidity	light		Over the past 30 days		synAIR012
+synAIR013_t1	air_quality	Air Quality Monitoring	Meteorological	terse	air	Wind speed	light		Over the past 30 days		synAIR013
+synAIR014_t1	air_quality	Air Quality Monitoring	Meteorological	terse	air	Atmospheric pressure	light		Over the past 30 days		synAIR014
+synAIR015_t1	air_quality	Air Quality Monitoring	Meteorological	terse	air	Visibility distance	light		Over the past 30 days		synAIR015
+synAIR016_t1	air_quality	Air Quality Monitoring	Sampling	terse	xd:sampling	Sampling frequency	light		Over the past 30 days		synAIR016
+synAIR017_t1	air_quality	Air Quality Monitoring	Sampling	terse	xd:coordinates	Station coordinates	light		Over the past 30 days		synAIR017
+synAIR018_t1	air_quality	Air Quality Monitoring	Compliance	terse	xd:regulatory	Exceedance day count	light		Over the past 30 days		synAIR018
+synAIR019_t1	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Acidity of precipitation	light		Over the past 30 days		synAIR019
+synAIR020_t1	air_quality	Air Quality Monitoring	Seasonal Patterns	terse	xd:seasonal	Seasonal pollutant trend	light		Over the past 30 days		synAIR020
+synWAT001_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen concentration	light		Over the past 30 days		synWAT001
+synWAT002_t1	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Water pH measurement	light		Over the past 30 days		synWAT002
+synWAT003_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Turbidity of water sample	light		Over the past 30 days		synWAT003
+synWAT004_t1	water_quality	Water Quality Assessment	Nutrients	informational	water	Nitrate concentration in water	light		Over the past 30 days		synWAT004
+synWAT005_t1	water_quality	Water Quality Assessment	Nutrients	informational	water	Phosphate level in water	light		Over the past 30 days		synWAT005
+synWAT006_t1	water_quality	Water Quality Assessment	Microbiology	informational	water	Escherichia coli count	light		Over the past 30 days		synWAT006
+synWAT007_t1	water_quality	Water Quality Assessment	Microbiology	informational	water	Total coliform bacteria count	light		Over the past 30 days		synWAT007
+synWAT008_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Electrical conductivity of water	light		Over the past 30 days		synWAT008
+synWAT009_t1	water_quality	Water Quality Assessment	Temperature	informational	xd:temperature	Water temperature at sampling point	light		Over the past 30 days		synWAT009
+synWAT010_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Biochemical oxygen demand	light		Over the past 30 days		synWAT010
+synWAT011_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chemical oxygen demand	light		Over the past 30 days		synWAT011
+synWAT012_t1	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Lead concentration in water	light		Over the past 30 days		synWAT012
+synWAT013_t1	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Mercury level in water	light		Over the past 30 days		synWAT013
+synWAT014_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chlorophyll-a concentration	light		Over the past 30 days		synWAT014
+synWAT015_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Total dissolved solids	light		Over the past 30 days		synWAT015
+synWAT016_t1	water_quality	Water Quality Assessment	Sampling	informational	xd:sampling	Water sampling method	light		Over the past 30 days		synWAT016
+synWAT017_t1	water_quality	Water Quality Assessment	Sampling	informational	xd:coordinates	Sampling site geographic coordinates	light		Over the past 30 days		synWAT017
+synWAT018_t1	water_quality	Water Quality Assessment	Compliance	informational	xd:regulatory	Regulatory threshold exceedance	light		Over the past 30 days		synWAT018
+synWAT019_t1	water_quality	Water Quality Assessment	Core Parameters	informational	water	Salinity measurement	light		Over the past 30 days		synWAT019
+synWAT020_t1	water_quality	Water Quality Assessment	Seasonal Patterns	informational	xd:seasonal	Seasonal water quality variation	light		Over the past 30 days		synWAT020
+synSOL001_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Soil organic matter content by weight	light		Over the past 30 days		synSOL001
+synSOL002_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Total nitrogen content of the soil sample	light		Over the past 30 days		synSOL002
+synSOL003_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Plant-available phosphorus concentration in soil	light		Over the past 30 days		synSOL003
+synSOL004_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Exchangeable potassium in the soil matrix	light		Over the past 30 days		synSOL004
+synSOL005_t1	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH measured in aqueous suspension	light		Over the past 30 days		synSOL005
+synSOL006_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Cation exchange capacity of the soil	light		Over the past 30 days		synSOL006
+synSOL007_t1	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil bulk density at the sampling location	light		Over the past 30 days		synSOL007
+synSOL008_t1	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Gravimetric soil moisture content	light		Over the past 30 days		synSOL008
+synSOL009_t1	soil_composition	Soil Composition Analysis	Microbiology	expansive	soil	Microbial biomass carbon in the soil	light		Over the past 30 days		synSOL009
+synSOL010_t1	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Lead concentration in the soil sample	light		Over the past 30 days		synSOL010
+synSOL011_t1	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Cadmium contamination level in the soil	light		Over the past 30 days		synSOL011
+synSOL012_t1	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil texture classification based on particle size distribution	light		Over the past 30 days		synSOL012
+synSOL013_t1	soil_composition	Soil Composition Analysis	Temperature	expansive	xd:temperature	Soil temperature profile at the sampling depth	light		Over the past 30 days		synSOL013
+synSOL014_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Electrical conductivity of the soil saturation extract	light		Over the past 30 days		synSOL014
+synSOL015_t1	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:sampling	Depth of soil sample collection below the surface	light		Over the past 30 days		synSOL015
+synSOL016_t1	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:coordinates	Geographic coordinates of the soil sampling point	light		Over the past 30 days		synSOL016
+synSOL017_t1	soil_composition	Soil Composition Analysis	Compliance	expansive	xd:regulatory	Regulatory contamination threshold exceedance for the soil sample	light		Over the past 30 days		synSOL017
+synSOL018_t1	soil_composition	Soil Composition Analysis	Seasonal Patterns	expansive	xd:seasonal	Seasonal variation in soil organic matter content	light		Over the past 30 days		synSOL018
+synSOL019_t1	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Carbon-to-nitrogen ratio of the soil organic fraction	light		Over the past 30 days		synSOL019
+synSOL020_t1	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Aggregate stability of the soil structure	light		Over the past 30 days		synSOL020
+synAIR001_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM2.5 concentration	medium	EMP Atmospheric Analysis			synAIR001
+synAIR002_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM10 concentration	medium	EMP Atmospheric Analysis			synAIR002
+synAIR003_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Ground-level ozone	medium	EMP Atmospheric Analysis			synAIR003
+synAIR004_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Nitrogen dioxide level	medium	EMP Atmospheric Analysis			synAIR004
+synAIR005_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Sulfur dioxide level	medium	EMP Atmospheric Analysis			synAIR005
+synAIR006_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Carbon monoxide level	medium	EMP Atmospheric Analysis			synAIR006
+synAIR007_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Air Quality Index	medium	EMP Atmospheric Analysis			synAIR007
+synAIR008_t2	air_quality	Air Quality Monitoring	Heavy Metals	terse	xd:heavy_metals	Airborne lead concentration	medium	EMP Atmospheric Analysis			synAIR008
+synAIR009_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Benzene level	medium	EMP Atmospheric Analysis			synAIR009
+synAIR010_t2	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	VOC concentration	medium	EMP Atmospheric Analysis			synAIR010
+synAIR011_t2	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Ambient temperature	medium	EMP Atmospheric Analysis			synAIR011
+synAIR012_t2	air_quality	Air Quality Monitoring	Meteorological	terse	air	Relative humidity	medium	EMP Atmospheric Analysis			synAIR012
+synAIR013_t2	air_quality	Air Quality Monitoring	Meteorological	terse	air	Wind speed	medium	EMP Atmospheric Analysis			synAIR013
+synAIR014_t2	air_quality	Air Quality Monitoring	Meteorological	terse	air	Atmospheric pressure	medium	EMP Atmospheric Analysis			synAIR014
+synAIR015_t2	air_quality	Air Quality Monitoring	Meteorological	terse	air	Visibility distance	medium	EMP Atmospheric Analysis			synAIR015
+synAIR016_t2	air_quality	Air Quality Monitoring	Sampling	terse	xd:sampling	Sampling frequency	medium	EMP Atmospheric Analysis			synAIR016
+synAIR017_t2	air_quality	Air Quality Monitoring	Sampling	terse	xd:coordinates	Station coordinates	medium	EMP Atmospheric Analysis			synAIR017
+synAIR018_t2	air_quality	Air Quality Monitoring	Compliance	terse	xd:regulatory	Exceedance day count	medium	EMP Atmospheric Analysis			synAIR018
+synAIR019_t2	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Acidity of precipitation	medium	EMP Atmospheric Analysis			synAIR019
+synAIR020_t2	air_quality	Air Quality Monitoring	Seasonal Patterns	terse	xd:seasonal	Seasonal pollutant trend	medium	EMP Atmospheric Analysis			synAIR020
+synWAT001_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen concentration	medium	EMP Aquatic Assessment			synWAT001
+synWAT002_t2	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Water pH measurement	medium	EMP Aquatic Assessment			synWAT002
+synWAT003_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Turbidity of water sample	medium	EMP Aquatic Assessment			synWAT003
+synWAT004_t2	water_quality	Water Quality Assessment	Nutrients	informational	water	Nitrate concentration in water	medium	EMP Aquatic Assessment			synWAT004
+synWAT005_t2	water_quality	Water Quality Assessment	Nutrients	informational	water	Phosphate level in water	medium	EMP Aquatic Assessment			synWAT005
+synWAT006_t2	water_quality	Water Quality Assessment	Microbiology	informational	water	Escherichia coli count	medium	EMP Aquatic Assessment			synWAT006
+synWAT007_t2	water_quality	Water Quality Assessment	Microbiology	informational	water	Total coliform bacteria count	medium	EMP Aquatic Assessment			synWAT007
+synWAT008_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Electrical conductivity of water	medium	EMP Aquatic Assessment			synWAT008
+synWAT009_t2	water_quality	Water Quality Assessment	Temperature	informational	xd:temperature	Water temperature at sampling point	medium	EMP Aquatic Assessment			synWAT009
+synWAT010_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Biochemical oxygen demand	medium	EMP Aquatic Assessment			synWAT010
+synWAT011_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chemical oxygen demand	medium	EMP Aquatic Assessment			synWAT011
+synWAT012_t2	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Lead concentration in water	medium	EMP Aquatic Assessment			synWAT012
+synWAT013_t2	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Mercury level in water	medium	EMP Aquatic Assessment			synWAT013
+synWAT014_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chlorophyll-a concentration	medium	EMP Aquatic Assessment			synWAT014
+synWAT015_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Total dissolved solids	medium	EMP Aquatic Assessment			synWAT015
+synWAT016_t2	water_quality	Water Quality Assessment	Sampling	informational	xd:sampling	Water sampling method	medium	EMP Aquatic Assessment			synWAT016
+synWAT017_t2	water_quality	Water Quality Assessment	Sampling	informational	xd:coordinates	Sampling site geographic coordinates	medium	EMP Aquatic Assessment			synWAT017
+synWAT018_t2	water_quality	Water Quality Assessment	Compliance	informational	xd:regulatory	Regulatory threshold exceedance	medium	EMP Aquatic Assessment			synWAT018
+synWAT019_t2	water_quality	Water Quality Assessment	Core Parameters	informational	water	Salinity measurement	medium	EMP Aquatic Assessment			synWAT019
+synWAT020_t2	water_quality	Water Quality Assessment	Seasonal Patterns	informational	xd:seasonal	Seasonal water quality variation	medium	EMP Aquatic Assessment			synWAT020
+synSOL001_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Soil organic matter content by weight	medium	EMP Pedological Survey			synSOL001
+synSOL002_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Total nitrogen content of the soil sample	medium	EMP Pedological Survey			synSOL002
+synSOL003_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Plant-available phosphorus concentration in soil	medium	EMP Pedological Survey			synSOL003
+synSOL004_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Exchangeable potassium in the soil matrix	medium	EMP Pedological Survey			synSOL004
+synSOL005_t2	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH measured in aqueous suspension	medium	EMP Pedological Survey			synSOL005
+synSOL006_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Cation exchange capacity of the soil	medium	EMP Pedological Survey			synSOL006
+synSOL007_t2	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil bulk density at the sampling location	medium	EMP Pedological Survey			synSOL007
+synSOL008_t2	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Gravimetric soil moisture content	medium	EMP Pedological Survey			synSOL008
+synSOL009_t2	soil_composition	Soil Composition Analysis	Microbiology	expansive	soil	Microbial biomass carbon in the soil	medium	EMP Pedological Survey			synSOL009
+synSOL010_t2	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Lead concentration in the soil sample	medium	EMP Pedological Survey			synSOL010
+synSOL011_t2	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Cadmium contamination level in the soil	medium	EMP Pedological Survey			synSOL011
+synSOL012_t2	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil texture classification based on particle size distribution	medium	EMP Pedological Survey			synSOL012
+synSOL013_t2	soil_composition	Soil Composition Analysis	Temperature	expansive	xd:temperature	Soil temperature profile at the sampling depth	medium	EMP Pedological Survey			synSOL013
+synSOL014_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Electrical conductivity of the soil saturation extract	medium	EMP Pedological Survey			synSOL014
+synSOL015_t2	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:sampling	Depth of soil sample collection below the surface	medium	EMP Pedological Survey			synSOL015
+synSOL016_t2	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:coordinates	Geographic coordinates of the soil sampling point	medium	EMP Pedological Survey			synSOL016
+synSOL017_t2	soil_composition	Soil Composition Analysis	Compliance	expansive	xd:regulatory	Regulatory contamination threshold exceedance for the soil sample	medium	EMP Pedological Survey			synSOL017
+synSOL018_t2	soil_composition	Soil Composition Analysis	Seasonal Patterns	expansive	xd:seasonal	Seasonal variation in soil organic matter content	medium	EMP Pedological Survey			synSOL018
+synSOL019_t2	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Carbon-to-nitrogen ratio of the soil organic fraction	medium	EMP Pedological Survey			synSOL019
+synSOL020_t2	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Aggregate stability of the soil structure	medium	EMP Pedological Survey			synSOL020
+synAIR001_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM2.5 concentration	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR001
+synAIR002_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM10 concentration	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR002
+synAIR003_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Ground-level ozone	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR003
+synAIR004_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Nitrogen dioxide level	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR004
+synAIR005_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Sulfur dioxide level	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR005
+synAIR006_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Carbon monoxide level	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR006
+synAIR007_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Air Quality Index	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR007
+synAIR008_t3	air_quality	Air Quality Monitoring	Heavy Metals	terse	xd:heavy_metals	Airborne lead concentration	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR008
+synAIR009_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Benzene level	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR009
+synAIR010_t3	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	VOC concentration	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR010
+synAIR011_t3	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Ambient temperature	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR011
+synAIR012_t3	air_quality	Air Quality Monitoring	Meteorological	terse	air	Relative humidity	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR012
+synAIR013_t3	air_quality	Air Quality Monitoring	Meteorological	terse	air	Wind speed	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR013
+synAIR014_t3	air_quality	Air Quality Monitoring	Meteorological	terse	air	Atmospheric pressure	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR014
+synAIR015_t3	air_quality	Air Quality Monitoring	Meteorological	terse	air	Visibility distance	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR015
+synAIR016_t3	air_quality	Air Quality Monitoring	Sampling	terse	xd:sampling	Sampling frequency	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR016
+synAIR017_t3	air_quality	Air Quality Monitoring	Sampling	terse	xd:coordinates	Station coordinates	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR017
+synAIR018_t3	air_quality	Air Quality Monitoring	Compliance	terse	xd:regulatory	Exceedance day count	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR018
+synAIR019_t3	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Acidity of precipitation	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR019
+synAIR020_t3	air_quality	Air Quality Monitoring	Seasonal Patterns	terse	xd:seasonal	Seasonal pollutant trend	heavy	EMP Atmospheric Analysis	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synAIR020
+synWAT001_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen concentration	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT001
+synWAT002_t3	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Water pH measurement	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT002
+synWAT003_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Turbidity of water sample	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT003
+synWAT004_t3	water_quality	Water Quality Assessment	Nutrients	informational	water	Nitrate concentration in water	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT004
+synWAT005_t3	water_quality	Water Quality Assessment	Nutrients	informational	water	Phosphate level in water	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT005
+synWAT006_t3	water_quality	Water Quality Assessment	Microbiology	informational	water	Escherichia coli count	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT006
+synWAT007_t3	water_quality	Water Quality Assessment	Microbiology	informational	water	Total coliform bacteria count	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT007
+synWAT008_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Electrical conductivity of water	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT008
+synWAT009_t3	water_quality	Water Quality Assessment	Temperature	informational	xd:temperature	Water temperature at sampling point	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT009
+synWAT010_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Biochemical oxygen demand	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT010
+synWAT011_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chemical oxygen demand	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT011
+synWAT012_t3	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Lead concentration in water	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT012
+synWAT013_t3	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Mercury level in water	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT013
+synWAT014_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Chlorophyll-a concentration	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT014
+synWAT015_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Total dissolved solids	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT015
+synWAT016_t3	water_quality	Water Quality Assessment	Sampling	informational	xd:sampling	Water sampling method	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT016
+synWAT017_t3	water_quality	Water Quality Assessment	Sampling	informational	xd:coordinates	Sampling site geographic coordinates	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT017
+synWAT018_t3	water_quality	Water Quality Assessment	Compliance	informational	xd:regulatory	Regulatory threshold exceedance	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT018
+synWAT019_t3	water_quality	Water Quality Assessment	Core Parameters	informational	water	Salinity measurement	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT019
+synWAT020_t3	water_quality	Water Quality Assessment	Seasonal Patterns	informational	xd:seasonal	Seasonal water quality variation	heavy	EMP Aquatic Assessment	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synWAT020
+synSOL001_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Soil organic matter content by weight	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL001
+synSOL002_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Total nitrogen content of the soil sample	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL002
+synSOL003_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Plant-available phosphorus concentration in soil	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL003
+synSOL004_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Exchangeable potassium in the soil matrix	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL004
+synSOL005_t3	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH measured in aqueous suspension	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL005
+synSOL006_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Cation exchange capacity of the soil	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL006
+synSOL007_t3	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil bulk density at the sampling location	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL007
+synSOL008_t3	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Gravimetric soil moisture content	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL008
+synSOL009_t3	soil_composition	Soil Composition Analysis	Microbiology	expansive	soil	Microbial biomass carbon in the soil	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL009
+synSOL010_t3	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Lead concentration in the soil sample	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL010
+synSOL011_t3	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Cadmium contamination level in the soil	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL011
+synSOL012_t3	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Soil texture classification based on particle size distribution	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL012
+synSOL013_t3	soil_composition	Soil Composition Analysis	Temperature	expansive	xd:temperature	Soil temperature profile at the sampling depth	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL013
+synSOL014_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Electrical conductivity of the soil saturation extract	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL014
+synSOL015_t3	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:sampling	Depth of soil sample collection below the surface	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL015
+synSOL016_t3	soil_composition	Soil Composition Analysis	Sampling	expansive	xd:coordinates	Geographic coordinates of the soil sampling point	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL016
+synSOL017_t3	soil_composition	Soil Composition Analysis	Compliance	expansive	xd:regulatory	Regulatory contamination threshold exceedance for the soil sample	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL017
+synSOL018_t3	soil_composition	Soil Composition Analysis	Seasonal Patterns	expansive	xd:seasonal	Seasonal variation in soil organic matter content	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL018
+synSOL019_t3	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Carbon-to-nitrogen ratio of the soil organic fraction	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL019
+synSOL020_t3	soil_composition	Soil Composition Analysis	Physical Properties	expansive	soil	Aggregate stability of the soil structure	heavy	EMP Pedological Survey	Over the past 30 days	Field Sampling Quality Assurance (FSQA)	synSOL020
