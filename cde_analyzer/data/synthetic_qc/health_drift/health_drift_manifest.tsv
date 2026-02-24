@@ -1,0 +1,181 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	noise_tier	instrument	temporal_phrase	anchor_phrase	source_tinyId
+synCRD001_t1	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Resting heart rate	light		Over the past 30 days		synCRD001
+synCRD002_t1	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	xdh:blood_pressure	Systolic blood pressure	light		Over the past 30 days		synCRD002
+synCRD003_t1	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Diastolic blood pressure	light		Over the past 30 days		synCRD003
+synCRD004_t1	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Mean arterial pressure	light		Over the past 30 days		synCRD004
+synCRD005_t1	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Cardiac output	light		Over the past 30 days		synCRD005
+synCRD006_t1	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Left ventricular ejection fraction	light		Over the past 30 days		synCRD006
+synCRD007_t1	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	QT interval duration	light		Over the past 30 days		synCRD007
+synCRD008_t1	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	xdh:lab_values	Troponin I concentration	light		Over the past 30 days		synCRD008
+synCRD009_t1	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	B-type natriuretic peptide level	light		Over the past 30 days		synCRD009
+synCRD010_t1	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Total cholesterol	light		Over the past 30 days		synCRD010
+synCRD011_t1	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	LDL cholesterol	light		Over the past 30 days		synCRD011
+synCRD012_t1	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	HDL cholesterol	light		Over the past 30 days		synCRD012
+synCRD013_t1	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Triglyceride level	light		Over the past 30 days		synCRD013
+synCRD014_t1	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	C-reactive protein	light		Over the past 30 days		synCRD014
+synCRD015_t1	cardiovascular	Cardiovascular Assessment	Vascular Imaging	terse	xdh:imaging	Carotid intima-media thickness	light		Over the past 30 days		synCRD015
+synCRD016_t1	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	Heart rate variability	light		Over the past 30 days		synCRD016
+synCRD017_t1	cardiovascular	Cardiovascular Assessment	Anthropometry	terse	xdh:bmi	Body mass index at cardiac assessment	light		Over the past 30 days		synCRD017
+synCRD018_t1	cardiovascular	Cardiovascular Assessment	Medication	terse	xdh:medication	Cardiac medication adherence	light		Over the past 30 days		synCRD018
+synCRD019_t1	cardiovascular	Cardiovascular Assessment	Demographics	terse	xdh:demographics	Age at cardiovascular screening	light		Over the past 30 days		synCRD019
+synCRD020_t1	cardiovascular	Cardiovascular Assessment	Treatment	terse	xdh:treatment_response	Cardiac treatment response score	light		Over the past 30 days		synCRD020
+synRSP001_t1	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced expiratory volume in one second	light		Over the past 30 days		synRSP001
+synRSP002_t1	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced vital capacity	light		Over the past 30 days		synRSP002
+synRSP003_t1	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	FEV1 to FVC ratio	light		Over the past 30 days		synRSP003
+synRSP004_t1	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Peak expiratory flow rate	light		Over the past 30 days		synRSP004
+synRSP005_t1	respiratory	Respiratory Function Evaluation	Oxygenation	informational	respiratory	Oxygen saturation by pulse oximetry	light		Over the past 30 days		synRSP005
+synRSP006_t1	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Respiratory rate	light		Over the past 30 days		synRSP006
+synRSP007_t1	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Arterial partial pressure of oxygen	light		Over the past 30 days		synRSP007
+synRSP008_t1	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	xdh:lab_values	Arterial partial pressure of carbon dioxide	light		Over the past 30 days		synRSP008
+synRSP009_t1	respiratory	Respiratory Function Evaluation	Exercise Capacity	informational	respiratory	Six-minute walk distance	light		Over the past 30 days		synRSP009
+synRSP010_t1	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Diffusing capacity for carbon monoxide	light		Over the past 30 days		synRSP010
+synRSP011_t1	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Tidal volume	light		Over the past 30 days		synRSP011
+synRSP012_t1	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Bronchodilator response	light		Over the past 30 days		synRSP012
+synRSP013_t1	respiratory	Respiratory Function Evaluation	Symptoms	informational	respiratory	Dyspnea severity score	light		Over the past 30 days		synRSP013
+synRSP014_t1	respiratory	Respiratory Function Evaluation	Biomarkers	informational	respiratory	Exhaled nitric oxide concentration	light		Over the past 30 days		synRSP014
+synRSP015_t1	respiratory	Respiratory Function Evaluation	Imaging	informational	xdh:imaging	Chest radiograph classification	light		Over the past 30 days		synRSP015
+synRSP016_t1	respiratory	Respiratory Function Evaluation	Hemodynamics	informational	xdh:blood_pressure	Blood pressure at pulmonary function visit	light		Over the past 30 days		synRSP016
+synRSP017_t1	respiratory	Respiratory Function Evaluation	Anthropometry	informational	xdh:bmi	Body mass index at respiratory assessment	light		Over the past 30 days		synRSP017
+synRSP018_t1	respiratory	Respiratory Function Evaluation	Medication	informational	xdh:medication	Respiratory medication adherence	light		Over the past 30 days		synRSP018
+synRSP019_t1	respiratory	Respiratory Function Evaluation	Demographics	informational	xdh:demographics	Age at pulmonary function evaluation	light		Over the past 30 days		synRSP019
+synRSP020_t1	respiratory	Respiratory Function Evaluation	Treatment	informational	xdh:treatment_response	Pulmonary treatment response rating	light		Over the past 30 days		synRSP020
+synMET001_t1	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting blood glucose concentration	light		Over the past 30 days		synMET001
+synMET002_t1	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Hemoglobin A1c percentage	light		Over the past 30 days		synMET002
+synMET003_t1	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting insulin level	light		Over the past 30 days		synMET003
+synMET004_t1	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	HOMA-IR insulin resistance index	light		Over the past 30 days		synMET004
+synMET005_t1	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Waist circumference measurement	light		Over the past 30 days		synMET005
+synMET006_t1	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Body fat percentage by bioimpedance	light		Over the past 30 days		synMET006
+synMET007_t1	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	metabolic	Total cholesterol in metabolic panel	light		Over the past 30 days		synMET007
+synMET008_t1	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	xdh:lab_values	Triglyceride concentration in metabolic panel	light		Over the past 30 days		synMET008
+synMET009_t1	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Uric acid level	light		Over the past 30 days		synMET009
+synMET010_t1	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Alanine aminotransferase activity	light		Over the past 30 days		synMET010
+synMET011_t1	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Aspartate aminotransferase activity	light		Over the past 30 days		synMET011
+synMET012_t1	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Serum creatinine concentration	light		Over the past 30 days		synMET012
+synMET013_t1	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Estimated glomerular filtration rate	light		Over the past 30 days		synMET013
+synMET014_t1	metabolic	Metabolic Health Monitoring	Endocrine	expansive	metabolic	Thyroid-stimulating hormone level	light		Over the past 30 days		synMET014
+synMET015_t1	metabolic	Metabolic Health Monitoring	Imaging	expansive	xdh:imaging	Abdominal ultrasound for hepatic steatosis	light		Over the past 30 days		synMET015
+synMET016_t1	metabolic	Metabolic Health Monitoring	Hemodynamics	expansive	xdh:blood_pressure	Blood pressure at metabolic screening visit	light		Over the past 30 days		synMET016
+synMET017_t1	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	xdh:bmi	Body mass index at metabolic assessment	light		Over the past 30 days		synMET017
+synMET018_t1	metabolic	Metabolic Health Monitoring	Medication	expansive	xdh:medication	Metabolic medication adherence	light		Over the past 30 days		synMET018
+synMET019_t1	metabolic	Metabolic Health Monitoring	Demographics	expansive	xdh:demographics	Age at metabolic health screening	light		Over the past 30 days		synMET019
+synMET020_t1	metabolic	Metabolic Health Monitoring	Treatment	expansive	xdh:treatment_response	Metabolic treatment response score	light		Over the past 30 days		synMET020
+synCRD001_t2	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Resting heart rate	medium	CMP Cardiac Assessment			synCRD001
+synCRD002_t2	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	xdh:blood_pressure	Systolic blood pressure	medium	CMP Cardiac Assessment			synCRD002
+synCRD003_t2	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Diastolic blood pressure	medium	CMP Cardiac Assessment			synCRD003
+synCRD004_t2	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Mean arterial pressure	medium	CMP Cardiac Assessment			synCRD004
+synCRD005_t2	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Cardiac output	medium	CMP Cardiac Assessment			synCRD005
+synCRD006_t2	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Left ventricular ejection fraction	medium	CMP Cardiac Assessment			synCRD006
+synCRD007_t2	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	QT interval duration	medium	CMP Cardiac Assessment			synCRD007
+synCRD008_t2	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	xdh:lab_values	Troponin I concentration	medium	CMP Cardiac Assessment			synCRD008
+synCRD009_t2	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	B-type natriuretic peptide level	medium	CMP Cardiac Assessment			synCRD009
+synCRD010_t2	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Total cholesterol	medium	CMP Cardiac Assessment			synCRD010
+synCRD011_t2	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	LDL cholesterol	medium	CMP Cardiac Assessment			synCRD011
+synCRD012_t2	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	HDL cholesterol	medium	CMP Cardiac Assessment			synCRD012
+synCRD013_t2	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Triglyceride level	medium	CMP Cardiac Assessment			synCRD013
+synCRD014_t2	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	C-reactive protein	medium	CMP Cardiac Assessment			synCRD014
+synCRD015_t2	cardiovascular	Cardiovascular Assessment	Vascular Imaging	terse	xdh:imaging	Carotid intima-media thickness	medium	CMP Cardiac Assessment			synCRD015
+synCRD016_t2	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	Heart rate variability	medium	CMP Cardiac Assessment			synCRD016
+synCRD017_t2	cardiovascular	Cardiovascular Assessment	Anthropometry	terse	xdh:bmi	Body mass index at cardiac assessment	medium	CMP Cardiac Assessment			synCRD017
+synCRD018_t2	cardiovascular	Cardiovascular Assessment	Medication	terse	xdh:medication	Cardiac medication adherence	medium	CMP Cardiac Assessment			synCRD018
+synCRD019_t2	cardiovascular	Cardiovascular Assessment	Demographics	terse	xdh:demographics	Age at cardiovascular screening	medium	CMP Cardiac Assessment			synCRD019
+synCRD020_t2	cardiovascular	Cardiovascular Assessment	Treatment	terse	xdh:treatment_response	Cardiac treatment response score	medium	CMP Cardiac Assessment			synCRD020
+synRSP001_t2	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced expiratory volume in one second	medium	CMP Pulmonary Evaluation			synRSP001
+synRSP002_t2	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced vital capacity	medium	CMP Pulmonary Evaluation			synRSP002
+synRSP003_t2	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	FEV1 to FVC ratio	medium	CMP Pulmonary Evaluation			synRSP003
+synRSP004_t2	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Peak expiratory flow rate	medium	CMP Pulmonary Evaluation			synRSP004
+synRSP005_t2	respiratory	Respiratory Function Evaluation	Oxygenation	informational	respiratory	Oxygen saturation by pulse oximetry	medium	CMP Pulmonary Evaluation			synRSP005
+synRSP006_t2	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Respiratory rate	medium	CMP Pulmonary Evaluation			synRSP006
+synRSP007_t2	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Arterial partial pressure of oxygen	medium	CMP Pulmonary Evaluation			synRSP007
+synRSP008_t2	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	xdh:lab_values	Arterial partial pressure of carbon dioxide	medium	CMP Pulmonary Evaluation			synRSP008
+synRSP009_t2	respiratory	Respiratory Function Evaluation	Exercise Capacity	informational	respiratory	Six-minute walk distance	medium	CMP Pulmonary Evaluation			synRSP009
+synRSP010_t2	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Diffusing capacity for carbon monoxide	medium	CMP Pulmonary Evaluation			synRSP010
+synRSP011_t2	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Tidal volume	medium	CMP Pulmonary Evaluation			synRSP011
+synRSP012_t2	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Bronchodilator response	medium	CMP Pulmonary Evaluation			synRSP012
+synRSP013_t2	respiratory	Respiratory Function Evaluation	Symptoms	informational	respiratory	Dyspnea severity score	medium	CMP Pulmonary Evaluation			synRSP013
+synRSP014_t2	respiratory	Respiratory Function Evaluation	Biomarkers	informational	respiratory	Exhaled nitric oxide concentration	medium	CMP Pulmonary Evaluation			synRSP014
+synRSP015_t2	respiratory	Respiratory Function Evaluation	Imaging	informational	xdh:imaging	Chest radiograph classification	medium	CMP Pulmonary Evaluation			synRSP015
+synRSP016_t2	respiratory	Respiratory Function Evaluation	Hemodynamics	informational	xdh:blood_pressure	Blood pressure at pulmonary function visit	medium	CMP Pulmonary Evaluation			synRSP016
+synRSP017_t2	respiratory	Respiratory Function Evaluation	Anthropometry	informational	xdh:bmi	Body mass index at respiratory assessment	medium	CMP Pulmonary Evaluation			synRSP017
+synRSP018_t2	respiratory	Respiratory Function Evaluation	Medication	informational	xdh:medication	Respiratory medication adherence	medium	CMP Pulmonary Evaluation			synRSP018
+synRSP019_t2	respiratory	Respiratory Function Evaluation	Demographics	informational	xdh:demographics	Age at pulmonary function evaluation	medium	CMP Pulmonary Evaluation			synRSP019
+synRSP020_t2	respiratory	Respiratory Function Evaluation	Treatment	informational	xdh:treatment_response	Pulmonary treatment response rating	medium	CMP Pulmonary Evaluation			synRSP020
+synMET001_t2	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting blood glucose concentration	medium	CMP Metabolic Panel			synMET001
+synMET002_t2	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Hemoglobin A1c percentage	medium	CMP Metabolic Panel			synMET002
+synMET003_t2	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting insulin level	medium	CMP Metabolic Panel			synMET003
+synMET004_t2	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	HOMA-IR insulin resistance index	medium	CMP Metabolic Panel			synMET004
+synMET005_t2	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Waist circumference measurement	medium	CMP Metabolic Panel			synMET005
+synMET006_t2	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Body fat percentage by bioimpedance	medium	CMP Metabolic Panel			synMET006
+synMET007_t2	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	metabolic	Total cholesterol in metabolic panel	medium	CMP Metabolic Panel			synMET007
+synMET008_t2	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	xdh:lab_values	Triglyceride concentration in metabolic panel	medium	CMP Metabolic Panel			synMET008
+synMET009_t2	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Uric acid level	medium	CMP Metabolic Panel			synMET009
+synMET010_t2	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Alanine aminotransferase activity	medium	CMP Metabolic Panel			synMET010
+synMET011_t2	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Aspartate aminotransferase activity	medium	CMP Metabolic Panel			synMET011
+synMET012_t2	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Serum creatinine concentration	medium	CMP Metabolic Panel			synMET012
+synMET013_t2	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Estimated glomerular filtration rate	medium	CMP Metabolic Panel			synMET013
+synMET014_t2	metabolic	Metabolic Health Monitoring	Endocrine	expansive	metabolic	Thyroid-stimulating hormone level	medium	CMP Metabolic Panel			synMET014
+synMET015_t2	metabolic	Metabolic Health Monitoring	Imaging	expansive	xdh:imaging	Abdominal ultrasound for hepatic steatosis	medium	CMP Metabolic Panel			synMET015
+synMET016_t2	metabolic	Metabolic Health Monitoring	Hemodynamics	expansive	xdh:blood_pressure	Blood pressure at metabolic screening visit	medium	CMP Metabolic Panel			synMET016
+synMET017_t2	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	xdh:bmi	Body mass index at metabolic assessment	medium	CMP Metabolic Panel			synMET017
+synMET018_t2	metabolic	Metabolic Health Monitoring	Medication	expansive	xdh:medication	Metabolic medication adherence	medium	CMP Metabolic Panel			synMET018
+synMET019_t2	metabolic	Metabolic Health Monitoring	Demographics	expansive	xdh:demographics	Age at metabolic health screening	medium	CMP Metabolic Panel			synMET019
+synMET020_t2	metabolic	Metabolic Health Monitoring	Treatment	expansive	xdh:treatment_response	Metabolic treatment response score	medium	CMP Metabolic Panel			synMET020
+synCRD001_t3	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Resting heart rate	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD001
+synCRD002_t3	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	xdh:blood_pressure	Systolic blood pressure	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD002
+synCRD003_t3	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Diastolic blood pressure	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD003
+synCRD004_t3	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Mean arterial pressure	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD004
+synCRD005_t3	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Cardiac output	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD005
+synCRD006_t3	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Left ventricular ejection fraction	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD006
+synCRD007_t3	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	QT interval duration	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD007
+synCRD008_t3	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	xdh:lab_values	Troponin I concentration	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD008
+synCRD009_t3	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	B-type natriuretic peptide level	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD009
+synCRD010_t3	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Total cholesterol	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD010
+synCRD011_t3	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	LDL cholesterol	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD011
+synCRD012_t3	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	HDL cholesterol	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD012
+synCRD013_t3	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Triglyceride level	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD013
+synCRD014_t3	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	C-reactive protein	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD014
+synCRD015_t3	cardiovascular	Cardiovascular Assessment	Vascular Imaging	terse	xdh:imaging	Carotid intima-media thickness	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD015
+synCRD016_t3	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	Heart rate variability	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD016
+synCRD017_t3	cardiovascular	Cardiovascular Assessment	Anthropometry	terse	xdh:bmi	Body mass index at cardiac assessment	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD017
+synCRD018_t3	cardiovascular	Cardiovascular Assessment	Medication	terse	xdh:medication	Cardiac medication adherence	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD018
+synCRD019_t3	cardiovascular	Cardiovascular Assessment	Demographics	terse	xdh:demographics	Age at cardiovascular screening	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD019
+synCRD020_t3	cardiovascular	Cardiovascular Assessment	Treatment	terse	xdh:treatment_response	Cardiac treatment response score	heavy	CMP Cardiac Assessment	Over the past 30 days	Health Data Quality Framework (HDQF)	synCRD020
+synRSP001_t3	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced expiratory volume in one second	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP001
+synRSP002_t3	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced vital capacity	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP002
+synRSP003_t3	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	FEV1 to FVC ratio	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP003
+synRSP004_t3	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Peak expiratory flow rate	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP004
+synRSP005_t3	respiratory	Respiratory Function Evaluation	Oxygenation	informational	respiratory	Oxygen saturation by pulse oximetry	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP005
+synRSP006_t3	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Respiratory rate	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP006
+synRSP007_t3	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Arterial partial pressure of oxygen	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP007
+synRSP008_t3	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	xdh:lab_values	Arterial partial pressure of carbon dioxide	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP008
+synRSP009_t3	respiratory	Respiratory Function Evaluation	Exercise Capacity	informational	respiratory	Six-minute walk distance	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP009
+synRSP010_t3	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Diffusing capacity for carbon monoxide	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP010
+synRSP011_t3	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Tidal volume	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP011
+synRSP012_t3	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Bronchodilator response	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP012
+synRSP013_t3	respiratory	Respiratory Function Evaluation	Symptoms	informational	respiratory	Dyspnea severity score	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP013
+synRSP014_t3	respiratory	Respiratory Function Evaluation	Biomarkers	informational	respiratory	Exhaled nitric oxide concentration	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP014
+synRSP015_t3	respiratory	Respiratory Function Evaluation	Imaging	informational	xdh:imaging	Chest radiograph classification	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP015
+synRSP016_t3	respiratory	Respiratory Function Evaluation	Hemodynamics	informational	xdh:blood_pressure	Blood pressure at pulmonary function visit	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP016
+synRSP017_t3	respiratory	Respiratory Function Evaluation	Anthropometry	informational	xdh:bmi	Body mass index at respiratory assessment	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP017
+synRSP018_t3	respiratory	Respiratory Function Evaluation	Medication	informational	xdh:medication	Respiratory medication adherence	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP018
+synRSP019_t3	respiratory	Respiratory Function Evaluation	Demographics	informational	xdh:demographics	Age at pulmonary function evaluation	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP019
+synRSP020_t3	respiratory	Respiratory Function Evaluation	Treatment	informational	xdh:treatment_response	Pulmonary treatment response rating	heavy	CMP Pulmonary Evaluation	Over the past 30 days	Health Data Quality Framework (HDQF)	synRSP020
+synMET001_t3	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting blood glucose concentration	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET001
+synMET002_t3	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Hemoglobin A1c percentage	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET002
+synMET003_t3	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting insulin level	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET003
+synMET004_t3	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	HOMA-IR insulin resistance index	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET004
+synMET005_t3	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Waist circumference measurement	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET005
+synMET006_t3	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Body fat percentage by bioimpedance	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET006
+synMET007_t3	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	metabolic	Total cholesterol in metabolic panel	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET007
+synMET008_t3	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	xdh:lab_values	Triglyceride concentration in metabolic panel	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET008
+synMET009_t3	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Uric acid level	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET009
+synMET010_t3	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Alanine aminotransferase activity	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET010
+synMET011_t3	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Aspartate aminotransferase activity	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET011
+synMET012_t3	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Serum creatinine concentration	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET012
+synMET013_t3	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Estimated glomerular filtration rate	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET013
+synMET014_t3	metabolic	Metabolic Health Monitoring	Endocrine	expansive	metabolic	Thyroid-stimulating hormone level	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET014
+synMET015_t3	metabolic	Metabolic Health Monitoring	Imaging	expansive	xdh:imaging	Abdominal ultrasound for hepatic steatosis	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET015
+synMET016_t3	metabolic	Metabolic Health Monitoring	Hemodynamics	expansive	xdh:blood_pressure	Blood pressure at metabolic screening visit	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET016
+synMET017_t3	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	xdh:bmi	Body mass index at metabolic assessment	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET017
+synMET018_t3	metabolic	Metabolic Health Monitoring	Medication	expansive	xdh:medication	Metabolic medication adherence	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET018
+synMET019_t3	metabolic	Metabolic Health Monitoring	Demographics	expansive	xdh:demographics	Age at metabolic health screening	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET019
+synMET020_t3	metabolic	Metabolic Health Monitoring	Treatment	expansive	xdh:treatment_response	Metabolic treatment response score	heavy	CMP Metabolic Panel	Over the past 30 days	Health Data Quality Framework (HDQF)	synMET020

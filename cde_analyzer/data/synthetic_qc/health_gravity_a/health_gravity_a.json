@@ -1,0 +1,2582 @@
+[
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL001",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Depression symptom score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, self-reported depression severity rating",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total score on a standardized depression screening questionnaire. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL002",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Anxiety symptom score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, self-reported generalized anxiety severity level",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total score on a validated generalized anxiety screening instrument. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL003",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Perceived stress level",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, rating of overall perceived psychological stress",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Self-rated global stress intensity over the assessment time period. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL004",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Emotional regulation score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, ability to manage and modulate emotional responses",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Rating of capacity to regulate emotional reactions under stress. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL005",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Suicidal ideation screen result",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, presence of thoughts of self-harm or suicide",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Binary screening result for active or passive suicidal ideation. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL006",
+    "designations": [
+      {
+        "designation": "PHI Emotional Distress - Overall psychiatric symptom severity",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, global rating of psychiatric symptom burden",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Composite severity score across all psychiatric symptom domains. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL007",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Social functioning score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, ability to engage in social interactions and relationships",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Rating of social engagement and interpersonal functioning level. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL008",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Occupational functioning rating",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, impact of mental health on work or school performance",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Degree of mental-health-related impairment in occupational roles. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL009",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Psychological resilience score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, capacity to recover from adverse psychological experiences",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Rating of adaptive coping ability following stressful life events. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL010",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Self-efficacy assessment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, belief in ability to accomplish daily tasks",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Self-rated confidence in managing routine activities and challenges. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL011",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Mental health functional impairment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, degree of disability caused by mental health symptoms",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Overall functional limitation attributable to psychiatric symptoms. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL012",
+    "designations": [
+      {
+        "designation": "COAS Psychological Well-Being - Trauma exposure history",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, prior exposure to potentially traumatic events",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Count of distinct traumatic events endorsed on screening checklist. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL013",
+    "designations": [
+      {
+        "designation": "Psychotropic medication usage",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Current use of prescribed psychiatric medications",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Record of prescribed psychotropic medications and current dosages. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL014",
+    "designations": [
+      {
+        "designation": "Psychological distress thermometer",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Visual analog rating of overall psychological distress",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Single-item distress rating on a zero-to-ten visual analog scale. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL015",
+    "designations": [
+      {
+        "designation": "Substance use screening result",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Screening for problematic alcohol or drug use",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Outcome of a brief standardized substance use screening instrument. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL016",
+    "designations": [
+      {
+        "designation": "Age at mental health assessment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, patient age at the time of psychiatric evaluation",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Chronological age at the date of mental health screening visit, assessed in the past 7 days.",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL017",
+    "designations": [
+      {
+        "designation": "Psychiatric comorbidity count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, number of concurrent psychiatric diagnoses",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total number of active comorbid psychiatric conditions diagnosed, assessed over the past 2 weeks.",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL018",
+    "designations": [
+      {
+        "designation": "Mental health quality of life rating",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Impact of psychiatric symptoms on overall quality of life",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Self-reported effect of mental illness on daily well-being.",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL019",
+    "designations": [
+      {
+        "designation": "Psychiatric treatment response",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Clinical response to current mental health treatment",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Clinician-rated response to prescribed psychiatric intervention.",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMHL020",
+    "designations": [
+      {
+        "designation": "Panic attack frequency",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Number of panic episodes in the assessment period",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Count of discrete panic attacks during the assessment interval.",
+        "tags": [
+          "Mental Health Screening"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK001",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Joint pain severity score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, self-reported severity of joint pain at the most affected site",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A numeric rating of the patient's joint pain intensity on a validated ordinal scale. Joint pain severity is assessed at the most affected joint and guides analgesic therapy decisions. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK002",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Active range of motion",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, angular excursion of the joint during voluntary movement",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The maximum angular displacement achieved through voluntary muscle contraction at the specified joint, measured in degrees with a goniometer. Reduced active range indicates pathology. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK003",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Grip strength measurement",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, maximum force exerted during a hand grip dynamometry test",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Peak isometric grip force measured in kilograms using a calibrated hand dynamometer. Grip strength is a surrogate marker of upper-extremity musculoskeletal function. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK004",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Muscle weakness grading",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, manual muscle testing grade for the affected muscle group",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A clinical grade assigned to the strength of a target muscle group using the Medical Research Council scale from zero to five. Grades below four indicate clinically meaningful weakness. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK005",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Bone mineral density T-score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, standard deviation of bone density relative to young adult reference",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The number of standard deviations by which the patient's bone mineral density differs from the mean of a healthy young adult reference population, measured by dual-energy X-ray absorptiometry. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK006",
+    "designations": [
+      {
+        "designation": "PHI Physical Limitation - Musculoskeletal symptom severity",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, global rating of musculoskeletal symptom burden",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A composite score reflecting the overall severity of musculoskeletal symptoms including pain, stiffness, and functional limitation assessed on a validated outcome measure. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK007",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Gait speed assessment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, walking velocity measured over a standardized distance",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The patient's habitual walking speed in meters per second over a four-meter course. Gait speed is a reliable predictor of disability, falls, and mortality in older adults. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK008",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Fall risk score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, composite assessment of the patient's risk of falling",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A multifactorial risk score incorporating balance, gait speed, lower-extremity strength, medication use, and prior fall history. Elevated scores guide fall prevention interventions. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK009",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Swollen joint count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, number of joints with detectable swelling on examination",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The count of joints exhibiting clinically detectable soft-tissue swelling on standardized musculoskeletal examination. A core disease activity measure in arthritis. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK010",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Morning stiffness duration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, length of time morning joint stiffness persists after waking",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The duration in minutes from waking to resolution of joint stiffness. Morning stiffness lasting more than thirty minutes is characteristic of inflammatory arthropathies. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK011",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Musculoskeletal functional impairment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, degree of disability in daily activities due to musculoskeletal conditions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A standardized rating of the patient's functional limitation attributable to musculoskeletal disorders, covering self-care, mobility, and household activities. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK012",
+    "designations": [
+      {
+        "designation": "COAS Rehabilitation Progress - Physical therapy response",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, clinical improvement following physical rehabilitation program",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The change in functional outcome measures after a structured physical therapy program, expressed as the percentage improvement from baseline values. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK013",
+    "designations": [
+      {
+        "designation": "Musculoskeletal medication usage",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Current medications prescribed for musculoskeletal conditions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A record of analgesic, anti-inflammatory, and disease-modifying agents prescribed for the patient's musculoskeletal condition. Medication type, dose, and frequency are documented. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK014",
+    "designations": [
+      {
+        "designation": "Vertebral fracture assessment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Presence and grading of vertebral compression fractures",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "An evaluation of thoracolumbar vertebral bodies for morphometric fractures using lateral spine imaging. Vertebral fractures indicate elevated future fracture risk. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK015",
+    "designations": [
+      {
+        "designation": "Disability index score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Standardized disability rating for musculoskeletal conditions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A patient-reported disability score derived from a validated questionnaire assessing difficulty with daily activities. The index quantifies functional impact across life domains. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK016",
+    "designations": [
+      {
+        "designation": "Age at musculoskeletal assessment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, patient age at the time of musculoskeletal evaluation",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The chronological age of the patient at the date of the musculoskeletal assessment. Age is a major determinant of osteoarthritis prevalence and normative strength values, assessed in the past 7 days.",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK017",
+    "designations": [
+      {
+        "designation": "Musculoskeletal comorbidity count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, number of concurrent conditions affecting the musculoskeletal system",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The total number of active comorbid conditions relevant to musculoskeletal health including osteoporosis, fibromyalgia, gout, and rheumatic diseases, assessed over the past 2 weeks.",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK018",
+    "designations": [
+      {
+        "designation": "Musculoskeletal quality of life",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Impact of musculoskeletal conditions on overall quality of life",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A patient-reported measure of the effect of musculoskeletal disorders on physical, emotional, and social well-being beyond clinical severity measures.",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK019",
+    "designations": [
+      {
+        "designation": "Musculoskeletal treatment response",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Clinical response to musculoskeletal treatment regimen",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The clinician's assessment of the patient's response to prescribed musculoskeletal treatment covering pain reduction, functional improvement, and side effect burden.",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synMSK020",
+    "designations": [
+      {
+        "designation": "Tender joint count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Number of joints painful to palpation on physical examination",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The count of joints eliciting pain on standardized palpation during musculoskeletal examination. A core component of composite disease activity indices in arthritis.",
+        "tags": [
+          "Musculoskeletal Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH001",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Abdominal pain severity score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, self-reported severity of abdominal pain over the assessment period",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The patient's numeric rating of abdominal pain intensity on a validated ordinal scale, assessed at each visit and averaged over the assessment period. Abdominal pain is the most common presenting symptom of gastrointestinal disease and its severity guides diagnostic urgency and analgesic intervention. Pain severity is interpreted alongside location, character, and temporal pattern to narrow the differential diagnosis. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH002",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Stool frequency per day",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, average number of bowel movements per day during the recall period",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The mean daily number of bowel movements recorded by the patient over the assessment recall period, typically one to four weeks. Stool frequency is a primary symptom measure in both constipation and diarrhea-predominant conditions. Frequencies below three per week suggest constipation, while frequencies above three per day with loose consistency suggest diarrhea. Change in stool frequency from baseline is a key clinical trial endpoint. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH003",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Bristol stool form scale score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, classification of stool consistency using the seven-type Bristol chart",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The patient's self-reported stool consistency classified according to the seven-type Bristol stool form scale, where type one represents hard separate lumps and type seven represents entirely liquid stool. Types three and four are considered normal. The Bristol scale provides a standardized, reproducible measure of colonic transit time and is widely used as an endpoint in clinical trials of gastrointestinal motility disorders. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH004",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Nausea severity rating",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, self-reported intensity of nausea symptoms during the assessment period",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A numeric rating of nausea intensity on a standardized visual analog or ordinal scale, recorded at each assessment. Nausea is a nonspecific gastrointestinal symptom that occurs across a wide range of conditions including gastroparesis, functional dyspepsia, and chemotherapy-induced emesis. Severity assessment captures both the peak intensity and the average daily burden of nausea and guides antiemetic prescribing decisions. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH005",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Gastroesophageal reflux symptom score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, composite score of heartburn and regurgitation severity and frequency",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A composite score derived from a validated questionnaire assessing the frequency and severity of gastroesophageal reflux symptoms including heartburn, acid regurgitation, and chest discomfort. Higher scores indicate more severe and frequent reflux episodes. The GERD symptom score is used to monitor response to proton pump inhibitor therapy, identify patients requiring further endoscopic evaluation, and classify reflux disease severity. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH006",
+    "designations": [
+      {
+        "designation": "PHI Digestive Function - Gastrointestinal symptom severity",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, global rating of gastrointestinal symptom burden across all domains",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A composite severity rating reflecting the overall burden of gastrointestinal symptoms experienced by the patient, encompassing abdominal pain, nausea, altered bowel habits, bloating, and dysphagia. The severity score is derived from a validated multi-domain gastrointestinal symptom questionnaire and provides a single summary measure of symptom impact. Global severity ratings complement individual symptom assessments by capturing cumulative burden on daily functioning. As part of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH007",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Dysphagia severity grade",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, grade of swallowing difficulty assessed by clinical evaluation",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A graded assessment of the patient's difficulty in swallowing solids, liquids, or both, classified according to a standardized severity scale. Dysphagia grading considers the consistency of foods that can be safely swallowed, the frequency of difficulty, and the presence of aspiration risk. Moderate to severe dysphagia may necessitate dietary modification, swallowing rehabilitation, or endoscopic intervention. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH008",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Hepatic fibrosis stage",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, histological or non-invasive staging of liver fibrosis severity",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The stage of hepatic fibrosis classified on a standardized scale from zero indicating no fibrosis to four indicating cirrhosis, determined by liver biopsy histology or validated non-invasive methods such as transient elastography or serum biomarker panels. Fibrosis staging is essential for prognostication and treatment decisions in chronic liver diseases including non-alcoholic steatohepatitis and viral hepatitis. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH009",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Endoscopy finding classification",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, standardized classification of findings during gastrointestinal endoscopy",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The categorical classification of mucosal and structural findings identified during upper or lower gastrointestinal endoscopy, recorded using standardized reporting terminology. Findings are classified by type including erosions, ulcers, polyps, strictures, and masses, and by location within the gastrointestinal tract. Endoscopic classification enables systematic documentation and facilitates comparison across follow-up examinations. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH010",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Helicobacter pylori infection status",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, result of diagnostic testing for Helicobacter pylori infection",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The result of diagnostic testing for active Helicobacter pylori infection, determined by urea breath test, stool antigen assay, or histological examination of gastric biopsy specimens. Positive status indicates current infection and guides eradication therapy with a proton pump inhibitor and antibiotic combination. H. pylori infection is causally associated with chronic gastritis, peptic ulcer disease, and gastric adenocarcinoma. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH011",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Gastrointestinal functional impairment",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, degree of disability in daily activities due to gastrointestinal symptoms",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A composite measure of the extent to which gastrointestinal symptoms impair the patient's ability to perform daily activities including work, social participation, meal preparation, and physical exercise. Functional impairment is assessed using validated patient-reported outcome instruments that capture disability across multiple life domains. The measure complements symptom severity scores by quantifying the real-world impact of gastrointestinal disease on daily functioning. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH012",
+    "designations": [
+      {
+        "designation": "COAS Somatic Symptom Burden - Inflammatory bowel disease activity index",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "During the past 4 weeks, composite score quantifying disease activity in inflammatory bowel disease",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A validated composite score incorporating symptoms, laboratory markers, and endoscopic findings to quantify the current level of disease activity in Crohn's disease or ulcerative colitis. Activity indices guide treatment escalation, de-escalation, and surgical decision-making. Clinical remission is typically defined as a score below a validated threshold. Serial assessment enables objective monitoring of treatment response. Based on the Clinical Outcome Assessment Scale (COAS).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH013",
+    "designations": [
+      {
+        "designation": "Gastrointestinal medication usage",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Current medications prescribed for gastrointestinal conditions",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A comprehensive record of all pharmacological agents prescribed for the patient's gastrointestinal condition, including proton pump inhibitors, antispasmodics, prokinetics, aminosalicylates, immunomodulators, and biologic agents. Medication name, dose, frequency, route, and duration of therapy are documented. The record enables assessment of treatment adherence and identification of drug interactions. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH014",
+    "designations": [
+      {
+        "designation": "Celiac disease antibody titer",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Serum tissue transglutaminase IgA antibody level for celiac screening",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The serum concentration of immunoglobulin A antibodies against tissue transglutaminase, measured in units per milliliter, used as the primary serological screening test for celiac disease. Elevated titers above the laboratory-specific threshold indicate a high probability of celiac disease and warrant confirmatory small bowel biopsy. Serial monitoring assesses adherence to a gluten-free diet. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH015",
+    "designations": [
+      {
+        "designation": "Nutritional status assessment score",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Standardized evaluation of the patient's nutritional adequacy",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A composite nutritional assessment score derived from anthropometric measurements, biochemical markers including serum albumin and prealbumin, dietary intake records, and clinical examination findings. The assessment identifies patients at risk of malnutrition due to gastrointestinal malabsorption, chronic inflammation, or inadequate oral intake. Nutritional screening is recommended for all patients with chronic GI disease. A field of the Patient Health Inventory (PHI).",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH016",
+    "designations": [
+      {
+        "designation": "Age at gastrointestinal evaluation",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "In the past 7 days, patient age at the time of the gastrointestinal health assessment",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The chronological age of the patient at the date of the gastrointestinal health evaluation. Age is a critical determinant of disease prevalence and presentation in gastroenterology. Colorectal cancer screening guidelines are age-stratified, and the prevalence of conditions such as diverticulosis and Barrett esophagus increases with advancing age. Age-appropriate reference ranges are applied to laboratory and endoscopic findings, assessed in the past 7 days.",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH017",
+    "designations": [
+      {
+        "designation": "Gastrointestinal comorbidity count",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Over the past 2 weeks, number of concurrent conditions affecting the gastrointestinal system",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The total number of active comorbid conditions with established effects on gastrointestinal health, including diabetes mellitus, chronic kidney disease, thyroid disorders, and connective tissue diseases. The comorbidity count provides context for interpreting gastrointestinal symptoms and guides treatment selection by identifying potential drug interactions and contraindications. Higher comorbidity burden is associated with poorer outcomes, assessed over the past 2 weeks.",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH018",
+    "designations": [
+      {
+        "designation": "Gastrointestinal quality of life",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Impact of gastrointestinal conditions on overall quality of life",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "A patient-reported measure of the effect of gastrointestinal symptoms and disease on overall quality of life, encompassing physical comfort, emotional well-being, social functioning, and dietary freedom. Quality of life assessment captures the subjective burden of gastrointestinal disease that may not be reflected in objective clinical measures such as laboratory values or endoscopic scores.",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH019",
+    "designations": [
+      {
+        "designation": "Gastrointestinal treatment response",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Clinical response to prescribed gastrointestinal therapy",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The clinician's overall assessment of the patient's clinical response to the prescribed gastrointestinal treatment regimen, integrating changes in symptom severity, endoscopic findings, laboratory markers, and functional status from baseline to follow-up. Treatment response is classified as complete remission, partial response, stable disease, or progressive disease to guide therapy decisions.",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synGIH020",
+    "designations": [
+      {
+        "designation": "Fecal calprotectin concentration",
+        "sources": [],
+        "tags": [
+          "Preferred Question Text"
+        ]
+      },
+      {
+        "designation": "Stool calprotectin level as a non-invasive marker of intestinal inflammation",
+        "sources": [],
+        "tags": [
+          "Alternative Question Text"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of calprotectin protein in a stool sample, measured in micrograms per gram by enzyme-linked immunosorbent assay. Fecal calprotectin is a neutrophil-derived protein that serves as a sensitive and specific non-invasive biomarker of intestinal inflammation. Elevated levels above 250 micrograms per gram strongly suggest active inflammatory bowel disease and distinguish organic from functional gastrointestinal disorders.",
+        "tags": [
+          "Gastrointestinal Health Evaluation"
+        ]
+      }
+    ]
+  }
+]

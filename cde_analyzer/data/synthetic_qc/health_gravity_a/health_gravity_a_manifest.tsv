@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	instrument	temporal_phrase	injection_site
+synMHL001	mental_health	Mental Health Screening	Depression	terse	mhl	Depression symptom score	PHI Emotional Distress	In the past 7 days	name+question+definition
+synMHL002	mental_health	Mental Health Screening	Anxiety	terse	mhl	Anxiety symptom score	PHI Emotional Distress	Over the past 2 weeks	name+question+definition
+synMHL003	mental_health	Mental Health Screening	Stress	terse	mhl	Perceived stress level	PHI Emotional Distress	During the past 4 weeks	name+question+definition
+synMHL004	mental_health	Mental Health Screening	Emotional	terse	mhl	Emotional regulation score	PHI Emotional Distress	In the past 7 days	name+question+definition
+synMHL005	mental_health	Mental Health Screening	Risk Screening	terse	mhl	Suicidal ideation screen result	PHI Emotional Distress	Over the past 2 weeks	name+question+definition
+synMHL006	mental_health	Mental Health Screening	Severity	terse	xdha:severity	Overall psychiatric symptom severity	PHI Emotional Distress	During the past 4 weeks	name+question+definition
+synMHL007	mental_health	Mental Health Screening	Social Function	terse	mhl	Social functioning score	COAS Psychological Well-Being	In the past 7 days	name+question+definition
+synMHL008	mental_health	Mental Health Screening	Occupational	terse	mhl	Occupational functioning rating	COAS Psychological Well-Being	Over the past 2 weeks	name+question+definition
+synMHL009	mental_health	Mental Health Screening	Resilience	terse	mhl	Psychological resilience score	COAS Psychological Well-Being	During the past 4 weeks	name+question+definition
+synMHL010	mental_health	Mental Health Screening	Self-Efficacy	terse	mhl	Self-efficacy assessment	COAS Psychological Well-Being	In the past 7 days	name+question+definition
+synMHL011	mental_health	Mental Health Screening	Function	terse	xdha:function	Mental health functional impairment	COAS Psychological Well-Being	Over the past 2 weeks	name+question+definition
+synMHL012	mental_health	Mental Health Screening	Trauma	terse	mhl	Trauma exposure history	COAS Psychological Well-Being	During the past 4 weeks	name+question+definition
+synMHL013	mental_health	Mental Health Screening	Medication	terse	xdha:medication	Psychotropic medication usage	PHI Emotional Distress		definition_only
+synMHL014	mental_health	Mental Health Screening	Distress	terse	mhl	Psychological distress thermometer	PHI Emotional Distress		definition_only
+synMHL015	mental_health	Mental Health Screening	Substance Use	terse	mhl	Substance use screening result	PHI Emotional Distress		definition_only
+synMHL016	mental_health	Mental Health Screening	Demographics	terse	xdha:demographics	Age at mental health assessment		In the past 7 days	temporal_only
+synMHL017	mental_health	Mental Health Screening	Comorbidity	terse	xdha:comorbidity	Psychiatric comorbidity count		Over the past 2 weeks	temporal_only
+synMHL018	mental_health	Mental Health Screening	Quality of Life	terse	xdha:qol	Mental health quality of life rating			clean
+synMHL019	mental_health	Mental Health Screening	Treatment	terse	xdha:treatment	Psychiatric treatment response			clean
+synMHL020	mental_health	Mental Health Screening	Panic Disorder	terse	mhl	Panic attack frequency			clean
+synMSK001	musculoskeletal	Musculoskeletal Assessment	Joint Pain	informational	msk	Joint pain severity score	PHI Physical Limitation	In the past 7 days	name+question+definition
+synMSK002	musculoskeletal	Musculoskeletal Assessment	Range of Motion	informational	msk	Active range of motion	PHI Physical Limitation	Over the past 2 weeks	name+question+definition
+synMSK003	musculoskeletal	Musculoskeletal Assessment	Strength	informational	msk	Grip strength measurement	PHI Physical Limitation	During the past 4 weeks	name+question+definition
+synMSK004	musculoskeletal	Musculoskeletal Assessment	Muscle Function	informational	msk	Muscle weakness grading	PHI Physical Limitation	In the past 7 days	name+question+definition
+synMSK005	musculoskeletal	Musculoskeletal Assessment	Bone Density	informational	msk	Bone mineral density T-score	PHI Physical Limitation	Over the past 2 weeks	name+question+definition
+synMSK006	musculoskeletal	Musculoskeletal Assessment	Severity	informational	xdha:severity	Musculoskeletal symptom severity	PHI Physical Limitation	During the past 4 weeks	name+question+definition
+synMSK007	musculoskeletal	Musculoskeletal Assessment	Gait	informational	msk	Gait speed assessment	COAS Rehabilitation Progress	In the past 7 days	name+question+definition
+synMSK008	musculoskeletal	Musculoskeletal Assessment	Fall Risk	informational	msk	Fall risk score	COAS Rehabilitation Progress	Over the past 2 weeks	name+question+definition
+synMSK009	musculoskeletal	Musculoskeletal Assessment	Joint Inflammation	informational	msk	Swollen joint count	COAS Rehabilitation Progress	During the past 4 weeks	name+question+definition
+synMSK010	musculoskeletal	Musculoskeletal Assessment	Stiffness	informational	msk	Morning stiffness duration	COAS Rehabilitation Progress	In the past 7 days	name+question+definition
+synMSK011	musculoskeletal	Musculoskeletal Assessment	Function	informational	xdha:function	Musculoskeletal functional impairment	COAS Rehabilitation Progress	Over the past 2 weeks	name+question+definition
+synMSK012	musculoskeletal	Musculoskeletal Assessment	Rehabilitation	informational	msk	Physical therapy response	COAS Rehabilitation Progress	During the past 4 weeks	name+question+definition
+synMSK013	musculoskeletal	Musculoskeletal Assessment	Medication	informational	xdha:medication	Musculoskeletal medication usage	PHI Physical Limitation		definition_only
+synMSK014	musculoskeletal	Musculoskeletal Assessment	Fracture	informational	msk	Vertebral fracture assessment	PHI Physical Limitation		definition_only
+synMSK015	musculoskeletal	Musculoskeletal Assessment	Disability	informational	msk	Disability index score	PHI Physical Limitation		definition_only
+synMSK016	musculoskeletal	Musculoskeletal Assessment	Demographics	informational	xdha:demographics	Age at musculoskeletal assessment		In the past 7 days	temporal_only
+synMSK017	musculoskeletal	Musculoskeletal Assessment	Comorbidity	informational	xdha:comorbidity	Musculoskeletal comorbidity count		Over the past 2 weeks	temporal_only
+synMSK018	musculoskeletal	Musculoskeletal Assessment	Quality of Life	informational	xdha:qol	Musculoskeletal quality of life			clean
+synMSK019	musculoskeletal	Musculoskeletal Assessment	Treatment	informational	xdha:treatment	Musculoskeletal treatment response			clean
+synMSK020	musculoskeletal	Musculoskeletal Assessment	Joint Tenderness	informational	msk	Tender joint count			clean
+synGIH001	gastrointestinal	Gastrointestinal Health Evaluation	Abdominal Pain	expansive	gih	Abdominal pain severity score	PHI Digestive Function	In the past 7 days	name+question+definition
+synGIH002	gastrointestinal	Gastrointestinal Health Evaluation	Bowel Habits	expansive	gih	Stool frequency per day	PHI Digestive Function	Over the past 2 weeks	name+question+definition
+synGIH003	gastrointestinal	Gastrointestinal Health Evaluation	Stool Form	expansive	gih	Bristol stool form scale score	PHI Digestive Function	During the past 4 weeks	name+question+definition
+synGIH004	gastrointestinal	Gastrointestinal Health Evaluation	Nausea	expansive	gih	Nausea severity rating	PHI Digestive Function	In the past 7 days	name+question+definition
+synGIH005	gastrointestinal	Gastrointestinal Health Evaluation	Reflux	expansive	gih	Gastroesophageal reflux symptom score	PHI Digestive Function	Over the past 2 weeks	name+question+definition
+synGIH006	gastrointestinal	Gastrointestinal Health Evaluation	Severity	expansive	xdha:severity	Gastrointestinal symptom severity	PHI Digestive Function	During the past 4 weeks	name+question+definition
+synGIH007	gastrointestinal	Gastrointestinal Health Evaluation	Dysphagia	expansive	gih	Dysphagia severity grade	COAS Somatic Symptom Burden	In the past 7 days	name+question+definition
+synGIH008	gastrointestinal	Gastrointestinal Health Evaluation	Liver Disease	expansive	gih	Hepatic fibrosis stage	COAS Somatic Symptom Burden	Over the past 2 weeks	name+question+definition
+synGIH009	gastrointestinal	Gastrointestinal Health Evaluation	Endoscopy	expansive	gih	Endoscopy finding classification	COAS Somatic Symptom Burden	During the past 4 weeks	name+question+definition
+synGIH010	gastrointestinal	Gastrointestinal Health Evaluation	Infection	expansive	gih	Helicobacter pylori infection status	COAS Somatic Symptom Burden	In the past 7 days	name+question+definition
+synGIH011	gastrointestinal	Gastrointestinal Health Evaluation	Function	expansive	xdha:function	Gastrointestinal functional impairment	COAS Somatic Symptom Burden	Over the past 2 weeks	name+question+definition
+synGIH012	gastrointestinal	Gastrointestinal Health Evaluation	IBD Activity	expansive	gih	Inflammatory bowel disease activity index	COAS Somatic Symptom Burden	During the past 4 weeks	name+question+definition
+synGIH013	gastrointestinal	Gastrointestinal Health Evaluation	Medication	expansive	xdha:medication	Gastrointestinal medication usage	PHI Digestive Function		definition_only
+synGIH014	gastrointestinal	Gastrointestinal Health Evaluation	Celiac	expansive	gih	Celiac disease antibody titer	PHI Digestive Function		definition_only
+synGIH015	gastrointestinal	Gastrointestinal Health Evaluation	Nutrition	expansive	gih	Nutritional status assessment score	PHI Digestive Function		definition_only
+synGIH016	gastrointestinal	Gastrointestinal Health Evaluation	Demographics	expansive	xdha:demographics	Age at gastrointestinal evaluation		In the past 7 days	temporal_only
+synGIH017	gastrointestinal	Gastrointestinal Health Evaluation	Comorbidity	expansive	xdha:comorbidity	Gastrointestinal comorbidity count		Over the past 2 weeks	temporal_only
+synGIH018	gastrointestinal	Gastrointestinal Health Evaluation	Quality of Life	expansive	xdha:qol	Gastrointestinal quality of life			clean
+synGIH019	gastrointestinal	Gastrointestinal Health Evaluation	Treatment	expansive	xdha:treatment	Gastrointestinal treatment response			clean
+synGIH020	gastrointestinal	Gastrointestinal Health Evaluation	Biomarkers	expansive	gih	Fecal calprotectin concentration			clean

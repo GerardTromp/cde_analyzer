@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name
+synCRD001	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Resting heart rate
+synCRD002	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	xdh:blood_pressure	Systolic blood pressure
+synCRD003	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Diastolic blood pressure
+synCRD004	cardiovascular	Cardiovascular Assessment	Hemodynamics	terse	cardiovascular	Mean arterial pressure
+synCRD005	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Cardiac output
+synCRD006	cardiovascular	Cardiovascular Assessment	Cardiac Parameters	terse	cardiovascular	Left ventricular ejection fraction
+synCRD007	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	QT interval duration
+synCRD008	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	xdh:lab_values	Troponin I concentration
+synCRD009	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	B-type natriuretic peptide level
+synCRD010	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Total cholesterol
+synCRD011	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	LDL cholesterol
+synCRD012	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	HDL cholesterol
+synCRD013	cardiovascular	Cardiovascular Assessment	Lipid Panel	terse	cardiovascular	Triglyceride level
+synCRD014	cardiovascular	Cardiovascular Assessment	Biomarkers	terse	cardiovascular	C-reactive protein
+synCRD015	cardiovascular	Cardiovascular Assessment	Vascular Imaging	terse	xdh:imaging	Carotid intima-media thickness
+synCRD016	cardiovascular	Cardiovascular Assessment	Electrophysiology	terse	cardiovascular	Heart rate variability
+synCRD017	cardiovascular	Cardiovascular Assessment	Anthropometry	terse	xdh:bmi	Body mass index at cardiac assessment
+synCRD018	cardiovascular	Cardiovascular Assessment	Medication	terse	xdh:medication	Cardiac medication adherence
+synCRD019	cardiovascular	Cardiovascular Assessment	Demographics	terse	xdh:demographics	Age at cardiovascular screening
+synCRD020	cardiovascular	Cardiovascular Assessment	Treatment	terse	xdh:treatment_response	Cardiac treatment response score
+synRSP001	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced expiratory volume in one second
+synRSP002	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Forced vital capacity
+synRSP003	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	FEV1 to FVC ratio
+synRSP004	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Peak expiratory flow rate
+synRSP005	respiratory	Respiratory Function Evaluation	Oxygenation	informational	respiratory	Oxygen saturation by pulse oximetry
+synRSP006	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Respiratory rate
+synRSP007	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Arterial partial pressure of oxygen
+synRSP008	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	xdh:lab_values	Arterial partial pressure of carbon dioxide
+synRSP009	respiratory	Respiratory Function Evaluation	Exercise Capacity	informational	respiratory	Six-minute walk distance
+synRSP010	respiratory	Respiratory Function Evaluation	Gas Exchange	informational	respiratory	Diffusing capacity for carbon monoxide
+synRSP011	respiratory	Respiratory Function Evaluation	Ventilation	informational	respiratory	Tidal volume
+synRSP012	respiratory	Respiratory Function Evaluation	Spirometry	informational	respiratory	Bronchodilator response
+synRSP013	respiratory	Respiratory Function Evaluation	Symptoms	informational	respiratory	Dyspnea severity score
+synRSP014	respiratory	Respiratory Function Evaluation	Biomarkers	informational	respiratory	Exhaled nitric oxide concentration
+synRSP015	respiratory	Respiratory Function Evaluation	Imaging	informational	xdh:imaging	Chest radiograph classification
+synRSP016	respiratory	Respiratory Function Evaluation	Hemodynamics	informational	xdh:blood_pressure	Blood pressure at pulmonary function visit
+synRSP017	respiratory	Respiratory Function Evaluation	Anthropometry	informational	xdh:bmi	Body mass index at respiratory assessment
+synRSP018	respiratory	Respiratory Function Evaluation	Medication	informational	xdh:medication	Respiratory medication adherence
+synRSP019	respiratory	Respiratory Function Evaluation	Demographics	informational	xdh:demographics	Age at pulmonary function evaluation
+synRSP020	respiratory	Respiratory Function Evaluation	Treatment	informational	xdh:treatment_response	Pulmonary treatment response rating
+synMET001	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting blood glucose concentration
+synMET002	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Hemoglobin A1c percentage
+synMET003	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	Fasting insulin level
+synMET004	metabolic	Metabolic Health Monitoring	Glycemic	expansive	metabolic	HOMA-IR insulin resistance index
+synMET005	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Waist circumference measurement
+synMET006	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	metabolic	Body fat percentage by bioimpedance
+synMET007	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	metabolic	Total cholesterol in metabolic panel
+synMET008	metabolic	Metabolic Health Monitoring	Lipid Panel	expansive	xdh:lab_values	Triglyceride concentration in metabolic panel
+synMET009	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Uric acid level
+synMET010	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Alanine aminotransferase activity
+synMET011	metabolic	Metabolic Health Monitoring	Hepatic	expansive	metabolic	Aspartate aminotransferase activity
+synMET012	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Serum creatinine concentration
+synMET013	metabolic	Metabolic Health Monitoring	Renal/Metabolic	expansive	metabolic	Estimated glomerular filtration rate
+synMET014	metabolic	Metabolic Health Monitoring	Endocrine	expansive	metabolic	Thyroid-stimulating hormone level
+synMET015	metabolic	Metabolic Health Monitoring	Imaging	expansive	xdh:imaging	Abdominal ultrasound for hepatic steatosis
+synMET016	metabolic	Metabolic Health Monitoring	Hemodynamics	expansive	xdh:blood_pressure	Blood pressure at metabolic screening visit
+synMET017	metabolic	Metabolic Health Monitoring	Anthropometry	expansive	xdh:bmi	Body mass index at metabolic assessment
+synMET018	metabolic	Metabolic Health Monitoring	Medication	expansive	xdh:medication	Metabolic medication adherence
+synMET019	metabolic	Metabolic Health Monitoring	Demographics	expansive	xdh:demographics	Age at metabolic health screening
+synMET020	metabolic	Metabolic Health Monitoring	Treatment	expansive	xdh:treatment_response	Metabolic treatment response score

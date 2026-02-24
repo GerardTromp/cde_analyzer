@@ -11,12 +11,23 @@ noise on embeddings:
 
 ## Data sets at a glance
 
+### Mixed-domain collection (360 CDEs)
+
 | Set | CDEs | Generator | Topics | Purpose |
 |-----|-----:|-----------|--------|---------|
 | Base | 60 | `generate_synthetic_cdes.py` | Air / Water / Soil | Clean controls, cross-domain overlap |
 | 1A | 60 | `generate_synthetic_set1a.py` | UHI / Stormwater / Indoor AQ | Gravity -- environmental instruments |
 | 1B | 60 | `generate_synthetic_set1b.py` | Pain / Cognitive / Sleep | Gravity -- clinical instruments |
 | 2 | 180 | `generate_synthetic_set2.py` | (copies of Base) | Drift -- dose-tier noise on base CDEs |
+
+### Health-focused collection (360 CDEs)
+
+| Set | CDEs | Generator | Topics | Purpose |
+|-----|-----:|-----------|--------|---------|
+| Health Base | 60 | `generate_health_base.py` | Cardiovascular / Respiratory / Metabolic | Clean controls, cross-domain overlap |
+| Health Gravity A | 60 | `generate_health_gravity_a.py` | Mental Health / Musculoskeletal / GI | Gravity -- clinical instruments (PHI/COAS) |
+| Health Gravity B | 60 | `generate_synthetic_set1b.py` | Pain / Cognitive / Sleep | Gravity -- clinical instruments (SSS/FAB) |
+| Health Drift | 180 | `generate_health_drift.py` | (copies of Health Base) | Drift -- dose-tier noise on health base CDEs |
 
 All output lives under `data/synthetic_qc/`.
 
@@ -159,10 +170,98 @@ definition: append "A field of the Environmental Monitoring Protocol (EMP)."
 | informational (Water, ~200 chars) | small | small | moderate |
 | expansive (Soil, ~450 chars) | negligible | negligible | small |
 
+## Health Base (60 CDEs)
+
+Three clinical domains, 20 CDEs each, no instrument or temporal noise.
+Designed for health-tuned embedding models where all topics should be
+in the biomedical domain.
+
+| Domain | TinyId prefix | Verbosity | Avg definition |
+|--------|--------------|-----------|----------------|
+| Cardiovascular Assessment | `synCRD` | terse | ~66 chars |
+| Respiratory Function Evaluation | `synRSP` | informational | ~179 chars |
+| Metabolic Health Monitoring | `synMET` | expansive | ~418 chars |
+
+Seven cross-domain concept groups (`xdh:blood_pressure`, `xdh:lab_values`,
+`xdh:bmi`, `xdh:demographics`, `xdh:medication`, `xdh:imaging`,
+`xdh:treatment_response`) place CDEs from different domains into the same
+expected cluster.
+
+## Health Gravity A -- Clinical Specialties (60 CDEs)
+
+New clinical topics with embedded **clinical instruments** and temporal phrases.
+Same injection structure as Set 1A/1B.
+
+### Topics
+
+| Topic | TinyId prefix | Verbosity |
+|-------|--------------|-----------|
+| Mental Health Screening | `synMHL` | terse |
+| Musculoskeletal Assessment | `synMSK` | informational |
+| Gastrointestinal Health Evaluation | `synGIH` | expansive |
+
+### Instrument families
+
+**Family 1: Patient Health Inventory (PHI)** -- 3 sub-scales
+
+- PHI Emotional Distress (Mental Health topic)
+- PHI Physical Limitation (Musculoskeletal topic)
+- PHI Digestive Function (GI topic)
+
+**Family 2: Clinical Outcome Assessment Scale (COAS)** -- 3 sub-scales
+
+- COAS Psychological Well-Being (Mental Health + Musculoskeletal)
+- COAS Somatic Symptom Burden (GI + Mental Health)
+- COAS Rehabilitation Progress (Musculoskeletal + GI)
+
+**Temporal phrases**: "In the past 7 days", "Over the past 2 weeks",
+"During the past 4 weeks" (matching real PROMIS/PHQ patterns).
+
+**Cross-domain groups** (7): `xdha:severity`, `xdha:function`,
+`xdha:medication`, `xdha:qol`, `xdha:demographics`, `xdha:comorbidity`,
+`xdha:treatment`.
+
+## Health Gravity B -- Clinical (60 CDEs)
+
+This is the **existing Set 1B** (`set1b_clinical.json`), reused as-is.
+The Pain/Cognitive/Sleep topics with SSS and FAB instruments are already
+fully health/medical.  No new generator script needed -- combine with
+the other health sets using `jq`.
+
+## Health Drift -- Noisy copies (180 CDEs)
+
+Takes the 60 Health Base CDEs and produces 3 dose tiers x 60 = 180 noisy
+variants.  Same structure as Set 2 but with clinical instruments.
+
+### Instruments
+
+- **Clinical Monitoring Protocol (CMP)** -- domain sub-scales:
+  CMP Cardiac Assessment (Cardiovascular), CMP Pulmonary Evaluation
+  (Respiratory), CMP Metabolic Panel (Metabolic)
+- **Health Data Quality Framework (HDQF)** -- used in Tier 3 only
+
+### Noise tiers
+
+| Tier | Suffix | Components | Expected drift |
+|------|--------|------------|----------------|
+| 1 (light) | `_t1` | Temporal phrase only | Minimal |
+| 2 (medium) | `_t2` | CMP instrument name only | Moderate |
+| 3 (heavy) | `_t3` | Temporal + CMP + HDQF anchor | Maximum |
+
+### Expected drift pattern
+
+| Source verbosity | Tier 1 | Tier 2 | Tier 3 |
+|------------------|--------|--------|--------|
+| terse (Cardiovascular, ~66 chars) | moderate | moderate | **maximum** |
+| informational (Respiratory, ~179 chars) | small | small | moderate |
+| expansive (Metabolic, ~418 chars) | negligible | negligible | small |
+
 ## Generation
 
+### Mixed-domain collection
+
 ```bash
-# Base set (already committed)
+# Base set
 python scripts/generate_synthetic_cdes.py \
     -o data/synthetic_qc/synthetic_cdes.json --pretty
 
@@ -180,6 +279,25 @@ python scripts/generate_synthetic_set2.py \
     -o data/synthetic_qc/set2_noisy/set2_noisy.json --pretty
 ```
 
+### Health-focused collection
+
+```bash
+# Health Base (60 clean CDEs)
+python scripts/generate_health_base.py \
+    -o data/synthetic_qc/health_base/health_base.json --pretty
+
+# Health Gravity A (60 CDEs with instruments)
+python scripts/generate_health_gravity_a.py \
+    -o data/synthetic_qc/health_gravity_a/health_gravity_a.json --pretty
+
+# Health Gravity B = Set 1B (already generated above)
+
+# Health Drift (180 noisy copies of health base)
+python scripts/generate_health_drift.py \
+    --source data/synthetic_qc/health_base/health_base.json \
+    -o data/synthetic_qc/health_drift/health_drift.json --pretty
+```
+
 Each script also writes a manifest TSV alongside the JSON.
 
 ## Combining sets for experiments
@@ -187,8 +305,10 @@ Each script also writes a manifest TSV alongside the JSON.
 Sets are separate files that can be combined at will.  Merge the JSON arrays
 with `jq`:
 
+### Mixed-domain combinations
+
 ```bash
-# All 4 sets (360 CDEs)
+# All 4 mixed sets (360 CDEs)
 jq -s 'add' data/synthetic_qc/synthetic_cdes.json \
               data/synthetic_qc/set1a_urban/set1a_urban.json \
               data/synthetic_qc/set1b_clinical/set1b_clinical.json \
@@ -204,6 +324,27 @@ jq -s 'add' data/synthetic_qc/synthetic_cdes.json \
 jq -s 'add' data/synthetic_qc/set1a_urban/set1a_urban.json \
               data/synthetic_qc/set1b_clinical/set1b_clinical.json \
     > data/synthetic_qc/combined_gravity.json
+```
+
+### Health-focused combinations
+
+```bash
+# All health sets (360 CDEs)
+jq -s 'add' data/synthetic_qc/health_base/health_base.json \
+              data/synthetic_qc/health_gravity_a/health_gravity_a.json \
+              data/synthetic_qc/set1b_clinical/set1b_clinical.json \
+              data/synthetic_qc/health_drift/health_drift.json \
+    > data/synthetic_qc/combined_health.json
+
+# Health base + drift only (240 CDEs, drift analysis)
+jq -s 'add' data/synthetic_qc/health_base/health_base.json \
+              data/synthetic_qc/health_drift/health_drift.json \
+    > data/synthetic_qc/combined_health_drift.json
+
+# Health gravity only (120 CDEs, gravity analysis)
+jq -s 'add' data/synthetic_qc/health_gravity_a/health_gravity_a.json \
+              data/synthetic_qc/set1b_clinical/set1b_clinical.json \
+    > data/synthetic_qc/combined_health_gravity.json
 ```
 
 ## Manifest columns
@@ -236,8 +377,8 @@ jq -s 'add' data/synthetic_qc/set1a_urban/set1a_urban.json \
 Synthetic instrument names are designed to match the instrument extractor
 regex patterns at `instrument_extractor.py`:
 
-- `INSTRUMENT_START`: Title Case or ALL_CAPS -- ESI, CRAT, SSS, FAB, EMP
+- `INSTRUMENT_START`: Title Case or ALL_CAPS -- ESI, CRAT, SSS, FAB, EMP, PHI, COAS, CMP
 - `INSTRUMENT_WORD`: Title/ALL_CAPS/lowercase/number words
-- `ACRONYM_PATTERN`: `(ESI)`, `(CRAT)`, etc. -- ALL_CAPS in parentheses
+- `ACRONYM_PATTERN`: `(ESI)`, `(CRAT)`, `(PHI)`, `(COAS)`, `(CMP)`, `(HDQF)` etc. -- ALL_CAPS in parentheses
 - Anchor phrases: "as part of", "based on", "a field of" -- match
   `AS_PART_OF`, `BASED_ON`, `FIELD_OF` patterns
