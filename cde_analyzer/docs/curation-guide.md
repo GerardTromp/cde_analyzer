@@ -277,14 +277,12 @@ Including one variant but missing others:
    - --exclude-patterns FILE (drop known exclusions)
          │
          ▼
-5. Manual review:
+5. Manual review: pattern_util --edit coalesced_fields.tsv
    - Remove instrument residuals → send back to instrument pipeline
    - Remove false positives (meaningful content)
    - Group temporal/boilerplate families
    - Verify anchor phrase handling
-         │
-         ▼
-6. Export curated.tsv (pattern + tinyIds only)
+   - Save As curated.tsv, Ctrl-C to stop the server
          │
          ▼
 7. Strip: strip_phrases --patterns curated.tsv
@@ -296,6 +294,7 @@ Including one variant but missing others:
 
 | Tool | Purpose |
 |------|---------|
+| `pattern_util --edit FILE` | Browser-based TSV editor for reviewing and editing patterns |
 | `pattern_util --field-analysis` | Add per-field counts for review |
 | `pattern_util --group-semantic` | Group by shared prefix (temporal families) |
 | `pattern_util --exclude-patterns` | Remove patterns from exclusion list |

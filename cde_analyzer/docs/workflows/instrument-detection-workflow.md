@@ -249,11 +249,11 @@ Output with min_prefix_tinyids=2:
       - ${abbrev_patterns} (abbreviation-based designation patterns)
 
     Actions:
-      1. Open ${coalesced_tsv} in spreadsheet
+      1. Open the editor: cde-analyzer pattern_util --edit ${coalesced_tsv}
       2. Remove false positives (accidental matches)
       3. Verify expanded phrases are correct instrument names
       4. Check ${failed_patterns} for patterns that should have matched
-      5. Save reviewed version as ${curated_tsv}
+      5. Save As ${curated_tsv} in the editor, then Ctrl-C to stop the server
 ```
 
 **Curator Actions**:

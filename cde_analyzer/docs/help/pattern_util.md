@@ -39,6 +39,9 @@ cde-analyzer pattern_util --expand-verbatim FILE -o EXPANDED.tsv \
 
 # Import patterns to supplementary config
 cde-analyzer pattern_util --add-to-supplementary CURATED.tsv
+
+# Interactive browser-based TSV editor
+cde-analyzer pattern_util --edit FILE [--port N] [--no-browser]
 ```
 
 ## Modes
@@ -175,6 +178,58 @@ cde-analyzer pattern_util --add-to-supplementary curated.tsv
 
 The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows with `include` column set to `yes` are imported. The input file is deleted after successful import.
 
+### Editor Mode
+
+Open an interactive browser-based TSV editor for reviewing and editing pattern files:
+
+```bash
+cde-analyzer pattern_util --edit coalesced_fields.tsv
+```
+
+This starts a local HTTP server and opens your default browser with the TSV loaded. The editor supports:
+
+- **Sort and filter** — click column headers to sort; use filter inputs to narrow rows
+- **Edit cells** — click any cell to edit its value in place
+- **Delete rows** — remove false positive patterns during curation
+- **Save / Save As** — write changes back to the original file or to a new file (e.g., `curated.tsv`)
+
+Press **Ctrl-C** in the terminal to stop the server when you are done.
+
+**Options**:
+
+- `--port N` — use a specific port instead of auto-assigning (default: auto)
+- `--no-browser` — start the server without automatically opening the browser
+
+**Without a file argument**, the editor opens blank and allows drag-and-drop loading of any TSV file.
+
+**Typical curation workflow**:
+
+```bash
+# 1. Open the enriched patterns for review
+cde-analyzer pattern_util --edit phase1_output/coalesced_fields.tsv
+
+# 2. In the browser: review, delete false positives, Save As curated.tsv
+# 3. Ctrl-C to stop the server
+
+# 4. Resume the pipeline
+cde-analyzer workflow resume --state-file phase1_output/.workflow_state.json
+```
+
+### YAML/TSV Conversion
+
+Convert supplementary YAML patterns to TSV for editing, then back:
+
+```bash
+# YAML → TSV (for editing in the browser editor)
+cde-analyzer pattern_util --yaml-to-tsv config/supplementary_patterns.yaml -o supplementary.tsv
+
+# Edit in the browser
+cde-analyzer pattern_util --edit supplementary.tsv
+
+# TSV → YAML (after editing)
+cde-analyzer pattern_util --tsv-to-yaml supplementary.tsv -o config/supplementary_patterns.yaml
+```
+
 ## Options
 
 ### Merge Options
@@ -252,6 +307,21 @@ The TSV must have `pattern` and `name` (or `suggested_name`) columns. Only rows 
 |--------|-------------|
 | `--add-to-supplementary FILE` | Curated TSV to import |
 | `--supplementary-section` | YAML section name (default: `added_patterns`) |
+
+### Editor Options
+
+| Option | Description |
+|--------|-------------|
+| `--edit FILE` | Open interactive browser-based TSV editor. Without a file, opens blank for drag-drop |
+| `--port N` | Port for the editor server (default: 0 = auto-assign) |
+| `--no-browser` | Start server without opening the browser |
+
+### Conversion Options
+
+| Option | Description |
+|--------|-------------|
+| `--yaml-to-tsv FILE` | Convert supplementary YAML to editable TSV |
+| `--tsv-to-yaml FILE` | Convert edited TSV back to supplementary YAML |
 
 ## Examples
 

@@ -97,7 +97,18 @@ Step 6/9: enrich_fields ... done (4.2s)
 
 ### Curating Phase 1 output
 
-Open `coalesced_fields.tsv` in a spreadsheet. You will see columns like:
+Open `coalesced_fields.tsv` in the built-in browser-based TSV editor:
+
+```bash
+cde-analyzer pattern_util --edit phase1_output/coalesced_fields.tsv
+```
+
+This launches a local web server and opens an interactive editor in your browser
+where you can review, sort, filter, and edit patterns.  When you are done, use
+**Save As** to write the reviewed file as `phase1_output/curated.tsv`, then
+press Ctrl-C in the terminal to stop the server.
+
+You will see columns like:
 
 ```tsv
 pattern                                    tinyIds          def_count  desig_count  field_profile
@@ -114,7 +125,7 @@ These contain verbs or pronouns and are not instrument names.
 **Keep both**: Family patterns and their sub-domains — `Neuro-QOL` alongside
 `Neuro-QOL Positive Affect and Well-Being`. Both are valid instruments.
 
-Save the reviewed file as `curated.tsv` (same directory), then resume:
+Then resume the pipeline:
 
 ```bash
 cde-analyzer workflow resume \
@@ -182,9 +193,16 @@ Please respond to each item                  ddd|eee        0          45
 For each of the following statements         fff|ggg        0          38
 ```
 
-These are typically boilerplate that should be removed. Review for false
-positives (patterns that look boilerplate but carry real meaning), save as
-`curated.tsv`, then resume:
+These are typically boilerplate that should be removed. Open the file in the
+browser-based editor to review:
+
+```bash
+cde-analyzer pattern_util --edit phase2_output/coalesced_fields.tsv
+```
+
+Remove false positives (patterns that look boilerplate but carry real meaning),
+then use **Save As** to write `phase2_output/curated.tsv` and Ctrl-C to stop
+the server. Then resume:
 
 ```bash
 cde-analyzer workflow resume \

@@ -279,7 +279,15 @@ cde-analyzer pattern_util --field-analysis coalesced.tsv \
 
 ### Step 5: Human curation (checkpoint)
 
-Open `coalesced_fields.tsv` in a spreadsheet. This is the most important step.
+Open `coalesced_fields.tsv` in the built-in browser-based TSV editor. This is
+the most important step.
+
+```bash
+cde-analyzer pattern_util --edit coalesced_fields.tsv
+```
+
+This launches a local web server and opens an interactive editor in your browser
+where you can sort, filter, and edit patterns.
 
 **Review checklist**:
 
@@ -294,7 +302,8 @@ Open `coalesced_fields.tsv` in a spreadsheet. This is the most important step.
 5. **Check field profiles** — `def-only` patterns might be definition templates
    worth stripping; `desig-only` might be naming conventions
 
-Save the reviewed file as `curated.tsv`.
+Use **Save As** in the editor to write the reviewed file as `curated.tsv`, then
+press Ctrl-C in the terminal to stop the server.
 
 ### Step 6: Strip
 

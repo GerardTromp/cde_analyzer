@@ -97,8 +97,16 @@ resolution chain.
 
 ## 3. Understanding the Output
 
-After the pipeline reaches the checkpoint, open `coalesced_fields.tsv`.
-This is the file you will curate.
+After the pipeline reaches the checkpoint, open `coalesced_fields.tsv` in the
+built-in browser-based TSV editor:
+
+```bash
+cde-analyzer pattern_util --edit phase1_output/coalesced_fields.tsv
+```
+
+This is the file you will curate. When you are done, use **Save As** to write
+the reviewed file as `phase1_output/curated.tsv`, then press Ctrl-C to stop
+the server.
 
 ### Column reference
 
