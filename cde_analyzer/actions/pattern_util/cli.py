@@ -617,6 +617,34 @@ def register_subparser(subparser: ArgumentParser):
              "Row matching is by 'pattern' column (exact, case-sensitive).",
     )
 
+    # ──────────────────────────────────────────────────────────────
+    # Centralized curation server
+    # ──────────────────────────────────────────────────────────────
+
+    subparser.add_argument(
+        "--serve-curation",
+        type=str,
+        metavar="CONFIG",
+        help="Start a centralized curation server from a YAML config file "
+             "(curators, TLS, timespan, output directory). "
+             "Requires --curation-source to specify the patterns TSV. "
+             "Each curator receives a unique token URL.",
+    )
+    subparser.add_argument(
+        "--curation-source",
+        type=str,
+        metavar="FILE",
+        help="Source patterns TSV for --serve-curation "
+             "(e.g., coalesced_fields.tsv).",
+    )
+    subparser.add_argument(
+        "--curation-status",
+        type=str,
+        metavar="DIR",
+        help="Show status of a running or completed centralized curation session "
+             "(reads .curation_state.yaml from the given directory).",
+    )
+
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""
         return _get_run_action()(args)

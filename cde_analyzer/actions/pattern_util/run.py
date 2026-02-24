@@ -1034,6 +1034,70 @@ DIFF_DATA.discrepancies.forEach(d => {{
 </html>"""
 
 
+def _run_serve_curation(args, config_path: str) -> int:
+    """
+    Start a centralized multi-curator curation server.
+
+    Reads a YAML config file with curator info, TLS settings, and timespan,
+    then serves per-curator editor sessions via unique token URLs.
+    """
+    from pathlib import Path
+    from .centralized_server import serve_curation
+
+    source_path = getattr(args, 'curation_source', None)
+    if not source_path:
+        logger.error("--curation-source is required with --serve-curation "
+                      "(path to the patterns TSV)")
+        raise SystemExit(1)
+
+    no_browser = getattr(args, 'no_browser', False)
+    return serve_curation(
+        config_path=Path(config_path),
+        source_path=Path(source_path),
+        no_browser=no_browser,
+    )
+
+
+def _run_curation_status(args, status_dir: str) -> int:
+    """
+    Show the status of a centralized curation session.
+
+    Reads .curation_state.yaml from the given directory and prints
+    curator statuses.
+    """
+    from pathlib import Path
+    import yaml
+
+    state_path = Path(status_dir) / ".curation_state.yaml"
+    if not state_path.is_file():
+        logger.error(f"No curation state found: {state_path}")
+        return 1
+
+    with open(state_path, encoding="utf-8") as fh:
+        state = yaml.safe_load(fh)
+
+    print(f"\nCuration Session Status")
+    print(f"  Source:   {state.get('source_file', '?')}")
+    print(f"  Started:  {state.get('started_at', '?')}")
+    print(f"  Expires:  {state.get('expires_at', '?')}")
+    print()
+
+    curators = state.get("curators", {})
+    if curators:
+        max_name = max(len(s) for s in curators) + 2
+        print(f"  {'Curator':<{max_name}} {'Status':<12} Last Access")
+        print(f"  {'─' * max_name} {'─' * 10}   {'─' * 20}")
+        for slug, info in curators.items():
+            status = info.get("status", "?")
+            last = info.get("last_access") or "—"
+            print(f"  {slug:<{max_name}} {status:<12} {last}")
+    else:
+        print("  No curators found in state file.")
+
+    print()
+    return 0
+
+
 def _run_to_minimal(args, input_path: str) -> int:
     """
     Normalize any pattern TSV to minimal 2-column format: pattern<TAB>tinyIds
@@ -3461,6 +3525,16 @@ def run_action(args: Namespace):
     merge_curation = getattr(args, 'merge_curation', None)
     if merge_curation:
         return _run_merge_curation(args, merge_curation)
+
+    # Check for serve-curation mode (centralized server)
+    serve_curation_cfg = getattr(args, 'serve_curation', None)
+    if serve_curation_cfg:
+        return _run_serve_curation(args, serve_curation_cfg)
+
+    # Check for curation-status mode
+    curation_status_dir = getattr(args, 'curation_status', None)
+    if curation_status_dir:
+        return _run_curation_status(args, curation_status_dir)
 
     # Check for generate-strip-patterns mode
     gen_strip = getattr(args, 'generate_strip_patterns', None)

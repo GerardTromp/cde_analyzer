@@ -402,6 +402,15 @@ body {
 #grid-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
 #grid-container::-webkit-scrollbar-track { background: var(--bg-alt); }
 </style>
+<script>
+/* Centralized mode URL prefix — injected by server via window.__CDE_TOKEN__ */
+function cdeUrl(path) {
+    if (window.__CDE_CENTRALIZED__ && window.__CDE_TOKEN__) {
+        return '/c/' + window.__CDE_TOKEN__ + path;
+    }
+    return path;
+}
+</script>
 </head>
 <body>
 
@@ -448,6 +457,12 @@ body {
     <span class="spacer"></span>
 
     <span id="toolbar-info" style="font-size:11px; color:var(--text-muted)"></span>
+</div>
+
+<!-- Centralized curation info bar (shown only in centralized mode) -->
+<div id="curator-bar" style="display:none; background:#ebf8ff; padding:6px 16px; font-size:13px; border-bottom:1px solid #bee3f8; color:#2b6cb0;">
+    <strong id="curator-name"></strong>
+    <span style="margin-left:1.5rem" id="expiry-countdown"></span>
 </div>
 
 <!-- Grid -->
@@ -1478,7 +1493,7 @@ body {
 
         const content = TSV.serialize(S.headers, S.rows.map(r => r.cells));
         try {
-            const resp = await fetch('/save', {
+            const resp = await fetch(cdeUrl('/save'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content }),
@@ -1663,14 +1678,40 @@ body {
     async function init() {
         // Try server mode
         try {
-            const infoResp = await fetch('/info');
+            const infoResp = await fetch(cdeUrl('/info'));
             const info = await infoResp.json();
             if (info.server_mode) {
                 S.serverMode = true;
                 S.filePath = info.path;
                 S.fileName = info.filename;
 
-                const dataResp = await fetch('/data');
+                /* Centralized mode: show curator bar and start countdown */
+                if (window.__CDE_CENTRALIZED__ && window.__CDE_CURATOR__) {
+                    const bar = document.getElementById('curator-bar');
+                    const nameEl = document.getElementById('curator-name');
+                    const countEl = document.getElementById('expiry-countdown');
+                    if (bar && nameEl) {
+                        nameEl.textContent = 'Curator: ' + window.__CDE_CURATOR__;
+                        bar.style.display = 'block';
+                        if (window.__CDE_EXPIRES__ && countEl) {
+                            function updateCountdown() {
+                                const remaining = window.__CDE_EXPIRES__ - Math.floor(Date.now() / 1000);
+                                if (remaining <= 0) {
+                                    countEl.textContent = 'Session expired';
+                                    countEl.style.color = '#c53030';
+                                } else {
+                                    const h = Math.floor(remaining / 3600);
+                                    const m = Math.floor((remaining % 3600) / 60);
+                                    countEl.textContent = 'Expires in ' + h + 'h ' + m + 'm';
+                                }
+                            }
+                            updateCountdown();
+                            setInterval(updateCountdown, 30000);
+                        }
+                    }
+                }
+
+                const dataResp = await fetch(cdeUrl('/data'));
                 const data = await dataResp.json();
                 if (data.content) {
                     loadData(data.content, data.filename);
