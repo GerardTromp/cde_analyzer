@@ -22,6 +22,8 @@ Decision rules for classify_patterns():
     remove          | has new tinyIds           | needs_review
     modify          | same or subset            | auto_modify (apply mod)
     modify          | has new tinyIds           | needs_review
+    substitute      | same or subset            | auto_substitute
+    substitute      | has new tinyIds           | needs_review
 """
 from __future__ import annotations
 
@@ -43,7 +45,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 class CurationDecision:
     """A single curation decision for one pattern."""
     pattern: str
-    decision: str          # "keep" | "remove" | "modify"
+    decision: str          # "keep" | "remove" | "modify" | "substitute"
     modification: str = ""
     tinyIds: Set[str] = field(default_factory=set)
     n_tinyIds: int = 0
@@ -163,9 +165,11 @@ class CurationLedger:
                 "n_auto_kept": summary.get("auto_keep", 0),
                 "n_auto_removed": summary.get("auto_remove", 0),
                 "n_auto_modified": summary.get("auto_modify", 0),
+                "n_auto_substituted": summary.get("auto_substitute", 0),
                 "n_new_reviewed": summary.get("new_pattern", 0)
                     + summary.get("changed_tinyids_remove", 0)
-                    + summary.get("changed_tinyids_modify", 0),
+                    + summary.get("changed_tinyids_modify", 0)
+                    + summary.get("changed_tinyids_substitute", 0),
             })
 
         self.meta["runs"].append(record)
@@ -207,8 +211,9 @@ def classify_patterns(
         Patterns that need human curation.  Each dict has all original
         columns plus empty ``decision``, ``modification``, ``notes``.
     summary : dict
-        Counts: auto_keep, auto_remove, auto_modify, new_pattern,
-        changed_tinyids_remove, changed_tinyids_modify.
+        Counts: auto_keep, auto_remove, auto_modify, auto_substitute,
+        new_pattern, changed_tinyids_remove, changed_tinyids_modify,
+        changed_tinyids_substitute.
     """
     auto_resolved: List[Dict[str, str]] = []
     needs_review: List[Dict[str, str]] = []
@@ -216,9 +221,11 @@ def classify_patterns(
         "auto_keep": 0,
         "auto_remove": 0,
         "auto_modify": 0,
+        "auto_substitute": 0,
         "new_pattern": 0,
         "changed_tinyids_remove": 0,
         "changed_tinyids_modify": 0,
+        "changed_tinyids_substitute": 0,
     }
 
     for row in current_patterns:
@@ -282,6 +289,25 @@ def classify_patterns(
                 ar["modification"] = prior.modification
                 auto_resolved.append(ar)
                 summary["auto_modify"] += 1
+
+        elif prior.decision == "substitute":
+            if has_new:
+                nr = dict(row)
+                nr["decision"] = ""
+                nr["modification"] = prior.modification
+                nr["notes"] = (
+                    f"Previously substituted with '{prior.modification}'; "
+                    f"new tinyIds detected"
+                )
+                needs_review.append(nr)
+                summary["changed_tinyids_substitute"] += 1
+            else:
+                ar = dict(row)
+                ar["prior_decision"] = "substitute"
+                ar["resolution_source"] = "ledger_auto_substitute"
+                ar["modification"] = prior.modification
+                auto_resolved.append(ar)
+                summary["auto_substitute"] += 1
 
         else:
             # Unknown decision — treat as new

@@ -16,6 +16,14 @@
 #     to produce {inst_patterns_base}_full.tsv and {inst_patterns_base}_sub.tsv
 #   - Curated phrase patterns TSV
 #
+# If either phase produced substitute patterns, merge them and apply
+# substitutions to the input JSON before running the branching strip:
+#
+#   cde-analyzer strip_phrases -i allcde.json -o substituted.json \
+#       --patterns merged_substitute.tsv,pattern --no-expand-anchors
+#
+# Then pass substituted.json as input_json to this workflow.
+#
 # Usage:
 #   cde-analyzer workflow run workflows/branching_strip.yaml \
 #       --set input_json=/path/to/cdes.json \

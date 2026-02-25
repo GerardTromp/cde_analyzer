@@ -207,6 +207,20 @@ body {
 .filter-input:focus { border-color: var(--primary); }
 .filter-input.active { background: #fff3e0; border-color: var(--warning); }
 
+.filter-select {
+    width: 100%;
+    padding: 2px 4px;
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: var(--font);
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+}
+.filter-select:focus { border-color: var(--primary); }
+.filter-select.active { background: #fff3e0; border-color: var(--warning); }
+
 /* Checkbox column */
 .col-check { width: 30px; max-width: 30px; text-align: center !important; }
 .col-check input[type="checkbox"] { cursor: pointer; }
@@ -226,6 +240,83 @@ body {
 #grid tbody tr.fp-both-all { border-left: 3px solid var(--profile-both); }
 #grid tbody tr.fp-both { border-left: 3px solid var(--profile-both); }
 #grid tbody tr.fp-mixed { border-left: 3px solid var(--profile-mixed); }
+
+/* ===== DECISION BADGES ===== */
+.decision-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+}
+.decision-keep { background: var(--success-light); color: var(--success); }
+.decision-remove { background: var(--danger-light); color: var(--danger); }
+.decision-modify { background: #fff3e0; color: var(--warning); }
+.decision-substitute { background: #e0f7fa; color: #00838f; }
+
+/* Decision quick-buttons in toolbar */
+.decision-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 0.1s;
+}
+.decision-quick-btn:disabled { opacity: 0.3; cursor: default; }
+.decision-quick-btn.dq-keep { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.decision-quick-btn.dq-keep:hover:not(:disabled) { background: #a5d6a7; }
+.decision-quick-btn.dq-remove { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.decision-quick-btn.dq-remove:hover:not(:disabled) { background: #ef9a9a; }
+.decision-quick-btn.dq-modify { background: #fff3e0; color: var(--warning); border-color: var(--warning); }
+.decision-quick-btn.dq-modify:hover:not(:disabled) { background: #ffe0b2; }
+.decision-quick-btn.dq-substitute { background: #e0f7fa; color: #00838f; border-color: #00838f; }
+.decision-quick-btn.dq-substitute:hover:not(:disabled) { background: #b2ebf2; }
+
+/* Decision select dropdown during edit */
+#grid td.editing select {
+    width: 100%;
+    min-width: 100px;
+    padding: 3px 5px;
+    border: 2px solid var(--primary);
+    border-radius: 0;
+    font-family: var(--font);
+    font-size: 12px;
+    outline: none;
+    background: #fff;
+}
+
+/* ===== GROUP INDICATORS (right border, 8 rotating hues) ===== */
+.group-border-1 { border-right: 3px solid #e91e63 !important; }
+.group-border-2 { border-right: 3px solid #9c27b0 !important; }
+.group-border-3 { border-right: 3px solid #2196f3 !important; }
+.group-border-4 { border-right: 3px solid #009688 !important; }
+.group-border-5 { border-right: 3px solid #ff9800 !important; }
+.group-border-6 { border-right: 3px solid #795548 !important; }
+.group-border-7 { border-right: 3px solid #607d8b !important; }
+.group-border-8 { border-right: 3px solid #cddc39 !important; }
+
+.group-badge {
+    display: inline-block;
+    padding: 0 5px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 4px;
+    line-height: 16px;
+}
+.group-badge-1 { background: #fce4ec; color: #e91e63; }
+.group-badge-2 { background: #f3e5f5; color: #9c27b0; }
+.group-badge-3 { background: #e3f2fd; color: #2196f3; }
+.group-badge-4 { background: #e0f2f1; color: #009688; }
+.group-badge-5 { background: #fff3e0; color: #ff9800; }
+.group-badge-6 { background: #efebe9; color: #795548; }
+.group-badge-7 { background: #eceff1; color: #607d8b; }
+.group-badge-8 { background: #f9fbe7; color: #cddc39; }
 
 /* Editing cell */
 #grid td.editing {
@@ -450,6 +541,23 @@ function cdeUrl(path) {
     <button class="tb-btn" id="btn-split" title="Split by field_profile">&#8700; Split</button>
     <div class="sep"></div>
 
+    <!-- Decision quick-assign (hidden when no decision column) -->
+    <div id="decision-buttons" style="display:none; align-items:center; gap:2px;">
+        <div class="sep"></div>
+        <button class="decision-quick-btn dq-keep" id="btn-dq-keep" title="Set selected to 'keep' (K)" disabled>&#10003; Keep</button>
+        <button class="decision-quick-btn dq-remove" id="btn-dq-remove" title="Set selected to 'remove' (R)" disabled>&#10007; Remove</button>
+        <button class="decision-quick-btn dq-modify" id="btn-dq-modify" title="Set selected to 'modify' (M)" disabled>&#10038; Modify</button>
+        <button class="decision-quick-btn dq-substitute" id="btn-dq-substitute" title="Set selected to 'substitute' (S)" disabled>&#8644; Subst</button>
+    </div>
+
+    <!-- Group ops (hidden when no notes column) -->
+    <div id="group-buttons" style="display:none; align-items:center; gap:2px;">
+        <div class="sep"></div>
+        <button class="tb-btn" id="btn-group" title="Assign merge group to selected rows" disabled>&#9744; Group</button>
+        <button class="tb-btn" id="btn-propagate" title="Propagate modifications within groups">&#8644; Propagate</button>
+    </div>
+    <div class="sep"></div>
+
     <!-- Undo/redo -->
     <button class="tb-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
     <button class="tb-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>&#8631; Redo</button>
@@ -505,6 +613,11 @@ function cdeUrl(path) {
         fpCol: -1,         // field_profile column index
         tinyIdCols: [],     // indices of tinyId columns
         expandedTids: new Set(), // row IDs with expanded tinyIds
+        decisionCol: -1,    // 'decision' column index
+        modificationCol: -1, // 'modification' column index
+        notesCol: -1,        // 'notes' column index
+        nextGroupNum: 1,     // next available merge group number
+        displayOrder: [],    // column indices in display order (decision first when present)
     };
 
     // ===== DOM REFS =====
@@ -536,6 +649,16 @@ function cdeUrl(path) {
     const btnSplit = $('btn-split');
     const btnUndo = $('btn-undo');
     const btnRedo = $('btn-redo');
+
+    // Decision + Group buttons
+    const decisionButtons = $('decision-buttons');
+    const btnDqKeep = $('btn-dq-keep');
+    const btnDqRemove = $('btn-dq-remove');
+    const btnDqModify = $('btn-dq-modify');
+    const btnDqSubstitute = $('btn-dq-substitute');
+    const groupButtons = $('group-buttons');
+    const btnGroup = $('btn-group');
+    const btnPropagate = $('btn-propagate');
 
     // ===== TSV PARSER =====
     const TSV = {
@@ -570,10 +693,38 @@ function cdeUrl(path) {
     function detectColumns() {
         S.fpCol = -1;
         S.tinyIdCols = [];
+        S.decisionCol = -1;
+        S.modificationCol = -1;
+        S.notesCol = -1;
         for (let i = 0; i < S.headers.length; i++) {
             const h = S.headers[i].toLowerCase();
             if (h === 'field_profile') S.fpCol = i;
             if (h.includes('tinyid') || h.includes('tinyids')) S.tinyIdCols.push(i);
+            if (h === 'decision') S.decisionCol = i;
+            if (h === 'modification') S.modificationCol = i;
+            if (h === 'notes') S.notesCol = i;
+        }
+        // Scan existing notes for group numbers to initialize nextGroupNum
+        S.nextGroupNum = 1;
+        if (S.notesCol >= 0) {
+            for (const row of S.rows) {
+                const notes = row.cells[S.notesCol] || '';
+                const re = /\bG(\d+)\b/g;
+                let m;
+                while ((m = re.exec(notes)) !== null) {
+                    const num = parseInt(m[1], 10);
+                    if (num >= S.nextGroupNum) S.nextGroupNum = num + 1;
+                }
+            }
+        }
+
+        // Compute display order: move curation columns (decision, modification) to front
+        S.displayOrder = [];
+        const frontCols = new Set();
+        if (S.decisionCol >= 0) { S.displayOrder.push(S.decisionCol); frontCols.add(S.decisionCol); }
+        if (S.modificationCol >= 0) { S.displayOrder.push(S.modificationCol); frontCols.add(S.modificationCol); }
+        for (let i = 0; i < S.headers.length; i++) {
+            if (!frontCols.has(i)) S.displayOrder.push(i);
         }
     }
 
@@ -637,8 +788,8 @@ function cdeUrl(path) {
         thNum.textContent = '#';
         tr.appendChild(thNum);
 
-        // Data headers
-        for (let i = 0; i < S.headers.length; i++) {
+        // Data headers (display order)
+        for (const i of S.displayOrder) {
             const th = document.createElement('th');
             th.textContent = S.headers[i];
             th.dataset.col = i;
@@ -668,19 +819,48 @@ function cdeUrl(path) {
         fNum.className = 'col-rownum';
         trFilter.appendChild(fNum);
 
-        for (let i = 0; i < S.headers.length; i++) {
+        for (const i of S.displayOrder) {
             const th = document.createElement('th');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'filter-input';
-            input.placeholder = 'Filter...';
-            input.dataset.col = i;
-            if (S.filters[i]) {
-                input.value = S.filters[i];
-                input.classList.add('active');
+
+            // Decision column: use dropdown filter
+            if (i === S.decisionCol && S.decisionCol >= 0) {
+                const sel = document.createElement('select');
+                sel.className = 'filter-select';
+                sel.dataset.col = i;
+                const opts = [
+                    ['', '(all)'],
+                    ['=blank', 'blank'],
+                    ['!blank', 'filled'],
+                    ['keep', 'keep'],
+                    ['remove', 'remove'],
+                    ['modify', 'modify'],
+                    ['substitute', 'substitute'],
+                ];
+                for (const [val, label] of opts) {
+                    const o = document.createElement('option');
+                    o.value = val;
+                    o.textContent = label;
+                    sel.appendChild(o);
+                }
+                if (S.filters[i]) {
+                    sel.value = S.filters[i];
+                    sel.classList.add('active');
+                }
+                sel.addEventListener('change', (e) => onFilterChange(i, e.target.value, e.target));
+                th.appendChild(sel);
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'filter-input';
+                input.placeholder = 'Filter...';
+                input.dataset.col = i;
+                if (S.filters[i]) {
+                    input.value = S.filters[i];
+                    input.classList.add('active');
+                }
+                input.addEventListener('input', (e) => onFilterChange(i, e.target.value, e.target));
+                th.appendChild(input);
             }
-            input.addEventListener('input', (e) => onFilterChange(i, e.target.value, e.target));
-            th.appendChild(input);
             trFilter.appendChild(th);
         }
         thead.appendChild(trFilter);
@@ -710,6 +890,15 @@ function cdeUrl(path) {
             if (fp) tr.classList.add('fp-' + fp);
         }
 
+        // Group border (right side, avoids conflict with field_profile left border)
+        if (S.notesCol >= 0) {
+            const groupNum = _extractGroupNum(row.cells[S.notesCol] || '');
+            if (groupNum > 0) {
+                const colorIdx = ((groupNum - 1) % 8) + 1;
+                tr.classList.add('group-border-' + colorIdx);
+            }
+        }
+
         // Check if visible
         if (!rowMatchesFilters(row)) {
             tr.classList.add('hidden');
@@ -734,13 +923,33 @@ function cdeUrl(path) {
         tdNum.textContent = displayIndex + 1;
         tr.appendChild(tdNum);
 
-        // Data cells
-        for (let i = 0; i < S.headers.length; i++) {
+        // Data cells (display order)
+        for (const i of S.displayOrder) {
             const td = document.createElement('td');
             const value = row.cells[i] || '';
 
             if (S.tinyIdCols.includes(i) && value) {
                 renderTinyIdCell(td, value, row.id);
+            } else if (i === S.decisionCol && S.decisionCol >= 0 && value.trim()) {
+                // Decision column: render as color-coded badge
+                const badge = document.createElement('span');
+                const dv = value.trim().toLowerCase();
+                badge.className = 'decision-badge decision-' + dv;
+                badge.textContent = value.trim();
+                td.appendChild(badge);
+                td.title = 'Double-click to change';
+            } else if (i === S.notesCol && S.notesCol >= 0) {
+                // Notes column: show text + group badge if present
+                td.textContent = value;
+                td.title = value.length > 50 ? value : '';
+                const groupNum = _extractGroupNum(value);
+                if (groupNum > 0) {
+                    const gbadge = document.createElement('span');
+                    const colorIdx = ((groupNum - 1) % 8) + 1;
+                    gbadge.className = 'group-badge group-badge-' + colorIdx;
+                    gbadge.textContent = 'G' + groupNum;
+                    td.appendChild(gbadge);
+                }
             } else {
                 td.textContent = value;
                 td.title = value.length > 50 ? value : '';
@@ -759,6 +968,12 @@ function cdeUrl(path) {
         tr.addEventListener('dragend', clearDragIndicators);
 
         return tr;
+    }
+
+    // ===== GROUP HELPER =====
+    function _extractGroupNum(notesText) {
+        const m = notesText.match(/\bG(\d+)\b/);
+        return m ? parseInt(m[1], 10) : 0;
     }
 
     // ===== TINYID CELL RENDERING =====
@@ -881,6 +1096,13 @@ function cdeUrl(path) {
 
     function matchFilter(cellVal, filter) {
         if (!filter) return true;
+        const fl = filter.toLowerCase();
+
+        // Special: =blank / =empty → matches empty cells
+        if (fl === '=blank' || fl === '=empty') return cellVal === '';
+        // Special: !blank / !empty → matches non-empty cells
+        if (fl === '!blank' || fl === '!empty') return cellVal !== '';
+
         const lower = cellVal.toLowerCase();
 
         // Negation
@@ -956,6 +1178,12 @@ function cdeUrl(path) {
     }
 
     // ===== CELL EDITING =====
+    function _adjacentDisplayCol(col, forward) {
+        const idx = S.displayOrder.indexOf(col);
+        const next = forward ? idx + 1 : idx - 1;
+        return (next >= 0 && next < S.displayOrder.length) ? S.displayOrder[next] : -1;
+    }
+
     function startEdit(rowId, col) {
         commitEdit(); // commit any existing edit
 
@@ -966,13 +1194,56 @@ function cdeUrl(path) {
         const tr = tbody.querySelector(`tr[data-row-id="${rowId}"]`);
         if (!tr) return;
 
-        // +2 for checkbox + rownum columns
-        const td = tr.children[col + 2];
+        const td = tr.querySelector(`td[data-col="${col}"]`);
         if (!td) return;
 
         const value = row.cells[col] || '';
         td.classList.add('editing');
         td.innerHTML = '';
+
+        // Decision column: use <select> dropdown
+        if (col === S.decisionCol && S.decisionCol >= 0) {
+            const select = document.createElement('select');
+            const options = ['', 'keep', 'remove', 'modify', 'substitute'];
+            for (const opt of options) {
+                const o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt || '(none)';
+                if (opt === value.trim().toLowerCase()) o.selected = true;
+                select.appendChild(o);
+            }
+
+            select.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    cancelEdit();
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    commitEdit();
+                    e.preventDefault();
+                } else if (e.key === 'Tab') {
+                    commitEdit();
+                    const nextCol = _adjacentDisplayCol(col, !e.shiftKey);
+                    if (nextCol >= 0) startEdit(rowId, nextCol);
+                    e.preventDefault();
+                }
+            });
+
+            select.addEventListener('change', () => {
+                commitEdit();
+            });
+
+            select.addEventListener('blur', () => {
+                setTimeout(() => {
+                    if (S.editingCell && S.editingCell.rowId === rowId && S.editingCell.col === col) {
+                        commitEdit();
+                    }
+                }, 150);
+            });
+
+            td.appendChild(select);
+            select.focus();
+            return;
+        }
 
         // Use textarea for tinyId columns or long values
         const useTa = S.tinyIdCols.includes(col) || value.length > 100;
@@ -989,11 +1260,8 @@ function cdeUrl(path) {
                 e.preventDefault();
             } else if (e.key === 'Tab') {
                 commitEdit();
-                // Move to next/prev cell
-                const nextCol = e.shiftKey ? col - 1 : col + 1;
-                if (nextCol >= 0 && nextCol < S.headers.length) {
-                    startEdit(rowId, nextCol);
-                }
+                const nextCol = _adjacentDisplayCol(col, !e.shiftKey);
+                if (nextCol >= 0) startEdit(rowId, nextCol);
                 e.preventDefault();
             }
         });
@@ -1021,8 +1289,9 @@ function cdeUrl(path) {
         const tr = tbody.querySelector(`tr[data-row-id="${rowId}"]`);
         if (!tr) { S.editingCell = null; return; }
 
-        const td = tr.children[col + 2];
-        const input = td.querySelector('input, textarea');
+        const td = tr.querySelector(`td[data-col="${col}"]`);
+        if (!td) { S.editingCell = null; return; }
+        const input = td.querySelector('input, textarea, select');
         if (!input) { S.editingCell = null; return; }
 
         const newValue = input.value;
@@ -1379,6 +1648,128 @@ function cdeUrl(path) {
         return base + '_' + fp.replace(/[^a-zA-Z0-9_-]/g, '_') + '.tsv';
     }
 
+    // ===== DECISION QUICK-ASSIGN =====
+    function setDecisionForSelected(decision) {
+        if (S.decisionCol < 0) return;
+        const sel = getSelectedRows();
+        if (sel.length === 0) return;
+
+        pushUndo('Set ' + sel.length + ' rows to "' + decision + '"');
+
+        for (const r of sel) {
+            r.cells[S.decisionCol] = decision;
+        }
+
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Set ' + sel.length + ' row(s) to \'' + decision + '\'');
+    }
+
+    // ===== GROUP MANAGEMENT =====
+    function _hasAnyGroups() {
+        if (S.notesCol < 0) return false;
+        const groupRe = /\bG\d+\b/;
+        return S.rows.some(r => groupRe.test(r.cells[S.notesCol] || ''));
+    }
+
+    function assignGroup() {
+        if (S.notesCol < 0) return;
+        const sel = getSelectedRows();
+        if (sel.length < 2) return;
+
+        const groupNum = S.nextGroupNum;
+        const tag = 'G' + groupNum;
+
+        pushUndo('Assign group ' + tag);
+
+        for (const r of sel) {
+            const existing = (r.cells[S.notesCol] || '').trim();
+            r.cells[S.notesCol] = existing ? existing + ' ' + tag : tag;
+        }
+
+        S.nextGroupNum = groupNum + 1;
+
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Assigned ' + tag + ' to ' + sel.length + ' rows');
+    }
+
+    function propagateGroups() {
+        if (S.notesCol < 0 || S.decisionCol < 0 || S.modificationCol < 0) {
+            alert('Propagation requires decision, modification, and notes columns.');
+            return;
+        }
+
+        // Scan all rows for group tags, build group -> [rows] map
+        const groupMembers = {};
+        for (const row of S.rows) {
+            const notes = row.cells[S.notesCol] || '';
+            const re = /\bG(\d+)\b/g;
+            const seenGroups = new Set();
+            let m;
+            while ((m = re.exec(notes)) !== null) {
+                const num = parseInt(m[1], 10);
+                if (!seenGroups.has(num)) {
+                    seenGroups.add(num);
+                    if (!groupMembers[num]) groupMembers[num] = [];
+                    groupMembers[num].push(row);
+                }
+            }
+        }
+
+        // For each group, find the source row (decision=modify + modification text)
+        let totalGroups = 0;
+        let totalRows = 0;
+        const propagations = [];
+
+        for (const [numStr, members] of Object.entries(groupMembers)) {
+            if (members.length < 2) continue;
+
+            const sourceRow = members.find(r => {
+                const dec = (r.cells[S.decisionCol] || '').trim().toLowerCase();
+                const mod = (r.cells[S.modificationCol] || '').trim();
+                return (dec === 'modify' || dec === 'substitute') && mod !== '';
+            });
+
+            if (sourceRow) {
+                const targets = members.filter(r => r !== sourceRow);
+                propagations.push({ groupNum: parseInt(numStr, 10), sourceRow, targetRows: targets });
+                totalGroups++;
+                totalRows += targets.length;
+            }
+        }
+
+        if (propagations.length === 0) {
+            setAction('No groups with modifications to propagate');
+            return;
+        }
+
+        if (!confirm('Propagate modifications for ' + totalGroups +
+                     ' group(s) (' + totalRows + ' target rows)?\n\n' +
+                     'This will copy the decision and modification text\n' +
+                     'from the source row to all other rows in each group.')) {
+            return;
+        }
+
+        pushUndo('Propagate ' + totalGroups + ' group(s)');
+
+        for (const { sourceRow, targetRows } of propagations) {
+            const srcDecision = sourceRow.cells[S.decisionCol];
+            const modText = sourceRow.cells[S.modificationCol];
+            for (const target of targetRows) {
+                target.cells[S.decisionCol] = srcDecision;
+                target.cells[S.modificationCol] = modText;
+            }
+        }
+
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Propagated to ' + totalRows + ' row(s) in ' + totalGroups + ' group(s)');
+    }
+
     // ===== UNDO / REDO =====
     function pushUndo(description) {
         S.undoStack.push({
@@ -1534,6 +1925,23 @@ function cdeUrl(path) {
         let text = S.fileName + ' \u2014 ' + total + ' rows';
         if (selected > 0) text += ' (' + selected + ' selected)';
         if (hidden > 0) text += ' (' + hidden + ' hidden by filter)';
+
+        // Decision column stats
+        if (S.decisionCol >= 0) {
+            let keep = 0, remove = 0, modify = 0, substitute = 0, empty = 0;
+            for (const r of S.rows) {
+                const d = (r.cells[S.decisionCol] || '').trim().toLowerCase();
+                if (d === 'keep') keep++;
+                else if (d === 'remove') remove++;
+                else if (d === 'modify') modify++;
+                else if (d === 'substitute') substitute++;
+                else empty++;
+            }
+            text += ' | \u2713' + keep + ' \u2717' + remove + ' \u270E' + modify;
+            if (substitute > 0) text += ' \u21C4' + substitute;
+            if (empty > 0) text += ' ?' + empty;
+        }
+
         statusLeft.textContent = text;
 
         const dot = S.serverMode ? 'server' : 'standalone';
@@ -1560,6 +1968,26 @@ function cdeUrl(path) {
 
         // Show/hide save button based on mode
         btnSave.style.display = S.serverMode ? '' : 'none';
+
+        // Decision quick-buttons: show only when decision column exists
+        if (S.decisionCol >= 0) {
+            decisionButtons.style.display = 'flex';
+            btnDqKeep.disabled = sel === 0;
+            btnDqRemove.disabled = sel === 0;
+            btnDqModify.disabled = sel === 0;
+            btnDqSubstitute.disabled = sel === 0;
+        } else {
+            decisionButtons.style.display = 'none';
+        }
+
+        // Group buttons: show only when notes column exists
+        if (S.notesCol >= 0) {
+            groupButtons.style.display = 'flex';
+            btnGroup.disabled = sel < 2;
+            btnPropagate.disabled = !_hasAnyGroups();
+        } else {
+            groupButtons.style.display = 'none';
+        }
     }
 
     function hasUnsavedChanges() {
@@ -1602,9 +2030,30 @@ function cdeUrl(path) {
         } else if (e.key === 'Delete' && !isInput) {
             deleteSelectedRows();
             e.preventDefault();
-        } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            // Focus first filter input
-            const firstFilter = thead.querySelector('.filter-input');
+        }
+
+        // Decision shortcuts: K=keep, R=remove, M=modify (plain keys, no modifiers)
+        if (!isInput && !inModal && !S.editingCell && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (S.decisionCol >= 0 && getSelectedRows().length > 0) {
+                if (e.key === 'k' || e.key === 'K') {
+                    setDecisionForSelected('keep');
+                    e.preventDefault();
+                } else if (e.key === 'r' || e.key === 'R') {
+                    setDecisionForSelected('remove');
+                    e.preventDefault();
+                } else if (e.key === 'm' || e.key === 'M') {
+                    setDecisionForSelected('modify');
+                    e.preventDefault();
+                } else if (e.key === 's' || e.key === 'S') {
+                    setDecisionForSelected('substitute');
+                    e.preventDefault();
+                }
+            }
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            // Focus first filter input or select
+            const firstFilter = thead.querySelector('.filter-input, .filter-select');
             if (firstFilter) {
                 firstFilter.focus();
                 e.preventDefault();
@@ -1633,6 +2082,14 @@ function cdeUrl(path) {
     btnSplit.addEventListener('click', splitByField);
     btnUndo.addEventListener('click', undo);
     btnRedo.addEventListener('click', redo);
+
+    // Decision + Group button handlers
+    btnDqKeep.addEventListener('click', () => setDecisionForSelected('keep'));
+    btnDqRemove.addEventListener('click', () => setDecisionForSelected('remove'));
+    btnDqModify.addEventListener('click', () => setDecisionForSelected('modify'));
+    btnDqSubstitute.addEventListener('click', () => setDecisionForSelected('substitute'));
+    btnGroup.addEventListener('click', assignGroup);
+    btnPropagate.addEventListener('click', propagateGroups);
 
     // File input handler
     fileInput.addEventListener('change', (e) => {

@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.8.0)
+# CDE Analyzer — Context (v0.8.1)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -18,25 +18,48 @@ wsl -d Ubuntu-22.04 -- bash -c "cd /mnt/d/GT/Professional/NLM_CDE/clone_git/cde-
 ## Pipeline Overview
 
 ### Phase 1: Instrument Pipeline (`instrument_pipeline.yaml`)
-mine_instruments → discover_verbatim → coalesce → validate_subsumption → enrich_fields → [CURATOR] → generate_strip_patterns → strip_instruments
+mine_instruments → discover_verbatim → coalesce → validate_subsumption → enrich_fields → [CURATOR] → apply_substitutions → strip_instruments
 
 ### Phase 2: Phrase Pipeline (`phrase_pipeline.yaml`)
-mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → strip_phrases → discovery_report
+mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → apply_substitutions → strip_phrases → discovery_report
 
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.8.0)
+## Current State (v0.8.1)
+
+### v0.8.1: Substitute Decision Type
+
+#### 4th Curation Decision
+- **`substitute`**: Replaces matched text with `modification` column content (vs `keep`=delete, `modify`=change pattern then delete)
+- Semantics: pattern matched → replaced with modification text in output (not deleted)
+- Runs as separate pass **before** stripping via `apply_substitutions` pipeline step
+
+#### Pipeline Integration
+- `_build_curated_from_auto()` returns `(curated_rows, substitute_rows)` tuple
+- `_write_substitute_tsv()` writes `substitute_patterns.tsv` with `replace_with` column
+- `instrument_pipeline.yaml` + `phrase_pipeline.yaml`: new `apply_substitutions` step between finalize and strip
+- `branching_strip.yaml`: substitute pre-pass documented (user applies before branching)
+- Empty `substitute_patterns.tsv` (header-only) makes strip step a no-op
+
+#### Ledger Support
+- `classify_patterns()`: `auto_substitute` (same tinyIds) / `needs_review` (new tinyIds)
+- `record_run()`: logs `n_auto_substituted`
+
+#### TSV Editor
+- Cyan badge, `S` keyboard shortcut, toolbar button, filter dropdown, `⇄N` status counter
+- `propagateGroups()` supports substitute source rows (copies actual decision, not hardcoded `modify`)
 
 ### v0.8.0: Incremental Curation (Curation Ledger & Gate)
 
 #### Curation Ledger (`logic/curation_ledger.py`)
-- **`CurationLedger`**: Persistent record of keep/remove/modify decisions across pipeline runs
+- **`CurationLedger`**: Persistent record of keep/remove/modify/substitute decisions across pipeline runs
 - **Storage**: `{ledger_dir}/ledger_meta.yaml` (run history) + `instrument_decisions.tsv` / `phrase_decisions.tsv`
 - **`classify_patterns()`**: Compares current patterns against prior decisions
   - keep + any tinyIds → auto_keep (validity is inherent)
   - remove + same tinyIds → auto_remove; remove + new tinyIds → needs_review
   - modify + same tinyIds → auto_modify; modify + new tinyIds → needs_review
+  - substitute + same tinyIds → auto_substitute; substitute + new tinyIds → needs_review
   - new pattern (not in ledger) → needs_review
 
 #### Curation Gate (`--curation-gate`)

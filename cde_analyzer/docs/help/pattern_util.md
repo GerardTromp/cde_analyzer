@@ -381,9 +381,10 @@ Outputs:
 | File | Contents |
 |------|----------|
 | `gate_result.json` | Classification summary: counts, file paths, skip flag |
-| `auto_resolved.tsv` | Patterns resolved from prior decisions (keep/remove/modify) |
+| `auto_resolved.tsv` | Patterns resolved from prior decisions (keep/remove/modify/substitute) |
 | `needs_review.tsv` | New or changed patterns requiring human curation |
 | `curated.tsv` | Written ONLY when needs_review is empty (signals checkpoint skip) |
+| `substitute_patterns.tsv` | Patterns with `replace_with` column (from substitute decisions) |
 
 **Finalize curation** — merge results and update the ledger after the checkpoint:
 
@@ -392,10 +393,12 @@ cde-analyzer pattern_util --finalize-curation gate_output/ \
     --ledger-dir .curation_ledger --phase instrument -i cdes.json
 ```
 
-If the checkpoint was skipped (all auto-resolved), `curated.tsv` already exists
-and the ledger is updated with timestamps. If the checkpoint paused for human
-review, `auto_resolved.tsv` and the human-curated `needs_review.tsv` are
-merged into `curated.tsv`, and all new decisions are recorded in the ledger.
+If the checkpoint was skipped (all auto-resolved), `curated.tsv` and
+`substitute_patterns.tsv` already exist and the ledger is updated with
+timestamps. If the checkpoint paused for human review, `auto_resolved.tsv`
+and the human-curated `needs_review.tsv` are merged into `curated.tsv`
+(keep/modify patterns) and `substitute_patterns.tsv` (substitute patterns
+with `replace_with` column), and all decisions are recorded in the ledger.
 
 **Decision rules:**
 
@@ -407,6 +410,8 @@ merged into `curated.tsv`, and all new decisions are recorded in the ledger.
 | remove | has new tinyIds | needs_review (new context) |
 | modify | same or subset | auto_modify (apply stored modification) |
 | modify | has new tinyIds | needs_review (new context) |
+| substitute | same or subset | auto_substitute (apply stored replacement) |
+| substitute | has new tinyIds | needs_review (new context) |
 
 **Ledger storage** (`--ledger-dir`):
 

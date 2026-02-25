@@ -26,6 +26,7 @@ ANCHOR_PREFIXES = [
     "as part of",
     "as a part of",
     "based on",
+    "related to",
     "from",
     "field of",
     "a field of",

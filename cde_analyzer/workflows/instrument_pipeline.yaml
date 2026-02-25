@@ -43,6 +43,8 @@ variables:
   validated_tsv: "${output_dir}/validated.tsv"
   # curated_tsv: Final curated patterns (auto-generated or human-edited)
   curated_tsv: "${output_dir}/curated.tsv"
+  substitute_tsv: "${output_dir}/substitute_patterns.tsv"
+  substituted_json: "${output_dir}/.substituted.json"
   stripped_json: "${output_dir}/inst_stripped.json"
   trace_tsv: "${output_dir}/strip_trace.tsv"
   sanity_check: "${output_dir}/sanity_check.tsv"
@@ -131,9 +133,10 @@ steps:
       Open the editor:
         cde-analyzer pattern_util --edit ${output_dir}/needs_review.tsv
 
-      Fill in the 'decision' column (keep / remove / modify) for each
-      pattern. If decision = modify, enter the replacement text in
-      the 'modification' column.
+      Fill in the 'decision' column (keep / remove / modify / substitute)
+      for each pattern. If decision = modify, enter the new pattern text
+      in the 'modification' column. If decision = substitute, enter the
+      replacement text in the 'modification' column.
 
       When ready, resume with:
         cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
@@ -146,10 +149,20 @@ steps:
       input: "${input_json}"
       phase: instrument
 
-  - name: strip_instruments
+  - name: apply_substitutions
     action: strip_phrases
     args:
       input: "${input_json}"
+      model: CDE
+      output: "${substituted_json}"
+      patterns: "${substitute_tsv},pattern"
+      no_expand_anchors: true
+      workers: "${workers}"
+
+  - name: strip_instruments
+    action: strip_phrases
+    args:
+      input: "${substituted_json}"
       model: CDE
       output: "${stripped_json}"
       patterns: "${curated_tsv},pattern"

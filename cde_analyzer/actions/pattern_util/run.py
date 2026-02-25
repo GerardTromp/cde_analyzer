@@ -1159,8 +1159,13 @@ def _write_gate_tsv(path, rows, extra_cols):
 
 
 def _build_curated_from_auto(auto_resolved):
-    """Filter auto_resolved to kept + modified patterns for curated.tsv."""
+    """Filter auto_resolved to kept + modified patterns for curated.tsv.
+
+    Returns (curated_rows, substitute_rows).
+    Substitute patterns go to a separate file with ``replace_with`` column.
+    """
     curated = []
+    substitute = []
     for row in auto_resolved:
         decision = row.get("prior_decision", "keep")
         if decision == "keep":
@@ -1171,8 +1176,12 @@ def _build_curated_from_auto(auto_resolved):
             if mod_text:
                 modified["pattern"] = mod_text
             curated.append(modified)
+        elif decision == "substitute":
+            sub = dict(row)
+            sub["replace_with"] = sub.get("modification", "")
+            substitute.append(sub)
         # decision == "remove" -> excluded
-    return curated
+    return curated, substitute
 
 
 def _write_curated_tsv(path, rows):
@@ -1188,6 +1197,39 @@ def _write_curated_tsv(path, rows):
     skip_cols = {"prior_decision", "resolution_source", "decision",
                  "modification", "notes"}
     all_keys = [k for k in rows[0].keys() if k not in skip_cols]
+
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f, fieldnames=all_keys,
+            delimiter="\t", lineterminator="\n",
+            extrasaction="ignore",
+        )
+        writer.writeheader()
+        for row in rows:
+            out = {k: row.get(k, "") for k in all_keys}
+            writer.writerow(out)
+
+
+def _write_substitute_tsv(path, rows):
+    """Write substitute_patterns.tsv with ``replace_with`` column.
+
+    Writes a header-only file when *rows* is empty so the downstream
+    ``strip_phrases`` step is a harmless no-op (zero patterns loaded).
+    """
+    import csv
+
+    if not rows:
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write("pattern\treplace_with\ttinyIds\n")
+        return
+
+    # Ensure replace_with is present and move it next to pattern
+    skip_cols = {"prior_decision", "resolution_source", "decision",
+                 "modification", "notes"}
+    priority = ["pattern", "replace_with"]
+    remaining = [k for k in rows[0].keys()
+                 if k not in skip_cols and k not in priority]
+    all_keys = priority + remaining
 
     with open(path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
@@ -1342,8 +1384,9 @@ def _run_curation_gate(args, enriched_tsv_path: str) -> int:
         )
     else:
         # All auto-resolved — write curated.tsv directly
-        curated = _build_curated_from_auto(auto_resolved)
+        curated, substitute = _build_curated_from_auto(auto_resolved)
         _write_curated_tsv(output_dir / "curated.tsv", curated)
+        _write_substitute_tsv(output_dir / "substitute_patterns.tsv", substitute)
 
     # Write gate_result.json
     gate_result = {
@@ -1375,8 +1418,12 @@ def _run_curation_gate(args, enriched_tsv_path: str) -> int:
         print(f"    Auto-keep:           {summary['auto_keep']}")
         print(f"    Auto-remove:         {summary['auto_remove']}")
         print(f"    Auto-modify:         {summary['auto_modify']}")
+        if summary.get('auto_substitute', 0):
+            print(f"    Auto-substitute:     {summary['auto_substitute']}")
         print(f"    New patterns:        {summary['new_pattern']}")
-        n_changed = summary['changed_tinyids_remove'] + summary['changed_tinyids_modify']
+        n_changed = (summary['changed_tinyids_remove']
+                     + summary['changed_tinyids_modify']
+                     + summary.get('changed_tinyids_substitute', 0))
         if n_changed:
             print(f"    Changed (re-review): {n_changed}")
     else:
@@ -1427,8 +1474,11 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
     auto_resolved_path = gate_dir_p / "auto_resolved.tsv"
     needs_review_path = gate_dir_p / "needs_review.tsv"
 
+    substitute_path = gate_dir_p / "substitute_patterns.tsv"
+
     if gate_result.get("all_auto_resolved"):
-        # Checkpoint was skipped. curated.tsv already written by gate.
+        # Checkpoint was skipped. curated.tsv + substitute_patterns.tsv
+        # already written by gate.
         all_decisions = _extract_decisions_from_auto(str(auto_resolved_path))
         logger.info("Finalize: checkpoint was skipped (all auto-resolved)")
     else:
@@ -1443,8 +1493,8 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
         auto_rows = _read_enriched_tsv(str(auto_resolved_path))
         review_rows = _read_enriched_tsv(str(needs_review_path))
 
-        # Build curated.tsv from auto + reviewed
-        curated_rows = _build_curated_from_auto(auto_rows)
+        # Build curated.tsv + substitute from auto-resolved
+        curated_rows, substitute_rows = _build_curated_from_auto(auto_rows)
 
         for row in review_rows:
             decision = row.get("decision", "").strip().lower()
@@ -1458,11 +1508,18 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
                 if mod_text:
                     modified["pattern"] = mod_text
                 curated_rows.append(modified)
+            elif decision == "substitute":
+                sub_row = dict(row)
+                mod_text = row.get("modification", "").strip()
+                sub_row["replace_with"] = mod_text if mod_text else ""
+                substitute_rows.append(sub_row)
             # decision == "remove" -> excluded
 
         _write_curated_tsv(curated_path, curated_rows)
+        _write_substitute_tsv(substitute_path, substitute_rows)
         logger.info(f"Merged {len(auto_rows)} auto + {len(review_rows)} reviewed "
-                     f"→ {len(curated_rows)} curated patterns")
+                     f"→ {len(curated_rows)} curated + "
+                     f"{len(substitute_rows)} substitute patterns")
 
         # Collect all decisions for ledger
         all_decisions = _extract_decisions_from_auto(str(auto_resolved_path))
@@ -1485,11 +1542,19 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
     )
     ledger.save()
 
+    # Count substitute patterns (from file if exists)
+    n_substitute = 0
+    if substitute_path.exists():
+        with open(substitute_path, encoding="utf-8") as _sf:
+            n_substitute = max(0, sum(1 for _ in _sf) - 1)  # minus header
+
     print(f"\n  Finalize curation ({phase}):")
-    print(f"    Curated patterns: {curated_path}")
-    print(f"    Ledger updated:   {ledger_dir}")
-    print(f"    Decisions stored:  {len(all_decisions)}")
-    print(f"    Run recorded:     {run_id}")
+    print(f"    Curated patterns:     {curated_path}")
+    if n_substitute:
+        print(f"    Substitute patterns:  {n_substitute} ({substitute_path})")
+    print(f"    Ledger updated:       {ledger_dir}")
+    print(f"    Decisions stored:      {len(all_decisions)}")
+    print(f"    Run recorded:         {run_id}")
 
     return 0
 
