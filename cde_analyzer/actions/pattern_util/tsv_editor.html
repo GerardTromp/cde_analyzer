@@ -221,9 +221,9 @@ body {
 .filter-select:focus { border-color: var(--primary); }
 .filter-select.active { background: #fff3e0; border-color: var(--warning); }
 
-/* Checkbox column */
-.col-check { width: 30px; max-width: 30px; text-align: center !important; }
-.col-check input[type="checkbox"] { cursor: pointer; }
+/* Checkbox column — enlarged click target covers the whole cell */
+.col-check { width: 30px; max-width: 30px; text-align: center !important; cursor: pointer; user-select: none; }
+.col-check input[type="checkbox"] { cursor: pointer; pointer-events: none; }
 
 /* Row number column */
 .col-rownum { width: 36px; max-width: 36px; text-align: right !important; color: var(--text-muted); font-size: 11px; }
@@ -772,13 +772,17 @@ function cdeUrl(path) {
         // Header row
         const tr = document.createElement('tr');
 
-        // Checkbox header
+        // Checkbox header — click on whole cell
         const thCheck = document.createElement('th');
         thCheck.className = 'col-check';
+        thCheck.title = 'Select all visible';
         const cbAll = document.createElement('input');
         cbAll.type = 'checkbox';
-        cbAll.title = 'Select all visible';
-        cbAll.addEventListener('change', () => toggleSelectAll(cbAll.checked));
+        thCheck.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cbAll.checked = !cbAll.checked;
+            toggleSelectAll(cbAll.checked);
+        });
         thCheck.appendChild(cbAll);
         tr.appendChild(thCheck);
 
@@ -904,14 +908,15 @@ function cdeUrl(path) {
             tr.classList.add('hidden');
         }
 
-        // Checkbox
+        // Checkbox — click handler on the whole cell for a larger hit target
         const tdCheck = document.createElement('td');
         tdCheck.className = 'col-check';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.checked = row.selected;
-        cb.addEventListener('change', (e) => {
+        tdCheck.addEventListener('click', (e) => {
             e.stopPropagation();
+            cb.checked = !cb.checked;
             onRowCheckbox(row.id, cb.checked, e);
         });
         tdCheck.appendChild(cb);

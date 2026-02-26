@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: TSV Pattern Editor Quickstart</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-size: 10pt;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  color: #2d3748;
+  background: #dedede;
+}
+@page { size: letter landscape; margin: 1.27cm; }
+.page {
+  width: 25.4cm; height: 19.05cm;
+  margin: 0.5cm auto; padding: 0.3cm;
+  background: #fff; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.page + .page { page-break-before: always; }
+@media print {
+  html { background: #fff; }
+  .page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: 100%; }
+}
+
+.banner {
+  background: #1a202c; color: #fff;
+  padding: 0.22cm 0.5cm; margin-bottom: 0.2cm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-radius: 3px; flex-shrink: 0;
+}
+.banner h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.02em; }
+.banner h1 strong { font-weight: 700; color: #a3bffa; }
+.banner .subtitle { font-size: 0.7rem; color: #a0aec0; font-style: italic; }
+
+.columns {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25cm; align-items: start; align-content: start;
+  min-height: 0;
+}
+
+.section {
+  border-left: 4px solid #cbd5e1; background: #f7fafc;
+  padding: 0.15cm 0.2cm; margin-bottom: 0.15cm;
+  border-radius: 0 3px 3px 0;
+}
+.section:last-child { margin-bottom: 0; }
+.section h2 {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 0.06cm; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.section h3 {
+  font-size: 0.76rem; font-weight: 600;
+  margin-top: 0.08cm; margin-bottom: 0.04cm;
+}
+.section p, .section li { font-size: 0.76rem; line-height: 1.35; margin-bottom: 0.04cm; }
+.section ul { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+.section ul li, .section ol li { margin-bottom: 0.02cm; }
+.section ol { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+
+.section.purple  { border-left-color: #9f7aea; background: #faf5ff; }
+.section.blue    { border-left-color: #4299e1; background: #ebf8ff; }
+.section.green   { border-left-color: #48bb78; background: #f0fff4; }
+.section.orange  { border-left-color: #ed8936; background: #fffaf0; }
+.section.gold    { border-left-color: #eab308; background: #fefce8; }
+.section.teal    { border-left-color: #38b2ac; background: #e6fffa; }
+.section.purple h2  { color: #6b46c1; }
+.section.blue h2    { color: #2b6cb0; }
+.section.green h2   { color: #276749; }
+.section.orange h2  { color: #c05621; }
+.section.gold h2    { color: #a16207; }
+.section.teal h2    { color: #285e61; }
+
+code {
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.72rem;
+  background: #edf2f7; color: #553c9a; padding: 0.02cm 0.06cm; border-radius: 2px;
+}
+pre {
+  background: #1a202c; color: #e2e8f0;
+  padding: 0.1cm 0.15cm; border-radius: 3px;
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.68rem;
+  line-height: 1.3; overflow-x: auto; margin: 0.06cm 0;
+}
+pre code { background: none; color: inherit; padding: 0; }
+pre .kw { color: #a3bffa; } pre .str { color: #9ae6b4; } pre .cm { color: #718096; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 0.05cm 0; }
+th {
+  background: #edf2f7; font-weight: 600; text-align: left;
+  padding: 0.04cm 0.1cm; border-bottom: 1px solid #cbd5e1;
+}
+td { padding: 0.04cm 0.1cm; border-bottom: 0.5px solid #e2e8f0; vertical-align: top; }
+tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
+
+.flow-row { display: flex; align-items: center; gap: 0.12cm; margin: 0.06cm 0; flex-wrap: wrap; }
+.flow-box {
+  display: inline-block; padding: 0.04cm 0.1cm; border-radius: 2px;
+  font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+}
+.flow-box.purple { background: #e9d8fd; color: #553c9a; }
+.flow-box.blue   { background: #bee3f8; color: #2a4365; }
+.flow-box.green  { background: #c6f6d5; color: #22543d; }
+.flow-box.orange { background: #feebc8; color: #7b341e; }
+.flow-box.dark   { background: #2d3748; color: #e2e8f0; }
+.flow-arrow { color: #a0aec0; font-size: 0.72rem; font-weight: bold; }
+
+.mt { margin-top: 0.08cm; }
+.small { font-size: 0.68rem; color: #718096; }
+
+.footer {
+  text-align: center; font-size: 0.62rem; color: #a0aec0;
+  margin-top: auto; padding-top: 0.08cm; border-top: 0.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+/* ===== EDITOR MOCKUP STYLES ===== */
+.mockup {
+  border: 1px solid #cbd5e0; border-radius: 4px; overflow: hidden;
+  margin: 0.08cm 0; font-size: 0.58rem; line-height: 1.3;
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+/* Toolbar mockup */
+.mock-toolbar {
+  background: #f7fafc; border-bottom: 1px solid #e2e8f0;
+  padding: 0.06cm 0.1cm; display: flex; align-items: center; gap: 0.06cm;
+  flex-wrap: wrap;
+}
+.mock-btn {
+  display: inline-block; padding: 0.02cm 0.06cm; border-radius: 2px;
+  font-size: 0.5rem; font-weight: 600; white-space: nowrap;
+  border: 1px solid #cbd5e0; background: #fff; color: #4a5568;
+}
+.mock-btn.keep { background: #c6f6d5; color: #22543d; border-color: #48bb78; }
+.mock-btn.remove { background: #fed7d7; color: #9b2c2c; border-color: #fc8181; }
+.mock-btn.modify { background: #fff3e0; color: #c05621; border-color: #ed8936; }
+.mock-btn.substitute { background: #e0f7fa; color: #00838f; border-color: #00838f; }
+.mock-sep { width: 1px; height: 0.3cm; background: #e2e8f0; margin: 0 0.02cm; }
+
+/* Grid mockup */
+.mock-grid { width: 100%; border-collapse: collapse; }
+.mock-grid th {
+  background: #edf2f7; font-size: 0.52rem; font-weight: 600;
+  padding: 0.03cm 0.06cm; border-bottom: 1px solid #cbd5e0;
+  text-align: left; color: #4a5568;
+}
+.mock-grid td {
+  font-size: 0.52rem; padding: 0.03cm 0.06cm;
+  border-bottom: 0.5px solid #edf2f7; color: #2d3748;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 2.2cm;
+}
+.mock-grid tr.mock-filter td {
+  background: #fff; padding: 0.02cm 0.04cm;
+}
+.mock-grid .mock-filter-input {
+  display: inline-block; border: 1px solid #e2e8f0; border-radius: 2px;
+  padding: 0 0.04cm; font-size: 0.46rem; color: #a0aec0;
+  background: #fff; width: 100%;
+}
+.mock-grid .mock-filter-select {
+  display: inline-block; border: 1px solid #e2e8f0; border-radius: 2px;
+  padding: 0 0.04cm; font-size: 0.46rem; color: #4a5568;
+  background: #fff; width: 100%;
+}
+.mock-grid tr:nth-child(even):not(.mock-filter) td { background: rgba(247,250,252,0.4); }
+.mock-grid tr.selected td { background: #ebf8ff; }
+
+/* Decision badges in mockup */
+.mock-badge {
+  display: inline-block; padding: 0 0.06cm; border-radius: 6px;
+  font-size: 0.48rem; font-weight: 700; line-height: 1.4;
+}
+.mock-badge.keep { background: #c6f6d5; color: #22543d; }
+.mock-badge.remove { background: #fed7d7; color: #9b2c2c; }
+.mock-badge.modify { background: #fff3e0; color: #c05621; }
+.mock-badge.substitute { background: #e0f7fa; color: #00838f; }
+
+/* Checkbox in mockup */
+.mock-cb { width: 0.22cm; height: 0.22cm; display: inline-block; text-align: center; }
+
+/* Row number */
+.mock-rn { color: #a0aec0; text-align: right; font-size: 0.5rem; width: 0.4cm; }
+
+/* Field profile borders */
+.mock-grid tr.fp-def { border-left: 2px solid #4299e1; }
+.mock-grid tr.fp-desig { border-left: 2px solid #ed8936; }
+.mock-grid tr.fp-both { border-left: 2px solid #48bb78; }
+.mock-grid tr.fp-mixed { border-left: 2px solid #9f7aea; }
+
+/* Group borders */
+.mock-grid tr.grp1 { border-right: 2px solid #e91e63; }
+.mock-grid tr.grp2 { border-right: 2px solid #2196f3; }
+
+/* Group badge */
+.mock-gbadge {
+  display: inline-block; padding: 0 0.04cm; border-radius: 4px;
+  font-size: 0.42rem; font-weight: 700; line-height: 1.3; margin-left: 0.04cm;
+}
+.mock-gbadge.g1 { background: #fce4ec; color: #e91e63; }
+.mock-gbadge.g2 { background: #e3f2fd; color: #2196f3; }
+
+/* Status bar mockup */
+.mock-status {
+  background: #f7fafc; border-top: 1px solid #e2e8f0;
+  padding: 0.04cm 0.1cm; display: flex; justify-content: space-between;
+  font-size: 0.5rem; color: #718096;
+}
+.mock-status .counts span { font-weight: 600; }
+.mock-status .counts .ck { color: #22543d; }
+.mock-status .counts .cr { color: #9b2c2c; }
+.mock-status .counts .cm { color: #c05621; }
+.mock-status .counts .cs { color: #00838f; }
+.mock-status .counts .cu { color: #718096; }
+.mock-status .mode-dot {
+  display: inline-block; width: 0.16cm; height: 0.16cm;
+  border-radius: 50%; background: #48bb78; margin-right: 0.04cm;
+  vertical-align: middle;
+}
+
+/* Keyboard shortcut key cap */
+.key {
+  display: inline-block; padding: 0 0.08cm;
+  background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 2px;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.7rem; font-weight: 700; color: #2d3748;
+  line-height: 1.4; min-width: 0.35cm; text-align: center;
+}
+
+/* Numbered step list */
+.num-list {
+  list-style: none; padding: 0; margin: 0.06cm 0;
+  counter-reset: step;
+}
+.num-list li {
+  position: relative; padding-left: 0.55cm;
+  margin-bottom: 0.04cm; font-size: 0.76rem; line-height: 1.3;
+}
+.num-list li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: 0;
+  width: 0.35cm; height: 0.35cm; border-radius: 50%;
+  background: #e2e8f0; color: #4a5568;
+  font-size: 0.58rem; font-weight: 700;
+  text-align: center; line-height: 0.35cm;
+}
+.num-list.blue li::before   { background: #bee3f8; color: #2a4365; }
+.num-list.green li::before  { background: #c6f6d5; color: #22543d; }
+.num-list.orange li::before { background: #feebc8; color: #7b341e; }
+
+/* Color swatch */
+.swatch {
+  display: inline-block; width: 0.3cm; height: 0.2cm;
+  border-radius: 2px; vertical-align: middle; margin-right: 0.04cm;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="banner">
+    <h1>TSV Pattern Editor <strong>:: QUICKSTART</strong></h1>
+    <span class="subtitle">CDE Analyzer v0.8.1 &mdash; Browser-Based Curation Tool</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Launch + Mockup -->
+    <div>
+      <div class="section blue">
+        <h2>Launch the Editor</h2>
+        <pre><code><span class="cm"># Full installation (server mode)</span>
+cde-analyzer pattern_util <span class="kw">--edit</span> needs_review.tsv
+
+<span class="cm"># Standalone zipapp (no dependencies)</span>
+python cde_editor.pyz needs_review.tsv</code></pre>
+        <p class="small">Opens <code>http://localhost:8777</code> &mdash; edit in browser, save with Ctrl+S.</p>
+      </div>
+
+      <div class="section">
+        <h2>Editor Interface</h2>
+        <div class="mockup">
+          <!-- Toolbar -->
+          <div class="mock-toolbar">
+            <span class="mock-btn">Save</span>
+            <span class="mock-btn">Save As</span>
+            <span class="mock-sep"></span>
+            <span class="mock-btn">+ Add</span>
+            <span class="mock-btn">x Del</span>
+            <span class="mock-btn">&uarr;</span>
+            <span class="mock-btn">&darr;</span>
+            <span class="mock-sep"></span>
+            <span class="mock-btn keep">&check; Keep</span>
+            <span class="mock-btn remove">&cross; Remove</span>
+            <span class="mock-btn modify">&#10038; Modify</span>
+            <span class="mock-btn substitute">&#8644; Subst</span>
+            <span class="mock-sep"></span>
+            <span class="mock-btn">&#9744; Group</span>
+            <span class="mock-btn">&#8644; Propagate</span>
+            <span class="mock-sep"></span>
+            <span class="mock-btn">&#8630;</span>
+            <span class="mock-btn">&#8631;</span>
+          </div>
+          <!-- Grid -->
+          <table class="mock-grid">
+            <tr>
+              <th class="mock-cb">&#9744;</th>
+              <th class="mock-rn">#</th>
+              <th>decision</th>
+              <th>modification</th>
+              <th>pattern</th>
+              <th>tinyIds</th>
+              <th>notes</th>
+            </tr>
+            <tr class="mock-filter">
+              <td></td>
+              <td></td>
+              <td><span class="mock-filter-select">(all) &darr;</span></td>
+              <td><span class="mock-filter-input">Filter...</span></td>
+              <td><span class="mock-filter-input">Filter...</span></td>
+              <td><span class="mock-filter-input">Filter...</span></td>
+              <td><span class="mock-filter-input">Filter...</span></td>
+            </tr>
+            <tr class="fp-both">
+              <td class="mock-cb">&#9744;</td>
+              <td class="mock-rn">1</td>
+              <td><span class="mock-badge keep">keep</span></td>
+              <td></td>
+              <td>SF-12 Health Survey</td>
+              <td>aB3k | xP7m&hellip;</td>
+              <td></td>
+            </tr>
+            <tr class="fp-def selected">
+              <td class="mock-cb">&#9745;</td>
+              <td class="mock-rn">2</td>
+              <td><span class="mock-badge remove">remove</span></td>
+              <td></td>
+              <td>I felt</td>
+              <td>cD9n | hJ2q&hellip;</td>
+              <td></td>
+            </tr>
+            <tr class="fp-both grp1">
+              <td class="mock-cb">&#9744;</td>
+              <td class="mock-rn">3</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td>in past 7 d&hellip;</td>
+              <td>I got enough sle&hellip;</td>
+              <td>fK4p | mN8r&hellip;</td>
+              <td>G1 <span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="fp-desig grp1">
+              <td class="mock-cb">&#9744;</td>
+              <td class="mock-rn">4</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td>in past 7 d&hellip;</td>
+              <td>I had difficulty&hellip;</td>
+              <td>gL5s | nO9t&hellip;</td>
+              <td>G1 <span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="fp-both grp2">
+              <td class="mock-cb">&#9744;</td>
+              <td class="mock-rn">5</td>
+              <td><span class="mock-badge substitute">substitute</span></td>
+              <td>difficulty you&hellip;</td>
+              <td>Considering yo&hellip;</td>
+              <td>aR2v | wQ6x&hellip;</td>
+              <td>G2 <span class="mock-gbadge g2">G2</span></td>
+            </tr>
+            <tr class="fp-mixed">
+              <td class="mock-cb">&#9744;</td>
+              <td class="mock-rn">6</td>
+              <td></td>
+              <td></td>
+              <td>Gas Exchange</td>
+              <td>jM7u</td>
+              <td></td>
+            </tr>
+          </table>
+          <!-- Status bar -->
+          <div class="mock-status">
+            <span>needs_review.tsv &mdash; 458 rows (1 selected)</span>
+            <span class="counts">
+              <span class="ck">&check;430</span>&ensp;
+              <span class="cr">&cross;24</span>&ensp;
+              <span class="cm">&#10038;4</span>&ensp;
+              <span class="cs">&#8644;2</span>&ensp;
+              <span class="cu">?1</span>&ensp;
+              <span class="mode-dot"></span>server
+            </span>
+          </div>
+        </div>
+
+        <h3>Visual Cues</h3>
+        <table>
+          <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span></td><td>Decision badges: keep / remove / modify / substitute</td></tr>
+          <tr><td><span class="swatch" style="background:#fff;border-left:3px solid #4299e1;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #ed8936;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #48bb78;"></span></td><td>Left border: def-only / desig-only / both</td></tr>
+          <tr><td><span class="swatch" style="background:#fff;border-right:3px solid #e91e63;"></span> <span class="swatch" style="background:#fff;border-right:3px solid #2196f3;"></span></td><td>Right border + badge: merge group (G1, G2&hellip;)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 2: Decisions + Shortcuts -->
+    <div>
+      <div class="section green">
+        <h2>The 4 Decisions</h2>
+        <p>Each row is a detected <strong>pattern</strong>. Decide what happens to it:</p>
+        <table>
+          <tr><th>Decision</th><th>When to use</th><th>Effect</th></tr>
+          <tr><td><span class="mock-badge keep">keep</span></td><td>Real instrument/scale</td><td>Stripped (deleted)</td></tr>
+          <tr><td><span class="mock-badge remove">remove</span></td><td>False positive</td><td>Excluded entirely</td></tr>
+          <tr><td><span class="mock-badge modify">modify</span></td><td>Partially correct</td><td>Modification text <em>replaces</em> pattern, then stripped</td></tr>
+          <tr><td><span class="mock-badge substitute">substitute</span></td><td>Replace, don&rsquo;t delete</td><td>Modification text <em>appears in output</em></td></tr>
+        </table>
+        <h3>Modify vs Substitute</h3>
+        <p><strong>Modify</strong> changes <em>what gets stripped</em> (corrects the pattern text before deletion).
+        <strong>Substitute</strong> changes <em>what appears in the output</em> (matched text is replaced, not deleted).</p>
+        <p class="small">Blank decision = treated as <code>keep</code> (safe default).</p>
+      </div>
+
+      <div class="section purple">
+        <h2>Keyboard Shortcuts</h2>
+        <h3>Decision Assignment</h3>
+        <table>
+          <tr><td><span class="key">K</span></td><td>Set selected &rarr; <code>keep</code></td></tr>
+          <tr><td><span class="key">R</span></td><td>Set selected &rarr; <code>remove</code></td></tr>
+          <tr><td><span class="key">M</span></td><td>Set selected &rarr; <code>modify</code></td></tr>
+          <tr><td><span class="key">S</span></td><td>Set selected &rarr; <code>substitute</code></td></tr>
+        </table>
+        <p class="small">Requires rows selected &amp; not editing a cell.</p>
+        <h3>Navigation &amp; Editing</h3>
+        <table>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">A</span></td><td>Select all visible rows</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">Z</span></td><td>Undo (50 levels)</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">&#8679;</span>+<span class="key">Z</span></td><td>Redo</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">S</span></td><td>Save (server mode)</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">F</span></td><td>Focus first filter</td></tr>
+          <tr><td><span class="key">Del</span></td><td>Delete selected rows</td></tr>
+          <tr><td><span class="key">Tab</span></td><td>Next column (editing)</td></tr>
+          <tr><td><span class="key">Enter</span></td><td>Commit cell edit</td></tr>
+          <tr><td><span class="key">Esc</span></td><td>Cancel cell edit</td></tr>
+        </table>
+        <p class="small"><strong>Dbl-click</strong> any cell to edit. <strong>Shift+click</strong> checkboxes for range select.</p>
+      </div>
+    </div>
+
+    <!-- COL 3: Workflow + Filters -->
+    <div>
+      <div class="section orange">
+        <h2>Curation Workflow</h2>
+        <ol class="num-list orange">
+          <li><strong>Triage &mdash; Remove false positives</strong><br>
+          Scan patterns, select bad rows, press <span class="key">R</span></li>
+          <li><strong>Modify &mdash; Fix partial matches</strong><br>
+          Press <span class="key">M</span>, dbl-click modification column, type correction</li>
+          <li><strong>Substitute &mdash; Replace, don&rsquo;t delete</strong><br>
+          Press <span class="key">S</span>, dbl-click modification, type replacement text</li>
+          <li><strong>Mass keep &mdash; Approve the rest</strong><br>
+          Filter to <code>blank</code>, <span class="key">Ctrl</span>+<span class="key">A</span>, <span class="key">K</span></li>
+          <li><strong>Save</strong><br>
+          <span class="key">Ctrl</span>+<span class="key">S</span> (server) or Save As (standalone)</li>
+        </ol>
+        <p class="small mt">Common false positives: generic phrases (&ldquo;I felt&rdquo;), imaging (PET, MRI), agencies (OMB), short acronyms.</p>
+      </div>
+
+      <div class="section teal">
+        <h2>Column Filters</h2>
+        <table>
+          <tr><th>Syntax</th><th>Effect</th></tr>
+          <tr><td><code>abc</code></td><td>Contains &ldquo;abc&rdquo; (case-insensitive)</td></tr>
+          <tr><td><code>!abc</code></td><td>NOT containing &ldquo;abc&rdquo;</td></tr>
+          <tr><td><code>=blank</code></td><td>Empty cells only</td></tr>
+          <tr><td><code>!blank</code></td><td>Non-empty cells only</td></tr>
+          <tr><td><code>&gt;10</code></td><td>Numeric &gt; 10</td></tr>
+          <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
+        </table>
+        <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
+        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code></p>
+      </div>
+
+      <div class="section">
+        <h2>Status Bar</h2>
+        <p>Bottom bar shows real-time counts:</p>
+        <div class="mockup" style="border:none;margin:0.04cm 0;">
+          <div class="mock-status" style="border-radius:3px;">
+            <span>file.tsv &mdash; 458 rows</span>
+            <span class="counts">
+              <span class="ck">&check;430</span>&ensp;
+              <span class="cr">&cross;24</span>&ensp;
+              <span class="cm">&#10038;4</span>&ensp;
+              <span class="cs">&#8644;2</span>&ensp;
+              <span class="cu">?0</span>&ensp;
+              <span class="mode-dot"></span>server
+            </span>
+          </div>
+        </div>
+        <table>
+          <tr><td><code>?0</code></td><td>All rows decided &mdash; you&rsquo;re done!</td></tr>
+          <tr><td><code>server</code></td><td>Ctrl+S saves in-place</td></tr>
+          <tr><td><code>standalone</code></td><td>Use Save As to download</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Quickstart &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="banner">
+    <h1>TSV Pattern Editor <strong>:: QUICKSTART</strong></h1>
+    <span class="subtitle">Groups, Advanced Features &amp; Pipeline Integration</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Merge Groups + Propagation -->
+    <div>
+      <div class="section purple">
+        <h2>Merge Groups</h2>
+        <p>When multiple patterns should share the <strong>same modification</strong>:</p>
+        <ol class="num-list blue">
+          <li>Select 2+ related rows (Shift+click)</li>
+          <li>Click <strong>[Group]</strong> &mdash; assigns G1 tag</li>
+          <li>Set <strong>one</strong> member&rsquo;s decision + modification</li>
+          <li>Click <strong>[Propagate]</strong> &mdash; copies to all members</li>
+        </ol>
+
+        <h3>Before Propagation</h3>
+        <div class="mockup">
+          <table class="mock-grid">
+            <tr>
+              <th class="mock-rn">#</th>
+              <th>dec.</th>
+              <th>modification</th>
+              <th>pattern</th>
+              <th>notes</th>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">47</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
+              <td>I got enough sleep&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">48</td>
+              <td></td>
+              <td style="color:#a0aec0;">(empty)</td>
+              <td>I had difficulty&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">49</td>
+              <td></td>
+              <td style="color:#a0aec0;">(empty)</td>
+              <td>My sleep quality&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>After Propagation</h3>
+        <div class="mockup">
+          <table class="mock-grid">
+            <tr>
+              <th class="mock-rn">#</th>
+              <th>dec.</th>
+              <th>modification</th>
+              <th>pattern</th>
+              <th>notes</th>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">47</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
+              <td>I got enough sleep&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">48</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
+              <td>I had difficulty&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+            <tr class="grp1">
+              <td class="mock-rn">49</td>
+              <td><span class="mock-badge modify">modify</span></td>
+              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
+              <td>My sleep quality&hellip;</td>
+              <td><span class="mock-gbadge g1">G1</span></td>
+            </tr>
+          </table>
+        </div>
+        <p class="small mt">Multiple groups (G1, G2, G3&hellip;) propagate independently.
+        Propagation copies the source&rsquo;s actual decision type &mdash; works with both <code>modify</code> and <code>substitute</code>.</p>
+      </div>
+    </div>
+
+    <!-- COL 2: Toolbar + Column Layout + Saving -->
+    <div>
+      <div class="section blue">
+        <h2>Toolbar Reference</h2>
+        <table>
+          <tr><th>Button</th><th>Action</th></tr>
+          <tr><td><strong>Save</strong></td><td>Write to file (server mode)</td></tr>
+          <tr><td><strong>Save As</strong></td><td>Download edited TSV</td></tr>
+          <tr><td><strong>Open</strong></td><td>Load a different TSV</td></tr>
+          <tr><td><strong>+ Add</strong></td><td>Insert new row</td></tr>
+          <tr><td><strong>x Del</strong></td><td>Delete selected rows</td></tr>
+          <tr><td><strong>&uarr; / &darr;</strong></td><td>Move rows up/down</td></tr>
+          <tr><td><strong>Categorize</strong></td><td>Set column value for selected</td></tr>
+          <tr><td><strong>Merge</strong></td><td>Combine rows (merge tinyIds)</td></tr>
+          <tr><td><strong>Split</strong></td><td>Download by <code>field_profile</code></td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>Column Layout</h2>
+        <p>Curation columns (<code>decision</code>, <code>modification</code>) are
+        <strong>auto-moved to front</strong> of the display. Underlying save order is unchanged.</p>
+        <div class="mockup">
+          <table class="mock-grid">
+            <tr>
+              <th class="mock-cb">&#9744;</th>
+              <th class="mock-rn">#</th>
+              <th style="background:#e9d8fd;">decision</th>
+              <th style="background:#e9d8fd;">modification</th>
+              <th>group_key</th>
+              <th>pattern</th>
+              <th>tinyIds</th>
+            </tr>
+          </table>
+          <div style="font-size:0.48rem;color:#718096;padding:0.04cm 0.1cm;">
+            &uarr; moved to front &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &uarr; original order follows
+          </div>
+        </div>
+        <p class="small">Click any column header to sort ascending/descending.</p>
+      </div>
+
+      <div class="section gold">
+        <h2>Saving Your Work</h2>
+        <h3>Server Mode (recommended)</h3>
+        <p>Launched with <code>--edit FILE</code> or <code>cde_editor.pyz FILE</code>:</p>
+        <ul>
+          <li><span class="key">Ctrl</span>+<span class="key">S</span> saves directly to original file</li>
+          <li>Unsaved changes trigger browser close warning</li>
+        </ul>
+        <h3>Standalone / Drag-Drop</h3>
+        <p>Open editor without file, drag-drop a TSV:</p>
+        <ul>
+          <li>Use <strong>Save As</strong> to download</li>
+          <li>Original file is not modified</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 3: Tips + After Curation + Pipeline -->
+    <div>
+      <div class="section green">
+        <h2>Tips &amp; Tricks</h2>
+        <ul>
+          <li><strong>Undo is generous</strong> &mdash; 50 levels. Don&rsquo;t fear mistakes.</li>
+          <li><strong>Shift+click</strong> checkboxes for range selection &mdash; much faster.</li>
+          <li><strong>Dbl-click</strong> a decision badge to edit via dropdown (single row).</li>
+          <li><strong>The <span class="key">K</span> shortcut is your friend</strong> &mdash; after triaging removes and modifies, filter to <code>blank</code>, Ctrl+A, K. Done.</li>
+          <li><strong>TinyId columns</strong> collapse to 3 IDs + count badge. Click to expand.</li>
+          <li><strong>Drag row numbers</strong> to reorder by drag-and-drop.</li>
+          <li><strong>Column sorting</strong> &mdash; click any header.</li>
+        </ul>
+      </div>
+
+      <div class="section orange">
+        <h2>After Curation</h2>
+        <p>Return your curated TSV. The pipeline will:</p>
+        <ol class="num-list orange">
+          <li><strong>Merge</strong> your edits with auto-resolved patterns</li>
+          <li><strong>Apply decisions</strong>: keep &rarr; strip, modify &rarr; rewrite+strip, substitute &rarr; replace, remove &rarr; exclude</li>
+          <li><strong>Update ledger</strong> for future incremental runs</li>
+          <li><strong>Strip/substitute</strong> from CDE text fields</li>
+        </ol>
+        <p class="small mt">Multiple curators? Coordinator runs
+        <code>--merge-curation</code> with inter-rater statistics.</p>
+      </div>
+
+      <div class="section">
+        <h2>Pipeline Integration</h2>
+        <div class="flow-row">
+          <span class="flow-box blue">gate</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box orange">edit</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box blue">finalize</span>
+          <span class="flow-arrow">&rarr;</span>
+          <span class="flow-box green">strip</span>
+        </div>
+        <table class="mt">
+          <tr><td><code>curation_gate</code></td><td>Auto-resolves from prior ledger</td></tr>
+          <tr><td><code>curator_review</code></td><td>Human reviews <code>needs_review.tsv</code></td></tr>
+          <tr><td><code>finalize_curation</code></td><td>Merge &rarr; <code>curated.tsv</code> + <code>substitute_patterns.tsv</code></td></tr>
+          <tr><td><code>apply_substitutions</code></td><td>Replace matched text (before strip)</td></tr>
+          <tr><td><code>strip_*</code></td><td>Delete matched patterns from text</td></tr>
+        </table>
+        <pre class="mt"><code><span class="cm"># Resume after curation</span>
+cde-analyzer workflow resume \
+  <span class="kw">--state-file</span> out/.workflow_state.json</code></pre>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Quickstart &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
+</div>
+
+</body>
+</html>

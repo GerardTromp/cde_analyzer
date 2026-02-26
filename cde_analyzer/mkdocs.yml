@@ -68,6 +68,7 @@ nav:
     - Distributed Curation: vignettes/distributed-curation.md
     - Synthetic QC Data: vignettes/synthetic-data.md
     - Curation Guide: curation-guide.md
+    - TSV Editor Quickstart: tsv-editor-cheatsheet.md
     - Phrase Miner Logic: phrase_miner_logic.md
   - Development:
     - Architecture: architecture.md
