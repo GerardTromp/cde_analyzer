@@ -543,6 +543,25 @@ def register_subparser(subparser: ArgumentParser):
     # Note: --min-tinyids is already defined above (shared with group-hierarchy).
     # --input, --model, --output, --fields, --exclude-patterns are also shared.
 
+    # Priority split mode (Zipf-based curation triage)
+    subparser.add_argument(
+        "--split-priority",
+        type=str,
+        metavar="FILE",
+        help="Split a needs_review TSV into high-priority (domain-specific) and "
+             "low-priority (common English) files using wordfreq Zipf scores. "
+             "If ALL word tokens in a pattern have Zipf frequency >= threshold, "
+             "the pattern is classified as low-priority (likely common English). "
+             "Outputs: {stem}_high.tsv and {stem}_low.tsv. "
+             "Use --zipf-threshold to control the cutoff (default: 4.0).",
+    )
+    subparser.add_argument(
+        "--split-auto-remove",
+        action="store_true",
+        help="Pre-fill decision='remove' in low-priority patterns "
+             "(used with --split-priority). Default: leave decision blank.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

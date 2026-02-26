@@ -31,7 +31,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: main (v0.6.0)
+**Active Branch**: main (v0.9.0)
 
 **Recent Work** (Last 30 days):
 - **v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes**

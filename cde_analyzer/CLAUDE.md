@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.8.1)
+# CDE Analyzer — Context (v0.9.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,7 +26,34 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.8.1)
+## Current State (v0.9.0)
+
+### v0.9.0: Zipf Priority Split + Editor Improvements
+
+#### Zipf-Based Curation Triage (`--split-priority`)
+- **`--split-priority FILE`**: Splits `needs_review.tsv` into high-priority and low-priority files using wordfreq Zipf frequency scores
+- **Classification**: If ALL word tokens in a pattern have Zipf >= threshold (default 4.0), pattern is low-priority (common English); otherwise high-priority (domain-specific)
+- **`--split-auto-remove`**: Pre-fills `decision=remove` in low-priority patterns for fast single-reviewer triage
+- **Outputs**: `{stem}_high.tsv` (multi-reviewer) + `{stem}_low.tsv` (fast triage)
+- **allcde03 empirical results**: 1,480 patterns → 582 high-priority + 898 low-priority
+- **Zipf reference**: 3=uncommon, 4=common (~top 6K words), 5=very common
+- **Key files**: `actions/pattern_util/cli.py` (CLI args), `actions/pattern_util/run.py:_run_split_priority()`
+
+#### TSV Editor UX Improvements
+- **Propagate scoping**: Selection-aware group propagation with tiered warnings (selected groups only, or all if none selected)
+- **Clear filters**: `Clear Filters` button + `Ctrl+Shift+F` shortcut to reset all column filters
+- **Numeric equals filter**: Full operator support (`=`, `==`, `!=`, `>=`, `<=`, bare numbers)
+- **Checkbox click targets**: Enlarged via pointer-events on `<td>` wrapper
+
+#### Version Sync Mechanism
+- **`tools/editor_standalone/__main__.py`**: `_resolve_version()` tries dynamic import from `cde_analyzer.__version__`, falls back to `_FALLBACK_VERSION`
+- **`scripts/build_editor_zipapp.py`**: Smart `_stamp_version()` — preserves 4-segment editor versions (e.g., 0.8.1.4) when base matches, overwrites when base differs
+
+#### Parameter Tuning Documentation
+- **`docs/vignettes/parameter-tuning.md`**: New §3 "Most Influential Parameters" with empirical data from 3 production runs (allcde01/02/03)
+- Impact ranking: `min_parent_tinyids` > `min_field_count` > `k_max` > `min_tokens` > `k_min`
+- False-positive/false-negative tradeoff table with Zipf split workflow
+- Updated `k_max` recommendation to 90 for all dataset sizes
 
 ### v0.8.1: Substitute Decision Type
 
@@ -207,6 +234,7 @@ cde-analyzer pattern_util --serve-curation CONFIG --curation-source FILE  # cent
 cde-analyzer pattern_util --curation-status DIR                   # check centralized session status
 cde-analyzer pattern_util --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR  # incremental curation gate
 cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i JSON      # finalize + update ledger
+cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]                     # Zipf-based priority split
 ```
 
 ## `workflow` Capabilities

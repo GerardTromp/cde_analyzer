@@ -3925,6 +3925,103 @@ def _run_detect_rare_words(args) -> int:
     return 0
 
 
+# ──────────────────────────────────────────────────────────────
+# Priority split (Zipf-based curation triage)
+# ──────────────────────────────────────────────────────────────
+
+def _run_split_priority(args, input_path: str) -> int:
+    """Split a needs_review TSV into high-priority and low-priority files.
+
+    Uses wordfreq Zipf frequency scores to classify patterns:
+    - Low-priority: ALL word tokens have Zipf >= threshold (common English)
+    - High-priority: at least one token has Zipf < threshold (domain-specific)
+    """
+    import csv
+    import re
+    from pathlib import Path
+
+    try:
+        from wordfreq import zipf_frequency
+    except ImportError:
+        logger.error("wordfreq package required: pip install wordfreq")
+        return 1
+
+    input_file = Path(input_path)
+    if not input_file.exists():
+        logger.error(f"File not found: {input_file}")
+        return 1
+
+    # Use 4.0 as default for split-priority (different from rare-word's 1.5)
+    threshold = getattr(args, 'zipf_threshold', None)
+    if threshold is None or threshold == 1.5:
+        # If still at rare-word default, use the split-priority default
+        threshold = 4.0
+    auto_remove = getattr(args, 'split_auto_remove', False)
+
+    # Output paths
+    stem = input_file.stem
+    parent = input_file.parent
+    high_path = parent / f"{stem}_high.tsv"
+    low_path = parent / f"{stem}_low.tsv"
+
+    _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9'-]*[A-Za-z0-9]|[A-Za-z]")
+
+    def min_word_zipf(pattern: str) -> float:
+        """Return the minimum Zipf score across word tokens in a pattern."""
+        tokens = _WORD_RE.findall(pattern)
+        if not tokens:
+            return 0.0
+        return min(zipf_frequency(t.lower(), 'en') for t in tokens)
+
+    # Read input
+    with open(input_file, encoding='utf-8', newline='') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        fieldnames = reader.fieldnames
+        if not fieldnames:
+            logger.error(f"No columns found in {input_file}")
+            return 1
+        rows = list(reader)
+
+    # Classify
+    high_rows = []
+    low_rows = []
+    for row in rows:
+        pattern = row.get('pattern', '')
+        mz = min_word_zipf(pattern)
+        if mz >= threshold:
+            # All tokens are common English
+            if auto_remove and 'decision' in row:
+                row['decision'] = 'remove'
+            low_rows.append(row)
+        else:
+            high_rows.append(row)
+
+    # Write high-priority
+    with open(high_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t',
+                                quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        writer.writerows(high_rows)
+
+    # Write low-priority
+    with open(low_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t',
+                                quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        writer.writerows(low_rows)
+
+    print(f"\nPriority split (Zipf threshold={threshold}):")
+    print(f"  Input:         {len(rows):>6,d}  {input_file.name}")
+    print(f"  High-priority: {len(high_rows):>6,d}  {high_path.name}  (domain-specific, multi-reviewer)")
+    print(f"  Low-priority:  {len(low_rows):>6,d}  {low_path.name}  (common English, fast triage)")
+    if auto_remove:
+        print(f"  Low-priority patterns pre-filled with decision='remove'")
+    print(f"\n  Zipf threshold: {threshold} (words with Zipf >= {threshold} are 'common')")
+    print(f"  Zipf reference: 3=uncommon, 4=common (~top 6K words), 5=very common")
+
+    return 0
+
+
 @graceful_interrupt
 def run_action(args: Namespace):
     """Main entry point for pattern_util action."""
@@ -4056,6 +4153,11 @@ def run_action(args: Namespace):
     detect_rare = getattr(args, 'detect_rare_words', False)
     if detect_rare:
         return _run_detect_rare_words(args)
+
+    # Check for priority split mode (Zipf-based curation triage)
+    split_priority = getattr(args, 'split_priority', None)
+    if split_priority:
+        return _run_split_priority(args, split_priority)
 
     # Check for merge mode (supports multiple files)
     merge_patterns = getattr(args, 'merge_patterns', None)

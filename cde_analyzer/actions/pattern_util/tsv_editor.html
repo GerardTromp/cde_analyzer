@@ -562,6 +562,9 @@ function cdeUrl(path) {
     <button class="tb-btn" id="btn-undo" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
     <button class="tb-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>&#8631; Redo</button>
 
+    <div class="sep"></div>
+    <button class="tb-btn" id="btn-clear-filters" title="Clear all column filters (Ctrl+Shift+F)">&#10005; Filters</button>
+
     <span class="spacer"></span>
 
     <span id="toolbar-info" style="font-size:11px; color:var(--text-muted)"></span>
@@ -659,6 +662,7 @@ function cdeUrl(path) {
     const groupButtons = $('group-buttons');
     const btnGroup = $('btn-group');
     const btnPropagate = $('btn-propagate');
+    const btnClearFilters = $('btn-clear-filters');
 
     // ===== TSV PARSER =====
     const TSV = {
@@ -1088,6 +1092,25 @@ function cdeUrl(path) {
         updateStatus();
     }
 
+    function clearAllFilters() {
+        S.filters = {};
+        // Reset all filter inputs and dropdowns in the DOM
+        const filterRow = grid.querySelector('thead tr.filter-row');
+        if (filterRow) {
+            for (const input of filterRow.querySelectorAll('input.filter-input')) {
+                input.value = '';
+                input.classList.remove('active');
+            }
+            for (const sel of filterRow.querySelectorAll('select.filter-select')) {
+                sel.value = '';
+                sel.classList.remove('active');
+            }
+        }
+        renderBody();
+        updateStatus();
+        setAction('Filters cleared');
+    }
+
     function rowMatchesFilters(row) {
         for (const colStr in S.filters) {
             const col = parseInt(colStr);
@@ -1115,15 +1138,24 @@ function cdeUrl(path) {
             const term = filter.slice(1).toLowerCase();
             return !lower.includes(term);
         }
-        // Numeric comparisons
-        if (filter.startsWith('>') || filter.startsWith('<')) {
-            const op = filter[0];
-            const num = parseFloat(filter.slice(1));
-            if (!isNaN(num)) {
-                const cv = parseFloat(cellVal);
-                if (isNaN(cv)) return false;
-                return op === '>' ? cv > num : cv < num;
-            }
+        // Numeric comparisons: >N, <N, >=N, <=N, =N, ==N
+        const numMatch = filter.match(/^([><=!]=?)\s*(-?\d+\.?\d*)$/);
+        if (numMatch) {
+            const op = numMatch[1];
+            const num = parseFloat(numMatch[2]);
+            const cv = parseFloat(cellVal);
+            if (isNaN(cv)) return false;
+            if (op === '>' ) return cv > num;
+            if (op === '<' ) return cv < num;
+            if (op === '>=' ) return cv >= num;
+            if (op === '<=' ) return cv <= num;
+            if (op === '=' || op === '==') return cv === num;
+            if (op === '!=' ) return cv !== num;
+        }
+        // Plain number → exact numeric match
+        if (/^-?\d+\.?\d*$/.test(filter.trim())) {
+            const cv = parseFloat(cellVal);
+            if (!isNaN(cv)) return cv === parseFloat(filter.trim());
         }
         // OR matching (pipe-separated)
         if (filter.includes('|')) {
@@ -1707,30 +1739,63 @@ function cdeUrl(path) {
             return;
         }
 
-        // Scan all rows for group tags, build group -> [rows] map
+        // Helper: extract group numbers from a row's notes cell
+        function rowGroupNums(row) {
+            const notes = row.cells[S.notesCol] || '';
+            const nums = new Set();
+            const re = /\bG(\d+)\b/g;
+            let m;
+            while ((m = re.exec(notes)) !== null) nums.add(parseInt(m[1], 10));
+            return nums;
+        }
+
+        // Scan ALL rows for group membership (need full groups even if only
+        // some members are selected)
         const groupMembers = {};
         for (const row of S.rows) {
-            const notes = row.cells[S.notesCol] || '';
-            const re = /\bG(\d+)\b/g;
-            const seenGroups = new Set();
-            let m;
-            while ((m = re.exec(notes)) !== null) {
-                const num = parseInt(m[1], 10);
-                if (!seenGroups.has(num)) {
-                    seenGroups.add(num);
-                    if (!groupMembers[num]) groupMembers[num] = [];
-                    groupMembers[num].push(row);
-                }
+            for (const num of rowGroupNums(row)) {
+                if (!groupMembers[num]) groupMembers[num] = [];
+                groupMembers[num].push(row);
             }
         }
 
-        // For each group, find the source row (decision=modify + modification text)
-        let totalGroups = 0;
-        let totalRows = 0;
-        const propagations = [];
+        // Scope: if rows are selected, restrict to groups with selected members
+        const selected = getSelectedRows();
+        let scopedGroupNums;
 
-        for (const [numStr, members] of Object.entries(groupMembers)) {
-            if (members.length < 2) continue;
+        if (selected.length > 0) {
+            // Collect group numbers from selected rows
+            const selGroupNums = new Set();
+            let nonGroupSelected = 0;
+            for (const row of selected) {
+                const nums = rowGroupNums(row);
+                if (nums.size === 0) {
+                    nonGroupSelected++;
+                } else {
+                    for (const n of nums) selGroupNums.add(n);
+                }
+            }
+
+            if (selGroupNums.size === 0) {
+                setAction('Selected rows are not in any group');
+                return;
+            }
+
+            if (nonGroupSelected > 0) {
+                alert(nonGroupSelected + ' selected row(s) are not in any group and will be ignored.');
+            }
+
+            scopedGroupNums = selGroupNums;
+        } else {
+            // No selection — use all groups
+            scopedGroupNums = new Set(Object.keys(groupMembers).map(Number));
+        }
+
+        // For each scoped group, find the source row (decision + modification text)
+        const propagations = [];
+        for (const num of scopedGroupNums) {
+            const members = groupMembers[num];
+            if (!members || members.length < 2) continue;
 
             const sourceRow = members.find(r => {
                 const dec = (r.cells[S.decisionCol] || '').trim().toLowerCase();
@@ -1740,9 +1805,7 @@ function cdeUrl(path) {
 
             if (sourceRow) {
                 const targets = members.filter(r => r !== sourceRow);
-                propagations.push({ groupNum: parseInt(numStr, 10), sourceRow, targetRows: targets });
-                totalGroups++;
-                totalRows += targets.length;
+                propagations.push({ groupNum: num, sourceRow, targetRows: targets });
             }
         }
 
@@ -1751,11 +1814,24 @@ function cdeUrl(path) {
             return;
         }
 
-        if (!confirm('Propagate modifications for ' + totalGroups +
-                     ' group(s) (' + totalRows + ' target rows)?\n\n' +
-                     'This will copy the decision and modification text\n' +
-                     'from the source row to all other rows in each group.')) {
-            return;
+        const totalGroups = propagations.length;
+        const totalRows = propagations.reduce((s, p) => s + p.targetRows.length, 0);
+
+        // Extra warning when multiple groups would be affected
+        if (totalGroups > 1) {
+            const groupList = propagations.map(p => 'G' + p.groupNum).join(', ');
+            if (!confirm('Multiple groups selected: ' + groupList + '\n\n' +
+                         'Propagate all ' + totalGroups + ' groups (' + totalRows + ' target rows)?\n\n' +
+                         'To propagate a single group, select only its members first.')) {
+                return;
+            }
+        } else {
+            if (!confirm('Propagate G' + propagations[0].groupNum +
+                         ' (' + totalRows + ' target row' + (totalRows !== 1 ? 's' : '') + ')?\n\n' +
+                         'This will copy the decision and modification text\n' +
+                         'from the source row to all other rows in the group.')) {
+                return;
+            }
         }
 
         pushUndo('Propagate ' + totalGroups + ' group(s)');
@@ -2057,11 +2133,17 @@ function cdeUrl(path) {
         }
 
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            // Focus first filter input or select
-            const firstFilter = thead.querySelector('.filter-input, .filter-select');
-            if (firstFilter) {
-                firstFilter.focus();
+            if (e.shiftKey) {
+                // Ctrl+Shift+F: clear all filters
+                clearAllFilters();
                 e.preventDefault();
+            } else {
+                // Ctrl+F: focus first filter input or select
+                const firstFilter = thead.querySelector('.filter-input, .filter-select');
+                if (firstFilter) {
+                    firstFilter.focus();
+                    e.preventDefault();
+                }
             }
         }
     });
@@ -2095,6 +2177,7 @@ function cdeUrl(path) {
     btnDqSubstitute.addEventListener('click', () => setDecisionForSelected('substitute'));
     btnGroup.addEventListener('click', assignGroup);
     btnPropagate.addEventListener('click', propagateGroups);
+    btnClearFilters.addEventListener('click', clearAllFilters);
 
     // File input handler
     fileInput.addEventListener('change', (e) => {
