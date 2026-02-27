@@ -4,72 +4,50 @@
 
 **Focus**: Automated instrument/phrase stripping pipeline for CDE text normalization
 
-**Note**: phrase-curator branch merged into main at v0.5.14 (2026-02-12)
+**Version**: 0.9.0 (2026-02-26)
 
-**Version**: 0.6.0
+## Current State (v0.9.0)
 
-## Current State (v0.6.0, 2026-02-21)
+### All Pipeline Phases — Complete
 
-### v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes
+**Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
+**Phase 2: Phrase Pipeline** — 86 curated phrases, 6 removed; 13,640 k-mer phrases mined
+**Phase 3: Branching Strip** — 5 variant outputs, 10-step pipeline, ~4.5 min runtime, 0 temporal remnants
 
-#### Multi-Curator Curation Workflow
-- `--init-curation` / `--merge-curation` in pattern_util for multi-curator workflows
-- `logic/inter_rater.py` — Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, pairwise agreement
-- `actions/pattern_util/curation_diff.html` — browser-based visual diff viewer
-- Rare word detection with wordfreq Zipf scoring and whitelist
+### Curation Infrastructure — Complete
 
-#### Workflow Scaffold
-- `workflow scaffold PROJECT -i JSON -d DIR` generates project-specific pipeline bash scripts
-- Auto Windows→WSL path conversion, phase subset support, iterative harvesting loop
-- Generated script: PARAMETERS → DERIVED PATHS → HELPERS → phase functions → DISPATCH
+- **Multi-curator workflow** (v0.6.0): init/merge with inter-rater stats (Cohen's/Fleiss' kappa, Krippendorff's alpha)
+- **Standalone TSV editor** (v0.7.0): zipapp distribution (`cde_editor.pyz`, ~59 KB)
+- **Centralized curation server** (v0.7.0): HMAC token auth, TLS, rate limiting, admin dashboard
+- **Incremental curation ledger** (v0.8.0): auto-resolve from prior decisions, gate/finalize workflow
+- **Substitute decision** (v0.8.1): 4th decision type replacing matched text with modification content
+- **Zipf priority split** (v0.9.0): triage needs_review by word frequency for fast curation
 
-#### Documentation: Vignettes (5 new pages)
-- `docs/vignettes/index.md` — landing page with decision table
-- `docs/vignettes/quickstart.md` — full pipeline end-to-end walkthrough
-- `docs/vignettes/instrument-detection.md` — Phase 1 deep dive
-- `docs/vignettes/pipeline-orchestration.md` — workflow engine power user guide
-- `docs/vignettes/parameter-tuning.md` — small vs large dataset comparison
-- `mkdocs.yml` nav: "Guides" → "Guides & Vignettes"
+### Tooling — Complete
 
-### Phase 3 Branching Strip — Complete
-- 5-way branching strip pipeline producing distinct normalized outputs
-- Split temporal/curated stripping: temporal patterns case-insensitive, curated case-sensitive
-- 25 temporal seed patterns → ~2100 expanded variants (0 remnants in def/desig fields)
-- 10-step pipeline: 2 instrument + 1 expand + 3 temporal + 3 curated + 1 quality report
-- allcde01 results: inst_full: -515K, inst_sub: -415K, phrase: -105K, both_full: -553K, both_sub: -449K
-- 6 non-temporal remnants in fully-stripped outputs (trailing articles)
-- Runtime: ~4.5 minutes (down from >15 hours before v0.5.13 fixes)
-
-### Phase 2 Phrase Pipeline — Complete
-- 86 curated phrases, 6 removed
-- Whole-text dedup: 4 phrases >k_max (separate curation template)
-- 13,640 k-mer phrases mined
-
-### Phase 1 Instrument Pipeline — Complete
-- 458 validated instrument patterns (from 1342 raw → 591 coalesced → 458 validated)
+- **Workflow scaffold** (v0.6.0): auto-generate bash scripts with Windows→WSL conversion
+- **Documentation** (v0.5.17–v0.6.0): 7 vignettes, SVG diagrams, CLI short options, MkDocs site
 
 ## Recent Versions
 
 | Version | Date | Summary |
 |---------|------|---------|
-| 0.6.0 | 2026-02-21 | Multi-curator curation, workflow scaffold, vignettes |
-| 0.5.17 | 2026-02-15 | Documentation restructuring, CLI short options |
-| 0.5.14 | 2026-02-12 | Split temporal/curated strip, bare/article-only variants, 5 new seeds |
-| 0.5.13 | 2026-02-11 | Universal temporal stripping, dedup pre-pass, 3 critical bug fixes |
-| 0.5.12 | 2026-02-11 | Empirical subsumption validation, coalescer punctuation fix |
-| 0.5.11 | 2026-02-10 | Coalescer NP-continuity fix, iterative stripping pipeline |
-| 0.5.6 | 2026-02-10 | Interactive TSV editor for pattern curation |
-| 0.5.5 | 2026-02-10 | strip_report action for quality reports |
+| 0.9.0 | 2026-02-26 | Zipf priority split, editor UX, version sync |
+| 0.8.1 | 2026-02-25 | Substitute decision type |
+| 0.8.0 | 2026-02-24 | Incremental curation with ledger and gate |
+| 0.7.0 | 2026-02-23 | Standalone editor zipapp, centralized server, synthetic QC |
+| 0.6.0 | 2026-02-21 | Multi-curator, workflow scaffold, 7 vignettes |
+| 0.5.17 | 2026-02-18 | Documentation restructuring, SVG diagrams, CLI shorts |
+| 0.5.14 | 2026-02-12 | Split temporal/curated strip pipeline |
 
 ## Branches
 
-### Active: main (CURRENT)
-- **Contains**: All v0.5.x features merged from phrase-curator + v0.6.0 features
-- **Status**: Phase 3 complete, multi-curator + scaffold + vignettes added
+### Active: main
+- **Contains**: Everything through v0.9.0
+- **Status**: All pipeline phases complete, full curation infrastructure
 
 ### Retired: phrase-curator (merged at v0.5.14)
 - Merged into main on 2026-02-12
-- Remote branch preserved for history
 
 ## What Remains
 

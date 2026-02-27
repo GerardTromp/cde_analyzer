@@ -1,15 +1,15 @@
-# Claude Code Checkpoint Context Files
+# Claude Code Context Files
 
-This directory contains structured context files that help restore project knowledge after session interruptions.
+This directory contains structured context files for session recovery.
 
-## Purpose
+## Quick Recovery (Recommended)
 
-These files provide a comprehensive snapshot of the codebase that can be quickly loaded to restore context in case of:
-- Network disconnections
-- Session timeouts
-- System crashes
-- Starting new sessions
-- Context window exhaustion
+For most session recovery, read these in order:
+1. **`CLAUDE.md`** (project root) — authoritative current state (v0.9.0)
+2. **`.claude/checkpoints/checkpoint-2026-02-27-v090-consolidated.md`** — full history
+3. **`08-progress.md`** — current progress summary
+
+Files 01-07 below are **deep reference** from early project phases (2026-01-07). They describe foundational architecture, patterns, and gotchas that are still largely valid, but file listings and dependency info are stale (pre-v0.6.0). Use them for understanding *how the architecture works*, not *what the current state is*.
 
 ## Context Files
 
