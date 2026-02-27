@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" width="1100" height="520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#444"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2e7d32"/>
+    </marker>
+    <style>
+      text { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+      .title { font-size: 18px; font-weight: 700; fill: #1a1a1a; }
+      .phase-label { font-size: 15px; font-weight: 600; fill: #fff; }
+      .step-label { font-size: 11px; fill: #333; }
+      .step-label-sm { font-size: 10px; fill: #555; }
+      .note { font-size: 10px; fill: #666; font-style: italic; }
+      .ledger-label { font-size: 11px; fill: #2e7d32; font-weight: 600; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="550" y="30" text-anchor="middle" class="title">CDE Text Normalization Pipeline</text>
+
+  <!-- Phase 1 -->
+  <rect x="20" y="55" width="330" height="280" rx="12" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+  <rect x="20" y="55" width="330" height="36" rx="12" fill="#1565c0"/>
+  <rect x="20" y="73" width="330" height="18" fill="#1565c0"/>
+  <text x="185" y="79" text-anchor="middle" class="phase-label">Phase 1: Instrument Detection</text>
+
+  <!-- Phase 1 steps -->
+  <rect x="40" y="105" width="130" height="32" rx="6" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="105" y="125" text-anchor="middle" class="step-label">Mine Instruments</text>
+
+  <rect x="200" y="105" width="130" height="32" rx="6" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="265" y="125" text-anchor="middle" class="step-label">Discover Verbatim</text>
+
+  <line x1="170" y1="121" x2="198" y2="121" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="40" y="155" width="130" height="32" rx="6" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="105" y="175" text-anchor="middle" class="step-label">Coalesce + Validate</text>
+
+  <line x1="265" y1="137" x2="265" y2="142" stroke="#444" stroke-width="1.5"/>
+  <line x1="265" y1="142" x2="105" y2="142" stroke="#444" stroke-width="1.5"/>
+  <line x1="105" y1="142" x2="105" y2="153" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="200" y="155" width="130" height="32" rx="6" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="265" y="175" text-anchor="middle" class="step-label">Enrich Fields</text>
+
+  <line x1="170" y1="171" x2="198" y2="171" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase 1 curation -->
+  <rect x="80" y="210" width="200" height="36" rx="8" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+  <text x="180" y="233" text-anchor="middle" class="step-label" style="font-weight:600; fill:#e65100;">Curation Checkpoint</text>
+
+  <line x1="265" y1="187" x2="265" y2="195" stroke="#444" stroke-width="1.5"/>
+  <line x1="265" y1="195" x2="180" y2="195" stroke="#444" stroke-width="1.5"/>
+  <line x1="180" y1="195" x2="180" y2="208" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase 1 strip -->
+  <rect x="80" y="265" width="200" height="32" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="180" y="285" text-anchor="middle" class="step-label" style="font-weight:600;">Strip Instruments</text>
+
+  <line x1="180" y1="246" x2="180" y2="263" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="180" y="315" text-anchor="middle" class="step-label-sm">Output: inst_stripped.json</text>
+
+  <!-- Arrow Phase 1 → Phase 2 -->
+  <line x1="350" y1="195" x2="388" y2="195" stroke="#444" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Phase 2 -->
+  <rect x="390" y="55" width="330" height="280" rx="12" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <rect x="390" y="55" width="330" height="36" rx="12" fill="#7b1fa2"/>
+  <rect x="390" y="73" width="330" height="18" fill="#7b1fa2"/>
+  <text x="555" y="79" text-anchor="middle" class="phase-label">Phase 2: Phrase Mining</text>
+
+  <!-- Phase 2 steps -->
+  <rect x="410" y="105" width="130" height="32" rx="6" fill="#fff" stroke="#ce93d8" stroke-width="1.5"/>
+  <text x="475" y="125" text-anchor="middle" class="step-label">Mine Phrases (k-mer)</text>
+
+  <rect x="570" y="105" width="130" height="32" rx="6" fill="#fff" stroke="#ce93d8" stroke-width="1.5"/>
+  <text x="635" y="125" text-anchor="middle" class="step-label">Discover Verbatim</text>
+
+  <line x1="540" y1="121" x2="568" y2="121" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="410" y="155" width="130" height="32" rx="6" fill="#fff" stroke="#ce93d8" stroke-width="1.5"/>
+  <text x="475" y="175" text-anchor="middle" class="step-label">Coalesce Patterns</text>
+
+  <line x1="635" y1="137" x2="635" y2="142" stroke="#444" stroke-width="1.5"/>
+  <line x1="635" y1="142" x2="475" y2="142" stroke="#444" stroke-width="1.5"/>
+  <line x1="475" y1="142" x2="475" y2="153" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="570" y="155" width="130" height="32" rx="6" fill="#fff" stroke="#ce93d8" stroke-width="1.5"/>
+  <text x="635" y="175" text-anchor="middle" class="step-label">Field Analysis</text>
+
+  <line x1="540" y1="171" x2="568" y2="171" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase 2 curation -->
+  <rect x="450" y="210" width="200" height="36" rx="8" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+  <text x="550" y="233" text-anchor="middle" class="step-label" style="font-weight:600; fill:#e65100;">Curation Checkpoint</text>
+
+  <line x1="635" y1="187" x2="635" y2="195" stroke="#444" stroke-width="1.5"/>
+  <line x1="635" y1="195" x2="550" y2="195" stroke="#444" stroke-width="1.5"/>
+  <line x1="550" y1="195" x2="550" y2="208" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Phase 2 strip -->
+  <rect x="450" y="265" width="200" height="32" rx="6" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="550" y="285" text-anchor="middle" class="step-label" style="font-weight:600;">Strip Phrases</text>
+
+  <line x1="550" y1="246" x2="550" y2="263" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="550" y="315" text-anchor="middle" class="step-label-sm">Output: phrase_stripped.json</text>
+
+  <!-- Arrow Phase 2 → Phase 3 -->
+  <line x1="720" y1="195" x2="758" y2="195" stroke="#444" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Phase 3 -->
+  <rect x="760" y="55" width="320" height="280" rx="12" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+  <rect x="760" y="55" width="320" height="36" rx="12" fill="#2e7d32"/>
+  <rect x="760" y="73" width="320" height="18" fill="#2e7d32"/>
+  <text x="920" y="79" text-anchor="middle" class="phase-label">Phase 3: Branching Strip</text>
+
+  <!-- Phase 3 steps -->
+  <rect x="790" y="105" width="260" height="28" rx="6" fill="#fff" stroke="#81c784" stroke-width="1.5"/>
+  <text x="920" y="123" text-anchor="middle" class="step-label">Temporal Expansion (25 seeds)</text>
+
+  <rect x="790" y="148" width="120" height="28" rx="6" fill="#bbdefb" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="850" y="166" text-anchor="middle" class="step-label-sm">inst_full</text>
+
+  <rect x="930" y="148" width="120" height="28" rx="6" fill="#bbdefb" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="990" y="166" text-anchor="middle" class="step-label-sm">inst_sub</text>
+
+  <rect x="790" y="190" width="260" height="28" rx="6" fill="#fff9c4" stroke="#f9a825" stroke-width="1.5"/>
+  <text x="920" y="208" text-anchor="middle" class="step-label">Case-Insensitive Temporal Strip</text>
+
+  <rect x="790" y="232" width="260" height="28" rx="6" fill="#e1bee7" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="920" y="250" text-anchor="middle" class="step-label">Case-Sensitive Phrase Strip</text>
+
+  <!-- Arrows in Phase 3 -->
+  <line x1="920" y1="133" x2="920" y2="146" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="920" y1="176" x2="920" y2="188" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="920" y1="218" x2="920" y2="230" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 5 outputs -->
+  <rect x="780" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="826" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">phrase</text>
+  <text x="826" y="310" text-anchor="middle" class="step-label-sm">only</text>
+
+  <rect x="880" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="926" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">both</text>
+  <text x="926" y="310" text-anchor="middle" class="step-label-sm">full</text>
+
+  <rect x="980" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="1026" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">both</text>
+  <text x="1026" y="310" text-anchor="middle" class="step-label-sm">sub</text>
+
+  <line x1="920" y1="260" x2="920" y2="276" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="920" y1="268" x2="826" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="826" y1="268" x2="826" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="920" y1="268" x2="1026" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="1026" y1="268" x2="1026" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <text x="920" y="340" text-anchor="middle" class="step-label-sm">5 variant outputs for downstream comparison</text>
+
+  <!-- Curation Ledger feedback loop -->
+  <rect x="280" y="370" width="500" height="38" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="530" y="394" text-anchor="middle" class="ledger-label">Curation Ledger: persists decisions across runs for incremental auto-resolution</text>
+
+  <!-- Feedback arrows from curation checkpoints to ledger -->
+  <line x1="180" y1="246" x2="180" y2="389" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="180" y1="389" x2="278" y2="389" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-green)"/>
+
+  <line x1="550" y1="246" x2="550" y2="370" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-green)"/>
+
+  <!-- Feedback from ledger back up to curation gates -->
+  <path d="M 530 370 L 530 360 L 90 360 L 90 228 L 78 228" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrow-green)"/>
+  <path d="M 530 370 L 530 355 L 448 355 L 448 228" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrow-green)"/>
+
+  <!-- Input label -->
+  <rect x="20" y="440" width="160" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1"/>
+  <text x="100" y="460" text-anchor="middle" class="step-label">CDE JSON (22,743)</text>
+  <line x1="100" y1="440" x2="100" y2="335" stroke="#666" stroke-width="1.5"/>
+  <line x1="100" y1="335" x2="100" y2="330" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Legend -->
+  <rect x="20" y="490" width="14" height="14" rx="3" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="40" y="502" class="step-label-sm">Automated step</text>
+  <rect x="170" y="490" width="14" height="14" rx="3" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+  <text x="190" y="502" class="step-label-sm">Human checkpoint</text>
+  <rect x="340" y="490" width="14" height="14" rx="3" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="360" y="502" class="step-label-sm">Output</text>
+  <line x1="460" y1="497" x2="500" y2="497" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="510" y="502" class="step-label-sm">Ledger feedback</text>
+</svg>

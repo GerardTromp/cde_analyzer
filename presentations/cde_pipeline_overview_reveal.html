@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Text Normalization for Semantic Clustering</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  .reveal { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+  .reveal h1 { font-size: 1.6em; color: #1565c0; }
+  .reveal h2 { font-size: 1.15em; color: #1565c0; margin-bottom: 0.3em; }
+  .reveal h3 { font-size: 0.85em; color: #333; margin-bottom: 0.2em; margin-top: 0.3em; }
+  .reveal p, .reveal li { font-size: 0.6em; line-height: 1.4; }
+  .reveal ul, .reveal ol { margin: 0.15em 0 0.15em 1.2em; }
+  .reveal li { margin: 0.05em 0; }
+  .reveal table { font-size: 0.55em; margin: 0.3em auto; border-collapse: collapse; }
+  .reveal th { background: #1565c0; color: #fff; padding: 3px 8px; text-align: left; }
+  .reveal td { padding: 3px 8px; border-bottom: 1px solid #e0e0e0; }
+  .reveal tr:nth-child(even) { background: #f5f5f5; }
+  .reveal code { font-size: 0.8em; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; }
+  .reveal pre { font-size: 0.5em; }
+  .reveal blockquote { font-style: italic; border-left: 4px solid #1565c0; padding-left: 1em; }
+  .reveal .highlight { color: #e65100; font-weight: 700; }
+  .reveal .dim { color: #999; }
+  .reveal img.diagram { max-width: 90%; max-height: 480px; border: none; box-shadow: none; }
+  .reveal .example-box { background: #f5f5f5; border-left: 4px solid #1565c0; padding: 0.4em 0.8em; margin: 0.3em 0; text-align: left; font-size: 0.6em; }
+  .reveal .badge-keep { display: inline-block; background: #4caf50; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.65em; }
+  .reveal .badge-remove { display: inline-block; background: #f44336; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.65em; }
+  .reveal .badge-modify { display: inline-block; background: #ff9800; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.65em; }
+  .reveal .badge-substitute { display: inline-block; background: #00bcd4; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.65em; }
+  .reveal .two-col { display: flex; gap: 1.5em; }
+  .reveal .two-col > div { flex: 1; }
+  .reveal .small { font-size: 0.5em; }
+  .reveal .footnote { font-size: 0.45em; color: #999; margin-top: 0.5em; }
+
+  /* Editor mockup styles */
+  .reveal .mockup { border: 1px solid #cbd5e0; border-radius: 4px; overflow: hidden; font-family: Consolas, 'Courier New', monospace; font-size: 0.48em; line-height: 1.3; text-align: left; }
+  .reveal .mock-toolbar { background: #f7fafc; border-bottom: 1px solid #e2e8f0; padding: 3px 6px; display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+  .reveal .mock-btn { display: inline-block; padding: 1px 4px; border-radius: 2px; font-size: 0.9em; font-weight: 600; white-space: nowrap; border: 1px solid #cbd5e0; background: #fff; color: #4a5568; }
+  .reveal .mock-btn.keep { background: #c6f6d5; color: #22543d; border-color: #48bb78; }
+  .reveal .mock-btn.remove { background: #fed7d7; color: #9b2c2c; border-color: #fc8181; }
+  .reveal .mock-btn.modify { background: #fff3e0; color: #c05621; border-color: #ed8936; }
+  .reveal .mock-btn.substitute { background: #e0f7fa; color: #00838f; border-color: #00838f; }
+  .reveal .mock-sep { width: 1px; height: 12px; background: #e2e8f0; margin: 0 1px; }
+  .reveal .mock-grid { width: 100%; border-collapse: collapse; }
+  .reveal .mock-grid th { background: #edf2f7; font-size: 0.9em; font-weight: 600; padding: 2px 4px; border-bottom: 1px solid #cbd5e0; text-align: left; color: #4a5568; }
+  .reveal .mock-grid td { font-size: 0.9em; padding: 2px 4px; border-bottom: 0.5px solid #edf2f7; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+  .reveal .mock-grid tr.mock-filter td { background: #fff; padding: 1px 3px; }
+  .reveal .mock-grid .mock-filter-input { display: inline-block; border: 1px solid #e2e8f0; border-radius: 2px; padding: 0 3px; font-size: 0.85em; color: #a0aec0; background: #fff; width: 100%; }
+  .reveal .mock-grid .mock-filter-select { display: inline-block; border: 1px solid #e2e8f0; border-radius: 2px; padding: 0 3px; font-size: 0.85em; color: #4a5568; background: #fff; width: 100%; }
+  .reveal .mock-grid tr:nth-child(even):not(.mock-filter) td { background: rgba(247,250,252,0.4); }
+  .reveal .mock-grid tr.selected td { background: #ebf8ff; }
+  .reveal .mock-badge { display: inline-block; padding: 0 4px; border-radius: 6px; font-size: 0.85em; font-weight: 700; line-height: 1.4; }
+  .reveal .mock-badge.keep { background: #c6f6d5; color: #22543d; }
+  .reveal .mock-badge.remove { background: #fed7d7; color: #9b2c2c; }
+  .reveal .mock-badge.modify { background: #fff3e0; color: #c05621; }
+  .reveal .mock-badge.substitute { background: #e0f7fa; color: #00838f; }
+  .reveal .mock-cb { width: 10px; text-align: center; }
+  .reveal .mock-rn { color: #a0aec0; text-align: right; font-size: 0.85em; width: 16px; }
+  .reveal .mock-grid tr.fp-def { border-left: 2px solid #4299e1; }
+  .reveal .mock-grid tr.fp-desig { border-left: 2px solid #ed8936; }
+  .reveal .mock-grid tr.fp-both { border-left: 2px solid #48bb78; }
+  .reveal .mock-grid tr.fp-mixed { border-left: 2px solid #9f7aea; }
+  .reveal .mock-grid tr.grp1 { border-right: 2px solid #e91e63; }
+  .reveal .mock-grid tr.grp2 { border-right: 2px solid #2196f3; }
+  .reveal .mock-gbadge { display: inline-block; padding: 0 3px; border-radius: 4px; font-size: 0.8em; font-weight: 700; line-height: 1.3; margin-left: 2px; }
+  .reveal .mock-gbadge.g1 { background: #fce4ec; color: #e91e63; }
+  .reveal .mock-gbadge.g2 { background: #e3f2fd; color: #2196f3; }
+  .reveal .mock-status { background: #f7fafc; border-top: 1px solid #e2e8f0; padding: 2px 6px; display: flex; justify-content: space-between; font-size: 0.9em; color: #718096; }
+  .reveal .mock-status .counts span { font-weight: 600; }
+  .reveal .mock-status .ck { color: #22543d; }
+  .reveal .mock-status .cr { color: #9b2c2c; }
+  .reveal .mock-status .cm { color: #c05621; }
+  .reveal .mock-status .cs { color: #00838f; }
+  .reveal .mock-status .cu { color: #718096; }
+  .reveal .mock-status .mode-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #48bb78; margin-right: 2px; vertical-align: middle; }
+  .reveal .swatch { display: inline-block; width: 12px; height: 8px; border-radius: 2px; vertical-align: middle; margin-right: 2px; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <h1>CDE Text Normalization<br>for Semantic Clustering</h1>
+  <p>Automated detection and removal of repeated text patterns<br>from NLM Common Data Elements</p>
+  <p class="dim" style="margin-top:2em;">Gerard Tromp &mdash; CDE Analyzer v0.9.0 &mdash; February 2026</p>
+</section>
+
+<!-- Slide 2: Intention -->
+<section>
+  <h2>Project Intention</h2>
+  <h3>Processing CDE entries for embedding and clustering</h3>
+  <div class="two-col">
+    <div>
+      <p><strong>Goal</strong>: Normalize CDE text fields so that transformer embeddings capture <em>clinical meaning</em>, not shared boilerplate.</p>
+      <p><strong>Problem</strong>: Raw CDE text contains repeated instrument names, temporal preambles, and instructional phrases that distort embedding space.</p>
+      <p><strong>Impact</strong>:</p>
+      <ul>
+        <li>CDEs sharing instruments cluster together regardless of clinical content</li>
+        <li>Shared boilerplate creates false semantic similarity</li>
+        <li>Terse CDEs experience proportionally larger drift</li>
+      </ul>
+    </div>
+    <div>
+      <p><strong>Approach</strong>: Three-phase pipeline</p>
+      <ol>
+        <li><strong>Detect</strong> repeated patterns automatically</li>
+        <li><strong>Curate</strong> with human-in-the-loop review</li>
+        <li><strong>Strip</strong> curated patterns, producing multiple variants for comparison</li>
+      </ol>
+      <p><strong>Scale</strong>: 22,743 CDEs processed<br>553K characters removed (max variant)</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Instruments -->
+<section>
+  <h2>Repeated Text: Instruments</h2>
+  <div class="example-box">
+    <p><strong>Example CDE definition (before)</strong>:</p>
+    <p>&ldquo;This is a definition for <span class="highlight">Patient-Reported Outcomes Measurement Information System (PROMIS) Anxiety Short Form 8a</span> item. In the past 7 days, I felt fearful.&rdquo;</p>
+  </div>
+  <p>The instrument name spans <strong>78 characters</strong> in a 130-character definition.</p>
+  <div class="two-col">
+    <div>
+      <h3>Scale of the problem</h3>
+      <ul>
+        <li>~1,300 instrument patterns mined</li>
+        <li>458 validated after curation</li>
+        <li>Stripping removes <strong>515K characters</strong></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Variable surface forms</h3>
+      <ul>
+        <li>&ldquo;Patient Health Questionnaire-9 (PHQ-9)&rdquo;</li>
+        <li>&ldquo;PHQ-9&rdquo;</li>
+        <li>&ldquo;the PHQ - 9&rdquo;</li>
+        <li>&ldquo;Patient Health Questionnaire&rdquo;</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: Boilerplate -->
+<section>
+  <h2>Repeated Text: Boilerplate Phrases</h2>
+  <div class="two-col">
+    <div>
+      <h3>Temporal preambles</h3>
+      <ul>
+        <li>&ldquo;In the past 7 days&rdquo;</li>
+        <li>&ldquo;Over the last 2 weeks&rdquo;</li>
+        <li>&ldquo;During the past month&rdquo;</li>
+      </ul>
+      <p>25 seed patterns &rarr; ~2,100 expanded variants</p>
+      <h3>Instructional boilerplate</h3>
+      <ul>
+        <li>&ldquo;Please respond to each item&rdquo;</li>
+        <li>&ldquo;For each of the following statements&rdquo;</li>
+        <li>&ldquo;Have you had any of the following&rdquo;</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Combined character reduction</h3>
+      <table>
+        <tr><th>Variant</th><th>Removed</th></tr>
+        <tr><td>Instruments only (full)</td><td>-515K</td></tr>
+        <tr><td>Phrases only</td><td>-105K</td></tr>
+        <tr><td><strong>Both (full + phrases)</strong></td><td><strong>-553K</strong></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Detection Challenge -->
+<section>
+  <h2>The Detection Challenge</h2>
+  <ol>
+    <li><strong>Variable surface forms</strong>: Same instrument &mdash; different punctuation, spacing, abbreviations</li>
+    <li><strong>Nested names</strong>: &ldquo;NIH Toolbox&rdquo; vs &ldquo;NIH Toolbox General Life Satisfaction&rdquo; &mdash; different granularity</li>
+    <li><strong>Temporal variants</strong>: &ldquo;past 7 days&rdquo; / &ldquo;last seven days&rdquo; / &ldquo;the past week&rdquo;</li>
+    <li><strong>Case sensitivity</strong>: Instrument names (Title Case) vs temporal patterns (case-insensitive)</li>
+    <li><strong>Context dependence</strong>: Pattern in an instrument name vs. in a definition sentence</li>
+  </ol>
+  <p style="margin-top:1em;"><strong>Solution</strong>: Automated mining + human curation + multi-variant stripping</p>
+</section>
+
+<!-- Slide 6: Pipeline Overview -->
+<section>
+  <h2>Pipeline Overview</h2>
+  <img src="diagrams/pipeline_overview.svg" class="diagram" alt="Three-phase pipeline overview">
+  <p class="footnote">Blue = automated steps | Orange = human checkpoints | Green dashed = ledger feedback</p>
+</section>
+
+<!-- Slide 7: Key Aspects -->
+<section>
+  <h2>Key Aspects: Cyclical Improvement</h2>
+  <h3>The curation ledger enables compounding efficiency</h3>
+  <table>
+    <tr><th>Run</th><th>Patterns</th><th>Auto-resolved</th><th>Need review</th><th>Effort reduction</th></tr>
+    <tr><td>Run 1 (first time)</td><td>1,480</td><td>0</td><td>1,480</td><td>&mdash;</td></tr>
+    <tr><td>Run 2 (expanded)</td><td>1,550</td><td>~900</td><td>~650</td><td>57%</td></tr>
+    <tr><td>Run 3 (further)</td><td>1,480</td><td>~1,200</td><td>~280</td><td>81%</td></tr>
+  </table>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <h3>Ledger auto-resolution rules</h3>
+      <ul>
+        <li><strong>keep</strong> &rarr; always auto-apply</li>
+        <li><strong>remove/modify/substitute</strong> &rarr; auto-apply only if CDEs unchanged</li>
+        <li>New tinyIds &rarr; re-review</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Zipf triage (v0.9.0)</h3>
+      <ul>
+        <li><strong>High-priority</strong>: domain-specific (Zipf &lt; 4.0)</li>
+        <li><strong>Low-priority</strong>: common English (Zipf &ge; 4.0)</li>
+        <li>allcde03: 1,480 &rarr; 582 high + 898 low</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Phase 1 Detail -->
+<section>
+  <h2>Phase 1: Instrument Detection</h2>
+  <div class="two-col">
+    <div>
+      <h3>Pipeline steps</h3>
+      <ol>
+        <li>Mine instruments (Title Case, abbreviations)</li>
+        <li>Discover abbreviation expansions</li>
+        <li>Discover verbatim variants in text</li>
+        <li>Coalesce (prefix-trie + NP-continuity)</li>
+        <li>Validate subsumption empirically</li>
+        <li>Enrich with field counts</li>
+        <li>Curation gate (ledger auto-resolve)</li>
+        <li>Human curation checkpoint</li>
+        <li>Apply substitutions + strip</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Key parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Value</th></tr>
+        <tr><td>min_prefix_tinyids</td><td>2</td></tr>
+        <tr><td>min_count (harvest)</td><td>max(N*0.0005, 5)</td></tr>
+        <tr><td>workers</td><td>0 (auto)</td></tr>
+      </table>
+      <h3>Results (22,743 CDEs)</h3>
+      <p>1,342 raw &rarr; 591 coalesced &rarr; <strong>458 validated</strong></p>
+      <p>Iterative harvesting catches residual patterns across rounds</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 9: Phase 2 Detail -->
+<section>
+  <h2>Phase 2: Phrase Mining</h2>
+  <div class="two-col">
+    <div>
+      <h3>Pipeline steps</h3>
+      <ol>
+        <li>Mine phrases (k-mer descending loop)</li>
+        <li>Discover verbatim surface forms</li>
+        <li>Coalesce (subsumption + parent filter)</li>
+        <li>Field analysis (filter + dedup)</li>
+        <li>Curation gate (ledger auto-resolve)</li>
+        <li>Human curation checkpoint</li>
+        <li>Apply substitutions + strip phrases</li>
+        <li>Discovery report</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Key parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Impact</th><th>Recommended</th></tr>
+        <tr><td><strong>min_parent_tinyids</strong></td><td>HIGHEST</td><td>max(2, N/1000)</td></tr>
+        <tr><td>min_field_count</td><td>HIGH</td><td>4&ndash;6</td></tr>
+        <tr><td>k_max</td><td>MODERATE</td><td>90</td></tr>
+        <tr><td>min_tokens</td><td>LOW-MOD</td><td>2&ndash;3</td></tr>
+        <tr><td>k_min</td><td>NEGLIGIBLE</td><td>3</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 10: K-Mer Algorithm -->
+<section>
+  <h2>K-Mer Mining Algorithm</h2>
+  <img src="diagrams/kmer_mining.svg" class="diagram" alt="Descending k-mer mining with masking">
+</section>
+
+<!-- Slide 11: Temporal Detection -->
+<section>
+  <h2>Temporal Detection</h2>
+  <div class="two-col">
+    <div>
+      <h3>25 seed patterns &rarr; ~2,100 variants</h3>
+      <p><strong>Seeds</strong>:</p>
+      <ul>
+        <li>&ldquo;in the past [N] [UNIT]&rdquo;</li>
+        <li>&ldquo;over the [past/last] [N] [UNIT]&rdquo;</li>
+        <li>&ldquo;during [article] [N] [UNIT]&rdquo;</li>
+      </ul>
+      <p><strong>Expansion</strong>:</p>
+      <ul>
+        <li>Numbers: 1&ndash;90 (15 values)</li>
+        <li>Units: days, weeks, months, years, hours</li>
+        <li>Bare + article-only forms</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Critical design decision</h3>
+      <table>
+        <tr><th>Pass</th><th>Patterns</th><th>Case</th></tr>
+        <tr><td>First</td><td>Temporal (2,100)</td><td>Insensitive</td></tr>
+        <tr><td>Second</td><td>Curated phrases</td><td>Sensitive</td></tr>
+      </table>
+      <p>Prevents false matches from case-insensitive phrase stripping</p>
+      <h3>Result</h3>
+      <p><strong>0 temporal remnants</strong> in definition/designation fields</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 12: Phase 3 -->
+<section>
+  <h2>Phase 3: Branching Strip</h2>
+  <img src="diagrams/branching_strip.svg" class="diagram" alt="Five-way branching strip pipeline">
+</section>
+
+<!-- Slide 13: Production Results -->
+<section>
+  <h2>Production Results (22,743 CDEs)</h2>
+  <table>
+    <tr><th>Output</th><th>Instruments</th><th>Phrases</th><th>Chars removed</th></tr>
+    <tr><td>phrase_only</td><td>&mdash;</td><td>Yes</td><td>-105K</td></tr>
+    <tr><td>inst_full</td><td>Full</td><td>&mdash;</td><td>-515K</td></tr>
+    <tr><td>inst_sub</td><td>Prefix</td><td>&mdash;</td><td>-415K</td></tr>
+    <tr style="background:#e8f5e9;"><td><strong>both_full</strong></td><td><strong>Full</strong></td><td><strong>Yes</strong></td><td><strong>-553K</strong></td></tr>
+    <tr><td>both_sub</td><td>Prefix</td><td>Yes</td><td>-449K</td></tr>
+  </table>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <h3>Quality</h3>
+      <ul>
+        <li>Temporal remnants: <strong>0</strong></li>
+        <li>Non-temporal remnants: 6 (trailing articles)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Performance</h3>
+      <ul>
+        <li>Runtime: <strong>~4.5 minutes</strong> (was &gt;15 hours)</li>
+        <li>Pattern cache = 5,000x speedup</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 14: Comparison Table -->
+<section>
+  <h2>Parameter Comparison: allcde01 / 02 / 03</h2>
+  <p>Same corpus (22,743 CDEs), different parameter settings</p>
+  <table>
+    <tr><th>Parameter</th><th>allcde01 (strict)</th><th>allcde03 (midway)</th><th>allcde02 (lax)</th></tr>
+    <tr><td>min_parent_tinyids</td><td>20</td><td><strong>5</strong></td><td>5</td></tr>
+    <tr><td>min_field_count</td><td>6</td><td><strong>4</strong></td><td>3</td></tr>
+    <tr><td>min_tokens</td><td>3</td><td><strong>2</strong></td><td>2</td></tr>
+    <tr><td>k_max</td><td>25</td><td><strong>90</strong></td><td>90</td></tr>
+    <tr><td>Coalesced patterns</td><td>138</td><td>2,132</td><td>2,132</td></tr>
+    <tr style="background:#e3f2fd;"><td><strong>After field analysis</strong></td><td><strong>86</strong></td><td><strong>1,480</strong></td><td><strong>1,599</strong></td></tr>
+    <tr><td>Zipf high-priority</td><td>&mdash;</td><td>582</td><td>&mdash;</td></tr>
+    <tr><td>Zipf low-priority (trivial)</td><td>&mdash;</td><td>898</td><td>&mdash;</td></tr>
+  </table>
+  <p class="footnote">Impact ranking: min_parent_tinyids (18.6x) &gt; min_field_count (~25%) &gt; k_max &gt; min_tokens &gt; k_min</p>
+</section>
+
+<!-- Slide 15: Tradeoff -->
+<section>
+  <h2>False Positive / False Negative Tradeoff</h2>
+  <table>
+    <tr><th>Setting</th><th>Curator queue</th><th>False positives</th><th>False negatives</th></tr>
+    <tr><td>Strict (allcde01)</td><td>~86</td><td>Very few</td><td>Many missed</td></tr>
+    <tr style="background:#e8f5e9;"><td><strong>Lax + Zipf (allcde03)</strong></td><td><strong>582 high + 898 low</strong></td><td><strong>Controlled</strong></td><td><strong>Very few</strong></td></tr>
+    <tr><td>Lax (allcde02)</td><td>~1,599</td><td>Many</td><td>Very few</td></tr>
+  </table>
+  <div class="two-col" style="margin-top:1em;">
+    <div>
+      <h3>Recommended approach</h3>
+      <p>Use <strong>permissive settings</strong> + Zipf split:</p>
+      <ul>
+        <li>High-priority (582): multi-reviewer</li>
+        <li>Low-priority (898): fast single triage, pre-filled <code>remove</code></li>
+        <li>Ledger auto-resolves returning patterns</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Heuristic</h3>
+      <p><code>min_parent_tinyids &asymp; max(2, N/1000)</code></p>
+      <table>
+        <tr><th>CDEs</th><th>Suggested</th></tr>
+        <tr><td>1,000</td><td>2</td></tr>
+        <tr><td>5,000</td><td>5</td></tr>
+        <tr><td>10,000</td><td>10</td></tr>
+        <tr><td>20,000</td><td>10&ndash;20</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 16: Two-Stage Curation -->
+<section>
+  <h2>Two-Stage Curation Concept</h2>
+  <img src="diagrams/curation_workflow.svg" class="diagram" alt="Two-stage curation workflow">
+</section>
+
+<!-- Slide 17: Curation Detail -->
+<section>
+  <h2>Curation Workflow Detail</h2>
+  <div class="two-col">
+    <div>
+      <h3>Initialize and distribute</h3>
+      <pre><code>--init-curation enriched.tsv
+  --curators "alice,bob,carol"</code></pre>
+      <p>Creates per-curator TSV files</p>
+      <h3>Curate independently</h3>
+      <ul>
+        <li><strong>Standalone</strong>: <code>python cde_editor.pyz file.tsv</code></li>
+        <li><strong>Centralized</strong>: HMAC token-auth web server</li>
+      </ul>
+      <h3>Merge and measure</h3>
+      <pre><code>--merge-curation curation/*.tsv -o results/</code></pre>
+    </div>
+    <div>
+      <h3>Inter-rater statistics</h3>
+      <table>
+        <tr><th>Metric</th><th>Threshold</th></tr>
+        <tr><td>Cohen's &kappa; (pairwise)</td><td>&gt; 0.80 excellent</td></tr>
+        <tr><td>Krippendorff's &alpha;</td><td>&gt; 0.80 reliable</td></tr>
+        <tr><td></td><td>0.67&ndash;0.80 tentative</td></tr>
+        <tr><td></td><td>&lt; 0.67 unreliable</td></tr>
+      </table>
+      <h3>Merge outputs</h3>
+      <ul>
+        <li>consensus.tsv</li>
+        <li>discrepancies.tsv + visual diff HTML</li>
+        <li>inter_rater_report.md</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 18: TSV Editor Motivation -->
+<section>
+  <h2>TSV Editor: Motivation</h2>
+  <div class="two-col">
+    <div>
+      <h3>Problem: Data corruption</h3>
+      <ul>
+        <li>Excel auto-converts tinyIds to dates/numbers</li>
+        <li>Excel strips leading zeros, changes encoding</li>
+        <li>Google Sheets reformats columns unpredictably</li>
+      </ul>
+      <h3>Problem: Restricted vocabulary</h3>
+      <ul>
+        <li>Decisions must be exactly: <span class="badge-keep">keep</span> <span class="badge-remove">remove</span> <span class="badge-modify">modify</span> <span class="badge-substitute">substitute</span></li>
+        <li>Free-text invites typos and inconsistency</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Problem: Efficiency at scale</h3>
+      <ul>
+        <li>1,480 patterns need batch operations</li>
+        <li>Keyboard shortcuts for rapid assignment</li>
+        <li>Filtering to focus on subsets</li>
+      </ul>
+      <h3>Solution</h3>
+      <p>Browser-based TSV editor as Python zipapp</p>
+      <ul>
+        <li>~59 KB, zero external dependencies</li>
+        <li>Works on any machine with Python 3.8+</li>
+        <li>No data leaves the local machine</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 19: TSV Editor Features -->
+<section>
+  <h2>TSV Editor Features</h2>
+  <div class="two-col">
+    <div>
+      <h3>Decision assignment</h3>
+      <ul>
+        <li>Keyboard: <strong>K</strong> (keep), <strong>R</strong> (remove), <strong>M</strong> (modify), <strong>S</strong> (substitute)</li>
+        <li>Color-coded badges inline</li>
+        <li>Dropdown constraint on decision column</li>
+      </ul>
+      <h3>Filtering</h3>
+      <ul>
+        <li>Per-column text search</li>
+        <li>Numeric operators: =, !=, &ge;, &le;</li>
+        <li>Decision dropdown filter</li>
+        <li>Clear all: Ctrl+Shift+F</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Batch operations</h3>
+      <ul>
+        <li>Group propagation (selection-aware)</li>
+        <li>Shift+click range selection</li>
+        <li>Undo/redo: Ctrl+Z / Ctrl+Shift+Z</li>
+      </ul>
+      <h3>Visual cues</h3>
+      <ul>
+        <li>Field profile colors (def=blue, desig=orange, both=green)</li>
+        <li>Expandable tinyId pills</li>
+        <li>Group stripes (8 rotating hues)</li>
+      </ul>
+      <h3>Zipf pre-fill (v0.9.0)</h3>
+      <p><code>--split-auto-remove</code> pre-fills <span class="badge-remove">remove</span> for low-priority</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Editor Interface -->
+<section>
+  <h2>TSV Editor Interface</h2>
+  <div class="mockup" style="max-width:700px; margin:0 auto;">
+    <div class="mock-toolbar">
+      <span class="mock-btn">Save</span>
+      <span class="mock-btn">Save As</span>
+      <span class="mock-sep"></span>
+      <span class="mock-btn">+ Add</span>
+      <span class="mock-btn">x Del</span>
+      <span class="mock-btn">&uarr;</span>
+      <span class="mock-btn">&darr;</span>
+      <span class="mock-sep"></span>
+      <span class="mock-btn keep">&check; Keep</span>
+      <span class="mock-btn remove">&cross; Remove</span>
+      <span class="mock-btn modify">&#10038; Modify</span>
+      <span class="mock-btn substitute">&#8644; Subst</span>
+      <span class="mock-sep"></span>
+      <span class="mock-btn">&#9744; Group</span>
+      <span class="mock-btn">&#8644; Propagate</span>
+      <span class="mock-sep"></span>
+      <span class="mock-btn">&#8630;</span>
+      <span class="mock-btn">&#8631;</span>
+    </div>
+    <table class="mock-grid">
+      <tr>
+        <th class="mock-cb">&#9744;</th>
+        <th class="mock-rn">#</th>
+        <th>decision</th>
+        <th>modification</th>
+        <th>pattern</th>
+        <th>tinyIds</th>
+        <th>notes</th>
+      </tr>
+      <tr class="mock-filter">
+        <td></td><td></td>
+        <td><span class="mock-filter-select">(all) &darr;</span></td>
+        <td><span class="mock-filter-input">Filter...</span></td>
+        <td><span class="mock-filter-input">Filter...</span></td>
+        <td><span class="mock-filter-input">Filter...</span></td>
+        <td><span class="mock-filter-input">Filter...</span></td>
+      </tr>
+      <tr class="fp-both">
+        <td class="mock-cb">&#9744;</td><td class="mock-rn">1</td>
+        <td><span class="mock-badge keep">keep</span></td>
+        <td></td>
+        <td>SF-12 Health Survey</td>
+        <td>aB3k | xP7m&hellip;</td>
+        <td></td>
+      </tr>
+      <tr class="fp-def selected">
+        <td class="mock-cb">&#9745;</td><td class="mock-rn">2</td>
+        <td><span class="mock-badge remove">remove</span></td>
+        <td></td>
+        <td>I felt</td>
+        <td>cD9n | hJ2q&hellip;</td>
+        <td></td>
+      </tr>
+      <tr class="fp-both grp1">
+        <td class="mock-cb">&#9744;</td><td class="mock-rn">3</td>
+        <td><span class="mock-badge modify">modify</span></td>
+        <td>in past 7 d&hellip;</td>
+        <td>I got enough sle&hellip;</td>
+        <td>fK4p | mN8r&hellip;</td>
+        <td>G1 <span class="mock-gbadge g1">G1</span></td>
+      </tr>
+      <tr class="fp-desig grp1">
+        <td class="mock-cb">&#9744;</td><td class="mock-rn">4</td>
+        <td><span class="mock-badge modify">modify</span></td>
+        <td>in past 7 d&hellip;</td>
+        <td>I had difficulty&hellip;</td>
+        <td>gL5s | nO9t&hellip;</td>
+        <td>G1 <span class="mock-gbadge g1">G1</span></td>
+      </tr>
+      <tr class="fp-both grp2">
+        <td class="mock-cb">&#9744;</td><td class="mock-rn">5</td>
+        <td><span class="mock-badge substitute">substitute</span></td>
+        <td>difficulty you&hellip;</td>
+        <td>Considering yo&hellip;</td>
+        <td>aR2v | wQ6x&hellip;</td>
+        <td>G2 <span class="mock-gbadge g2">G2</span></td>
+      </tr>
+      <tr class="fp-mixed">
+        <td class="mock-cb">&#9744;</td><td class="mock-rn">6</td>
+        <td></td>
+        <td></td>
+        <td>Gas Exchange</td>
+        <td>jM7u</td>
+        <td></td>
+      </tr>
+    </table>
+    <div class="mock-status">
+      <span>needs_review.tsv &mdash; 458 rows (1 selected)</span>
+      <span class="counts">
+        <span class="ck">&check;430</span>&ensp;
+        <span class="cr">&cross;24</span>&ensp;
+        <span class="cm">&#10038;4</span>&ensp;
+        <span class="cs">&#8644;2</span>&ensp;
+        <span class="cu">?1</span>&ensp;
+        <span class="mode-dot"></span>server
+      </span>
+    </div>
+  </div>
+  <div class="two-col small" style="margin-top:0.3em;">
+    <div>
+      <p><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span><span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span><span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span><span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span> Decision badges: keep / remove / modify / substitute</p>
+      <p><span class="swatch" style="background:#fff;border-left:3px solid #4299e1;"></span><span class="swatch" style="background:#fff;border-left:3px solid #ed8936;"></span><span class="swatch" style="background:#fff;border-left:3px solid #48bb78;"></span> Left border: def-only / desig-only / both</p>
+    </div>
+    <div>
+      <p><span class="swatch" style="background:#fff;border-right:3px solid #e91e63;"></span><span class="swatch" style="background:#fff;border-right:3px solid #2196f3;"></span> Right border + badge: merge group (G1, G2&hellip;)</p>
+      <p>Row 2 selected (blue highlight) | Row 6 undecided (blank) | Toolbar: decision buttons, group ops, undo/redo</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 21: Additional Editing -->
+<section>
+  <h2>Additional TSV Editing</h2>
+  <p>Merge and Split are <em>not used for curation</em> but useful for pattern file management</p>
+  <div class="two-col">
+    <div>
+      <h3>Merge patterns</h3>
+      <pre><code>--merge-patterns file1.tsv file2.tsv -o merged.tsv</code></pre>
+      <ul>
+        <li>Combine/deduplicate from different sources</li>
+        <li>Extracts columns by header name (not position)</li>
+      </ul>
+      <h3>Split operations</h3>
+      <pre><code>--split-priority needs_review.tsv --split-auto-remove</code></pre>
+      <ul>
+        <li>Zipf-based priority triage</li>
+        <li>Field-profile-based splitting</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Pattern utility commands</h3>
+      <ul class="small">
+        <li><code>--coalesce-variants</code>: subsumption + prefix trie</li>
+        <li><code>--field-analysis</code>: add field counts</li>
+        <li><code>--validate-subsumption</code>: empirical check</li>
+        <li><code>--expand-temporal-seeds</code>: seed &rarr; variants</li>
+        <li><code>--harvest-to-supplementary</code>: ingest residuals</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 22: Summary -->
+<section>
+  <h2>Project Summary</h2>
+  <div class="two-col">
+    <div>
+      <h3>Complete</h3>
+      <ul>
+        <li>Three-phase pipeline (instrument, phrase, branching strip)</li>
+        <li>Curation infrastructure (ledger, gate, editor, server)</li>
+        <li>Production-tested: 22,743 CDEs, ~4.5 min</li>
+        <li>Documentation: 7 vignettes, 22+ reference pages</li>
+      </ul>
+      <h3>Remaining</h3>
+      <ul>
+        <li>LLM-assisted classification (P3)</li>
+        <li>Field-aware stripping (P4)</li>
+        <li>Embedding evaluation on 5 variants</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Version highlights</h3>
+      <table>
+        <tr><th>Version</th><th>Feature</th></tr>
+        <tr><td>v0.6.0</td><td>Multi-curator, scaffold, vignettes</td></tr>
+        <tr><td>v0.7.0</td><td>Standalone editor, curation server</td></tr>
+        <tr><td>v0.8.0</td><td>Incremental curation ledger</td></tr>
+        <tr><td>v0.8.1</td><td>Substitute decision type</td></tr>
+        <tr><td>v0.9.0</td><td>Zipf priority split</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 23: Takeaways -->
+<section>
+  <h2>Key Takeaways</h2>
+  <ol>
+    <li><strong>Three-phase pipeline</strong> with human-in-the-loop curation</li>
+    <li><strong>Descending k-mer mining</strong> with masking prevents redundant detection</li>
+    <li><strong>Curation ledger</strong> enables incremental improvement &mdash; effort compounds</li>
+    <li><strong>Zipf triage</strong> separates domain-specific from common English</li>
+    <li><strong>Five stripped variants</strong> for downstream embedding comparison</li>
+    <li><strong><code>min_parent_tinyids</code></strong> is the most influential parameter (18.6x)</li>
+    <li><strong>Standalone editor</strong> prevents Excel data corruption</li>
+  </ol>
+  <blockquote style="margin-top:1em;">
+    Automate detection, curate decisions, persist knowledge, strip with variants.
+  </blockquote>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: true,
+    transition: 'slide',
+    width: 1200,
+    height: 700,
+    margin: 0.04,
+    center: false
+  });
+</script>
+</body>
+</html>
