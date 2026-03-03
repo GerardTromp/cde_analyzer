@@ -257,6 +257,12 @@ Phase 3 complete. Outputs:
   branching_output/stripped_MTSTPT.json
 ```
 
+!!! tip "Production: run only the variants you need"
+    The full pipeline produces all 6 variants. For production, use
+    `workflow configure` to generate a minimal pipeline:
+
+        cde-analyzer workflow configure MTSTPT -o production_strip.yaml
+
 ---
 
 ## Alternative: Running Without Scaffold

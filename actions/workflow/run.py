@@ -25,6 +25,19 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+# Step dependencies for each branching strip code.
+# Maps strip code -> list of step names required (order matches YAML).
+STRIP_CODE_STEPS: Dict[str, List[str]] = {
+    "MTSFPF": ["strip_MTSFPF"],
+    "MFSTPF": ["strip_MFSTPF"],
+    "MFSFPT": ["expand_temporal", "temporal_MFSFPT", "strip_MFSFPT"],
+    "MTSFPT": ["strip_MTSFPF", "expand_temporal", "temporal_MTSFPT", "strip_MTSFPT"],
+    "MFSTPT": ["strip_MFSTPF", "expand_temporal", "temporal_MFSTPT", "strip_MFSTPT"],
+    "MTSTPT": ["strip_MTSFPF", "sub_on_full_MTSTPT", "expand_temporal",
+                "temporal_MTSTPT", "strip_MTSTPT"],
+}
+ALL_STRIP_CODES = sorted(STRIP_CODE_STEPS.keys())
+
 
 def get_system_variables() -> Dict[str, Any]:
     """
@@ -343,7 +356,8 @@ def run_workflow(
     variables: Dict[str, Any],
     state: WorkflowState,
     dry_run: bool = False,
-    from_step: Optional[str] = None
+    from_step: Optional[str] = None,
+    only_steps: Optional[set] = None,
 ) -> int:
     """
     Execute workflow steps sequentially.
@@ -351,6 +365,19 @@ def run_workflow(
     Returns 0 on success/checkpoint, non-zero on failure.
     """
     steps = workflow.get("steps", [])
+
+    # Filter to requested steps only (preserving YAML order)
+    if only_steps:
+        original_count = len(steps)
+        known_names = {s.get("name") for s in steps}
+        unknown = only_steps - known_names
+        if unknown:
+            print(f"Warning: Unknown step names ignored: {', '.join(sorted(unknown))}")
+        steps = [s for s in steps if s.get("name") in only_steps]
+        if not steps:
+            print("Error: No valid steps to execute after --only-steps filtering")
+            return 1
+        print(f"Filtered: {len(steps)}/{original_count} steps selected by --only-steps")
 
     # Determine starting point
     start_index = state.current_step_index
@@ -511,6 +538,12 @@ def cmd_run(args) -> int:
     # Create state tracker
     state = WorkflowState(Path(state_dir) / ".workflow_state.json")
 
+    # Parse --only-steps
+    only_steps = None
+    raw_only = getattr(args, "only_steps", None)
+    if raw_only:
+        only_steps = {s.strip() for s in raw_only.split(",") if s.strip()}
+
     # Run workflow
     return run_workflow(
         workflow,
@@ -518,7 +551,8 @@ def cmd_run(args) -> int:
         variables,
         state,
         dry_run=args.dry_run,
-        from_step=getattr(args, "from_step", None)
+        from_step=getattr(args, "from_step", None),
+        only_steps=only_steps,
     )
 
 
@@ -719,6 +753,213 @@ def cmd_copy(args) -> int:
     print(f"  2. Run: cde-analyzer workflow run {dest_path}")
 
     return 0
+
+
+# ── Configure helpers ────────────────────────────────────────────────────────
+
+def _collect_referenced_variables(workflow: Dict) -> set:
+    """Scan step args and variable definitions for ${var} references."""
+    var_pattern = re.compile(r'\$\{([^}:]+?)(?::-[^}]*)?\}')
+    referenced = set()
+
+    # Collect from step args
+    for step in workflow.get("steps", []):
+        for _key, value in step.get("args", {}).items():
+            if isinstance(value, str):
+                for m in var_pattern.finditer(value):
+                    referenced.add(m.group(1))
+
+    # Follow transitive references (variables that reference other variables)
+    changed = True
+    while changed:
+        changed = False
+        for key, value in workflow.get("variables", {}).items():
+            if key in referenced and isinstance(value, str):
+                for m in var_pattern.finditer(value):
+                    if m.group(1) not in referenced:
+                        referenced.add(m.group(1))
+                        changed = True
+
+    return referenced
+
+
+def _print_configure_summary(
+    codes: List[str],
+    step_names: List[str],
+    intermediate_outputs: set,
+    template_path: str,
+    needs_inst: bool,
+    needs_phrases: bool,
+) -> int:
+    """Print step list and ready-to-use command."""
+    print(f"Strip codes: {', '.join(codes)}")
+    print(f"Required steps ({len(step_names)}):")
+    for i, name in enumerate(step_names, 1):
+        print(f"  {i}. {name}")
+
+    if intermediate_outputs:
+        print(f"\nNote: Intermediate files also produced:")
+        for code in sorted(intermediate_outputs):
+            print(f"  stripped_{code}.json (required as input to later steps)")
+
+    if len(codes) == len(ALL_STRIP_CODES):
+        print(f"\nAll strip codes selected — equivalent to running the full pipeline.")
+
+    # Show ready-to-use command with relative path for built-in template
+    display_path = template_path
+    builtin = str(get_builtin_workflows_dir())
+    if display_path.startswith(builtin):
+        display_path = "workflows/branching_strip.yaml"
+
+    steps_csv = ",".join(step_names)
+    print(f"\nReady-to-use command:")
+    print(f"  cde-analyzer workflow run {display_path} \\")
+    print(f"      --only-steps \"{steps_csv}\" \\")
+    print(f"      --set input_json=<INPUT> \\")
+    print(f"      --set output_dir=<OUTPUT_DIR>", end="")
+    if needs_inst:
+        print(f" \\\n      --set inst_patterns_base=<PATTERN_BASE>", end="")
+    if needs_phrases:
+        print(f" \\\n      --set phrase_patterns=<PHRASE_TSV>", end="")
+    print()
+
+    return 0
+
+
+def _write_configured_yaml(
+    workflow: Dict,
+    selected_steps: List[Dict],
+    codes: List[str],
+    no_report: bool,
+    output_path: str,
+) -> int:
+    """Generate a production YAML with only the needed steps."""
+    import copy
+
+    configured = copy.deepcopy(workflow)
+    codes_str = "_".join(sorted(codes))
+    configured["name"] = f"branching_strip_{codes_str}"
+    configured["description"] = (
+        f"Branching strip configured for: {', '.join(sorted(codes))}"
+    )
+
+    # Filter steps
+    configured["steps"] = copy.deepcopy(selected_steps)
+
+    # Filter variables to only those referenced by selected steps
+    used_vars = _collect_referenced_variables(configured)
+    original_vars = configured.get("variables", {})
+    filtered_vars = {}
+
+    # Always keep core variables
+    for core_var in ("input_json", "output_dir", "model", "workers", "version"):
+        if core_var in original_vars:
+            filtered_vars[core_var] = original_vars[core_var]
+
+    # Add referenced variables in original definition order
+    for key, value in original_vars.items():
+        if key in used_vars and key not in filtered_vars:
+            filtered_vars[key] = value
+
+    configured["variables"] = filtered_vars
+
+    # Write
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(f"# Configured branching strip: {', '.join(sorted(codes))}\n")
+        f.write(f"# Generated by: cde-analyzer workflow configure {' '.join(codes)}\n")
+        f.write(f"# Steps: {len(configured['steps'])}\n")
+        f.write("#\n")
+        yaml.dump(configured, f, default_flow_style=False, sort_keys=False,
+                  allow_unicode=True)
+
+    print(f"Wrote configured workflow: {output_path}")
+    print(f"  Strip codes: {', '.join(sorted(codes))}")
+    print(f"  Steps: {len(configured['steps'])}")
+    print(f"\nRun with:")
+    print(f"  cde-analyzer workflow run {output_path} \\")
+    print(f"      --set input_json=<INPUT> \\")
+    print(f"      --set output_dir=<OUTPUT_DIR> \\")
+    print(f"      --set inst_patterns_base=<PATTERN_BASE> \\")
+    print(f"      --set phrase_patterns=<PHRASE_TSV>")
+
+    return 0
+
+
+def cmd_configure(args) -> int:
+    """Handle 'workflow configure' command."""
+    codes = [c.upper() for c in args.codes]
+    no_report = args.no_report
+    output_path = args.output
+    template_path = args.template
+
+    # Validate codes
+    invalid = [c for c in codes if c not in STRIP_CODE_STEPS]
+    if invalid:
+        print(f"Error: Invalid strip code(s): {', '.join(invalid)}")
+        print(f"Valid codes: {', '.join(ALL_STRIP_CODES)}")
+        return 1
+
+    # Deduplicate while preserving order
+    seen = set()
+    unique_codes = []
+    for c in codes:
+        if c not in seen:
+            seen.add(c)
+            unique_codes.append(c)
+    codes = unique_codes
+
+    # Collect required steps (union, deduplicated)
+    required_steps = set()
+    for code in codes:
+        required_steps.update(STRIP_CODE_STEPS[code])
+    if not no_report:
+        required_steps.add("quality_report")
+
+    # Load template to get canonical step order
+    if template_path:
+        template = Path(template_path)
+    else:
+        template = get_builtin_workflows_dir() / "branching_strip.yaml"
+
+    if not template.exists():
+        print(f"Error: Template not found: {template}")
+        return 1
+
+    try:
+        workflow = load_workflow(str(template))
+    except WorkflowError as e:
+        print(f"Error: {e}")
+        return 1
+
+    all_steps = workflow.get("steps", [])
+
+    # Filter and order steps according to YAML order
+    selected_steps = [s for s in all_steps if s.get("name") in required_steps]
+    step_names = [s.get("name") for s in selected_steps]
+
+    # Identify intermediate outputs (steps producing files for codes not requested)
+    intermediate_outputs = set()
+    for s in selected_steps:
+        name = s.get("name", "")
+        for code in STRIP_CODE_STEPS:
+            if name == f"strip_{code}" and code not in codes:
+                intermediate_outputs.add(code)
+
+    # Determine which input types are needed from code positions:
+    # M[1]S[3]P[5] — T=stripped, F=present
+    needs_inst = any(c[1] == "T" or c[3] == "T" for c in codes)
+    needs_phrases = any(c[5] == "T" for c in codes)
+
+    if output_path:
+        return _write_configured_yaml(
+            workflow, selected_steps, codes, no_report, output_path
+        )
+    else:
+        return _print_configure_summary(
+            codes, step_names, intermediate_outputs, str(template),
+            needs_inst, needs_phrases,
+        )
 
 
 # ── Scaffold helpers ──────────────────────────────────────────────────────────
@@ -1179,6 +1420,7 @@ def run_action(args) -> int:
         print("  list      List available workflow templates")
         print("  copy      Copy a template to current directory for customization")
         print("  scaffold  Generate project-specific pipeline orchestration script")
+        print("  configure Generate workflow for specific strip variants")
         print("  run       Execute a workflow from YAML file")
         print("  resume    Resume workflow after checkpoint")
         print("  status    Show workflow execution status")
@@ -1202,6 +1444,8 @@ def run_action(args) -> int:
         return cmd_copy(args)
     elif command == "scaffold":
         return cmd_scaffold(args)
+    elif command == "configure":
+        return cmd_configure(args)
     else:
         print(f"Unknown command: {command}")
         return 1

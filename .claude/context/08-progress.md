@@ -4,15 +4,20 @@
 
 **Focus**: Automated instrument/phrase stripping pipeline for CDE text normalization
 
-**Version**: 0.9.0 (2026-02-26)
+**Version**: 0.9.1 (2026-03-03)
 
-## Current State (v0.9.0)
+## Current State (v0.9.1)
 
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 86 curated phrases, 6 removed; 13,640 k-mer phrases mined
 **Phase 3: Branching Strip** — 6 variant outputs, 13-step pipeline, ~4.5 min runtime, 0 temporal remnants
+
+### Production Tooling — Complete
+
+- **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE]` maps codes to steps
+- **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter for any workflow
 
 ### Curation Infrastructure — Complete
 
@@ -32,6 +37,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps, 6th variant (MTSTPT) |
 | 0.9.0 | 2026-02-26 | Zipf priority split, editor UX, version sync |
 | 0.8.1 | 2026-02-25 | Substitute decision type |
 | 0.8.0 | 2026-02-24 | Incremental curation with ledger and gate |
@@ -43,8 +49,8 @@
 ## Branches
 
 ### Active: main
-- **Contains**: Everything through v0.9.0
-- **Status**: All pipeline phases complete, full curation infrastructure
+- **Contains**: Everything through v0.9.1
+- **Status**: All pipeline phases complete, full curation infrastructure, production strip tooling
 
 ### Retired: phrase-curator (merged at v0.5.14)
 - Merged into main on 2026-02-12

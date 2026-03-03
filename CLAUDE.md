@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.0)
+# CDE Analyzer — Context (v0.9.1)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -26,7 +26,28 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 ### Phase 3: Branching Strip (`branching_strip.yaml`)
 strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
 
-## Current State (v0.9.0)
+## Current State (v0.9.1)
+
+### v0.9.1: Production Strip Configurator + 6th Variant
+
+#### 6th Branching Strip Variant (MTSTPT)
+- **MTSTPT**: Full + sub instrument removal + phrase removal (maximum stripping)
+- Pipeline extended from 5 to 6 variants (10 → 13 steps)
+- Output naming standardized to `stripped_{CODE}.json` format
+
+#### Production Strip Configurator (`workflow configure`)
+- **`workflow configure CODE [CODE...] [-o FILE]`**: Maps strip codes to required pipeline steps
+- **Without `-o`**: Prints step list + ready-to-use `workflow run --only-steps ...` command
+- **With `-o FILE`**: Generates production YAML with only needed steps and variables
+- **`--no-report`**: Exclude quality_report step
+- **Smart `--set` hints**: Conditionally shows `inst_patterns_base` / `phrase_patterns` based on code positions
+- **Step dependency map**: `STRIP_CODE_STEPS` constant in `actions/workflow/run.py`
+
+#### Generic Step Filtering (`--only-steps`)
+- **`workflow run --only-steps S1,S2,...`**: Filter step list before execution
+- Works with any workflow YAML, not just branching strip
+- Preserves YAML-defined step order; warns on unknown names; errors on empty result
+- Composable with `--from-step`
 
 ### v0.9.0: Zipf Priority Split + Editor Improvements
 
@@ -179,8 +200,8 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - `actions/pattern_util/centralized_server.py` — centralized multi-curator curation server (CurationState, CuratorSession, serve_curation)
 - `actions/pattern_util/editor_config.py` — curation server config parsing (CurationServerConfig, load_config)
 - `actions/pattern_util/editor_security.py` — token gen/verify, RateLimiter, TLS setup
-- `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold)
-- `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status, skip_if_file)
+- `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold, configure)
+- `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status, skip_if_file, configure)
 - `logic/curation_ledger.py` — CurationLedger, CurationDecision, classify_patterns (incremental curation)
 - `logic/inter_rater.py` — inter-rater reliability statistics (Cohen's/Fleiss' kappa, Krippendorff's alpha)
 - `actions/phrase_miner/run.py` — phrase miner runner + `write_dedup_curation_tsv()`
@@ -240,10 +261,11 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]           
 ## `workflow` Capabilities
 
 ```bash
-cde-analyzer workflow run YAML [--set K=V] [--from-step S] [--dry-run]  # execute pipeline
+cde-analyzer workflow run YAML [--set K=V] [--from-step S] [--only-steps S1,S2] [--dry-run]  # execute pipeline
 cde-analyzer workflow resume --state-file FILE                          # resume after checkpoint
 cde-analyzer workflow status [--state-file FILE] [-v]                   # check pipeline state
 cde-analyzer workflow list                                              # list built-in workflows
 cde-analyzer workflow copy NAME [--as FILE]                             # copy template to project
 cde-analyzer workflow scaffold PROJECT -i JSON -d DIR [--phases 1,2,3] [--with-iterate]  # generate orchestration script
+cde-analyzer workflow configure CODE [CODE...] [-o FILE] [--no-report]  # configure branching strip for specific variants
 ```

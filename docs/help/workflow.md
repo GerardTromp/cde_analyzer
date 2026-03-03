@@ -19,8 +19,11 @@ The `workflow` command executes sequential pipelines defined in YAML files. It p
 cde-analyzer workflow list
 cde-analyzer workflow copy <workflow_name> [--as NAME] [--dest DIR]
 
+# Configure branching strip for specific variants
+cde-analyzer workflow configure <CODE> [CODE...] [-o FILE]
+
 # Execute workflows
-cde-analyzer workflow run <workflow.yaml> [--set KEY=VALUE] [--dry-run]
+cde-analyzer workflow run <workflow.yaml> [--set KEY=VALUE] [--only-steps S1,S2] [--dry-run]
 cde-analyzer workflow resume [--state-file FILE]
 cde-analyzer workflow status [--state-file FILE]
 ```
@@ -91,6 +94,7 @@ Options:
 - `--dry-run` - Preview workflow without executing
 - `--state-dir DIR` - Directory to store workflow state
 - `--from-step STEP` - Start execution from specific step
+- `--only-steps STEP1,STEP2,...` - Run only these steps (comma-separated); order preserved from YAML
 
 ### resume
 
@@ -117,6 +121,35 @@ cde-analyzer workflow status --verbose
 Options:
 - `--state-file FILE` - Path to workflow state file
 - `--verbose` - Show detailed step information including variables
+
+### configure
+
+Configure the branching strip pipeline for specific strip variants. Resolves step
+dependencies and either prints a ready-to-use command or generates a production YAML
+with only the needed steps and variables.
+
+```bash
+# Show required steps for one variant
+cde-analyzer workflow configure MTSTPT
+
+# Show steps for multiple variants
+cde-analyzer workflow configure MTSFPT MTSTPT
+
+# Generate a production YAML with only needed steps
+cde-analyzer workflow configure MTSFPT MTSTPT -o production_strip.yaml
+
+# Without quality report
+cde-analyzer workflow configure MTSTPT --no-report
+```
+
+Options:
+- `CODE` - One or more strip codes (positional, required). Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT
+- `-o FILE` - Write a production YAML (without: prints steps and command)
+- `--no-report` - Exclude the quality_report step
+- `--template FILE` - Use a custom template instead of built-in branching_strip.yaml
+
+When generating a YAML with `-o`, variables are filtered to only those referenced by
+the selected steps. The generated YAML can be run directly with `workflow run`.
 
 ## Workflow YAML Format
 
@@ -312,6 +345,7 @@ The codebase includes pre-built workflow templates. Use `workflow list` to see t
 | `phrase_family_stripping` | Phrase family stripping |
 | `quick_strip` | Quick strip with minimal steps |
 | `full_pipeline` | Complete multi-phase stripping pipeline |
+| `branching_strip` | Phase 3: 6-way branching strip (use `configure` for production subsets) |
 
 ## Related Commands
 

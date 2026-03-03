@@ -85,6 +85,12 @@ def register_subparser(subparser: ArgumentParser):
         metavar="STEP_NAME",
         help="Start execution from specific step (skip earlier steps)"
     )
+    run_parser.add_argument(
+        "--only-steps",
+        type=str,
+        metavar="STEP1,STEP2,...",
+        help="Run only these steps (comma-separated names); order preserved from YAML"
+    )
 
     # ===== RESUME command =====
     resume_parser = workflow_subparsers.add_parser(
@@ -208,6 +214,39 @@ def register_subparser(subparser: ArgumentParser):
         "--force", "-f",
         action="store_true",
         help="Overwrite existing script without prompting"
+    )
+
+    # ===== CONFIGURE command =====
+    configure_parser = workflow_subparsers.add_parser(
+        "configure",
+        help="Configure branching strip pipeline for specific strip variants",
+        formatter_class=_fmt,
+    )
+    configure_parser.add_argument(
+        "codes",
+        nargs="+",
+        metavar="CODE",
+        help="Strip codes to include (e.g., MTSFPT MTSTPT). "
+             "Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT"
+    )
+    configure_parser.add_argument(
+        "--output", "-o",
+        type=str,
+        default=None,
+        help="Write a production YAML with only needed steps "
+             "(without -o: prints step list and ready-to-use command)"
+    )
+    configure_parser.add_argument(
+        "--no-report",
+        action="store_true",
+        help="Exclude the quality_report step"
+    )
+    configure_parser.add_argument(
+        "--template",
+        type=str,
+        default=None,
+        help="Path to branching strip YAML template "
+             "(default: built-in workflows/branching_strip.yaml)"
     )
 
     def _lazy_run_action(args):

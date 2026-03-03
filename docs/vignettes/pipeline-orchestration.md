@@ -352,6 +352,21 @@ Step 2: discover_verbatim
 This shows all resolved variables and the exact CLI commands that would run,
 without executing anything.
 
+### `--only-steps`: Run a subset of steps
+
+Run only specific named steps from a workflow, preserving YAML-defined order:
+
+```bash
+cde-analyzer workflow run workflows/branching_strip.yaml \
+    --only-steps "strip_MTSFPF,expand_temporal,temporal_MTSFPT,strip_MTSFPT,quality_report" \
+    --set input_json=/data/cdes.json \
+    --set output_dir=/data/output
+```
+
+Unknown step names produce a warning and are ignored. Can be combined with
+`--from-step` (filtering happens first, then the start point is located within
+the filtered list).
+
 ### State file inspection
 
 ```bash
@@ -430,6 +445,35 @@ cde-analyzer workflow run workflows/phrase_pipeline.yaml \
 
 The templates themselves never need to be copied or modified. Config files
 in each project's output directory provide persistent customization.
+
+### Run specific strip variants (skip unused branches)
+
+The full branching strip produces 6 variants. For production, use `workflow configure`
+to determine the minimal step set for the variant(s) you need:
+
+```bash
+# See what steps MTSTPT needs
+cde-analyzer workflow configure MTSTPT
+
+# Generate a production YAML for two variants
+cde-analyzer workflow configure MTSFPT MTSTPT -o production_strip.yaml
+cde-analyzer workflow run production_strip.yaml \
+    --set input_json=/data/cdes.json \
+    --set output_dir=/data/output \
+    --set inst_patterns_base=/data/phase1/strip_patterns \
+    --set phrase_patterns=/data/phase2/curated.tsv
+```
+
+Alternatively, use `--only-steps` directly with the full template:
+
+```bash
+cde-analyzer workflow run workflows/branching_strip.yaml \
+    --only-steps "strip_MTSFPF,sub_on_full_MTSTPT,expand_temporal,temporal_MTSTPT,strip_MTSTPT,quality_report" \
+    --set input_json=/data/cdes.json \
+    --set output_dir=/data/output \
+    --set inst_patterns_base=/data/phase1/strip_patterns \
+    --set phrase_patterns=/data/phase2/curated.tsv
+```
 
 ### List available workflow templates
 
