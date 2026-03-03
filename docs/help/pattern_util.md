@@ -110,7 +110,7 @@ cde-analyzer pattern_util --field-analysis coalesced.tsv \
     --exclude-patterns exclusions.tsv
 ```
 
-**New columns added**: `definition_count`, `designation_count`, `field_profile` (one of: `def-only`, `desig-only`, `both-all`, `mixed`)
+**New columns added**: `tinyid_count` (unique CDE count), `definition_count`, `designation_count`, `field_profile` (one of: `def-only`, `desig-only`, `both-all`, `mixed`), `example_name`, `example_context`
 
 **Filters applied**:
 - `--min-field-count N`: drop patterns below N in ALL fields

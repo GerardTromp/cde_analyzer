@@ -438,6 +438,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><span class="key">Ctrl</span>+<span class="key">&#8679;</span>+<span class="key">Z</span></td><td>Redo</td></tr>
           <tr><td><span class="key">Ctrl</span>+<span class="key">S</span></td><td>Save (server mode)</td></tr>
           <tr><td><span class="key">Ctrl</span>+<span class="key">F</span></td><td>Focus first filter</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">&#8679;</span>+<span class="key">F</span></td><td>Clear all filters</td></tr>
           <tr><td><span class="key">Del</span></td><td>Delete selected rows</td></tr>
           <tr><td><span class="key">Tab</span></td><td>Next column (editing)</td></tr>
           <tr><td><span class="key">Enter</span></td><td>Commit cell edit</td></tr>
@@ -474,7 +475,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><code>!abc</code></td><td>NOT containing &ldquo;abc&rdquo;</td></tr>
           <tr><td><code>=blank</code></td><td>Empty cells only</td></tr>
           <tr><td><code>!blank</code></td><td>Non-empty cells only</td></tr>
-          <tr><td><code>&gt;10</code></td><td>Numeric &gt; 10</td></tr>
+          <tr><td><code>&gt;10</code> <code>&lt;5</code></td><td>Numeric comparison</td></tr>
+          <tr><td><code>=10</code> <code>!=5</code></td><td>Numeric equals / not-equals</td></tr>
           <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
         </table>
         <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
@@ -629,6 +631,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <th class="mock-cb">&#9744;</th>
               <th class="mock-rn">#</th>
               <th style="background:#e9d8fd;">decision</th>
+              <th style="background:#c6f6d5;">tinyid_count</th>
               <th style="background:#e9d8fd;">modification</th>
               <th>group_key</th>
               <th>pattern</th>
@@ -639,7 +642,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
             &uarr; moved to front &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &uarr; original order follows
           </div>
         </div>
-        <p class="small">Click any column header to sort ascending/descending.</p>
+        <p class="small"><strong>Click any column header to sort</strong> ascending/descending.
+        <code>tinyid_count</code> is read-only and auto-computed from <code>tinyIds</code>.</p>
       </div>
 
       <div class="section gold">

@@ -1704,6 +1704,25 @@ def _load_rare_word_whitelist(explicit_path: str = None) -> set:
     return words
 
 
+def _field_tag(field_type: str, index: int) -> str:
+    """Generate field tag for example_context column.
+
+    Designation labels: [des N] (name, pos 0), [des Q] (question, pos 1),
+    [des 2], [des 3], etc. for higher positions.
+    Definition labels: [def] (pos 0), [def 1], [def 2], etc.
+    """
+    if field_type == "des":
+        if index == 0:
+            return "[des N]"
+        if index == 1:
+            return "[des Q]"
+        return f"[des {index}]"
+    # definitions
+    if index == 0:
+        return "[def]"
+    return f"[def {index}]"
+
+
 def _run_field_analysis(args, field_analysis_path: str) -> int:
     """
     Enrich a patterns TSV with per-field tinyId counts and field_profile.
@@ -1803,8 +1822,8 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
 
     logger.info(f"Loaded {len(parsed)} CDE records from {input_json}")
 
-    # Build CDE text lookup: tinyId -> (name, question, definition)
-    # name = designations[0], question = designations[1], definition = definitions[0]
+    # Build CDE text lookup: tinyId -> (name, fields_list)
+    # name = designations[0] (CDE identity); fields_list = [(tag, text), ...] for all fields
     MAX_EXAMPLE_LEN = 120
     cde_text_lookup = {}
     for model in parsed:
@@ -1814,26 +1833,20 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
         desigs = getattr(model, 'designations', None) or []
         defs = getattr(model, 'definitions', None) or []
         name = ""
-        question = ""
-        definition = ""
         if desigs:
-            d0 = desigs[0] if len(desigs) > 0 else None
-            d1 = desigs[1] if len(desigs) > 1 else None
-            if d0:
-                name = getattr(d0, 'designation', '') or ''
-            if d1:
-                question = getattr(d1, 'designation', '') or ''
-        if defs:
-            d0 = defs[0]
-            definition = getattr(d0, 'definition', '') or ''
-        # Truncate long text for readability
-        if len(name) > MAX_EXAMPLE_LEN:
-            name = name[:MAX_EXAMPLE_LEN] + "..."
-        if len(question) > MAX_EXAMPLE_LEN:
-            question = question[:MAX_EXAMPLE_LEN] + "..."
-        if len(definition) > MAX_EXAMPLE_LEN:
-            definition = definition[:MAX_EXAMPLE_LEN] + "..."
-        cde_text_lookup[tid] = (name, question, definition)
+            name = getattr(desigs[0], 'designation', '') or ''
+            if len(name) > MAX_EXAMPLE_LEN:
+                name = name[:MAX_EXAMPLE_LEN] + "..."
+        fields_list = []
+        for i, d in enumerate(desigs):
+            text = getattr(d, 'designation', '') or ''
+            if text:
+                fields_list.append((_field_tag("des", i), text))
+        for i, d in enumerate(defs):
+            text = getattr(d, 'definition', '') or ''
+            if text:
+                fields_list.append((_field_tag("def", i), text))
+        cde_text_lookup[tid] = (name, fields_list)
 
     # Compute field distribution
     field_dist = compute_field_distribution(parsed, verbatim_map, field_paths)
@@ -1843,7 +1856,7 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
 
     # Apply filters and write output
     # Strip existing field/example columns from header if re-running
-    EXAMPLE_COLS = {"example_name", "example_question", "example_definition"}
+    EXAMPLE_COLS = {"example_name", "example_question", "example_definition", "example_context"}
     drop_cols = set()
     for col in field_col_names:
         col_count = f"{col}_count"
@@ -1851,6 +1864,8 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
             drop_cols.add(col_count)
     if "field_profile" in headers:
         drop_cols.add("field_profile")
+    if "tinyid_count" in headers:
+        drop_cols.add("tinyid_count")
     for ec in EXAMPLE_COLS:
         if ec in headers:
             drop_cols.add(ec)
@@ -1865,11 +1880,16 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
 
     # Build final header: clean + example cols inserted after pattern + field cols at end
     new_headers = clean_headers[:]
-    for j, ec in enumerate(["example_name", "example_question", "example_definition"]):
+    for j, ec in enumerate(["example_name", "example_context"]):
         new_headers.insert(example_insert_at + j, ec)
     for col in field_col_names:
         new_headers.append(f"{col}_count")
     new_headers.append("field_profile")
+    # Insert tinyid_count right after tinyIds
+    tinyid_count_pos = -1
+    if "tinyIds" in new_headers:
+        tinyid_count_pos = new_headers.index("tinyIds") + 1
+        new_headers.insert(tinyid_count_pos, "tinyid_count")
 
     filtered_count = 0
     excluded_count = 0
@@ -1914,14 +1934,36 @@ def _run_field_analysis(args, field_analysis_path: str) -> int:
         clean_fields = [fields_list[i] if i < len(fields_list) else ""
                         for i in clean_header_indices]
 
-        # Look up example CDE text from first tinyId
-        first_tid = next(iter(sorted(tinyids)), None) if tinyids else None
-        ex_name, ex_question, ex_definition = "", "", ""
-        if first_tid and first_tid in cde_text_lookup:
-            ex_name, ex_question, ex_definition = cde_text_lookup[first_tid]
-        # Insert example columns right after pattern position
-        for j, val in enumerate([ex_name, ex_question, ex_definition]):
+        # Look up example CDE: find a tinyId where the pattern actually appears
+        ex_name = ""
+        ex_context = ""
+        if tinyids:
+            pat_lower = pattern.lower()
+            for tid in sorted(tinyids):
+                entry = cde_text_lookup.get(tid)
+                if not entry:
+                    continue
+                name, fields_list = entry
+                if not ex_name and name:
+                    ex_name = name
+                for tag, text in fields_list:
+                    if pat_lower in text.lower():
+                        trunc = text if len(text) <= MAX_EXAMPLE_LEN else text[:MAX_EXAMPLE_LEN] + "..."
+                        ex_context = f"{tag} {trunc}"
+                        break
+                if ex_context:
+                    break
+            # Fallback: use first tinyId's name if no match found
+            if not ex_name:
+                first_entry = cde_text_lookup.get(next(iter(sorted(tinyids)), None))
+                if first_entry:
+                    ex_name = first_entry[0]
+        # Insert 2 example columns right after pattern position
+        for j, val in enumerate([ex_name, ex_context]):
             clean_fields.insert(example_insert_at + j, val)
+        # Insert tinyid_count after tinyIds
+        if tinyid_count_pos >= 0:
+            clean_fields.insert(tinyid_count_pos, str(len(tinyids)))
 
         # Append field columns at end
         for col in field_col_names:

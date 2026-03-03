@@ -79,7 +79,7 @@ This runs `instrument_pipeline.yaml`, which:
 3. **Discovers verbatim occurrences** across all CDEs with variant expansion
 4. **Coalesces redundant patterns** via prefix trie + reverse subsumption
 5. **Validates subsumption** empirically against source text
-6. **Enriches with field counts** (def_count, desig_count, field_profile)
+6. **Enriches with field counts** (tinyid_count, def_count, desig_count, field_profile)
 
 Then it stops at a **checkpoint**:
 
@@ -104,17 +104,19 @@ cde-analyzer pattern_util --edit phase1_output/coalesced_fields.tsv
 ```
 
 This launches a local web server and opens an interactive editor in your browser
-where you can review, sort, filter, and edit patterns.  When you are done, use
-**Save As** to write the reviewed file as `phase1_output/curated.tsv`, then
-press Ctrl-C in the terminal to stop the server.
+where you can review, sort, filter, and edit patterns. **Click any column header
+to sort** ascending/descending — useful for sorting by `tinyid_count` to
+prioritize high-impact patterns. When you are done, use **Save As** to write
+the reviewed file as `phase1_output/curated.tsv`, then press Ctrl-C in the
+terminal to stop the server.
 
 You will see columns like:
 
 ```tsv
-pattern                                    tinyIds          def_count  desig_count  field_profile
-Patient Health Questionnaire (PHQ-9)       abc|def|ghi      12         45           definition+designation
-Neuro-QOL Positive Affect and Well-Being   jkl|mno          8          22           definition+designation
-think about                                pqr|stu          0          3            designation_only
+pattern                                    tinyIds          tinyid_count  def_count  desig_count  field_profile
+Patient Health Questionnaire (PHQ-9)       abc|def|ghi      3             12         45           definition+designation
+Neuro-QOL Positive Affect and Well-Being   jkl|mno          2             8          22           definition+designation
+think about                                pqr|stu          2             0          3            designation_only
 ```
 
 **Keep**: Recognized instrument names — `Patient Health Questionnaire (PHQ-9)`.
@@ -187,10 +189,10 @@ Phase 2 patterns look different from Phase 1 — these are repeated text
 fragments, not instrument names:
 
 ```tsv
-pattern                                       tinyIds       def_count  desig_count
-in the past 7 days                           aaa|bbb|ccc    89         0
-Please respond to each item                  ddd|eee        0          45
-For each of the following statements         fff|ggg        0          38
+pattern                                       tinyIds       tinyid_count  def_count  desig_count
+in the past 7 days                           aaa|bbb|ccc    3             89         0
+Please respond to each item                  ddd|eee        2             0          45
+For each of the following statements         fff|ggg        2             0          38
 ```
 
 These are typically boilerplate that should be removed. Open the file in the

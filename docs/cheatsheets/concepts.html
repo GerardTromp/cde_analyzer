@@ -194,11 +194,12 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
         </table>
         <h3>Enriched Columns (post field-analysis)</h3>
         <table>
+          <tr><td><code>tinyid_count</code></td><td>Number of unique CDEs containing this pattern</td></tr>
           <tr><td><code>def_count</code></td><td>CDEs matched in definitions</td></tr>
           <tr><td><code>desig_count</code></td><td>CDEs matched in designations</td></tr>
           <tr><td><code>field_profile</code></td><td><code>def_only</code>, <code>desig_only</code>, or <code>both</code></td></tr>
-          <tr><td><code>example_name</code></td><td>First matching CDE name</td></tr>
-          <tr><td><code>example_definition</code></td><td>First matching definition (120 chars)</td></tr>
+          <tr><td><code>example_name</code></td><td>First matching CDE name (designations[0])</td></tr>
+          <tr><td><code>example_context</code></td><td>Field containing pattern, prefixed [des N/Q/2..] or [def] (120 chars)</td></tr>
         </table>
         <h3>Hierarchy Columns (coalesced)</h3>
         <table>

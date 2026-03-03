@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Parallelized with `ProcessPoolExecutor`, greedy bin packing by tinyId count
   - `--workers N` flag (0 = sequential); sequential and parallel produce identical output
 - Example CDE columns in `--field-analysis` enriched output
-  - `example_name` (designation[0]), `example_question` (designation[1]), `example_definition` (definition[0])
+  - `example_name` (designation[0]) + `example_context` (actual field containing pattern, prefixed [des N/Q/2..] or [def])
   - Inserted after `pattern` column; text truncated to 120 chars
   - Idempotent: re-runs strip old example columns before adding new ones
 - NUMERIC_WORD support in instrument extractor

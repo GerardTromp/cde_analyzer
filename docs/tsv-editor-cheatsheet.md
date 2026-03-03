@@ -88,6 +88,7 @@ Requires rows selected and not editing a cell.
 | **Ctrl+Z** / **Ctrl+Shift+Z** | Undo / Redo (50 levels) |
 | **Ctrl+S** | Save (server mode) |
 | **Ctrl+F** | Focus first filter |
+| **Ctrl+Shift+F** | Clear all filters |
 | **Delete** | Delete selected rows |
 | **Double-click** | Edit cell inline |
 | **Tab** / **Shift+Tab** | Next / previous column while editing |
@@ -119,6 +120,7 @@ Each column has a filter below the header. The **decision column** uses a dropdo
 | `=blank` | Empty cells only |
 | `!blank` | Non-empty cells only |
 | `>10` / `<5` | Numeric comparisons |
+| `=10` / `!=5` | Numeric equals / not-equals |
 | `foo\|bar` | "foo" OR "bar" |
 
 Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modify` · `substitute`
@@ -206,6 +208,7 @@ If a pattern contains quotes (e.g., `COVID-19 Mitigation Policy`), search the JS
 - **Double-click** a decision badge to edit via dropdown (single row).
 - **The `K` shortcut is your friend** — after triaging removes/modifies, filter to blank, Ctrl+A, K. Done.
 - **TinyId columns** collapse to 3 IDs + count badge. Click to expand.
+- **`tinyid_count`** — read-only column auto-computed from `tinyIds`. Displayed as column 2.
 - **Drag row numbers** to reorder by drag-and-drop.
-- **Column sorting** — click any header to sort ascending/descending.
-- **Column layout** — `decision` and `modification` are auto-moved to front. Save order unchanged.
+- **Column sorting** — click any column header to sort ascending/descending.
+- **Column layout** — `decision`, `tinyid_count`, and `modification` are auto-moved to front. Save order unchanged.

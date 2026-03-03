@@ -114,11 +114,11 @@ the server.
 |--------|-------------|---------|
 | `pattern` | The matched text string | `Patient Health Questionnaire (PHQ-9)` |
 | `tinyIds` | Pipe-separated CDE identifiers containing this pattern | `abc123\|def456\|ghi789` |
+| `tinyid_count` | Number of unique CDEs containing this pattern | `3` |
 | `type` | Detection source | `instrument`, `abbreviation`, `verbatim` |
 | `source_pattern` | Original pattern before variant expansion | `Patient Health Questionnaire` |
-| `example_name` | First CDE's primary designation (truncated to 120 chars) | `PHQ-9 Total Score` |
-| `example_question` | First CDE's secondary designation | `Over the last 2 weeks...` |
-| `example_definition` | First CDE's definition | `A self-report measure...` |
+| `example_name` | First matching CDE's primary designation (truncated to 120 chars) | `PHQ-9 Total Score` |
+| `example_context` | Actual field containing the pattern, prefixed with source tag | `[des N] PHQ-9 Total Score` |
 | `def_count` | Number of CDEs where pattern appears in definitions | `12` |
 | `desig_count` | Number of CDEs where pattern appears in designations | `45` |
 | `field_profile` | Which fields contain this pattern | `definition+designation` |
@@ -163,7 +163,7 @@ and low designation counts. Remove them.
 !!! tip "Quick filter for verb fragments"
     Sort by `def_count` ascending. Patterns with `def_count=0` and
     `field_profile=designation_only` are the most likely false positives.
-    Check the `example_question` column to confirm they are sentence fragments.
+    Check the `example_context` column to confirm they are sentence fragments.
 
 ### Sub-domain families — keep both
 

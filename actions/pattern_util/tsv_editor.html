@@ -697,13 +697,15 @@ function cdeUrl(path) {
     function detectColumns() {
         S.fpCol = -1;
         S.tinyIdCols = [];
+        S.tinyidCountCol = -1;
         S.decisionCol = -1;
         S.modificationCol = -1;
         S.notesCol = -1;
         for (let i = 0; i < S.headers.length; i++) {
             const h = S.headers[i].toLowerCase();
             if (h === 'field_profile') S.fpCol = i;
-            if (h.includes('tinyid') || h.includes('tinyids')) S.tinyIdCols.push(i);
+            if (h === 'tinyid_count') S.tinyidCountCol = i;
+            else if (h.includes('tinyid') || h.includes('tinyids')) S.tinyIdCols.push(i);
             if (h === 'decision') S.decisionCol = i;
             if (h === 'modification') S.modificationCol = i;
             if (h === 'notes') S.notesCol = i;
@@ -722,13 +724,31 @@ function cdeUrl(path) {
             }
         }
 
-        // Compute display order: move curation columns (decision, modification) to front
+        // Compute display order: move curation columns to front, tinyid_count as col 2
         S.displayOrder = [];
         const frontCols = new Set();
         if (S.decisionCol >= 0) { S.displayOrder.push(S.decisionCol); frontCols.add(S.decisionCol); }
+        if (S.tinyidCountCol >= 0) { S.displayOrder.push(S.tinyidCountCol); frontCols.add(S.tinyidCountCol); }
         if (S.modificationCol >= 0) { S.displayOrder.push(S.modificationCol); frontCols.add(S.modificationCol); }
         for (let i = 0; i < S.headers.length; i++) {
             if (!frontCols.has(i)) S.displayOrder.push(i);
+        }
+    }
+
+    // ===== INJECT TINYID COUNT =====
+    function _injectTinyidCount() {
+        const tcIdx = S.headers.findIndex(h => h.toLowerCase() === 'tinyid_count');
+        if (tcIdx >= 0) return; // already present
+        const tidIdx = S.headers.findIndex(h => {
+            const lc = h.toLowerCase();
+            return lc === 'tinyids' || lc === 'tinyid';
+        });
+        if (tidIdx < 0) return; // no tinyIds column
+        const insertAt = tidIdx + 1;
+        S.headers.splice(insertAt, 0, 'tinyid_count');
+        for (const row of S.rows) {
+            const tids = (row.cells[tidIdx] || '').split(/[\s|]+/).filter(Boolean);
+            row.cells.splice(insertAt, 0, String(tids.length));
         }
     }
 
@@ -750,6 +770,9 @@ function cdeUrl(path) {
         S.redoStack = [];
         S.editingCell = null;
         S.expandedTids = new Set();
+
+        // Inject tinyid_count column if missing (backward compat with older TSVs)
+        _injectTinyidCount();
 
         detectColumns();
 
@@ -937,7 +960,13 @@ function cdeUrl(path) {
             const td = document.createElement('td');
             const value = row.cells[i] || '';
 
-            if (S.tinyIdCols.includes(i) && value) {
+            if (i === S.tinyidCountCol && S.tinyidCountCol >= 0) {
+                td.textContent = value;
+                td.style.textAlign = 'right';
+                td.style.color = '#666';
+                td.style.backgroundColor = '#f8f8f8';
+                td.title = value + ' CDEs';
+            } else if (S.tinyIdCols.includes(i) && value) {
                 renderTinyIdCell(td, value, row.id);
             } else if (i === S.decisionCol && S.decisionCol >= 0 && value.trim()) {
                 // Decision column: render as color-coded badge
@@ -1222,6 +1251,7 @@ function cdeUrl(path) {
     }
 
     function startEdit(rowId, col) {
+        if (col === S.tinyidCountCol) return; // read-only computed column
         commitEdit(); // commit any existing edit
 
         const row = S.rows.find(r => r.id === rowId);
