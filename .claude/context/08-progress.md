@@ -12,7 +12,7 @@
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 86 curated phrases, 6 removed; 13,640 k-mer phrases mined
-**Phase 3: Branching Strip** — 5 variant outputs, 10-step pipeline, ~4.5 min runtime, 0 temporal remnants
+**Phase 3: Branching Strip** — 6 variant outputs, 13-step pipeline, ~4.5 min runtime, 0 temporal remnants
 
 ### Curation Infrastructure — Complete
 
@@ -53,4 +53,4 @@
 
 - **Priority 3 — LLM-assisted classification** (not started)
 - **Priority 4 — Field-aware stripping** (not started)
-- **Embedding evaluation** — run extract_embed on 5 branching-strip outputs
+- **Embedding evaluation** — run extract_embed on 6 branching-strip outputs

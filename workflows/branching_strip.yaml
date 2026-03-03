@@ -1,11 +1,18 @@
-# Workflow: 5-Way Branching Strip Pipeline
+# Workflow: 6-Way Branching Strip Pipeline
 #
-# Produces 5 stripped JSON outputs from curated instrument and phrase patterns:
-#   1. inst_full_stripped.json  — instruments fully removed
-#   2. inst_sub_stripped.json   — instrument group prefix removed, suffix retained
-#   3. phrase_stripped.json     — phrases removed (no instrument stripping)
-#   4. both_full_stripped.json  — full instrument + phrase removal
-#   5. both_sub_stripped.json   — sub-group instrument + phrase removal
+# Output filenames encode which pattern types are stripped:
+#   M = Main (full) instrument, S = Sub instrument, P = Phrase
+#   T = stripped, F = not stripped
+#
+# | Text removed                | M | S | P | Code   | Output file              |
+# |-----------------------------|---|---|---|--------|--------------------------|
+# | (None — original baseline)  | F | F | F | MFSFPF | (input_json)             |
+# | Main instrument             | T | F | F | MTSFPF | stripped_MTSFPF.json     |
+# | Sub instrument              | F | T | F | MFSTPF | stripped_MFSTPF.json     |
+# | Phrases                     | F | F | T | MFSFPT | stripped_MFSFPT.json     |
+# | Main instrument and phrases | T | F | T | MTSFPT | stripped_MTSFPT.json     |
+# | Sub instrument and phrases  | F | T | T | MFSTPT | stripped_MFSTPT.json     |
+# | Main, sub and phrases       | T | T | T | MTSTPT | stripped_MTSTPT.json     |
 #
 # Temporal phrases are automatically expanded from seed patterns in
 # config/temporal_seed_patterns.yaml and stripped case-insensitively in a
@@ -40,7 +47,7 @@
 # to remove post-strip artifacts (orphan articles, floating punctuation).
 
 name: branching_strip
-description: "5-way branching strip: full/sub instrument × with/without phrases"
+description: "6-way branching strip: full/sub instrument × with/without phrases + combined"
 
 variables:
   input_json: "${INPUT_JSON}"
@@ -61,40 +68,56 @@ variables:
   # Temporal expansion (auto-generated from config seeds)
   temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
 
-  # Intermediate files (temporal-stripped, before curated phrase strip)
-  temporal_phrase_tmp: "${output_dir}/.temporal_phrase_tmp.json"
-  temporal_both_full_tmp: "${output_dir}/.temporal_both_full_tmp.json"
-  temporal_both_sub_tmp: "${output_dir}/.temporal_both_sub_tmp.json"
+  # Intermediate files (hidden dot-prefixed temporaries)
+  inst_sub_on_full_tmp: "${output_dir}/.sub_on_full_MTSTPT_tmp.json"
+  temporal_MFSFPT_tmp: "${output_dir}/.temporal_MFSFPT_tmp.json"
+  temporal_MTSFPT_tmp: "${output_dir}/.temporal_MTSFPT_tmp.json"
+  temporal_MFSTPT_tmp: "${output_dir}/.temporal_MFSTPT_tmp.json"
+  temporal_MTSTPT_tmp: "${output_dir}/.temporal_MTSTPT_tmp.json"
 
-  # Output files
-  inst_full_json: "${output_dir}/inst_full_stripped.json"
-  inst_sub_json: "${output_dir}/inst_sub_stripped.json"
-  phrase_json: "${output_dir}/phrase_stripped.json"
-  both_full_json: "${output_dir}/both_full_stripped.json"
-  both_sub_json: "${output_dir}/both_sub_stripped.json"
+  # Output files (M=main inst, S=sub inst, P=phrase; T=stripped, F=present)
+  out_MTSFPF: "${output_dir}/stripped_MTSFPF.json"
+  out_MFSTPF: "${output_dir}/stripped_MFSTPF.json"
+  out_MFSFPT: "${output_dir}/stripped_MFSFPT.json"
+  out_MTSFPT: "${output_dir}/stripped_MTSFPT.json"
+  out_MFSTPT: "${output_dir}/stripped_MFSTPT.json"
+  out_MTSTPT: "${output_dir}/stripped_MTSTPT.json"
 
 steps:
-  # Branch 1: Full instrument removal
-  - name: strip_inst_full
+  # ---- Instrument stripping (verbatim, anchor expansion ON) ----
+
+  # [1] MTSFPF: Full instrument removal
+  - name: strip_MTSFPF
     action: strip_phrases
     args:
       patterns: "${inst_patterns_full},pattern"
       input: "${input_json}"
       model: "${model}"
-      output: "${inst_full_json}"
+      output: "${out_MTSFPF}"
       workers: "${workers}"
 
-  # Branch 2: Sub-group instrument removal (suffix retained)
-  - name: strip_inst_sub
+  # [2] MFSTPF: Sub-group instrument removal (suffix retained)
+  - name: strip_MFSTPF
     action: strip_phrases
     args:
       patterns: "${inst_patterns_sub},pattern"
       input: "${input_json}"
       model: "${model}"
-      output: "${inst_sub_json}"
+      output: "${out_MFSTPF}"
       workers: "${workers}"
 
-  # Expand temporal seed patterns from config
+  # [3] MTSTPT intermediate: Apply sub-group patterns on top of full-stripped
+  #     output.  Catches any residual prefixes not eliminated by full patterns.
+  - name: sub_on_full_MTSTPT
+    action: strip_phrases
+    args:
+      patterns: "${inst_patterns_sub},pattern"
+      input: "${out_MTSFPF}"
+      model: "${model}"
+      output: "${inst_sub_on_full_tmp}"
+      workers: "${workers}"
+
+  # [4] Expand temporal seed patterns from config
   - name: expand_temporal
     action: pattern_util
     args:
@@ -106,42 +129,56 @@ steps:
   # title-case ("Past 7 Days") and ALL-CAPS ("LAST 4 WEEKS") forms.
   # No anchor expansion needed (temporal patterns are self-contained).
 
-  # Branch 3a: Temporal strip on raw input (for phrase-only branch)
-  - name: strip_temporal_phrase
+  # [5] MFSFPT intermediate: Temporal strip on raw input (phrase-only branch)
+  - name: temporal_MFSFPT
     action: strip_phrases
     args:
       patterns: "${temporal_expanded_tsv},pattern"
       input: "${input_json}"
       model: "${model}"
-      output: "${temporal_phrase_tmp}"
+      output: "${temporal_MFSFPT_tmp}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
       no_expand_anchors: true
       ignore_case: true
 
-  # Branch 4a: Temporal strip on full-instrument-stripped input
-  - name: strip_temporal_both_full
+  # [6] MTSFPT intermediate: Temporal strip on full-instrument-stripped input
+  - name: temporal_MTSFPT
     action: strip_phrases
     args:
       patterns: "${temporal_expanded_tsv},pattern"
-      input: "${inst_full_json}"
+      input: "${out_MTSFPF}"
       model: "${model}"
-      output: "${temporal_both_full_tmp}"
+      output: "${temporal_MTSFPT_tmp}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
       no_expand_anchors: true
       ignore_case: true
 
-  # Branch 5a: Temporal strip on sub-instrument-stripped input
-  - name: strip_temporal_both_sub
+  # [7] MFSTPT intermediate: Temporal strip on sub-instrument-stripped input
+  - name: temporal_MFSTPT
     action: strip_phrases
     args:
       patterns: "${temporal_expanded_tsv},pattern"
-      input: "${inst_sub_json}"
+      input: "${out_MFSTPF}"
       model: "${model}"
-      output: "${temporal_both_sub_tmp}"
+      output: "${temporal_MFSTPT_tmp}"
+      workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+      no_expand_anchors: true
+      ignore_case: true
+
+  # [8] MTSTPT intermediate: Temporal strip on full+sub instrument-stripped input
+  - name: temporal_MTSTPT
+    action: strip_phrases
+    args:
+      patterns: "${temporal_expanded_tsv},pattern"
+      input: "${inst_sub_on_full_tmp}"
+      model: "${model}"
+      output: "${temporal_MTSTPT_tmp}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
@@ -152,46 +189,59 @@ steps:
   # Curated phrases use verbatim expansion for controlled matching.
   # No anchor expansion needed (phrase patterns are self-contained).
 
-  # Branch 3b: Curated phrases on temporal-stripped input
-  - name: strip_phrase_only
+  # [9] MFSFPT: Curated phrases on temporal-stripped input (phrase-only)
+  - name: strip_MFSFPT
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${temporal_phrase_tmp}"
+      input: "${temporal_MFSFPT_tmp}"
       model: "${model}"
-      output: "${phrase_json}"
+      output: "${out_MFSFPT}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
       no_expand_anchors: true
 
-  # Branch 4b: Curated phrases on full-instrument + temporal-stripped input
-  - name: strip_both_full
+  # [10] MTSFPT: Curated phrases on full-instrument + temporal-stripped input
+  - name: strip_MTSFPT
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${temporal_both_full_tmp}"
+      input: "${temporal_MTSFPT_tmp}"
       model: "${model}"
-      output: "${both_full_json}"
+      output: "${out_MTSFPT}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
       no_expand_anchors: true
 
-  # Branch 5b: Curated phrases on sub-instrument + temporal-stripped input
-  - name: strip_both_sub
+  # [11] MFSTPT: Curated phrases on sub-instrument + temporal-stripped input
+  - name: strip_MFSTPT
     action: strip_phrases
     args:
       patterns: "${phrase_patterns},pattern"
-      input: "${temporal_both_sub_tmp}"
+      input: "${temporal_MFSTPT_tmp}"
       model: "${model}"
-      output: "${both_sub_json}"
+      output: "${out_MFSTPT}"
       workers: "${workers}"
       word_boundary: true
       clean_remnants: true
       no_expand_anchors: true
 
-  # Quality report — scans all stripped outputs for detritus and remnants
+  # [12] MTSTPT: Curated phrases on full+sub instrument + temporal-stripped input
+  - name: strip_MTSTPT
+    action: strip_phrases
+    args:
+      patterns: "${phrase_patterns},pattern"
+      input: "${temporal_MTSTPT_tmp}"
+      model: "${model}"
+      output: "${out_MTSTPT}"
+      workers: "${workers}"
+      word_boundary: true
+      clean_remnants: true
+      no_expand_anchors: true
+
+  # [13] Quality report — scans all stripped outputs for detritus and remnants
   - name: quality_report
     action: strip_report
     args:
@@ -199,3 +249,4 @@ steps:
       input_json: "${input_json}"
       output: "${output_dir}/strip_report.md"
       version: "${version}"
+      json_pattern: "stripped_*.json"

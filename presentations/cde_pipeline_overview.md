@@ -95,7 +95,7 @@ Automated detection + human-in-the-loop curation + multi-variant stripping
 
 **Phase 1**: Instrument Detection — mine, discover, coalesce, validate, curate, strip
 **Phase 2**: Phrase Mining — k-mer mining, discover, coalesce, field analysis, curate, strip
-**Phase 3**: Branching Strip — 5 output variants for downstream comparison
+**Phase 3**: Branching Strip — 6 output variants for downstream comparison
 
 ### Key design features
 - **Curation ledger** persists human decisions across runs
@@ -218,22 +218,27 @@ Original surface forms tracked before normalization — "Patient Health Question
 
 ![Branching Strip](diagrams/branching_strip.svg)
 
-### 10-step pipeline producing 5 output variants
+### 13-step pipeline producing 6 output variants
 
 | Step | Operation | Case sensitivity |
 |------|-----------|:---:|
 | 1-2 | Instrument strip (full / sub-group) | Verbatim |
-| 3 | Temporal seed expansion | - |
-| 4-6 | Temporal strip (3 branches) | Case-insensitive |
-| 7-9 | Curated phrase strip (3 branches) | Case-sensitive |
-| 10 | Quality report (remnant scan) | - |
+| 3 | Sub-group on full-stripped (safety net) | Verbatim |
+| 4 | Temporal seed expansion | - |
+| 5-8 | Temporal strip (4 branches) | Case-insensitive |
+| 9-12 | Curated phrase strip (4 branches) | Case-sensitive |
+| 13 | Quality report (remnant scan) | - |
 
-### 5 output variants enable downstream comparison
-- **phrase_only**: phrases removed, instruments intact
-- **inst_full**: full instrument names removed
-- **inst_sub**: instrument prefix removed, suffix retained
-- **both_full**: instruments (full) + phrases removed
-- **both_sub**: instruments (sub) + phrases removed
+### 6 output variants enable downstream comparison
+
+| Code | Main inst | Sub inst | Phrases | Description |
+|------|:-:|:-:|:-:|---|
+| MTSFPF | Stripped | - | - | Full instrument removal only |
+| MFSTPF | - | Stripped | - | Sub-group removal only |
+| MFSFPT | - | - | Stripped | Phrases only |
+| MTSFPT | Stripped | - | Stripped | Full instruments + phrases |
+| MFSTPT | - | Stripped | Stripped | Sub instruments + phrases |
+| MTSTPT | Stripped | Stripped | Stripped | Maximum cleaning |
 
 ---
 
@@ -241,13 +246,14 @@ Original surface forms tracked before normalization — "Patient Health Question
 
 ### Character reduction by variant
 
-| Output | Instruments | Phrases | Total removed |
-|--------|:-:|:-:|--:|
-| phrase_only | - | Yes | -105K |
-| inst_full | Full | - | -515K |
-| inst_sub | Prefix | - | -415K |
-| **both_full** | **Full** | **Yes** | **-553K** |
-| both_sub | Prefix | Yes | -449K |
+| Code | Main inst | Sub inst | Phrases | Total removed |
+|------|:-:|:-:|:-:|--:|
+| MTSFPF | Stripped | - | - | -515K |
+| MFSTPF | - | Stripped | - | -415K |
+| MFSFPT | - | - | Stripped | -105K |
+| MTSFPT | Stripped | - | Stripped | -553K |
+| MFSTPT | - | Stripped | Stripped | -449K |
+| **MTSTPT** | **Stripped** | **Stripped** | **Stripped** | **-553K** |
 
 ### Quality metrics
 - **Temporal remnants**: 0 in definition/designation fields
@@ -471,7 +477,7 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
 ### What remains
 - **LLM-assisted classification** (Priority 3): Automated curation decisions using multi-LLM framework
 - **Field-aware stripping** (Priority 4): Strip patterns only from specific field types
-- **Embedding evaluation**: Run extract_embed on 5 branching-strip outputs to assess clustering quality improvement
+- **Embedding evaluation**: Run extract_embed on 6 branching-strip outputs to assess clustering quality improvement
 
 ### Version history highlights
 | Version | Feature |
@@ -490,7 +496,7 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
 2. **Descending k-mer mining** with masking prevents redundant detection
 3. **Curation ledger** enables incremental improvement — effort compounds across runs
 4. **Zipf triage** separates domain-specific patterns from common English for efficient review
-5. **Five stripped variants** for downstream comparison of embedding/clustering quality
+5. **Six stripped variants** for downstream comparison of embedding/clustering quality
 6. **`min_parent_tinyids`** is the single most influential parameter (18.6x impact)
 7. **Standalone editor** enables distributed curation without Excel data corruption
 

@@ -177,8 +177,15 @@ def _load_version_history(markdown_path: str) -> List[str]:
 # ---------------------------------------------------------------------------
 
 def _branch_name(filename: str) -> str:
-    """Extract branch label from filename (e.g., 'both_full_stripped.json' -> 'both_full')."""
+    """Extract branch label from filename.
+
+    Handles both naming conventions:
+      New-style: 'stripped_MTSTPT.json' -> 'MTSTPT'
+      Old-style: 'both_full_stripped.json' -> 'both_full'
+    """
     stem = Path(filename).stem
+    if stem.startswith("stripped_"):
+        return stem[len("stripped_"):]
     if stem.endswith("_stripped"):
         return stem[: -len("_stripped")]
     return stem

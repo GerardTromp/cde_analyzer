@@ -8,7 +8,7 @@
 
 The analysis script `scripts/branching_loss_analysis.py` extracts text from two
 CDE fields — `definitions.*.definition` and `designations.*.designation` — across
-the original (unstripped) JSON and each of the 5 branching-strip outputs.
+the original (unstripped) JSON and each of the 6 branching-strip outputs.
 
 ### Metrics
 
@@ -27,13 +27,14 @@ right tail means a minority of CDEs are predominantly formulaic.
 
 ## Branching Strip Variants
 
-| Variant | What is removed |
+| Code | What is removed |
 |---|---|
-| `inst_full` | Instrument names fully removed (entire match deleted) |
-| `inst_sub` | Instrument group prefix removed, sub-group suffix retained |
-| `phrase_only` | Curated phrase patterns removed, no instrument stripping |
-| `both_full` | Full instrument removal + phrase removal |
-| `both_sub` | Sub-group instrument removal + phrase removal |
+| `MTSFPF` | Main instrument names fully removed |
+| `MFSTPF` | Sub-group instrument prefix removed, suffix retained |
+| `MFSFPT` | Curated phrase patterns removed, no instrument stripping |
+| `MTSFPT` | Full instrument removal + phrase removal |
+| `MFSTPT` | Sub-group instrument removal + phrase removal |
+| `MTSTPT` | Full + sub instrument removal + phrase removal (maximum) |
 
 ## Usage
 
@@ -66,5 +67,5 @@ The same analysis approach was used to produce the tables in:
 - `docs/slides/phrase_stripping_pipeline.html` — cumulative stage-by-stage loss
 
 Those slides used a different (larger) dataset and a 2-stage pipeline (instruments
-then phrases). The branching analysis extends this to 5 parallel variants on the
+then phrases). The branching analysis extends this to 6 parallel variants on the
 same input.

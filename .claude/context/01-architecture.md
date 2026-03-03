@@ -247,7 +247,7 @@ Based on import analysis:
   - Temporal/curated split strip pipeline (Feb 2026)
   - Universal temporal stripping with case-insensitive matching
   - Whole-text dedup pre-pass in phrase miner
-  - 5-way branching strip pipeline
+  - 6-way branching strip pipeline
 
 **Latest Development** (2026-02-12):
 - Split temporal/curated stripping in branching_strip.yaml (v0.5.14)

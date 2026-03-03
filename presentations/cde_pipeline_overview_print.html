@@ -371,19 +371,20 @@
 <!-- Slide 12 -->
 <div class="slide" id="s12">
   <h2><span class="slide-num">12</span>Phase 3: Branching Strip</h2>
-  <img src="diagrams/branching_strip.svg" class="diagram" alt="Five-way branching strip pipeline">
+  <img src="diagrams/branching_strip.svg" class="diagram" alt="Six-way branching strip pipeline">
 </div>
 
 <!-- Slide 13 -->
 <div class="slide" id="s13">
   <h2><span class="slide-num">13</span>Production Results (22,743 CDEs)</h2>
   <table>
-    <tr><th>Output</th><th>Instruments</th><th>Phrases</th><th>Chars removed</th></tr>
-    <tr><td>phrase_only</td><td>&mdash;</td><td>Yes</td><td>-105K</td></tr>
-    <tr><td>inst_full</td><td>Full</td><td>&mdash;</td><td>-515K</td></tr>
-    <tr><td>inst_sub</td><td>Prefix</td><td>&mdash;</td><td>-415K</td></tr>
-    <tr class="highlight"><td><strong>both_full</strong></td><td><strong>Full</strong></td><td><strong>Yes</strong></td><td><strong>-553K</strong></td></tr>
-    <tr><td>both_sub</td><td>Prefix</td><td>Yes</td><td>-449K</td></tr>
+    <tr><th>Code</th><th>Main inst</th><th>Sub inst</th><th>Phrases</th><th>Chars removed</th></tr>
+    <tr><td>MTSFPF</td><td>Stripped</td><td>&mdash;</td><td>&mdash;</td><td>-515K</td></tr>
+    <tr><td>MFSTPF</td><td>&mdash;</td><td>Stripped</td><td>&mdash;</td><td>-415K</td></tr>
+    <tr><td>MFSFPT</td><td>&mdash;</td><td>&mdash;</td><td>Stripped</td><td>-105K</td></tr>
+    <tr><td>MTSFPT</td><td>Stripped</td><td>&mdash;</td><td>Stripped</td><td>-553K</td></tr>
+    <tr><td>MFSTPT</td><td>&mdash;</td><td>Stripped</td><td>Stripped</td><td>-449K</td></tr>
+    <tr class="highlight"><td><strong>MTSTPT</strong></td><td><strong>Stripped</strong></td><td><strong>Stripped</strong></td><td><strong>Stripped</strong></td><td><strong>-553K</strong></td></tr>
   </table>
   <div class="two-col">
     <div>
@@ -727,7 +728,7 @@
       <ul>
         <li>LLM-assisted classification (Priority 3)</li>
         <li>Field-aware stripping (Priority 4)</li>
-        <li>Embedding evaluation on 5 variants</li>
+        <li>Embedding evaluation on 6 variants</li>
       </ul>
     </div>
     <div>
@@ -752,7 +753,7 @@
     <li><strong>Descending k-mer mining</strong> with masking prevents redundant detection</li>
     <li><strong>Curation ledger</strong> enables incremental improvement &mdash; effort compounds across runs</li>
     <li><strong>Zipf triage</strong> separates domain-specific patterns from common English</li>
-    <li><strong>Five stripped variants</strong> for downstream embedding/clustering comparison</li>
+    <li><strong>Six stripped variants</strong> for downstream embedding/clustering comparison</li>
     <li><strong><code>min_parent_tinyids</code></strong> is the single most influential parameter (18.6x)</li>
     <li><strong>Standalone editor</strong> prevents Excel data corruption during curation</li>
   </ol>

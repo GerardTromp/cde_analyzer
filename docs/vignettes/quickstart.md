@@ -217,16 +217,17 @@ cde-analyzer workflow resume \
 ./run_pipeline.sh phase3
 ```
 
-This runs `branching_strip.yaml`, which produces **five stripped variants**
+This runs `branching_strip.yaml`, which produces **six stripped variants**
 from the original (un-stripped) CDE JSON:
 
-| Output | Instruments | Phrases | Use case |
-|--------|------------|---------|----------|
-| `inst_full_stripped.json` | Fully removed | Kept | Instrument-free text |
-| `inst_sub_stripped.json` | Group prefix removed | Kept | Keep sub-domain suffixes |
-| `phrase_stripped.json` | Kept | Removed | Phrase-free text |
-| `both_full_stripped.json` | Fully removed | Removed | Maximum cleaning |
-| `both_sub_stripped.json` | Group prefix removed | Removed | Balanced cleaning |
+| Code | Main inst | Sub inst | Phrases | Description |
+|------|:-:|:-:|:-:|---|
+| MTSFPF | Stripped | - | - | Full instrument removal only |
+| MFSTPF | - | Stripped | - | Sub-group removal only |
+| MFSFPT | - | - | Stripped | Phrases only |
+| MTSFPT | Stripped | - | Stripped | Full instruments + phrases |
+| MFSTPT | - | Stripped | Stripped | Sub instruments + phrases |
+| MTSTPT | Stripped | Stripped | Stripped | Maximum cleaning |
 
 Temporal patterns (e.g., "in the past 7 days") are automatically expanded
 from seed patterns and stripped case-insensitively before curated phrases are
@@ -237,21 +238,23 @@ applied case-sensitively.
 Phase 3 generates a quality report automatically. A typical summary
 (from a 22,743-CDE corpus):
 
-| Output | Characters removed |
-|--------|-------------------|
-| inst_full | -515K |
-| inst_sub | -415K |
-| phrase_only | -105K |
-| both_full | -553K |
-| both_sub | -449K |
+| Code | Characters removed |
+|------|-------------------|
+| MTSFPF | -515K |
+| MFSTPF | -415K |
+| MFSFPT | -105K |
+| MTSFPT | -553K |
+| MFSTPT | -449K |
+| MTSTPT | -553K |
 
 ```
 Phase 3 complete. Outputs:
-  branching_output/inst_full_stripped.json
-  branching_output/inst_sub_stripped.json
-  branching_output/phrase_stripped.json
-  branching_output/both_full_stripped.json
-  branching_output/both_sub_stripped.json
+  branching_output/stripped_MTSFPF.json
+  branching_output/stripped_MFSTPF.json
+  branching_output/stripped_MFSFPT.json
+  branching_output/stripped_MTSFPT.json
+  branching_output/stripped_MFSTPT.json
+  branching_output/stripped_MTSTPT.json
 ```
 
 ---

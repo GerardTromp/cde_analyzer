@@ -197,7 +197,7 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 ### Workflows
 - `workflows/instrument_pipeline.yaml` — Phase 1
 - `workflows/phrase_pipeline.yaml` — Phase 2
-- `workflows/branching_strip.yaml` — Phase 3 (5-way branch)
+- `workflows/branching_strip.yaml` — Phase 3 (6-way branch)
 
 ### Documentation
 - `docs/vignettes/` — 7 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation)

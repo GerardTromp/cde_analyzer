@@ -3,7 +3,7 @@
 Potential loss of information analysis for branching strip outputs.
 
 Computes per-field word counts (all words, content words) for the original
-input and each of the 5 branching strip outputs. Reports absolute counts
+input and each of the 6 branching strip outputs. Reports absolute counts
 and percentage loss relative to the original.
 
 Usage:
@@ -157,11 +157,12 @@ def main():
     }
 
     branch_files = {
-        'inst_full': 'inst_full_stripped.json',
-        'inst_sub': 'inst_sub_stripped.json',
-        'phrase_only': 'phrase_stripped.json',
-        'both_full': 'both_full_stripped.json',
-        'both_sub': 'both_sub_stripped.json',
+        'MTSFPF': 'stripped_MTSFPF.json',
+        'MFSTPF': 'stripped_MFSTPF.json',
+        'MFSFPT': 'stripped_MFSFPT.json',
+        'MTSFPT': 'stripped_MTSFPT.json',
+        'MFSTPT': 'stripped_MFSTPT.json',
+        'MTSTPT': 'stripped_MTSTPT.json',
     }
 
     branch_dir = Path(args.branch_dir)

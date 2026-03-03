@@ -754,7 +754,7 @@ def _scaffold_header(project_name: str, timestamp: str, is_windows: bool,
     if 2 in phases:
         lines.append(f'#   {script} phase2           # Run phrase mining')
     if 3 in phases:
-        lines.append(f'#   {script} phase3           # Run 5-way branching strip')
+        lines.append(f'#   {script} phase3           # Run 6-way branching strip')
     lines.append(f'#   {script} all              # Run full pipeline (stops at checkpoints)')
     lines.extend(['', 'set -euo pipefail'])
     if is_windows:
@@ -1003,7 +1003,7 @@ def _scaffold_phase3() -> str:
 # ── PHASE 3: Branching Strip ────────────────────────────────────────────
 
 phase3() {
-    log_phase "Phase 3: 5-Way Branching Strip"
+    log_phase "Phase 3: 6-Way Branching Strip"
 
     check_file "${STRIP_PATTERNS_BASE}_full.tsv" "Run prepare_strip first"
     check_file "$PHRASE_CURATED" "Run phase2 and curate first"
@@ -1017,11 +1017,12 @@ phase3() {
 
     echo ""
     echo "Phase 3 complete. Outputs:"
-    echo "  $PHASE3_DIR/inst_full_stripped.json"
-    echo "  $PHASE3_DIR/inst_sub_stripped.json"
-    echo "  $PHASE3_DIR/phrase_stripped.json"
-    echo "  $PHASE3_DIR/both_full_stripped.json"
-    echo "  $PHASE3_DIR/both_sub_stripped.json"
+    echo "  $PHASE3_DIR/stripped_MTSFPF.json"
+    echo "  $PHASE3_DIR/stripped_MFSTPF.json"
+    echo "  $PHASE3_DIR/stripped_MFSFPT.json"
+    echo "  $PHASE3_DIR/stripped_MTSFPT.json"
+    echo "  $PHASE3_DIR/stripped_MFSTPT.json"
+    echo "  $PHASE3_DIR/stripped_MTSTPT.json"
 }'''
 
 

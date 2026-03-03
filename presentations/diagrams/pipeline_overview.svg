@@ -140,7 +140,7 @@
   <line x1="920" y1="176" x2="920" y2="188" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="920" y1="218" x2="920" y2="230" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <!-- 5 outputs -->
+  <!-- 6 outputs -->
   <rect x="780" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
   <text x="826" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">phrase</text>
   <text x="826" y="310" text-anchor="middle" class="step-label-sm">only</text>
@@ -159,7 +159,7 @@
   <line x1="920" y1="268" x2="1026" y2="268" stroke="#444" stroke-width="1"/>
   <line x1="1026" y1="268" x2="1026" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <text x="920" y="340" text-anchor="middle" class="step-label-sm">5 variant outputs for downstream comparison</text>
+  <text x="920" y="340" text-anchor="middle" class="step-label-sm">6 variant outputs for downstream comparison</text>
 
   <!-- Curation Ledger feedback loop -->
   <rect x="280" y="370" width="500" height="38" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,3"/>

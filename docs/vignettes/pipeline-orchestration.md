@@ -242,7 +242,7 @@ MIN_PARENT_TINYIDS=2
 ./run_pipeline.sh phase1_iterate 5 # Iterative harvesting (5 rounds)
 ./run_pipeline.sh prepare_strip    # Generate hierarchy + strip patterns
 ./run_pipeline.sh phase2           # Phrase mining
-./run_pipeline.sh phase3           # 5-way branching strip
+./run_pipeline.sh phase3           # 6-way branching strip
 ./run_pipeline.sh all              # Run phase1, then prompt for next steps
 ```
 
@@ -441,5 +441,5 @@ cde-analyzer workflow list
 Available workflows:
   instrument_pipeline    Phase 1 - Mine and strip instrument patterns
   phrase_pipeline         Phase 2 - Mine and strip generic phrases
-  branching_strip         Phase 3 - 5-way branching strip
+  branching_strip         Phase 3 - 6-way branching strip
 ```

@@ -10,7 +10,7 @@
 
 Set up an evaluation directory to run the complete instrument + phrase curation
 pipeline on a 1148-CDE subset. The run uses knowledge graph analysis for curation
-grouping and produces 5 branching-strip outputs.
+grouping and produces 6 branching-strip outputs.
 
 ## Directory Structure
 
@@ -24,7 +24,7 @@ grouping and produces 5 branching-strip outputs.
 │   ├── pattern_graph.py          # copied from knowledge-graph branch
 │   ├── group_for_curation.py     # standalone script: builds graphs, outputs grouped TSV
 │   └── grouped_patterns.tsv      # output: patterns with community/cluster columns
-├── branching_output/             # 5-way strip output (after curation)
+├── branching_output/             # 6-way strip output (after curation)
 └── run_pipeline.sh               # orchestration script
 ```
 
@@ -88,7 +88,7 @@ python $BASE/curation/group_for_curation.py \
 ### Phase 3 — Branching Strip (after curation)
 
 After manual curation produces `curated.tsv` files, generate strip patterns and
-run the 5-way branching strip.
+run the 6-way branching strip.
 
 ```bash
 # Step 1: Assign group hierarchy (adds group/suffix columns)
@@ -101,7 +101,7 @@ cde-analyzer pattern_util --generate-strip-patterns \
   $BASE/phase1_output/hierarchy.tsv \
   -o $BASE/phase1_output/strip_patterns
 
-# Step 3: Run 5-way branching strip
+# Step 3: Run 6-way branching strip
 cde-analyzer workflow run workflows/branching_strip.yaml \
   --set input_json=$BASE/cdes_subset.json \
   --set output_dir=$BASE/branching_output \
@@ -113,13 +113,14 @@ cde-analyzer workflow run workflows/branching_strip.yaml \
 `--generate-strip-patterns`. Without it, all patterns get empty `replace_with`
 values and full/sub outputs will be identical.
 
-**Produces 5 outputs**:
+**Produces 6 outputs**:
 
-1. `inst_full_stripped.json` — instruments fully removed
-2. `inst_sub_stripped.json` — instrument group prefix removed, suffix retained
-3. `phrase_stripped.json` — phrases removed (no instrument stripping)
-4. `both_full_stripped.json` — full instrument + phrase removal
-5. `both_sub_stripped.json` — sub-group instrument + phrase removal
+1. `stripped_MTSFPF.json` — instruments fully removed
+2. `stripped_MFSTPF.json` — instrument group prefix removed, suffix retained
+3. `stripped_MFSFPT.json` — phrases removed (no instrument stripping)
+4. `stripped_MTSFPT.json` — full instrument + phrase removal
+5. `stripped_MFSTPT.json` — sub-group instrument + phrase removal
+6. `stripped_MTSTPT.json` — full + sub instrument + phrase removal (maximum)
 
 ## Curation Workflow (Human Steps)
 
@@ -128,7 +129,7 @@ values and full/sub outputs will be identical.
 3. Run Phase 2 → produces `coalesced_fields.tsv` at checkpoint
 4. Run KG grouping → produces `grouped_patterns.tsv`
 5. Open grouped TSV in spreadsheet, curate by community, save as `phase2_output/curated.tsv`
-6. Run Phase 3 → 5 branching-strip outputs
+6. Run Phase 3 → 6 branching-strip outputs
 
 ## Evaluation Criteria
 
