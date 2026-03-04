@@ -134,6 +134,11 @@ ACTION_REGISTRY = {
         "help": "Generate quality report for stripped JSON outputs",
         "description": "Scan stripped outputs for detritus, remnants, and remaining temporal patterns",
     },
+    "tsv_concat": {
+        "module": "actions.tsv_concat.cli",
+        "help": "Concatenate TSV columns for embedding preparation",
+        "description": "Selective column concatenation producing 2-column id+text TSV",
+    },
     # "depth": {...}
     # "quality": {...}
 }
