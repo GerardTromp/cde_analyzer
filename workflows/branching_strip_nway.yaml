@@ -1,0 +1,92 @@
+# Workflow: N-way Branching Strip Pipeline (Single-Pass)
+#
+# Replaces the 13-step branching_strip.yaml with a 3-step pipeline that
+# loads the CDE JSON once and produces all requested variants simultaneously.
+#
+# Output filenames use the same coding as the original pipeline:
+#   M = Main (full) instrument, S = Sub instrument, P = Phrase
+#   T = stripped, F = not stripped
+#
+# | Text removed                | M | S | P | Code   | Output file              |
+# |-----------------------------|---|---|---|--------|--------------------------|
+# | Main instrument             | T | F | F | MTSFPF | stripped_MTSFPF.json     |
+# | Sub instrument              | F | T | F | MFSTPF | stripped_MFSTPF.json     |
+# | Phrases                     | F | F | T | MFSFPT | stripped_MFSFPT.json     |
+# | Main instrument and phrases | T | F | T | MTSFPT | stripped_MTSFPT.json     |
+# | Sub instrument and phrases  | F | T | T | MFSTPT | stripped_MFSTPT.json     |
+# | Main, sub and phrases       | T | T | T | MTSTPT | stripped_MTSTPT.json     |
+#
+# Prerequisites:
+#   - Curated instrument patterns processed through --generate-strip-patterns
+#     to produce {inst_patterns_base}_full.tsv and {inst_patterns_base}_sub.tsv
+#   - Curated phrase patterns TSV
+#   - If either phase produced substitute patterns, apply them to input JSON
+#     before running this workflow (same as branching_strip.yaml)
+#
+# Usage:
+#   cde-analyzer workflow run workflows/branching_strip_nway.yaml \
+#       --set input_json=/path/to/cdes.json \
+#       --set output_dir=/path/to/output \
+#       --set inst_patterns_base=/path/to/inst_patterns \
+#       --set phrase_patterns=/path/to/curated_phrases.tsv
+#
+# To produce only specific variants:
+#   --set variants=MTSFPT,MTSTPT
+
+name: branching_strip_nway
+description: "N-way branching strip: single-pass engine producing all variants simultaneously"
+
+variables:
+  input_json: "${INPUT_JSON}"
+  output_dir: "${OUTPUT_DIR}"
+  model: "${MODEL:-CDE}"
+  workers: 0
+  version: "${VERSION:-}"
+
+  # Instrument pattern files (from --generate-strip-patterns)
+  # Base path without _full.tsv / _sub.tsv suffix
+  inst_patterns_base: "${INST_PATTERNS_BASE}"
+  inst_patterns_full: "${inst_patterns_base}_full.tsv"
+  inst_patterns_sub: "${inst_patterns_base}_sub.tsv"
+
+  # Phrase patterns (curated TSV with pattern + tinyIds columns)
+  phrase_patterns: "${PHRASE_PATTERNS}"
+
+  # Temporal expansion (auto-generated from config seeds)
+  temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
+
+  # Variant selection (default: all 6)
+  variants: "${VARIANTS:-MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT}"
+
+steps:
+  # [1] Expand temporal seed patterns from config
+  - name: expand_temporal
+    action: pattern_util
+    args:
+      expand_temporal_seeds: true
+      output: "${temporal_expanded_tsv}"
+
+  # [2] N-way branching strip (single pass, all variants)
+  - name: branching_strip
+    action: strip_branching
+    args:
+      input: "${input_json}"
+      output_dir: "${output_dir}"
+      inst_full_patterns: "${inst_patterns_full},pattern"
+      inst_sub_patterns: "${inst_patterns_sub},pattern"
+      temporal_patterns: "${temporal_expanded_tsv},pattern"
+      phrase_patterns: "${phrase_patterns},pattern"
+      variants: "${variants}"
+      model: "${model}"
+      workers: "${workers}"
+      clean_remnants: true
+
+  # [3] Quality report — scans all stripped outputs for detritus and remnants
+  - name: quality_report
+    action: strip_report
+    args:
+      output_dir: "${output_dir}"
+      input_json: "${input_json}"
+      output: "${output_dir}/strip_report.md"
+      version: "${version}"
+      json_pattern: "stripped_*.json"

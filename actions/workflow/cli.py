@@ -248,6 +248,12 @@ def register_subparser(subparser: ArgumentParser):
         help="Path to branching strip YAML template "
              "(default: built-in workflows/branching_strip.yaml)"
     )
+    configure_parser.add_argument(
+        "--nway",
+        action="store_true",
+        help="Use the N-way single-pass template (branching_strip_nway.yaml) "
+             "instead of the step-based pipeline"
+    )
 
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""

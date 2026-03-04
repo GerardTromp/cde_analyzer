@@ -23,10 +23,23 @@ mine_instruments → discover_verbatim → coalesce → validate_subsumption →
 ### Phase 2: Phrase Pipeline (`phrase_pipeline.yaml`)
 mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → apply_substitutions → strip_phrases → discovery_report
 
-### Phase 3: Branching Strip (`branching_strip.yaml`)
-strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,both_sub} (case-insensitive) → strip_{phrase_only,both_full,both_sub} (case-sensitive) → quality_report
+### Phase 3: Branching Strip
+- **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (13 steps)
+- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all variants) → quality_report (3 steps)
 
-## Current State (v0.9.1)
+## Current State (v0.9.2)
+
+### v0.9.2: N-way Single-Pass Branching Strip
+
+#### N-way Branching Strip Engine (`strip_branching`)
+- **Single-pass**: Loads CDE JSON once, produces all 6 variants simultaneously
+- **Shared intermediates**: `inst_full` result reused across MTSFPF, MTSFPT, MTSTPT
+- **4 strip stages**: `inst_full`, `inst_sub`, `temporal`, `phrase` — each with appropriate settings
+- **TinyId-indexed lookup**: Patterns indexed by tinyId for O(applicable) vs O(all) per CDE
+- **Parallel processing**: Chunks CDEs across workers, each producing all variants
+- **Key files**: `logic/branching_stripper.py` (engine), `actions/strip_branching/` (action)
+- **Workflow**: `branching_strip_nway.yaml` — 3 steps vs 13 in legacy pipeline
+- **Configure**: `workflow configure CODE --nway` for nway-aware configuration
 
 ### v0.9.1: Production Strip Configurator + 6th Variant
 
@@ -190,7 +203,7 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 
 ### What Remains
 - **Priority 3 — LLM-assisted classification** (not started)
-- **Priority 4 — Field-aware stripping** (not started)
+- **Priority 4 — Position-specific field-aware stripping** (architecture ready in branching_stripper)
 
 ## Key Files
 
@@ -206,6 +219,9 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 - `logic/inter_rater.py` — inter-rater reliability statistics (Cohen's/Fleiss' kappa, Krippendorff's alpha)
 - `actions/phrase_miner/run.py` — phrase miner runner + `write_dedup_curation_tsv()`
 - `logic/phrase_miner.py` — core mining: `dedup_field_texts()`, `mine_phrases()`, k-mer loop, masking
+- `actions/strip_branching/cli.py` — CLI for N-way branching strip
+- `actions/strip_branching/run.py` — N-way branching strip orchestration
+- `logic/branching_stripper.py` — N-way branching strip engine (StripStage, strip_branching, build_tinyid_index)
 - `actions/strip_discover/run.py` — `compute_field_distribution()`, `build_field_text_index()`
 - `actions/strip_phrases/run.py` — stripping engine
 - `utils/instrument_extractor.py` — instrument name extraction
@@ -218,7 +234,8 @@ strip_inst_full/sub → expand_temporal → strip_temporal_{phrase,both_full,bot
 ### Workflows
 - `workflows/instrument_pipeline.yaml` — Phase 1
 - `workflows/phrase_pipeline.yaml` — Phase 2
-- `workflows/branching_strip.yaml` — Phase 3 (6-way branch)
+- `workflows/branching_strip.yaml` — Phase 3 (6-way branch, 13-step legacy)
+- `workflows/branching_strip_nway.yaml` — Phase 3 (N-way single-pass, 3 steps)
 
 ### Documentation
 - `docs/vignettes/` — 7 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation)
@@ -267,5 +284,14 @@ cde-analyzer workflow status [--state-file FILE] [-v]                   # check 
 cde-analyzer workflow list                                              # list built-in workflows
 cde-analyzer workflow copy NAME [--as FILE]                             # copy template to project
 cde-analyzer workflow scaffold PROJECT -i JSON -d DIR [--phases 1,2,3] [--with-iterate]  # generate orchestration script
-cde-analyzer workflow configure CODE [CODE...] [-o FILE] [--no-report]  # configure branching strip for specific variants
+cde-analyzer workflow configure CODE [CODE...] [-o FILE] [--no-report] [--nway]  # configure branching strip for specific variants
+```
+
+## `strip_branching` Capabilities
+
+```bash
+cde-analyzer strip_branching -i JSON -d OUTPUT_DIR \
+    --inst-full-patterns TSV --inst-sub-patterns TSV \
+    --temporal-patterns TSV --phrase-patterns TSV \
+    [--variants CODES] [--workers N] [--clean-remnants]
 ```

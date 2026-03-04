@@ -1,22 +1,23 @@
 # Progress and Current State
 
-## Current Branch: main
+## Current Branch: field-aware-strip
 
-**Focus**: Automated instrument/phrase stripping pipeline for CDE text normalization
+**Focus**: N-way single-pass branching strip engine
 
-**Version**: 0.9.1 (2026-03-03)
+**Version**: 0.9.2 (2026-03-03)
 
-## Current State (v0.9.1)
+## Current State (v0.9.2)
 
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 86 curated phrases, 6 removed; 13,640 k-mer phrases mined
-**Phase 3: Branching Strip** — 6 variant outputs, 13-step pipeline, ~4.5 min runtime, 0 temporal remnants
+**Phase 3: Branching Strip** — 6 variant outputs; legacy 13-step pipeline or N-way 3-step single-pass
 
 ### Production Tooling — Complete
 
-- **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE]` maps codes to steps
+- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine producing all variants simultaneously
+- **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE] [--nway]` maps codes to steps
 - **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter for any workflow
 
 ### Curation Infrastructure — Complete
@@ -37,6 +38,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.9.2 | 2026-03-03 | N-way single-pass branching strip engine, tinyid_count column |
 | 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps, 6th variant (MTSTPT) |
 | 0.9.0 | 2026-02-26 | Zipf priority split, editor UX, version sync |
 | 0.8.1 | 2026-02-25 | Substitute decision type |
@@ -48,8 +50,12 @@
 
 ## Branches
 
+### Active: field-aware-strip (from main)
+- **Contains**: Everything through v0.9.2
+- **Status**: N-way branching strip engine, tinyid_count column
+
 ### Active: main
-- **Contains**: Everything through v0.9.1
+- **Contains**: Everything through v0.9.1 + tinyid_count + context-aware examples
 - **Status**: All pipeline phases complete, full curation infrastructure, production strip tooling
 
 ### Retired: phrase-curator (merged at v0.5.14)
@@ -58,5 +64,5 @@
 ## What Remains
 
 - **Priority 3 — LLM-assisted classification** (not started)
-- **Priority 4 — Field-aware stripping** (not started)
+- **Position-specific field-aware stripping** — architecture ready in branching_stripper
 - **Embedding evaluation** — run extract_embed on 6 branching-strip outputs

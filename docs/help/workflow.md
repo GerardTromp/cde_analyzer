@@ -147,6 +147,7 @@ Options:
 - `-o FILE` - Write a production YAML (without: prints steps and command)
 - `--no-report` - Exclude the quality_report step
 - `--template FILE` - Use a custom template instead of built-in branching_strip.yaml
+- `--nway` - Use the N-way single-pass template instead of the 13-step pipeline
 
 When generating a YAML with `-o`, variables are filtered to only those referenced by
 the selected steps. The generated YAML can be run directly with `workflow run`.
@@ -345,7 +346,8 @@ The codebase includes pre-built workflow templates. Use `workflow list` to see t
 | `phrase_family_stripping` | Phrase family stripping |
 | `quick_strip` | Quick strip with minimal steps |
 | `full_pipeline` | Complete multi-phase stripping pipeline |
-| `branching_strip` | Phase 3: 6-way branching strip (use `configure` for production subsets) |
+| `branching_strip` | Phase 3: 6-way branching strip, 13-step pipeline (use `configure` for production subsets) |
+| `branching_strip_nway` | Phase 3: N-way single-pass branching strip (use `configure --nway` for production subsets) |
 
 ## Related Commands
 

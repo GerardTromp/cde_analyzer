@@ -265,6 +265,10 @@ Phase 3 complete. Outputs:
 
         cde-analyzer workflow configure MTSTPT -o production_strip.yaml
 
+    Or use the N-way single-pass engine for faster execution (loads JSON once):
+
+        cde-analyzer workflow configure MTSTPT --nway -o production_strip.yaml
+
 ---
 
 ## Alternative: Running Without Scaffold

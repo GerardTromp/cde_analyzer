@@ -44,6 +44,11 @@ ACTION_REGISTRY = {
         "help": "Remove literal phrases at given paths",
         "description": "Literal search-and-replace on structured data",
     },
+    "strip_branching": {
+        "module": "actions.strip_branching.cli",
+        "help": "N-way branching strip producing all variants in a single pass",
+        "description": "Single-pass engine producing all strip variants simultaneously",
+    },
     "strip_discover": {
         "module": "actions.strip_discover.cli",
         "help": "Discover instrument patterns in CDE text fields",
