@@ -15,8 +15,7 @@ import time
 from argparse import Namespace
 
 from utils.constants import MODEL_REGISTRY
-from utils.file_utils import exit_if_missing
-from utils.graceful_interrupt import graceful_interrupt
+from utils.file_utils import exit_if_missing, graceful_interrupt
 
 logger = logging.getLogger(__name__)
 
