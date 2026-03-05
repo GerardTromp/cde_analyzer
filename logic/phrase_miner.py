@@ -14,7 +14,7 @@ are implemented in separate utility modules.
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from collections import defaultdict
 
 from CDE_Schema.CDE_Item import CDEItem
@@ -121,6 +121,12 @@ class MinerConfig:
     dedup_enabled: bool = True           # Hash field texts, emit shared ones as phrases
     dedup_min_count: int = 2             # Min CDEs sharing identical text
     dedup_min_tokens: int = 3            # Min tokens to emit (skip trivial matches)
+    # Prefix consolidation (post-loop recovery of fragmented prefixes)
+    prefix_consolidation: bool = True    # Detect common prefixes across mined phrases
+    prefix_min_tinyids: int = 20         # Min union tinyId coverage for a prefix
+    prefix_min_descendants: int = 3      # Min distinct longer phrases sharing a prefix
+    # Ledger-informed pre-masking
+    ledger_patterns: Optional[Set[str]] = None  # "remove" patterns from curation ledger
 
 
 def dedup_field_texts(items: List[CDEItem], config: MinerConfig) -> List[DedupResult]:
@@ -332,10 +338,16 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
         else:
             mask_phrases_naive(token_seqs, new_phrases)
 
-    # Stage 7: Subsumption filtering (deferred to future enhancement)
-    # from utils.subsumption_filter import subsumption_filter
-    # filtered_phrases = subsumption_filter(all_phrases)
-    # logger.info(f"After subsumption filter: {len(filtered_phrases)} phrases (removed {len(all_phrases) - len(filtered_phrases)})")
+    # Stage 7: Prefix consolidation — recover fragmented prefixes
+    if config.prefix_consolidation:
+        prefix_phrases, phrase_id_counter = consolidate_prefixes(
+            all_phrases, token_seqs, vocab, config, phrase_id_counter
+        )
+        if prefix_phrases:
+            all_phrases.extend(prefix_phrases)
+            logger.info(
+                f"Prefix consolidation: {len(prefix_phrases)} prefix phrases emitted"
+            )
 
     # Stage 8: Generate histograms if enabled
     if histogram_collector:
@@ -679,6 +691,31 @@ def extract_token_sequences(items: List[CDEItem], config: MinerConfig):
                                         mask_owner[i] = mask_key
                             start_pos = idx + 1  # Continue searching for more occurrences
 
+            # Pre-mask ledger "remove" patterns (same approach as instrument pre-masking)
+            if config.ledger_patterns:
+                text_lower = text.lower()
+                for pattern in config.ledger_patterns:
+                    pattern_lower = pattern.lower()
+                    start_pos = 0
+                    while True:
+                        idx = text_lower.find(pattern_lower, start_pos)
+                        if idx == -1:
+                            break
+                        pattern_end = idx + len(pattern)
+                        token_start = None
+                        token_end = None
+                        for ti, (cs, ce) in enumerate(char_offsets):
+                            if cs < pattern_end and ce > idx:
+                                if token_start is None:
+                                    token_start = ti
+                                token_end = ti + 1
+                        if token_start is not None and token_end is not None:
+                            mask_key = f"__LEDGER_REMOVE__:{pattern[:50]}"
+                            for i in range(token_start, min(token_end, len(mask_owner))):
+                                if mask_owner[i] is None:
+                                    mask_owner[i] = mask_key
+                        start_pos = idx + 1
+
             token_seqs.append(TokenSeq(
                 tokens=token_ids,
                 cde_ref=cde_ref,
@@ -922,3 +959,226 @@ def kmer_count_to_phrase(kmer_count: KmerCount, phrase_id: int, k: int, vocab: V
         occurrences=kmer_count.occurrences,
         extension_method=extension_method
     )
+
+
+# ---------------------------------------------------------------------------
+# Stage 7: Prefix consolidation
+# ---------------------------------------------------------------------------
+
+class _TokenPrefixNode:
+    """Lightweight trie node for token-ID prefix analysis."""
+    __slots__ = ('children', 'phrase_ids', 'tinyid_union', 'is_phrase')
+
+    def __init__(self):
+        self.children: Dict[int, '_TokenPrefixNode'] = {}
+        self.phrase_ids: Set[str] = set()       # phrases passing through this node
+        self.tinyid_union: Optional[Set[str]] = None  # computed bottom-up
+        self.is_phrase: bool = False             # True if a mined phrase ends here
+
+
+def _build_prefix_trie(
+    phrases: List[Phrase],
+) -> '_TokenPrefixNode':
+    """Build a token-ID prefix trie from mined phrases."""
+    root = _TokenPrefixNode()
+    for p in phrases:
+        node = root
+        for tok_id in p.token_ids:
+            if tok_id not in node.children:
+                node.children[tok_id] = _TokenPrefixNode()
+            node = node.children[tok_id]
+            node.phrase_ids.add(p.phrase_id)
+        node.is_phrase = True
+    return root
+
+
+def _propagate_tinyids(
+    node: '_TokenPrefixNode',
+    phrase_map: Dict[str, Phrase],
+) -> Set[str]:
+    """Post-order traversal: compute tinyid_union bottom-up."""
+    result: Set[str] = set()
+    # Union from children
+    for child in node.children.values():
+        result |= _propagate_tinyids(child, phrase_map)
+    # Add tinyids from phrases terminating at this node
+    for pid in node.phrase_ids:
+        if pid in phrase_map:
+            result |= phrase_map[pid].distinct_tinyids
+    node.tinyid_union = result
+    return result
+
+
+def _collect_prefix_candidates(
+    node: '_TokenPrefixNode',
+    config: MinerConfig,
+    existing_phrases: Set[Tuple[int, ...]],
+    ledger_patterns_lower: Optional[Set[str]],
+    vocab: 'Vocabulary',
+    path: List[int],
+    candidates: List[Tuple[Tuple[int, ...], Set[str], Set[str]]],
+):
+    """
+    Traverse trie and collect prefix candidates meeting thresholds.
+
+    Each candidate is (token_ids, tinyid_union, phrase_ids).
+    """
+    for tok_id, child in node.children.items():
+        new_path = path + [tok_id]
+        depth = len(new_path)
+
+        if depth >= config.k_min and child.tinyid_union:
+            token_tuple = tuple(new_path)
+            # Skip if already a well-covered mined phrase
+            if token_tuple not in existing_phrases:
+                n_tinyids = len(child.tinyid_union)
+                n_descendants = len(child.phrase_ids)
+                if (n_tinyids >= config.prefix_min_tinyids
+                        and n_descendants >= config.prefix_min_descendants):
+                    # Level A: skip if ledger already has this as "remove"
+                    if ledger_patterns_lower is not None:
+                        text = " ".join(vocab.get_tokens(list(token_tuple)))
+                        if text.lower() in ledger_patterns_lower:
+                            _collect_prefix_candidates(
+                                child, config, existing_phrases,
+                                ledger_patterns_lower, vocab, new_path,
+                                candidates,
+                            )
+                            continue
+                    candidates.append(
+                        (token_tuple, child.tinyid_union, child.phrase_ids)
+                    )
+
+        # Recurse into children
+        _collect_prefix_candidates(
+            child, config, existing_phrases,
+            ledger_patterns_lower, vocab, new_path, candidates,
+        )
+
+
+def _build_prefix_occurrences(
+    token_tuple: Tuple[int, ...],
+    tinyid_union: Set[str],
+    token_seqs: List[TokenSeq],
+) -> List[CDERef]:
+    """
+    Scan token_seqs for occurrences of a prefix token pattern.
+
+    Only scans sequences belonging to tinyIds in the union (for efficiency).
+    Ignores mask state — this is a post-loop recovery pass.
+    """
+    prefix_len = len(token_tuple)
+    occurrences: List[CDERef] = []
+
+    for seq in token_seqs:
+        if seq.cde_ref.tinyId not in tinyid_union:
+            continue
+        for i in range(len(seq.tokens) - prefix_len + 1):
+            if tuple(seq.tokens[i:i + prefix_len]) == token_tuple:
+                # Extract verbatim text
+                verbatim_text = None
+                char_span = None
+                if seq.char_offsets and seq.original_text:
+                    try:
+                        char_start = seq.char_offsets[i][0]
+                        char_end = seq.char_offsets[i + prefix_len - 1][1]
+                        verbatim_text = seq.original_text[char_start:char_end]
+                        char_span = (char_start, char_end)
+                    except (IndexError, TypeError):
+                        pass
+                occurrences.append(CDERef(
+                    tinyId=seq.cde_ref.tinyId,
+                    field_path=seq.cde_ref.field_path,
+                    token_span=(i, i + prefix_len),
+                    verbatim_text=verbatim_text,
+                    char_span=char_span,
+                ))
+    return occurrences
+
+
+def consolidate_prefixes(
+    all_phrases: List[Phrase],
+    token_seqs: List[TokenSeq],
+    vocab: 'Vocabulary',
+    config: MinerConfig,
+    phrase_id_counter: int,
+) -> Tuple[List[Phrase], int]:
+    """
+    Stage 7: Prefix consolidation.
+
+    After all k-levels complete, detect common prefixes among mined phrases
+    that have high aggregate tinyId coverage and emit them as additional
+    phrases.  This recovers prefixes fragmented by the descending-k masking
+    strategy — e.g. "the free text field relate to" (548 tinyIds) split
+    across many k=7..10 phrases, each masking a small cluster.
+
+    Returns
+    -------
+    (new_prefix_phrases, updated_phrase_id_counter)
+    """
+    if not all_phrases:
+        return [], phrase_id_counter
+
+    # Build phrase lookup
+    phrase_map: Dict[str, Phrase] = {p.phrase_id: p for p in all_phrases}
+
+    # Build trie and propagate tinyIds
+    root = _build_prefix_trie(all_phrases)
+    _propagate_tinyids(root, phrase_map)
+
+    # Set of existing phrase token tuples with sufficient coverage
+    existing_phrases: Set[Tuple[int, ...]] = {
+        p.token_ids for p in all_phrases
+        if len(p.distinct_tinyids) >= config.prefix_min_tinyids
+    }
+
+    # Ledger pattern set (Level A filtering)
+    ledger_lower: Optional[Set[str]] = None
+    if config.ledger_patterns:
+        ledger_lower = {p.lower() for p in config.ledger_patterns}
+
+    # Collect candidates
+    candidates: List[Tuple[Tuple[int, ...], Set[str], Set[str]]] = []
+    _collect_prefix_candidates(
+        root, config, existing_phrases, ledger_lower, vocab, [], candidates,
+    )
+
+    if not candidates:
+        return [], phrase_id_counter
+
+    logger.info(
+        f"Prefix consolidation: {len(candidates)} candidates "
+        f"(min_tinyids={config.prefix_min_tinyids}, "
+        f"min_descendants={config.prefix_min_descendants})"
+    )
+
+    # Build Phrase objects for each candidate
+    new_phrases: List[Phrase] = []
+    for token_tuple, tinyid_union, _phrase_ids in candidates:
+        occurrences = _build_prefix_occurrences(
+            token_tuple, tinyid_union, token_seqs,
+        )
+        # Deduplicate tinyIds from actual occurrences
+        actual_tinyids = {occ.tinyId for occ in occurrences}
+        if len(actual_tinyids) < config.prefix_min_tinyids:
+            continue  # trie estimate was optimistic; skip
+
+        text = " ".join(vocab.get_tokens(list(token_tuple)))
+        phrase = Phrase(
+            phrase_id=f"phrase_{phrase_id_counter:05d}",
+            token_ids=token_tuple,
+            text=text,
+            frequency=len(occurrences),
+            distinct_tinyids=actual_tinyids,
+            k=len(token_tuple),
+            occurrences=occurrences,
+            extension_method="prefix_consolidation",
+        )
+        new_phrases.append(phrase)
+        phrase_id_counter += 1
+        logger.debug(
+            f"  Prefix: '{text}' (k={len(token_tuple)}, "
+            f"tinyids={len(actual_tinyids)}, occurrences={len(occurrences)})"
+        )
+
+    return new_phrases, phrase_id_counter

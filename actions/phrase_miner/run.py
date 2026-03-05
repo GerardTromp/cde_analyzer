@@ -78,7 +78,31 @@ def run_action(args: Namespace):
         dedup_enabled=getattr(args, 'dedup', True),
         dedup_min_count=getattr(args, 'dedup_min_count', 2),
         dedup_min_tokens=getattr(args, 'dedup_min_tokens', 3),
+        prefix_consolidation=getattr(args, 'prefix_consolidation', True),
+        prefix_min_tinyids=getattr(args, 'prefix_min_tinyids', 20),
+        prefix_min_descendants=getattr(args, 'prefix_min_descendants', 3),
+        ledger_patterns=None,  # populated below if --ledger-dir provided
     )
+
+    # Load ledger "remove" patterns for pre-masking if --ledger-dir provided
+    ledger_dir = getattr(args, 'ledger_dir', None)
+    if ledger_dir:
+        from logic.curation_ledger import CurationLedger
+        ledger = CurationLedger(ledger_dir)
+        if ledger.load():
+            decisions = ledger.get_decisions("phase2")
+            ledger_patterns = {
+                d.pattern for d in decisions.values()
+                if d.decision == "remove"
+            }
+            if ledger_patterns:
+                config.ledger_patterns = ledger_patterns
+                logger.info(
+                    f"Ledger: {len(ledger_patterns)} 'remove' patterns "
+                    f"loaded for pre-masking"
+                )
+        else:
+            logger.info(f"Ledger directory {ledger_dir} not found or empty")
 
     # Log configuration
     logger.info(f"Configuration: k={args.k_min}-{args.k_max}, freq_min={args.freq_min}, "
@@ -87,7 +111,9 @@ def run_action(args: Namespace):
                 f"aho_corasick={'enabled' if use_aho_corasick else 'disabled'}, "
                 f"subsumption={'enabled' if enable_subsumption else 'disabled'}, "
                 f"anchor={'enabled' if not skip_anchor else 'disabled'}, "
-                f"dedup={'enabled' if config.dedup_enabled else 'disabled'}")
+                f"dedup={'enabled' if config.dedup_enabled else 'disabled'}, "
+                f"prefix_consolidation={'enabled' if config.prefix_consolidation else 'disabled'}, "
+                f"ledger_premasking={'enabled' if config.ledger_patterns else 'disabled'}")
 
     # 3. Execute pipeline
     logger.info("Starting phrase mining pipeline...")

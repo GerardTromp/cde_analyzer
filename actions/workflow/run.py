@@ -269,9 +269,14 @@ def build_action_args(action: str, args: Dict[str, Any]) -> List[str]:
         # Convert underscores to hyphens for CLI
         cli_key = key.replace("_", "-")
 
-        if isinstance(value, bool):
-            if value:
+        # Handle booleans (native YAML bool or string "true"/"false")
+        if isinstance(value, bool) or (isinstance(value, str) and value.lower() in ("true", "false")):
+            is_true = value if isinstance(value, bool) else value.lower() == "true"
+            if is_true:
                 cli_args.append(f"--{cli_key}")
+            else:
+                cli_args.append(f"--no-{cli_key}")
+            continue
         elif isinstance(value, list):
             cli_args.append(f"--{cli_key}")
             for item in value:

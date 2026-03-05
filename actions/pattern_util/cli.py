@@ -562,6 +562,32 @@ def register_subparser(subparser: ArgumentParser):
              "(used with --split-priority). Default: leave decision blank.",
     )
 
+    # Remnant analysis diagnostic
+    subparser.add_argument(
+        "--remnant-analysis",
+        type=str,
+        metavar="FILE",
+        help="Pre-strip diagnostic: simulate stripping patterns from CDE texts and "
+             "identify frequent context words around each match. Reports extensions "
+             "that suggest missing longer patterns (e.g. 'The free-text field' almost "
+             "always followed by 'related to'). "
+             "Requires --input (CDE JSON) and --output.",
+    )
+    subparser.add_argument(
+        "--context-words",
+        type=int,
+        default=3,
+        help="Number of context words to extract on each side of a pattern match. "
+             "Used with --remnant-analysis. Default: 3.",
+    )
+    subparser.add_argument(
+        "--min-context-freq",
+        type=int,
+        default=5,
+        help="Minimum frequency for a context extension to be reported. "
+             "Used with --remnant-analysis. Default: 5.",
+    )
+
     # Supplementary pattern import mode
     subparser.add_argument(
         "--add-to-supplementary",

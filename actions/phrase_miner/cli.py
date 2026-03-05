@@ -189,6 +189,39 @@ def register_subparser(subparser: ArgumentParser):
         help="Maximum number of families to report"
     )
 
+    # Prefix consolidation (post-loop recovery of fragmented prefixes)
+    subparser.add_argument(
+        "--prefix-consolidation",
+        action=BooleanOptionalAction,
+        default=True,
+        help="Detect common prefixes across mined phrases and emit them as "
+             "additional phrases when aggregate tinyId coverage exceeds "
+             "--prefix-min-tinyids. Use --no-prefix-consolidation to disable.",
+    )
+    subparser.add_argument(
+        "--prefix-min-tinyids",
+        type=int,
+        default=20,
+        help="Minimum union tinyId count for a prefix to be emitted "
+             "during consolidation. Default: 20.",
+    )
+    subparser.add_argument(
+        "--prefix-min-descendants",
+        type=int,
+        default=3,
+        help="Minimum distinct longer phrases sharing a prefix for "
+             "consolidation. Default: 3.",
+    )
+
+    # Ledger-informed pre-masking
+    subparser.add_argument(
+        "--ledger-dir",
+        type=str,
+        default=None,
+        help="Curation ledger directory. If provided, 'remove' decisions are "
+             "pre-masked during mining to reduce search space.",
+    )
+
     # Optional features
     subparser.add_argument(
         "--histograms",

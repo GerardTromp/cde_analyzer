@@ -37,6 +37,11 @@ variables:
   # Override with --set or CURATION_LEDGER env var
   curation_ledger_dir: "${CURATION_LEDGER:-../.curation_ledger}"
 
+  # Prefix consolidation (post-loop recovery of fragmented prefixes)
+  prefix_consolidation: "${PREFIX_CONSOLIDATION:-true}"
+  prefix_min_tinyids: "${PREFIX_MIN_TINYIDS:-20}"
+  prefix_min_descendants: "${PREFIX_MIN_DESCENDANTS:-3}"
+
   # Intermediate files
   phrases_tsv: "${output_dir}/verbatim_phrases.tsv"
   discovered_tsv: "${output_dir}/discovered.tsv"
@@ -80,6 +85,10 @@ steps:
       enable_subsumption: true
       k_max: "${k_max}"
       k_min: "${k_min}"
+      ledger_dir: "${curation_ledger_dir}"
+      prefix_consolidation: "${prefix_consolidation}"
+      prefix_min_tinyids: "${prefix_min_tinyids}"
+      prefix_min_descendants: "${prefix_min_descendants}"
 
   - name: discover_verbatim
     action: strip_discover
