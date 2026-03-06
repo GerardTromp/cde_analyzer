@@ -1138,7 +1138,8 @@ def coalesce_variants_tsv(
     min_parent_tinyids: int = 0,
     rollup_subset_tinyids: bool = False,
     trim_anchors: bool = True,
-    emit_def_variants: bool = False
+    emit_def_variants: bool = False,
+    defer_parent_filter: bool = False
 ) -> Dict[str, int]:
     """
     Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
@@ -1171,6 +1172,10 @@ def coalesce_variants_tsv(
         min_parent_tinyids: Minimum parent tinyId count threshold (0 = disabled).
             When > 0, patterns whose parent_tinyid_count < threshold are dropped.
             Requires parent_phrase and parent_tinyid_count columns in input.
+        defer_parent_filter: If True, defer parent filtering until after prefix
+            extraction (Phase 2). Patterns rescued by a prefix group survive even
+            if their individual parent count is below threshold. Use for phrase
+            pipelines where cross-parent aggregation matters.
 
     Returns:
         Dict with coalesce statistics:
@@ -1252,21 +1257,34 @@ def coalesce_variants_tsv(
 
     input_patterns = len(pattern_to_tinyids)
 
-    # Apply parent tinyId threshold filter
+    # Identify patterns that fail parent threshold
     parent_filtered_count = 0
+    parent_weak_patterns: Set[str] = set()
+    # Snapshot tinyIds for parent-filtered patterns (for report/divergence diagnostics)
+    parent_weak_tinyids: Dict[str, Set[str]] = {}
     if min_parent_tinyids > 0 and has_parent_columns:
-        patterns_to_remove = []
         for pattern in pattern_to_tinyids:
             parent_count = pattern_to_parent_count.get(pattern, 0)
             if parent_count < min_parent_tinyids:
-                patterns_to_remove.append(pattern)
-        for pattern in patterns_to_remove:
-            del pattern_to_tinyids[pattern]
-            parent_filtered_count += 1
-        if parent_filtered_count:
+                parent_weak_patterns.add(pattern)
+
+        if not defer_parent_filter:
+            # Immediate filter (instrument mode — current behavior)
+            for pattern in parent_weak_patterns:
+                parent_weak_tinyids[pattern] = pattern_to_tinyids.pop(pattern)
+                parent_filtered_count += 1
+            if parent_filtered_count:
+                logger.info(
+                    f"Parent threshold filter: removed {parent_filtered_count} patterns "
+                    f"with parent_tinyid_count < {min_parent_tinyids}"
+                )
+        else:
+            # Deferred: snapshot tinyIds but keep patterns for prefix extraction
+            for pattern in parent_weak_patterns:
+                parent_weak_tinyids[pattern] = pattern_to_tinyids[pattern].copy()
             logger.info(
-                f"Parent threshold filter: removed {parent_filtered_count} patterns "
-                f"with parent_tinyid_count < {min_parent_tinyids}"
+                f"Deferred parent filter: {len(parent_weak_patterns)} patterns below "
+                f"parent threshold {min_parent_tinyids} (will apply after prefix extraction)"
             )
     logger.info(f"Loaded {input_patterns} unique patterns from {input_path}")
 
@@ -1388,6 +1406,11 @@ def coalesce_variants_tsv(
 
         for long_pattern in sorted_desc:
             if long_pattern not in kept_patterns:
+                continue
+            # In deferred mode, weak-parent patterns must survive to Phase 2
+            # so the prefix trie can group them. The deferred parent filter
+            # after Phase 2 acts as backstop for ungrouped weak patterns.
+            if defer_parent_filter and long_pattern in parent_weak_patterns:
                 continue
             long_tinyids = pattern_to_tinyids[long_pattern]
 
@@ -1616,6 +1639,20 @@ def coalesce_variants_tsv(
                 pattern_to_parent[prefix] = pattern_to_parent[orig]
                 pattern_to_parent_count[prefix] = pattern_to_parent_count.get(orig, 0)
 
+    # Deferred parent filter: remove weak-parent patterns NOT rescued by prefix extraction
+    if defer_parent_filter and parent_weak_patterns:
+        # covered_patterns is set by Phase 2; empty set if Phase 2 was skipped
+        rescued_by_prefix = parent_weak_patterns & prefix_replacements.keys()
+        still_weak = parent_weak_patterns - prefix_replacements.keys()
+        for pattern in still_weak:
+            if pattern in kept_patterns:
+                kept_patterns.remove(pattern)
+                parent_filtered_count += 1
+        logger.info(
+            f"Deferred parent filter applied: {len(rescued_by_prefix)} rescued by prefix, "
+            f"{parent_filtered_count} removed"
+        )
+
     # Phase 3: Emit definition-form variants (if enabled)
     # Patterns ending with " -" or " - " are designation-specific (e.g.,
     # "Center for Epidemiologic Studies-Depression Scale (CES-D) -").
@@ -1746,10 +1783,45 @@ def coalesce_variants_tsv(
             for orig, bare in sorted(anchor_trimmed_map.items(), key=lambda x: x[0]):
                 f.write(f"anchor-trim\t{orig}\t\t{bare}\t\n")
 
+            # Write parent-filtered entries (with divergence metric)
+            # Uses replacement column for parent phrase, replacement_tinyIds for
+            # structured "parent_count=N actual_tinyids=M" (tab-separated from parent)
+            for pattern in sorted(parent_weak_patterns):
+                if pattern not in kept_patterns:
+                    tids = ' '.join(sorted(parent_weak_tinyids.get(pattern, set())))
+                    parent = pattern_to_parent.get(pattern, "")
+                    parent_count = pattern_to_parent_count.get(pattern, 0)
+                    actual_count = len(parent_weak_tinyids.get(pattern, set()))
+                    f.write(
+                        f"parent-filtered\t{pattern}\t{tids}\t"
+                        f"{parent}\t{parent_count}\t{actual_count}\n"
+                    )
+
         logger.info(f"Wrote subsumption/prefix/rollup report to {report_path}")
+
+    # Divergence diagnostic: warn when parent filter removes high-value patterns
+    if parent_weak_patterns:
+        removed_weak = [p for p in parent_weak_patterns if p not in kept_patterns]
+        if removed_weak:
+            divergences = []
+            for p in removed_weak:
+                actual = len(parent_weak_tinyids.get(p, set()))
+                parent_c = pattern_to_parent_count.get(p, 1)
+                if parent_c > 0:
+                    divergences.append(actual / parent_c)
+            if divergences:
+                max_div = max(divergences)
+                high_div = sum(1 for d in divergences if d > 5.0)
+                if high_div > 0:
+                    logger.warning(
+                        f"Parent filter divergence: {high_div}/{len(divergences)} removed "
+                        f"patterns had actual/parent tinyId ratio > 5x (max {max_div:.1f}x). "
+                        f"Consider --defer-parent-filter if high-value phrases are lost."
+                    )
 
     reverse_count = len(reverse_subsumed)
     prefix_kept_count = len(prefix_kept)
+    rescued_count = len(parent_weak_patterns & kept_patterns)
     stats = {
         'input_patterns': input_patterns,
         'output_patterns': len(kept_patterns),
@@ -1759,6 +1831,7 @@ def coalesce_variants_tsv(
         'prefix_extracted_count': prefix_extracted_count,
         'rollup_count': rollup_count,
         'parent_filtered_count': parent_filtered_count,
+        'parent_rescued_count': rescued_count,
         'anchor_trimmed_count': anchor_trimmed_count,
         'def_variant_count': def_variant_count,
         'subsumptions': list(subsumed.items())
@@ -1769,10 +1842,11 @@ def coalesce_variants_tsv(
     reverse_info = f", {reverse_count} roll-down" if reverse_count else ""
     rollup_info = f", {rollup_count} rolled-up" if rollup_count else ""
     parent_info = f", {parent_filtered_count} parent-filtered" if parent_filtered_count else ""
+    rescued_info = f", {rescued_count} parent-rescued" if rescued_count else ""
     logger.info(
         f"Coalesced {input_path}: {input_patterns} patterns → {len(kept_patterns)} kept "
         f"({len(subsumed)} subsumed{prefix_kept_info}{anchor_info}{reverse_info}, "
-        f"{prefix_extracted_count} prefix-extracted{rollup_info}{parent_info})"
+        f"{prefix_extracted_count} prefix-extracted{rollup_info}{parent_info}{rescued_info})"
     )
 
     return stats

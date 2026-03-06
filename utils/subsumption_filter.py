@@ -21,17 +21,32 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def subsumption_filter(phrases: List, require_tinyid_overlap: bool = True) -> List:
+def subsumption_filter(phrases: List, require_tinyid_overlap: bool = True,
+                       min_subsume_coverage: float = 0.0,
+                       max_orphan_tinyids: int = 999_999) -> List:
     """
     Remove phrases that are fully contained in longer phrases.
 
     A phrase P is subsumed by Q if:
       - P's token sequence is a contiguous subsequence of Q's
       - P and Q share at least one tinyId (if require_tinyid_overlap=True)
+      - Q covers >= min_subsume_coverage of P's tinyIds (if > 0)
+      - The number of P's tinyIds NOT in Q is <= max_orphan_tinyids
+
+    The coverage check prevents a long phrase with few tinyIds from subsuming
+    a shorter phrase with many tinyIds.  The orphan check prevents subsumption
+    even at high coverage ratios when the absolute number of uncovered tinyIds
+    is large.
 
     Args:
         phrases: List of Phrase objects
         require_tinyid_overlap: If True, only subsume if phrases share tinyIds
+        min_subsume_coverage: Min fraction of the shorter phrase's tinyIds that
+            must be covered by the longer phrase for subsumption to occur.
+            0.0 = any overlap suffices (legacy). 0.5 = longer must cover >= 50%.
+        max_orphan_tinyids: Max number of the shorter phrase's tinyIds that may
+            be left uncovered. If orphan count exceeds this, keep both phrases.
+            Default: 999999 (no limit). Set to e.g. 10 to protect large groups.
 
     Returns:
         Filtered list with subsumed phrases removed
@@ -78,11 +93,20 @@ def subsumption_filter(phrases: List, require_tinyid_overlap: bool = True) -> Li
 
             # Check containment
             if is_contained(candidate_tokens, phrase_tokens):
-                # Check tinyId overlap if required
                 if require_tinyid_overlap:
-                    if has_tinyid_overlap(candidate.distinct_tinyids, phrase.distinct_tinyids):
+                    should, coverage, orphan_n = _check_coverage_subsumption(
+                        phrase.distinct_tinyids, candidate.distinct_tinyids,
+                        min_subsume_coverage, max_orphan_tinyids)
+                    if should:
                         subsumed_ids.add(candidate.phrase_id)
-                        logger.debug(f"Subsumed: '{candidate.text}' by '{phrase.text}'")
+                        logger.debug(
+                            f"Subsumed: '{candidate.text}' by '{phrase.text}' "
+                            f"(coverage={coverage:.0%}, orphan={orphan_n})")
+                    elif coverage > 0:
+                        logger.debug(
+                            f"Kept: '{candidate.text}' "
+                            f"(coverage={coverage:.0%}, orphan={orphan_n} "
+                            f"by '{phrase.text}')")
                 else:
                     subsumed_ids.add(candidate.phrase_id)
                     logger.debug(f"Subsumed: '{candidate.text}' by '{phrase.text}'")
@@ -119,28 +143,46 @@ def is_contained(short: Tuple[int, ...], long: Tuple[int, ...]) -> bool:
     return False
 
 
-def has_tinyid_overlap(set1: Set[str], set2: Set[str]) -> bool:
+def _check_coverage_subsumption(
+    longer_tinyids: Set[str],
+    shorter_tinyids: Set[str],
+    min_subsume_coverage: float,
+    max_orphan_tinyids: int,
+) -> Tuple[bool, float, int]:
+    """Check if a shorter phrase should be subsumed by a longer one.
+
+    Returns (should_subsume, coverage, orphan_count).
+
+    Fast path: when min_subsume_coverage == 0 and max_orphan_tinyids >= 999_999,
+    short-circuits on first shared element (legacy behavior).
     """
-    Check if two tinyId sets have non-empty intersection.
+    use_legacy = (min_subsume_coverage <= 0.0 and max_orphan_tinyids >= 999_999)
 
-    Args:
-        set1: First set of tinyIds
-        set2: Second set of tinyIds
+    if use_legacy:
+        # Short-circuit: any overlap suffices
+        smaller, larger = (shorter_tinyids, longer_tinyids) \
+            if len(shorter_tinyids) <= len(longer_tinyids) \
+            else (longer_tinyids, shorter_tinyids)
+        for item in smaller:
+            if item in larger:
+                return (True, 1.0, 0)
+        return (False, 0.0, 0)
 
-    Returns:
-        True if sets share at least one element
-    """
-    # Use smaller set for iteration (optimization)
-    if len(set1) > len(set2):
-        set1, set2 = set2, set1
+    # Full intersection needed for coverage calculation
+    overlap = longer_tinyids & shorter_tinyids
+    if not overlap:
+        return (False, 0.0, 0)
 
-    for item in set1:
-        if item in set2:
-            return True
-    return False
+    n_shorter = len(shorter_tinyids)
+    coverage = len(overlap) / n_shorter if n_shorter else 0.0
+    orphan_n = n_shorter - len(overlap)
+    should = (coverage >= min_subsume_coverage and orphan_n <= max_orphan_tinyids)
+    return (should, coverage, orphan_n)
 
 
-def subsumption_filter_optimized(phrases: List, require_tinyid_overlap: bool = True) -> List:
+def subsumption_filter_optimized(phrases: List, require_tinyid_overlap: bool = True,
+                                  min_subsume_coverage: float = 0.0,
+                                  max_orphan_tinyids: int = 999_999) -> List:
     """
     Optimized subsumption filter using suffix-based indexing.
 
@@ -150,13 +192,18 @@ def subsumption_filter_optimized(phrases: List, require_tinyid_overlap: bool = T
     Args:
         phrases: List of Phrase objects
         require_tinyid_overlap: If True, only subsume if phrases share tinyIds
+        min_subsume_coverage: Min fraction of shorter phrase's tinyIds that
+            must be covered by longer phrase. See subsumption_filter().
+        max_orphan_tinyids: Max uncovered tinyIds before keeping both.
+            See subsumption_filter().
 
     Returns:
         Filtered list with subsumed phrases removed
     """
     # Use simple algorithm for small sets
     if len(phrases) < 100:
-        return subsumption_filter(phrases, require_tinyid_overlap)
+        return subsumption_filter(phrases, require_tinyid_overlap,
+                                  min_subsume_coverage, max_orphan_tinyids)
 
     if not phrases:
         return []
@@ -214,7 +261,10 @@ def subsumption_filter_optimized(phrases: List, require_tinyid_overlap: bool = T
                 # Check if candidate is contained starting at this position
                 if remaining[:len(candidate_tokens)] == candidate_tokens:
                     if require_tinyid_overlap:
-                        if has_tinyid_overlap(candidate.distinct_tinyids, phrase.distinct_tinyids):
+                        should, _, _ = _check_coverage_subsumption(
+                            phrase.distinct_tinyids, candidate.distinct_tinyids,
+                            min_subsume_coverage, max_orphan_tinyids)
+                        if should:
                             subsumed_ids.add(candidate.phrase_id)
                     else:
                         subsumed_ids.add(candidate.phrase_id)

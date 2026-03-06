@@ -72,6 +72,37 @@ neuroqol_short:
     note: "Subscale reference without full instrument name"
 
 # =============================================================================
+# Bracketed source/instrument annotations
+# Trailing [ABBREV] tags on designations identifying source registry
+# =============================================================================
+bracketed_annotations:
+  - pattern: "[AHRQ]"
+    note: "Agency for Healthcare Research and Quality source tag - 62 occurrences"
+
+  - pattern: "[AQ]"
+    note: "Autism Quotient instrument tag - 50 occurrences"
+
+  - pattern: "[HL7v3.0]"
+    note: "HL7 version 3.0 source tag - 1 occurrence"
+
+# =============================================================================
+# Bare instrument abbreviations (LOINC-style field suffixes)
+# These appear as trailing tokens in designations and LOINC value strings
+# =============================================================================
+bare_instrument_abbrevs:
+  - pattern: "AQ Adolescent"
+    note: "Autism Quotient adolescent variant in LOINC values - 49 occurrences"
+
+  - pattern: "AQ Adol"
+    note: "Autism Quotient adolescent abbreviation in designations - 49 occurrences"
+
+  - pattern: "Ord AQ"
+    note: "Autism Quotient trailing abbreviation in LOINC values (e.g. 'Find Pt ^Patient Ord AQ') - 50 occurrences"
+
+  - pattern: "REGEX: AQ$"
+    note: "Bare trailing ' AQ' at end of designations (e.g. 'Anxious new situations AQ') - 50 occurrences"
+
+# =============================================================================
 # Boilerplate phrases (non-instrument)
 # Recurring definition/designation fragments that should be stripped.
 # These are applied to ALL records (no tinyId restriction), unlike curated
@@ -110,7 +141,7 @@ boilerplate_temporal:
     note: "PROMIS frequency scale descriptor"
 
 boilerplate_nlm:
-  - pattern: 'NLM disclaimer: Consistent with Executive Order 14168, "gender" should not be used as a replacement for the element "sex" in the NIH CDE'
+  - pattern: 'NLM disclaimer: Consistent with Executive Order 14168, "gender" should not be used as a replacement for the element "sex" in the NIH CDE repository.'
     note: "NLM policy disclaimer prepended to sex/gender CDEs - 49 CDEs"
 
 # boilerplate_other:

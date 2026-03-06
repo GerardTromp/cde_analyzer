@@ -121,10 +121,11 @@ class MinerConfig:
     dedup_enabled: bool = True           # Hash field texts, emit shared ones as phrases
     dedup_min_count: int = 2             # Min CDEs sharing identical text
     dedup_min_tokens: int = 3            # Min tokens to emit (skip trivial matches)
-    # Prefix consolidation (post-loop recovery of fragmented prefixes)
-    prefix_consolidation: bool = True    # Detect common prefixes across mined phrases
-    prefix_min_tinyids: int = 20         # Min union tinyId coverage for a prefix
-    prefix_min_descendants: int = 3      # Min distinct longer phrases sharing a prefix
+    # Text extension (post-loop recovery of truncated high-frequency phrases)
+    prefix_consolidation: bool = True    # Enable text extension of high-frequency phrases
+    prefix_min_tinyids: int = 20         # Min tinyId coverage to attempt extension
+    extension_min_pct: float = 0.5       # Min fraction of occurrences sharing a right extension
+    extension_max_words: int = 5         # Max words of right context to check
     # Ledger-informed pre-masking
     ledger_patterns: Optional[Set[str]] = None  # "remove" patterns from curation ledger
 
@@ -338,15 +339,15 @@ def mine_phrases(items: List[CDEItem], config: MinerConfig):
         else:
             mask_phrases_naive(token_seqs, new_phrases)
 
-    # Stage 7: Prefix consolidation — recover fragmented prefixes
+    # Stage 7: Text extension — recover truncated high-frequency phrases
     if config.prefix_consolidation:
-        prefix_phrases, phrase_id_counter = consolidate_prefixes(
+        extended_phrases, phrase_id_counter = extend_frequent_phrases(
             all_phrases, token_seqs, vocab, config, phrase_id_counter
         )
-        if prefix_phrases:
-            all_phrases.extend(prefix_phrases)
+        if extended_phrases:
+            all_phrases.extend(extended_phrases)
             logger.info(
-                f"Prefix consolidation: {len(prefix_phrases)} prefix phrases emitted"
+                f"Text extension: {len(extended_phrases)} extended phrases emitted"
             )
 
     # Stage 8: Generate histograms if enabled
@@ -962,223 +963,233 @@ def kmer_count_to_phrase(kmer_count: KmerCount, phrase_id: int, k: int, vocab: V
 
 
 # ---------------------------------------------------------------------------
-# Stage 7: Prefix consolidation
+# Stage 7: Text extension — recover truncated high-frequency phrases
 # ---------------------------------------------------------------------------
 
-class _TokenPrefixNode:
-    """Lightweight trie node for token-ID prefix analysis."""
-    __slots__ = ('children', 'phrase_ids', 'tinyid_union', 'is_phrase')
-
-    def __init__(self):
-        self.children: Dict[int, '_TokenPrefixNode'] = {}
-        self.phrase_ids: Set[str] = set()       # phrases passing through this node
-        self.tinyid_union: Optional[Set[str]] = None  # computed bottom-up
-        self.is_phrase: bool = False             # True if a mined phrase ends here
-
-
-def _build_prefix_trie(
-    phrases: List[Phrase],
-) -> '_TokenPrefixNode':
-    """Build a token-ID prefix trie from mined phrases."""
-    root = _TokenPrefixNode()
-    for p in phrases:
-        node = root
-        for tok_id in p.token_ids:
-            if tok_id not in node.children:
-                node.children[tok_id] = _TokenPrefixNode()
-            node = node.children[tok_id]
-            node.phrase_ids.add(p.phrase_id)
-        node.is_phrase = True
-    return root
-
-
-def _propagate_tinyids(
-    node: '_TokenPrefixNode',
-    phrase_map: Dict[str, Phrase],
-) -> Set[str]:
-    """Post-order traversal: compute tinyid_union bottom-up."""
-    result: Set[str] = set()
-    # Union from children
-    for child in node.children.values():
-        result |= _propagate_tinyids(child, phrase_map)
-    # Add tinyids from phrases terminating at this node
-    for pid in node.phrase_ids:
-        if pid in phrase_map:
-            result |= phrase_map[pid].distinct_tinyids
-    node.tinyid_union = result
-    return result
-
-
-def _collect_prefix_candidates(
-    node: '_TokenPrefixNode',
-    config: MinerConfig,
-    existing_phrases: Set[Tuple[int, ...]],
-    ledger_patterns_lower: Optional[Set[str]],
-    vocab: 'Vocabulary',
-    path: List[int],
-    candidates: List[Tuple[Tuple[int, ...], Set[str], Set[str]]],
-):
+def _extract_right_context(
+    original_text: str,
+    char_end: int,
+    max_words: int,
+) -> List[str]:
     """
-    Traverse trie and collect prefix candidates meeting thresholds.
+    Extract up to *max_words* whitespace-delimited words from *original_text*
+    starting at character position *char_end*.
 
-    Each candidate is (token_ids, tinyid_union, phrase_ids).
+    Returns a list of progressive extensions: ["+1 word", "+2 words", ...].
+    Each entry is the cumulative extension text (e.g. ["related", "related to",
+    "related to anesthetic"]).
     """
-    for tok_id, child in node.children.items():
-        new_path = path + [tok_id]
-        depth = len(new_path)
-
-        if depth >= config.k_min and child.tinyid_union:
-            token_tuple = tuple(new_path)
-            # Skip if already a well-covered mined phrase
-            if token_tuple not in existing_phrases:
-                n_tinyids = len(child.tinyid_union)
-                n_descendants = len(child.phrase_ids)
-                if (n_tinyids >= config.prefix_min_tinyids
-                        and n_descendants >= config.prefix_min_descendants):
-                    # Level A: skip if ledger already has this as "remove"
-                    if ledger_patterns_lower is not None:
-                        text = " ".join(vocab.get_tokens(list(token_tuple)))
-                        if text.lower() in ledger_patterns_lower:
-                            _collect_prefix_candidates(
-                                child, config, existing_phrases,
-                                ledger_patterns_lower, vocab, new_path,
-                                candidates,
-                            )
-                            continue
-                    candidates.append(
-                        (token_tuple, child.tinyid_union, child.phrase_ids)
-                    )
-
-        # Recurse into children
-        _collect_prefix_candidates(
-            child, config, existing_phrases,
-            ledger_patterns_lower, vocab, new_path, candidates,
-        )
+    remainder = original_text[char_end:].lstrip()
+    if not remainder:
+        return []
+    words = remainder.split(None, max_words)[:max_words]
+    extensions: List[str] = []
+    for i in range(len(words)):
+        extensions.append(" ".join(words[:i + 1]))
+    return extensions
 
 
-def _build_prefix_occurrences(
-    token_tuple: Tuple[int, ...],
-    tinyid_union: Set[str],
-    token_seqs: List[TokenSeq],
-) -> List[CDERef]:
+def _build_text_index(
+    token_seqs: List['TokenSeq'],
+) -> Dict[Tuple[str, str], str]:
     """
-    Scan token_seqs for occurrences of a prefix token pattern.
-
-    Only scans sequences belonging to tinyIds in the union (for efficiency).
-    Ignores mask state — this is a post-loop recovery pass.
+    Build a mapping ``(tinyId, field_path) → original_text`` from token
+    sequences for fast lookup during extension analysis.
     """
-    prefix_len = len(token_tuple)
-    occurrences: List[CDERef] = []
-
+    index: Dict[Tuple[str, str], str] = {}
     for seq in token_seqs:
-        if seq.cde_ref.tinyId not in tinyid_union:
-            continue
-        for i in range(len(seq.tokens) - prefix_len + 1):
-            if tuple(seq.tokens[i:i + prefix_len]) == token_tuple:
-                # Extract verbatim text
-                verbatim_text = None
-                char_span = None
-                if seq.char_offsets and seq.original_text:
-                    try:
-                        char_start = seq.char_offsets[i][0]
-                        char_end = seq.char_offsets[i + prefix_len - 1][1]
-                        verbatim_text = seq.original_text[char_start:char_end]
-                        char_span = (char_start, char_end)
-                    except (IndexError, TypeError):
-                        pass
-                occurrences.append(CDERef(
-                    tinyId=seq.cde_ref.tinyId,
-                    field_path=seq.cde_ref.field_path,
-                    token_span=(i, i + prefix_len),
-                    verbatim_text=verbatim_text,
-                    char_span=char_span,
-                ))
-    return occurrences
+        if seq.original_text:
+            key = (seq.cde_ref.tinyId, seq.cde_ref.field_path)
+            index[key] = seq.original_text
+    return index
 
 
-def consolidate_prefixes(
-    all_phrases: List[Phrase],
-    token_seqs: List[TokenSeq],
+def extend_frequent_phrases(
+    all_phrases: List['Phrase'],
+    token_seqs: List['TokenSeq'],
     vocab: 'Vocabulary',
-    config: MinerConfig,
+    config: 'MinerConfig',
     phrase_id_counter: int,
-) -> Tuple[List[Phrase], int]:
+) -> Tuple[List['Phrase'], int]:
     """
-    Stage 7: Prefix consolidation.
+    Stage 7: Text extension — recover truncated high-frequency phrases.
 
-    After all k-levels complete, detect common prefixes among mined phrases
-    that have high aggregate tinyId coverage and emit them as additional
-    phrases.  This recovers prefixes fragmented by the descending-k masking
-    strategy — e.g. "the free text field relate to" (548 tinyIds) split
-    across many k=7..10 phrases, each masking a small cluster.
+    For each phrase whose tinyId coverage meets *prefix_min_tinyids*, examine
+    the right context (verbatim text) at every occurrence.  If a common
+    extension appears in >= *extension_min_pct* of occurrences, emit the
+    extended phrase.  Then cascade: re-analyze the residual occurrences for
+    their own common extension, repeating until coverage drops below the
+    tinyId threshold.
+
+    Works on **verbatim text** — avoids lemmatization inconsistencies that
+    caused the token-ID prefix trie to fail on hyphenated words.
 
     Returns
     -------
-    (new_prefix_phrases, updated_phrase_id_counter)
+    (new_extended_phrases, updated_phrase_id_counter)
     """
     if not all_phrases:
         return [], phrase_id_counter
 
-    # Build phrase lookup
-    phrase_map: Dict[str, Phrase] = {p.phrase_id: p for p in all_phrases}
+    text_index = _build_text_index(token_seqs)
 
-    # Build trie and propagate tinyIds
-    root = _build_prefix_trie(all_phrases)
-    _propagate_tinyids(root, phrase_map)
+    # Existing phrase texts (case-insensitive) for dedup — only phrases with
+    # sufficient tinyId coverage.  Low-coverage fragmented phrases must NOT
+    # block the extension from being emitted with correct aggregated coverage.
+    existing_texts: Set[str] = set()
+    for p in all_phrases:
+        if len(p.distinct_tinyids) >= config.prefix_min_tinyids:
+            existing_texts.add(p.text.lower())
+            for occ in p.occurrences:
+                if occ.verbatim_text:
+                    existing_texts.add(occ.verbatim_text.strip().lower())
 
-    # Set of existing phrase token tuples with sufficient coverage
-    existing_phrases: Set[Tuple[int, ...]] = {
-        p.token_ids for p in all_phrases
-        if len(p.distinct_tinyids) >= config.prefix_min_tinyids
-    }
+    # Sort by distinct tinyId count descending — process highest-coverage first
+    candidates = sorted(
+        all_phrases,
+        key=lambda p: len(p.distinct_tinyids),
+        reverse=True,
+    )
 
-    # Ledger pattern set (Level A filtering)
+    # Ledger pattern set (Level A filtering — skip known "remove" patterns)
     ledger_lower: Optional[Set[str]] = None
     if config.ledger_patterns:
         ledger_lower = {p.lower() for p in config.ledger_patterns}
 
-    # Collect candidates
-    candidates: List[Tuple[Tuple[int, ...], Set[str], Set[str]]] = []
-    _collect_prefix_candidates(
-        root, config, existing_phrases, ledger_lower, vocab, [], candidates,
-    )
-
-    if not candidates:
-        return [], phrase_id_counter
-
-    logger.info(
-        f"Prefix consolidation: {len(candidates)} candidates "
-        f"(min_tinyids={config.prefix_min_tinyids}, "
-        f"min_descendants={config.prefix_min_descendants})"
-    )
-
-    # Build Phrase objects for each candidate
     new_phrases: List[Phrase] = []
-    for token_tuple, tinyid_union, _phrase_ids in candidates:
-        occurrences = _build_prefix_occurrences(
-            token_tuple, tinyid_union, token_seqs,
-        )
-        # Deduplicate tinyIds from actual occurrences
-        actual_tinyids = {occ.tinyId for occ in occurrences}
-        if len(actual_tinyids) < config.prefix_min_tinyids:
-            continue  # trie estimate was optimistic; skip
+    max_words = config.extension_max_words
+    min_pct = config.extension_min_pct
 
-        text = " ".join(vocab.get_tokens(list(token_tuple)))
-        phrase = Phrase(
-            phrase_id=f"phrase_{phrase_id_counter:05d}",
-            token_ids=token_tuple,
-            text=text,
-            frequency=len(occurrences),
-            distinct_tinyids=actual_tinyids,
-            k=len(token_tuple),
-            occurrences=occurrences,
-            extension_method="prefix_consolidation",
-        )
-        new_phrases.append(phrase)
-        phrase_id_counter += 1
-        logger.debug(
-            f"  Prefix: '{text}' (k={len(token_tuple)}, "
-            f"tinyids={len(actual_tinyids)}, occurrences={len(occurrences)})"
-        )
+    for phrase in candidates:
+        if len(phrase.distinct_tinyids) < config.prefix_min_tinyids:
+            continue  # below tinyId threshold; skip
+
+        # Gather occurrences with usable char_span
+        usable_occs: List[CDERef] = []
+        for occ in phrase.occurrences:
+            if occ.char_span is not None:
+                key = (occ.tinyId, occ.field_path)
+                if key in text_index:
+                    usable_occs.append(occ)
+
+        if len(usable_occs) < config.prefix_min_tinyids:
+            continue
+
+        # Cascade loop: extend, then re-analyze residual
+        remaining_occs = usable_occs
+        while len({occ.tinyId for occ in remaining_occs}) >= config.prefix_min_tinyids:
+            # Build progressive right-context extensions for each occurrence
+            occ_extensions: List[Tuple[CDERef, List[str]]] = []
+            for occ in remaining_occs:
+                orig_text = text_index[(occ.tinyId, occ.field_path)]
+                exts = _extract_right_context(orig_text, occ.char_span[1], max_words)
+                occ_extensions.append((occ, exts))
+
+            # Count frequency of each progressive extension
+            # extension_counts[ext_text] = list of occurrences that have it
+            best_ext_text: Optional[str] = None
+            best_ext_occs: List[CDERef] = []
+
+            # Try from longest to shortest — pick the longest above threshold
+            for width in range(max_words, 0, -1):
+                ext_map: Dict[str, List[CDERef]] = {}
+                for occ, exts in occ_extensions:
+                    if len(exts) >= width:
+                        ext_text = exts[width - 1].lower()
+                        ext_map.setdefault(ext_text, []).append(occ)
+
+                # Find most frequent extension at this width
+                for ext_text, occs in ext_map.items():
+                    if len(occs) >= min_pct * len(remaining_occs):
+                        if best_ext_text is None or len(occs) > len(best_ext_occs):
+                            best_ext_text = ext_text
+                            best_ext_occs = occs
+                # If found at this width, use it (longest above threshold)
+                if best_ext_text is not None:
+                    break
+
+            if best_ext_text is None:
+                break  # no extension above threshold; stop cascade
+
+            # Build extended text using verbatim phrase text + extension
+            # Use the first occurrence's verbatim text as the base
+            base_text = phrase.occurrences[0].verbatim_text or phrase.text
+            extended_text = base_text.rstrip() + " " + best_ext_text
+
+            # Dedup: skip if this text already exists
+            if extended_text.lower() in existing_texts:
+                # Remove matched occurrences and continue cascade on residual
+                matched_set = set(id(o) for o in best_ext_occs)
+                remaining_occs = [o for o in remaining_occs if id(o) not in matched_set]
+                continue
+
+            # Level A: skip if ledger says "remove"
+            if ledger_lower and extended_text.lower() in ledger_lower:
+                matched_set = set(id(o) for o in best_ext_occs)
+                remaining_occs = [o for o in remaining_occs if id(o) not in matched_set]
+                continue
+
+            # Build extended occurrences with updated char_span
+            extended_occs: List[CDERef] = []
+            extended_tinyids: Set[str] = set()
+            n_ext_words = len(best_ext_text.split())
+            for occ in best_ext_occs:
+                orig_text = text_index[(occ.tinyId, occ.field_path)]
+                # Walk n_ext_words forward from char_span end
+                pos = occ.char_span[1]
+                words_found = 0
+                while words_found < n_ext_words and pos < len(orig_text):
+                    # Skip whitespace
+                    while pos < len(orig_text) and orig_text[pos].isspace():
+                        pos += 1
+                    if pos >= len(orig_text):
+                        break
+                    # Skip word characters
+                    while pos < len(orig_text) and not orig_text[pos].isspace():
+                        pos += 1
+                    words_found += 1
+
+                char_end_new = pos
+                verbatim_new = orig_text[occ.char_span[0]:char_end_new]
+                extended_occs.append(CDERef(
+                    tinyId=occ.tinyId,
+                    field_path=occ.field_path,
+                    token_span=occ.token_span,  # approximate; token span not updated
+                    verbatim_text=verbatim_new,
+                    char_span=(occ.char_span[0], char_end_new),
+                ))
+                extended_tinyids.add(occ.tinyId)
+
+            if len(extended_tinyids) < config.prefix_min_tinyids:
+                break
+
+            # Tokenize extended text for token_ids field (for downstream compatibility)
+            token_ids = tuple(
+                vocab.tok2id.get(w, vocab.add_token(w))
+                for w in extended_text.lower().split()
+            )
+
+            ext_phrase = Phrase(
+                phrase_id=f"phrase_{phrase_id_counter:05d}",
+                token_ids=token_ids,
+                text=extended_text,
+                frequency=len(extended_occs),
+                distinct_tinyids=extended_tinyids,
+                k=len(token_ids),
+                occurrences=extended_occs,
+                extension_method="text_extension",
+            )
+            new_phrases.append(ext_phrase)
+            existing_texts.add(extended_text.lower())
+            phrase_id_counter += 1
+            logger.info(
+                f"  Extended '{base_text}' → '{extended_text}' "
+                f"(tinyids={len(extended_tinyids)}, "
+                f"occurrences={len(extended_occs)})"
+            )
+
+            # Cascade: remove matched occurrences, continue with residual
+            matched_set = set(id(o) for o in best_ext_occs)
+            remaining_occs = [o for o in remaining_occs if id(o) not in matched_set]
 
     return new_phrases, phrase_id_counter

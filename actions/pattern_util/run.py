@@ -4064,6 +4064,108 @@ def _run_split_priority(args, input_path: str) -> int:
     return 0
 
 
+def _run_recover_parent_filtered(args, report_path: str) -> int:
+    """Analyze parent-filtered patterns from coalesce report for prefix recovery.
+
+    Groups parent-filtered entries by word-level prefix and reports candidates
+    with high divergence between actual tinyId count and parent_tinyid_count.
+
+    This is a diagnostic placeholder. When --defer-parent-filter is used in the
+    coalesce step, this diagnostic is rarely needed. It exists as a hook for
+    future post-hoc recovery workflows.
+
+    TODO: Add --apply-recovery mode that emits a recovery TSV for merging
+    back into the coalesced output.
+    """
+    import re
+    from collections import defaultdict
+
+    output_path = getattr(args, 'output', None)
+    if not output_path:
+        logger.error("--output is required for --recover-parent-filtered")
+        raise SystemExit(1)
+
+    # Read parent-filtered entries from coalesce report
+    # Parent-filtered rows have extra columns beyond the standard 5-column header:
+    # type | original_pattern | tinyIds | parent_phrase | parent_count | actual_count
+    filtered_entries = []
+    with open(report_path, 'r', encoding='utf-8') as f:
+        f.readline()  # skip header
+        for line in f:
+            fields = line.rstrip('\n\r').split('\t')
+            if not fields or fields[0] != 'parent-filtered':
+                continue
+            pattern = fields[1] if len(fields) > 1 else ''
+            tinyids_str = fields[2] if len(fields) > 2 else ''
+            parent_count = int(fields[4]) if len(fields) > 4 and fields[4].isdigit() else 0
+            actual_count = int(fields[5]) if len(fields) > 5 and fields[5].isdigit() else 0
+
+            tinyids = set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
+            filtered_entries.append({
+                'pattern': pattern,
+                'tinyids': tinyids,
+                'parent_count': parent_count,
+                'actual_count': actual_count or len(tinyids),
+            })
+
+    if not filtered_entries:
+        print(f"No parent-filtered entries found in {report_path}")
+        return 0
+
+    # Group by word-level prefixes (2+ words)
+    prefix_groups: dict[str, list] = defaultdict(list)
+    for entry in filtered_entries:
+        words = entry['pattern'].split()
+        # Generate all prefixes of length 2 to len-1
+        for plen in range(2, len(words)):
+            prefix = ' '.join(words[:plen])
+            prefix_groups[prefix].append(entry)
+
+    # Compute aggregate stats per prefix group
+    results = []
+    for prefix, members in prefix_groups.items():
+        union_tinyids: set = set()
+        for m in members:
+            union_tinyids.update(m['tinyids'])
+        max_parent = max(m['parent_count'] for m in members) or 1
+        divergence = len(union_tinyids) / max_parent
+
+        results.append({
+            'prefix': prefix,
+            'aggregate_tinyids': len(union_tinyids),
+            'member_count': len(members),
+            'max_parent_count': max_parent,
+            'divergence_ratio': divergence,
+            'example': members[0]['pattern'][:80],
+        })
+
+    # Sort by divergence descending
+    results.sort(key=lambda x: -x['divergence_ratio'])
+
+    # Write output
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("prefix\taggregate_tinyids\tmember_count\tmax_parent_count\t"
+                "divergence_ratio\texample_pattern\n")
+        for r in results:
+            f.write(f"{r['prefix']}\t{r['aggregate_tinyids']}\t{r['member_count']}\t"
+                    f"{r['max_parent_count']}\t{r['divergence_ratio']:.1f}\t"
+                    f"{r['example']}\n")
+
+    print(f"\nParent-filtered recovery analysis:")
+    print(f"  Filtered entries: {len(filtered_entries)}")
+    print(f"  Prefix groups:    {len(results)}")
+    if results:
+        print(f"\n  Top recovery candidates (by divergence ratio):")
+        for r in results[:10]:
+            print(f"    {r['prefix'][:50]:50s}  "
+                  f"tinyIds={r['aggregate_tinyids']:>4d}  "
+                  f"members={r['member_count']:>3d}  "
+                  f"ratio={r['divergence_ratio']:.1f}x")
+    print(f"\n  Output: {output_path}")
+
+    return 0
+
+
 def _run_remnant_analysis(args, patterns_path: str) -> int:
     """Simulate stripping and identify frequent context around pattern matches.
 
@@ -4406,6 +4508,10 @@ def run_action(args: Namespace):
     if remnant_analysis:
         return _run_remnant_analysis(args, remnant_analysis)
 
+    recover_parent_filtered = getattr(args, 'recover_parent_filtered', None)
+    if recover_parent_filtered:
+        return _run_recover_parent_filtered(args, recover_parent_filtered)
+
     # Check for merge mode (supports multiple files)
     merge_patterns = getattr(args, 'merge_patterns', None)
     if merge_patterns:
@@ -4484,6 +4590,7 @@ def run_action(args: Namespace):
         rollup_subset_tinyids = getattr(args, 'rollup_subset_tinyids', False)
         trim_anchors = not getattr(args, 'no_trim_anchors', False)
         emit_def_variants = getattr(args, 'emit_def_variants', False)
+        defer_parent_filter = getattr(args, 'defer_parent_filter', False)
 
         logger.info(f"Coalesce mode: removing subsumed patterns from {coalesce_variants}")
         if trim_anchors:
@@ -4491,7 +4598,8 @@ def run_action(args: Namespace):
         if min_prefix_tinyids > 0:
             logger.info(f"Prefix extraction enabled (min_tinyids={min_prefix_tinyids})")
         if min_parent_tinyids > 0:
-            logger.info(f"Parent threshold filter enabled (min_parent_tinyids={min_parent_tinyids})")
+            mode = "deferred (after prefix extraction)" if defer_parent_filter else "immediate"
+            logger.info(f"Parent threshold filter enabled (min_parent_tinyids={min_parent_tinyids}, mode={mode})")
         if rollup_subset_tinyids:
             logger.info("TinyId-subset rollup enabled")
         if emit_def_variants:
@@ -4507,7 +4615,8 @@ def run_action(args: Namespace):
             min_parent_tinyids=min_parent_tinyids,
             rollup_subset_tinyids=rollup_subset_tinyids,
             trim_anchors=trim_anchors,
-            emit_def_variants=emit_def_variants
+            emit_def_variants=emit_def_variants,
+            defer_parent_filter=defer_parent_filter
         )
 
         print(f"\nCoalesce complete:")
@@ -4526,6 +4635,8 @@ def run_action(args: Namespace):
             print(f"  Rollup:   {stats['rollup_count']} short patterns rolled up by tinyId subset")
         if stats.get('parent_filtered_count', 0) > 0:
             print(f"  Parent filter: {stats['parent_filtered_count']} patterns below threshold")
+        if stats.get('parent_rescued_count', 0) > 0:
+            print(f"  Parent rescued: {stats['parent_rescued_count']} weak-parent patterns saved by prefix groups")
         if stats.get('def_variant_count', 0) > 0:
             print(f"  Def variants: {stats['def_variant_count']} definition-form patterns added")
         if report_path:

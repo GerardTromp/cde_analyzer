@@ -80,7 +80,8 @@ def run_action(args: Namespace):
         dedup_min_tokens=getattr(args, 'dedup_min_tokens', 3),
         prefix_consolidation=getattr(args, 'prefix_consolidation', True),
         prefix_min_tinyids=getattr(args, 'prefix_min_tinyids', 20),
-        prefix_min_descendants=getattr(args, 'prefix_min_descendants', 3),
+        extension_min_pct=getattr(args, 'extension_min_pct', 0.5),
+        extension_max_words=getattr(args, 'extension_max_words', 5),
         ledger_patterns=None,  # populated below if --ledger-dir provided
     )
 
@@ -130,7 +131,9 @@ def run_action(args: Namespace):
     if enable_subsumption:
         from utils.subsumption_filter import subsumption_filter
         original_count = len(phrases)
-        phrases = subsumption_filter(phrases, require_tinyid_overlap=True)
+        phrases = subsumption_filter(phrases, require_tinyid_overlap=True,
+                                     min_subsume_coverage=0.5,
+                                     max_orphan_tinyids=10)
         logger.info(f"Subsumption filter: {original_count} -> {len(phrases)} phrases")
 
     # 5. Optional anchor extension

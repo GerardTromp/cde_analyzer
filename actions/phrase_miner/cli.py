@@ -189,28 +189,32 @@ def register_subparser(subparser: ArgumentParser):
         help="Maximum number of families to report"
     )
 
-    # Prefix consolidation (post-loop recovery of fragmented prefixes)
+    # Text extension (post-loop recovery of truncated high-frequency phrases)
     subparser.add_argument(
         "--prefix-consolidation",
         action=BooleanOptionalAction,
         default=True,
-        help="Detect common prefixes across mined phrases and emit them as "
-             "additional phrases when aggregate tinyId coverage exceeds "
-             "--prefix-min-tinyids. Use --no-prefix-consolidation to disable.",
+        help="Extend high-frequency phrases by analyzing common right context "
+             "in verbatim text. Use --no-prefix-consolidation to disable.",
     )
     subparser.add_argument(
         "--prefix-min-tinyids",
         type=int,
         default=20,
-        help="Minimum union tinyId count for a prefix to be emitted "
-             "during consolidation. Default: 20.",
+        help="Minimum tinyId coverage to attempt text extension. Default: 20.",
     )
     subparser.add_argument(
-        "--prefix-min-descendants",
+        "--extension-min-pct",
+        type=float,
+        default=0.5,
+        help="Minimum fraction of occurrences that must share a right-context "
+             "extension for it to be emitted. Default: 0.5 (50%%).",
+    )
+    subparser.add_argument(
+        "--extension-max-words",
         type=int,
-        default=3,
-        help="Minimum distinct longer phrases sharing a prefix for "
-             "consolidation. Default: 3.",
+        default=5,
+        help="Maximum words of right context to check for extensions. Default: 5.",
     )
 
     # Ledger-informed pre-masking

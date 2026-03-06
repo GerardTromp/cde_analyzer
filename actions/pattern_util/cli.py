@@ -26,7 +26,7 @@ Usage Examples:
   # Import curated patterns to config
   cde-analyzer pattern_util --add-to-supplementary curated.tsv
 """
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 
 help_text = "TSV pattern utilities (merge, coalesce, import)"
 
@@ -133,6 +133,17 @@ def register_subparser(subparser: ArgumentParser):
              "Definitions use instrument names without trailing separators "
              "(e.g., '...Scale (CES-D).' vs '...Scale (CES-D) - question'). "
              "Without this flag, designation-only patterns miss definition matches.",
+    )
+
+    subparser.add_argument(
+        "--defer-parent-filter",
+        action=BooleanOptionalAction,
+        default=False,
+        help="Defer parent-tinyid filtering until after prefix extraction. "
+             "Patterns rescued by a prefix group survive even if their individual "
+             "parent count is below --min-parent-tinyids. Use for phrase pipelines "
+             "where cross-parent aggregation matters. "
+             "Use --no-defer-parent-filter to disable.",
     )
 
     subparser.add_argument(
@@ -586,6 +597,19 @@ def register_subparser(subparser: ArgumentParser):
         default=5,
         help="Minimum frequency for a context extension to be reported. "
              "Used with --remnant-analysis. Default: 5.",
+    )
+
+    # Parent-filtered recovery diagnostic (placeholder)
+    subparser.add_argument(
+        "--recover-parent-filtered",
+        type=str,
+        default=None,
+        metavar="REPORT_TSV",
+        help="[Diagnostic] Analyze parent-filtered patterns from a coalesce report "
+             "for prefix recovery opportunities. Groups parent-filtered entries by "
+             "word-level prefix and reports candidates with high divergence between "
+             "actual tinyId count and parent_tinyid_count. "
+             "Requires --output.",
     )
 
     # Supplementary pattern import mode
