@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDE Analyzer :: TSV Pattern Editor Quickstart</title>
+<title>CDE Analyzer :: TSV Pattern Editor Cheatsheet</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html {
@@ -264,7 +264,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 <!-- PAGE 1 -->
 <div class="page">
   <div class="banner">
-    <h1>TSV Pattern Editor <strong>:: QUICKSTART</strong></h1>
+    <h1>TSV Pattern Editor <strong>:: CHEATSHEET</strong></h1>
     <span class="subtitle">CDE Analyzer v0.8.1 &mdash; Browser-Based Curation Tool</span>
   </div>
   <div class="columns">
@@ -389,6 +389,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <span class="cm">&#10038;4</span>&ensp;
               <span class="cs">&#8644;2</span>&ensp;
               <span class="cu">?1</span>&ensp;
+              | tinyIds: 18,240/18,502&ensp;
               <span class="mode-dot"></span>server
             </span>
           </div>
@@ -434,6 +435,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <h3>Navigation &amp; Editing</h3>
         <table>
           <tr><td><span class="key">Ctrl</span>+<span class="key">A</span></td><td>Select all visible rows</td></tr>
+          <tr><td><span class="key">Ctrl</span>+<span class="key">U</span></td><td>Deselect all</td></tr>
           <tr><td><span class="key">Ctrl</span>+<span class="key">Z</span></td><td>Undo (50 levels)</td></tr>
           <tr><td><span class="key">Ctrl</span>+<span class="key">&#8679;</span>+<span class="key">Z</span></td><td>Redo</td></tr>
           <tr><td><span class="key">Ctrl</span>+<span class="key">S</span></td><td>Save (server mode)</td></tr>
@@ -451,20 +453,23 @@ python cde_editor.pyz needs_review.tsv</code></pre>
     <!-- COL 3: Workflow + Filters -->
     <div>
       <div class="section orange">
-        <h2>Curation Workflow</h2>
+        <h2>Suggested Curator Workflow</h2>
         <ol class="num-list orange">
-          <li><strong>Triage &mdash; Remove false positives</strong><br>
-          Scan patterns, select bad rows, press <span class="key">R</span></li>
-          <li><strong>Modify &mdash; Fix partial matches</strong><br>
-          Press <span class="key">M</span>, dbl-click modification column, type correction</li>
-          <li><strong>Substitute &mdash; Replace, don&rsquo;t delete</strong><br>
-          Press <span class="key">S</span>, dbl-click modification, type replacement text</li>
-          <li><strong>Mass keep &mdash; Approve the rest</strong><br>
-          Filter to <code>blank</code>, <span class="key">Ctrl</span>+<span class="key">A</span>, <span class="key">K</span></li>
+          <li><strong>Sort by tinyId count (descending)</strong><br>
+          Click <code>tinyid_count</code> header twice &mdash; highest-impact patterns first</li>
+          <li><strong>Evaluate top patterns &rarr; keep</strong><br>
+          Select real instruments/phrases, press <span class="key">K</span></li>
+          <li><strong>Filter by group keyword</strong><br>
+          For each &ldquo;keep&rdquo; pattern, filter the <code>group_key</code> column by a keyword from its tinyIds.
+          This shows all related patterns &mdash; most will be extensions that remove semantic context &rarr; <span class="key">R</span></li>
+          <li><strong>Handle modify/substitute cases</strong><br>
+          Press <span class="key">M</span> or <span class="key">S</span>, dbl-click modification, type correction</li>
+          <li><strong>Mass keep remaining</strong><br>
+          Filter decision to <code>blank</code>, <span class="key">Ctrl</span>+<span class="key">A</span>, <span class="key">K</span></li>
           <li><strong>Save</strong><br>
           <span class="key">Ctrl</span>+<span class="key">S</span> (server) or Save As (standalone)</li>
         </ol>
-        <p class="small mt">Common false positives: generic phrases (&ldquo;I felt&rdquo;), imaging (PET, MRI), agencies (OMB), short acronyms.</p>
+        <p class="small mt">Status bar shows <strong>tinyIds: decided/total</strong> to track coverage progress.</p>
       </div>
 
       <div class="section teal">
@@ -495,12 +500,14 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <span class="cm">&#10038;4</span>&ensp;
               <span class="cs">&#8644;2</span>&ensp;
               <span class="cu">?0</span>&ensp;
+              | tinyIds: 18,502/18,502&ensp;
               <span class="mode-dot"></span>server
             </span>
           </div>
         </div>
         <table>
           <tr><td><code>?0</code></td><td>All rows decided &mdash; you&rsquo;re done!</td></tr>
+          <tr><td><code>tinyIds: N/M</code></td><td>Decided / total tinyId coverage</td></tr>
           <tr><td><code>server</code></td><td>Ctrl+S saves in-place</td></tr>
           <tr><td><code>standalone</code></td><td>Use Save As to download</td></tr>
         </table>
@@ -508,13 +515,13 @@ python cde_editor.pyz needs_review.tsv</code></pre>
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Quickstart &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Cheatsheet &bull; Page 1 of 2 &bull; Print landscape for best results</div>
 </div>
 
 <!-- PAGE 2 -->
 <div class="page">
   <div class="banner">
-    <h1>TSV Pattern Editor <strong>:: QUICKSTART</strong></h1>
+    <h1>TSV Pattern Editor <strong>:: CHEATSHEET</strong></h1>
     <span class="subtitle">Groups, Advanced Features &amp; Pipeline Integration</span>
   </div>
   <div class="columns">
@@ -716,7 +723,7 @@ cde-analyzer workflow resume \
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Quickstart &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
+  <div class="footer">CDE Analyzer v0.8.1 &bull; TSV Pattern Editor Cheatsheet &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
 </div>
 
 </body>

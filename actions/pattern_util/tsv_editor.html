@@ -2037,20 +2037,27 @@ function cdeUrl(path) {
         if (selected > 0) text += ' (' + selected + ' selected)';
         if (hidden > 0) text += ' (' + hidden + ' hidden by filter)';
 
-        // Decision column stats
+        // Decision column stats + tinyId count summary
         if (S.decisionCol >= 0) {
             let keep = 0, remove = 0, modify = 0, substitute = 0, empty = 0;
+            let tidTotal = 0, tidDecided = 0;
+            const hasTidCount = S.tinyidCountCol >= 0;
             for (const r of S.rows) {
                 const d = (r.cells[S.decisionCol] || '').trim().toLowerCase();
-                if (d === 'keep') keep++;
-                else if (d === 'remove') remove++;
-                else if (d === 'modify') modify++;
-                else if (d === 'substitute') substitute++;
+                const tc = hasTidCount ? parseInt(r.cells[S.tinyidCountCol], 10) || 0 : 0;
+                tidTotal += tc;
+                if (d === 'keep') { keep++; tidDecided += tc; }
+                else if (d === 'remove') { remove++; tidDecided += tc; }
+                else if (d === 'modify') { modify++; tidDecided += tc; }
+                else if (d === 'substitute') { substitute++; tidDecided += tc; }
                 else empty++;
             }
             text += ' | \u2713' + keep + ' \u2717' + remove + ' \u270E' + modify;
             if (substitute > 0) text += ' \u21C4' + substitute;
             if (empty > 0) text += ' ?' + empty;
+            if (hasTidCount && tidTotal > 0) {
+                text += ' | tinyIds: ' + tidDecided.toLocaleString() + '/' + tidTotal.toLocaleString();
+            }
         }
 
         statusLeft.textContent = text;
@@ -2137,6 +2144,9 @@ function cdeUrl(path) {
             e.preventDefault();
         } else if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isInput) {
             toggleSelectAll(true);
+            e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+            deselectAll();
             e.preventDefault();
         } else if (e.key === 'Delete' && !isInput) {
             deleteSelectedRows();

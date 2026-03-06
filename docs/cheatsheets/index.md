@@ -28,7 +28,7 @@ copy-paste command recipes for common tasks.
 
 ### [TSV Pattern Editor](tsv-editor.html)
 
-Browser-based curation tool quickstart: editor interface mockup with all visual
+Browser-based curation tool cheatsheet: editor interface mockup with all visual
 cues, the 4 curation decisions (keep/remove/modify/substitute), keyboard
 shortcuts, merge groups with propagation, column filters, and pipeline
 integration.
