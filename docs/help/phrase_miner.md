@@ -39,13 +39,21 @@ cde-analyzer phrase_miner --input <file.json> [options]
 | `--enable-anchor` | `False` | Enable anchor-based extension (Phase 7) |
 | `--no-aho-corasick` | `False` | Use naive pattern matching instead of Aho-Corasick |
 | `--verbatim-case-sensitive` | `False` | Use case-sensitive verbatim grouping |
-| `--extract-instruments` | `False` | Extract 'as part of <Instrument>' patterns |
-| `--instruments-only` | `False` | Phase 1: Extract instruments only, skip phrase mining |
-| `--instrument-list` | - | Phase 2: TSV file with curated patterns to pre-mask |
-| `--min-instrument-words` | `3` | Minimum words in instrument name |
-| `--detect-families` | `False` | Enable instrument family detection |
-| `--family-confidence-threshold` | `0.7` | Minimum confidence for family assignment |
-| `--family-summary` | `False` | Generate instrument_families.tsv summary |
+| `--skip-debruijn` | `False` | Skip de Bruijn contig extension (enabled by default) |
+| `--skip-anchor` | `False` | Skip anchor-based extension |
+| `--dedup` / `--no-dedup` | `True` | Enable/disable whole-text dedup pre-pass. Detects field texts shared by multiple CDEs, emits as phrases, then masks to prevent redundant k-mer detection |
+| `--dedup-min-count N` | `2` | Minimum CDEs sharing identical text for dedup emission |
+| `--dedup-min-tokens N` | `3` | Minimum tokens in dedup text to emit as phrase |
+| `--analyze-phrase-families` | `False` | Analyze phrases for family groupings using prefix/suffix patterns. Outputs `phrase_families.tsv` and `phrase_family_members.tsv` |
+| `--min-prefix-words N` | `2` | Minimum words for prefix pattern detection |
+| `--min-suffix-words N` | `1` | Minimum words for suffix pattern detection |
+| `--min-family-size N` | `3` | Minimum phrases to form a family |
+| `--max-families N` | `100` | Maximum families to report |
+| `--prefix-consolidation` / `--no-prefix-consolidation` | `True` | Extend high-frequency phrases by analyzing common right context in verbatim text |
+| `--prefix-min-tinyids N` | `20` | Minimum tinyId coverage to attempt text extension |
+| `--extension-min-pct F` | `0.5` | Minimum fraction of occurrences sharing a right-context extension |
+| `--extension-max-words N` | `5` | Maximum words of right context to check for extensions |
+| `--ledger-dir DIR` | - | Curation ledger directory. If provided, prior "remove" decisions are pre-masked during mining |
 | `--histograms` | `False` | Generate k-mer frequency histograms |
 
 ## Examples
@@ -111,57 +119,39 @@ cde-analyzer phrase_miner \
   --remove-stopwords
 ```
 
-### Instrument Extraction (Two-Phase Workflow)
+### With Dedup and Ledger Pre-masking
 
 ```bash
-# Phase 1: Extract instruments only (for curation)
-cde-analyzer phrase_miner \
-  --input data/cde_records.json \
-  --output-dir instrument_output \
-  --instruments-only \
-  --min-tinyids 1
-
-# Curate instruments_verbatim.tsv (remove false positives)
-
-# Phase 2: Full phrase mining with curated instrument pre-masking
+# Mine with dedup and prior curation ledger
 cde-analyzer phrase_miner \
   --input data/cde_records.json \
   --output-dir phrase_output \
-  --instrument-list instrument_output/instruments_verbatim.tsv \
-  --min-tinyids 3
+  --dedup \
+  --ledger-dir .curation_ledger
 ```
 
-The `--instrument-list` argument accepts:
-- `filename` - Uses the `full_match` column (default)
-- `filename,column_name` - Uses the specified column
-
-### Instrument Family Detection
+### With Prefix Consolidation
 
 ```bash
-# Extract instruments with family grouping
+# Mine with prefix consolidation (extends fragmented prefixes)
 cde-analyzer phrase_miner \
   --input data/cde_records.json \
-  --output-dir instrument_output \
-  --instruments-only \
-  --detect-families \
-  --family-summary
-
-# Output includes:
-# - instruments.tsv with family_id, instrument_id columns
-# - instruments_verbatim.tsv with family assignments
-# - instrument_families.tsv summary (with --family-summary)
+  --output-dir phrase_output \
+  --prefix-consolidation \
+  --prefix-min-tinyids 20 \
+  --extension-min-pct 0.5
 ```
 
-Family detection groups instruments into known families:
-- **neuro-qol**: Neuro-QOL subscales
-- **promis**: PROMIS instruments
-- **mds-updrs**: MDS-UPDRS parts
-- **sf-health**: SF-36, SF-12
-- **beck**: Beck Depression/Anxiety Inventory
-- **phq**: PHQ-9, PHQ-8, etc.
-- **other**: Recognized instrument, unknown family
+### Phrase Family Analysis
 
-Instruments with `family_confidence < 0.7` are flagged with `needs_review=True` for optional LLM adjudication.
+```bash
+# Analyze phrase groupings
+cde-analyzer phrase_miner \
+  --input data/cde_records.json \
+  --output-dir phrase_output \
+  --analyze-phrase-families \
+  --min-family-size 3
+```
 
 ## Output Files
 
@@ -264,51 +254,14 @@ Extended phrases with context-based boundary improvement.
 | `right_tokens` | Tokens added on right |
 | `score` | Extension confidence score |
 
-### instruments.tsv (with --instruments-only or --extract-instruments)
+### dedup_phrases.tsv (with --dedup)
 
-Summary of detected research instrument references.
-
-| Column | Description |
-|--------|-------------|
-| `instrument_id` | Unique identifier (slug format with --detect-families) |
-| `normalized_name` | Lowercase normalized name for grouping |
-| `canonical_name` | Most common surface form |
-| `acronym` | Extracted acronym(s) if present |
-| `frequency` | Total occurrence count |
-| `n_tinyids` | Number of distinct CDE documents |
-| `tinyids` | Pipe-separated list of tinyIds |
-| `family_id` | Family identifier (with --detect-families) |
-| `family_display_name` | Human-readable family name (with --detect-families) |
-| `family_confidence` | Confidence in family assignment 0.0-1.0 (with --detect-families) |
-| `identification_method` | "pattern" or "llm" (with --detect-families) |
-| `needs_review` | True if confidence < threshold (with --detect-families) |
-
-### instrument_families.tsv (with --family-summary)
-
-Summary statistics grouped by instrument family.
+Whole-text duplicates detected during the dedup pre-pass.
 
 | Column | Description |
 |--------|-------------|
-| `family_id` | Family identifier (e.g., "neuro-qol") |
-| `family_display_name` | Human-readable name (e.g., "Neuro-QOL") |
-| `n_instruments` | Count of distinct instruments in family |
-| `n_tinyids` | Total distinct CDE documents |
-| `total_frequency` | Sum of all occurrences |
-| `top_instruments` | Top 5 instrument names (pipe-separated) |
-| `all_acronyms` | All acronyms in family (pipe-separated) |
-
-### instruments_verbatim.tsv (with --instruments-only)
-
-Detailed instrument variants for curation.
-
-| Column | Description |
-|--------|-------------|
-| `normalized_name` | Normalized name for grouping |
-| `acronym` | Extracted acronym if present |
-| `verbatim_name` | Exact instrument name as found |
-| `full_match` | Complete matched text (for --instrument-list) |
-| `count` | Occurrence count |
-| `n_tinyids` | Number of distinct documents |
+| `text` | The duplicate field text |
+| `n_tinyids` | Number of CDEs sharing this text |
 | `tinyids` | Pipe-separated list of tinyIds |
 
 ## Algorithm
@@ -366,8 +319,10 @@ Where:
 
 ### Recent Enhancements
 
-- ✅ **Instrument Extraction** - Detect "as part of <Instrument> (<ACRONYM>)" patterns
-- ✅ **Two-Phase Workflow** - Phase 1 extracts instruments, Phase 2 pre-masks curated list
+- ✅ **Whole-Text Dedup** - Pre-pass detects field texts shared across CDEs, emits as phrases, then masks
+- ✅ **Prefix Consolidation** - Post-loop token-ID prefix trie recovers fragmented prefixes masked across k-levels
+- ✅ **Ledger Pre-masking** - Prior "remove" decisions pre-masked during mining to reduce search space
+- ✅ **Phrase Family Analysis** - Prefix/suffix-based family grouping
 - ✅ **Verbatim Coalescing** - Case-insensitive grouping of verbatim forms
 - ✅ **Verbatim Templates** - Regex pattern extraction from multi-form phrases
 - ✅ **Unicode Normalization** - Expanded substitution table (156 entries)

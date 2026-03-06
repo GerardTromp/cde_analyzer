@@ -283,6 +283,9 @@ Including one variant but missing others:
    - Group temporal/boilerplate families
    - Verify anchor phrase handling
    - Save As curated.tsv, Ctrl-C to stop the server
+   For multi-curator teams, see Distributed Curation vignette:
+   - pattern_util --init-curation FILE → per-curator copies
+   - pattern_util --merge-curation FILE → merge + inter-rater stats
          │
          ▼
 7. Strip: strip_phrases --patterns curated.tsv
@@ -322,9 +325,20 @@ Including one variant but missing others:
 
 ## Related Documentation
 
+**Vignettes** (step-by-step tutorials):
+
+- [Instrument Detection](vignettes/instrument-detection.md) — Phase 1 curation decisions, iterative harvesting, supplementary patterns
+- [Phrase Stripping](vignettes/phrase-stripping.md) — Phase 2 scenarios from minimal strip to full production pipeline
+- [Distributed Curation](vignettes/distributed-curation.md) — Multi-curator workflow with standalone editor, inter-rater statistics, centralized server
+- [Full Pipeline Quickstart](vignettes/quickstart.md) — End-to-end walkthrough showing where curation checkpoints occur
+- [Pipeline Orchestration](vignettes/pipeline-orchestration.md) — Workflow engine, checkpoints, and resuming after curation
+- [Parameter Tuning](vignettes/parameter-tuning.md) — How `min_parent_tinyids`, `min_field_count`, etc. affect curation volume
+
+**Reference**:
+
 - [Phrase Miner Logic](phrase_miner_logic.md) — Algorithm internals
 - [pattern_util](help/pattern_util.md) — TSV manipulation utilities
 - [strip_phrases](help/strip_phrases.md) — Stripping engine
 - [Instrument & Phrase Stripping Workflow](workflows/instrument-phrase-stripping-workflow.md) — Complete workflow
 - [LLM Classification](llm/index.md) — Automated classification support
-- [Distributed Curation](vignettes/distributed-curation.md) — Multi-curator workflow with standalone editor
+- [TSV Editor Quickstart](tsv-editor-cheatsheet.md) — Keyboard shortcuts, filters, and decision semantics

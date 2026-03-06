@@ -1,26 +1,32 @@
 # `fix_underscores` Command
 
+Fix leading underscores in JSON field names for Pydantic compatibility.
+
+## Overview
+
+Underscores are not permitted as leading characters in Pydantic name tags. This command prepends a configurable prefix character to field names that start with `_`, at any nesting depth in the JSON structure.
+
+## Usage
+
+```bash
+cde-analyzer fix_underscores -i input.json [-o output.json] [--prefix x] [--depth N]
 ```
-usage: export_help_docs.py fix_underscores [-h] [--id-list ID_LIST [ID_LIST ...] | --id-file ID_FILE] [--id-type ID_TYPE] [--exclude | --no-exclude] --path-file PATH_FILE
-                                           --output OUTPUT [--output-format {json,csv,tsv}]
-                                           input
 
-fix_underscores command
+## Options
 
-positional arguments:
-  input                 Input JSON file
+| Option | Description |
+|--------|-------------|
+| `--input`, `-i` INPUT | Full path, including name, of input JSON file (required) |
+| `--output`, `-o` OUTPUT | Full path, including name, of output JSON file. If omitted, prints to stdout |
+| `--prefix` CHAR | Character to prepend on fields starting with an underscore (default: `x`) |
+| `--depth` N | Maximum depth (JSON nesting) to process. `None` = unlimited (default: `None`) |
 
-options:
-  -h, --help            show this help message and exit
-  --id-list ID_LIST [ID_LIST ...]
-                        List of identifiers to exclude/include (see --exclude)
-  --id-file ID_FILE     Path to file with list of identifiers (JSON, csv, or tsv)
-  --id-type ID_TYPE     Pydantic path/tag for identifier, i.e., what type of identifier. Required if either --id-list or --id-file is provided.
-  --exclude, --no-exclude
-                        Should provided tinyId's be excluded (--exclude) or included (--no-exclude) (default: True)
-  --path-file PATH_FILE
-                        File with the key-value pairs defining the names (key) and paths (value) to be extracted
-  --output OUTPUT       Path, including filename, where to store extracted fields.
-  --output-format {json,csv,tsv}
-                        Format for file with extracted data.
+## Example
+
+```bash
+# Fix underscores in raw CDE export
+cde-analyzer fix_underscores -i raw_cdes.json -o fixed_cdes.json
+
+# Use custom prefix, limit depth
+cde-analyzer fix_underscores -i raw.json -o fixed.json --prefix z --depth 5
 ```

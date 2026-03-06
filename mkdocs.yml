@@ -39,8 +39,9 @@ nav:
       - strip_report: help/strip_report.md
       - recall_analyze: help/recall_analyze.md
     - Data Cleaning:
-      - strip_html: help/strip.md
+      - strip_html: help/strip_html.md
       - fix_underscores: help/fix_underscores.md
+      - tsv_concat: help/tsv_concat.md
     - Analysis:
       - count: help/count.md
       - extract_embed: help/extract_embed.md

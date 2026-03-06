@@ -69,11 +69,22 @@ The `--clean-remnants` flag applies iterative regex-based normalization to remov
 
 Cleanup runs in a loop until the text stabilizes (up to 5 passes). In testing on 22,743 CDEs, this reduced 7,652 remnants to 6 (99.9% reduction).
 
+### Pattern Matching Options
+
+| Argument | Description |
+|----------|-------------|
+| `--expand-anchors` | Expand patterns with anchor prefixes (e.g., "as part of the X"). Enables cleaner stripping by matching longer context (default: on) |
+| `--no-expand-anchors` | Disable anchor prefix expansion. Use bare patterns only |
+| `--verbatim-patterns` | Merge patterns from `config/verbatim_strip_patterns.yaml` and local override. Pre-curated patterns that escape discovery logic (default: on) |
+| `--no-verbatim-patterns` | Disable loading verbatim patterns from config files |
+
 ### Diagnostics
 
 | Argument | Description |
 |----------|-------------|
 | `--trace-matching`, `-T` FILE | Write detailed matching trace TSV (tinyId, pattern length, pattern text per match) |
+| `--match-log` FILE | Write detailed match log TSV (tinyId, matched_pattern, source_pattern, verbatim_text). Full audit trail of what was stripped and where |
+| `--match-summary` FILE | Write pattern match summary TSV (source_pattern, match_count, unique_records). Aggregated counts per pattern |
 
 ### Diff Output
 

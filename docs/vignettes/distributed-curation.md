@@ -34,8 +34,9 @@ This vignette covers two approaches:
 
 **Related documentation**:
 
-- [pattern_util reference](../help/pattern_util.md) — init-curation,
-  merge-curation, editor commands
+- [Curation Guide](../curation-guide.md) — decision guidelines, checklist, and pitfalls
+- [TSV Editor Quickstart](../tsv-editor-cheatsheet.md) — keyboard shortcuts and editor workflow
+- [pattern_util reference](../help/pattern_util.md) — init-curation, merge-curation, editor commands
 - [Quickstart](quickstart.md) — end-to-end pipeline walkthrough
 
 ---

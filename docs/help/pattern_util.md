@@ -54,6 +54,25 @@ cde-analyzer pattern_util --curation-status DIR
 # Incremental curation (re-run optimization)
 cde-analyzer pattern_util --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR
 cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i JSON
+
+# Detect rare words in CDE fields
+cde-analyzer pattern_util --detect-rare-words -i cdes.json -m CDE -o rare.tsv
+
+# Split needs_review into high/low priority (Zipf-based)
+cde-analyzer pattern_util --split-priority needs_review.tsv [--split-auto-remove]
+
+# Pre-strip remnant analysis
+cde-analyzer pattern_util --remnant-analysis patterns.tsv -i cdes.json -o remnants.tsv
+
+# Generate LLM semantic proxies
+cde-analyzer pattern_util --generate-proxies patterns.tsv -i cdes.json -m CDE \
+    --provider claude -o proxied.tsv
+
+# Harvest residuals from sanity check
+cde-analyzer pattern_util --harvest-residuals sanity.tsv --curated curated.tsv -o harvest.tsv
+
+# Analyze parent-filtered patterns for recovery
+cde-analyzer pattern_util --recover-parent-filtered report.tsv -o recovery.tsv
 ```
 
 ## Modes
@@ -483,6 +502,7 @@ between them uses `skip_if_file` to skip when all patterns are auto-resolved:
 | `--no-trim-anchors` | Disable anchor phrase trimming |
 | `--rollup-subset-tinyids` | Enable tinyId-subset rollup |
 | `--emit-def-variants` | Emit definition-form variants (without trailing separator) |
+| `--defer-parent-filter` / `--no-defer-parent-filter` | Defer parent-tinyid filtering until after prefix extraction. Patterns rescued by a prefix group survive even if individual parent count is below threshold. Use for phrase pipelines where cross-parent aggregation matters (default: off) |
 | `--split-tiers MIN_TOKENS` | Split output into tier-1/tier-2 by token count (0 = disabled) |
 
 ### Field Analysis Options
@@ -496,6 +516,7 @@ between them uses `skip_if_file` to skip when all patterns are auto-resolved:
 | `--min-field-count N` | Drop patterns below N in both fields (0 = disabled) |
 | `--min-tokens N` | Drop patterns with fewer than N tokens (0 = disabled) |
 | `--exclude-patterns FILE` | Remove patterns matching entries in exclusion file |
+| `--dedup-phrases FILE` | Remove patterns that are substrings of dedup phrases in this TSV (from phrase_miner). Prevents dedup fragments from cluttering curation |
 
 ### Group Options
 
@@ -577,6 +598,61 @@ between them uses `skip_if_file` to skip when all patterns are auto-resolved:
 |--------|-------------|
 | `--yaml-to-tsv FILE` | Convert supplementary YAML to editable TSV |
 | `--tsv-to-yaml FILE` | Convert edited TSV back to supplementary YAML |
+
+### LLM Proxy Generation Options
+
+| Option | Description |
+|--------|-------------|
+| `--generate-proxies FILE` | Generate semantic proxies for patterns using an LLM. Reads a patterns TSV, looks up sample CDE contexts from `--input` JSON, queries the LLM for a 1-3 word semantic proxy per pattern, and writes enriched TSV with `replace_with` and `proxy_reasoning` columns. Requires `--input`, `--model`, and `--provider` |
+| `--provider {claude,openai,google}` | LLM provider for proxy generation (default: `claude`) |
+| `--llm-model MODEL` | LLM model identifier (e.g., `claude-sonnet-4-20250514`). Uses provider default if not specified |
+| `--config-file FILE` | Path to LLM config file (default: `~/.cde_analyzer/llm_config.json`) |
+| `--api-keys KEYS` | API keys in `provider:key` format |
+| `--context-window N` | Characters of surrounding text to include as context (default: 150) |
+| `--max-contexts N` | Maximum CDE contexts to show per pattern (default: 3) |
+| `--dry-run` | Show prompts without calling LLM |
+
+### Harvest Residuals Options
+
+| Option | Description |
+|--------|-------------|
+| `--harvest-residuals FILE` | Cross-reference sanity check residuals against curated patterns. Classifies residuals as `should_have_matched`, `partial_match`, or `new_candidate`. Requires `--curated` and `--output` |
+| `--curated FILE` | Curated patterns TSV for residual harvesting |
+| `--update-ledger FILE` | Merge new patterns into a cumulative pattern registry. Requires `--ledger` and `--output` |
+| `--ledger FILE` | Path to existing ledger TSV (created if missing) |
+| `--source LABEL` | Source label for ledger entries (e.g., `mined`, `harvested`) (default: `unknown`) |
+| `--round N` | Iteration round number for ledger entries (default: 1) |
+
+### Rare Word Detection Options
+
+| Option | Description |
+|--------|-------------|
+| `--detect-rare-words`, `-R` | Scan CDE fields for words frequent across CDEs but rare in general English (via wordfreq Zipf scores). Requires `--input`, `--model`, and `--output` |
+| `--zipf-threshold N` | Maximum effective Zipf score to be considered rare. Lower = stricter. Scale: 0=absent, 3=uncommon, 5=common (default: 1.5) |
+| `--caps-penalty N` | Zipf penalty for ALL-CAPS words (len >= 2). Catches acronyms that spell common words (default: 2.5) |
+| `--rare-word-whitelist FILE` | Path to rare-word whitelist YAML. Auto-discovers `config/rare_word_whitelist.yaml` and `./rare_word_whitelist.yaml` |
+| `--no-whitelist` | Skip whitelist loading entirely |
+
+### Priority Split Options
+
+| Option | Description |
+|--------|-------------|
+| `--split-priority FILE` | Split a needs_review TSV into high-priority (domain-specific) and low-priority (common English) files using wordfreq Zipf scores. Outputs `{stem}_high.tsv` and `{stem}_low.tsv` |
+| `--split-auto-remove` | Pre-fill `decision=remove` in low-priority patterns (default: leave blank) |
+
+### Remnant Analysis Options
+
+| Option | Description |
+|--------|-------------|
+| `--remnant-analysis FILE` | Pre-strip diagnostic: simulate stripping and identify frequent context words around each match. Reports extensions suggesting missing longer patterns. Requires `--input` and `--output` |
+| `--context-words N` | Number of context words to extract on each side of a match (default: 3) |
+| `--min-context-freq N` | Minimum frequency for a context extension to be reported (default: 5) |
+
+### Parent Filter Diagnostics
+
+| Option | Description |
+|--------|-------------|
+| `--recover-parent-filtered FILE` | Analyze parent-filtered patterns from a coalesce report for prefix recovery opportunities. Groups by word-level prefix and reports candidates with high divergence. Requires `--output` |
 
 ## Examples
 

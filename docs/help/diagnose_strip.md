@@ -52,6 +52,7 @@ cde-analyzer diagnose_strip -i cleaned.json -m CDE -o remaining.tsv [options]
 | Option | Description |
 |--------|-------------|
 | `--suggest-patterns` | Output suggested patterns for `config/supplementary_patterns.yaml` |
+| `--emit-tinyids` | Include tinyIds column (space-separated) in output TSV |
 
 ## Output Format
 

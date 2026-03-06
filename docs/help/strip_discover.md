@@ -80,6 +80,14 @@ cde-analyzer strip_discover \
 | `--no-include-name-only` | Disable bare name inclusion |
 | `--discover-bare-names`, `-b` | Second pass: discover bare names after prefixed patterns |
 
+### Variant Matching
+
+| Option | Description |
+|--------|-------------|
+| `--min-bare-words N` | Minimum word count for bare instrument names. Filters short fragments like "Score" during `--discover-bare-names` (default: 2) |
+| `--allow-abbrev-variants` | Enable abbreviation variant matching. Patterns like `(PHQ)` will also match `(PHQ-9)`, `(PHQ-15)`, etc. |
+| `--allow-embedded-abbrev` | Allow embedded abbreviation parentheticals between words. E.g., `Scale Long` matches `Scale (GDS) Long` |
+
 ### Filtering
 
 | Option | Description |

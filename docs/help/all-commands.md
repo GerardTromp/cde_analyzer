@@ -31,10 +31,13 @@ usage: phrase_miner [-h] --input INPUT [--output-dir OUTPUT_DIR]
                     [--fields FIELDS [FIELDS ...]] [-K K_MAX] [-k K_MIN]
                     [-n FREQ_MIN] [-t MIN_TINYIDS]
                     [--lemmatize | --no-lemmatize] [--remove-stopwords]
-                    [-D] [-S] [--enable-anchor]
-                    [--extract-instruments] [--instrument-list FILE]
-                    [--detect-families] [--family-confidence-threshold N]
-                    [--family-summary]
+                    [--skip-debruijn] [--skip-anchor]
+                    [--dedup | --no-dedup] [--dedup-min-count N]
+                    [--dedup-min-tokens N] [--verbatim-case-sensitive]
+                    [--analyze-phrase-families] [--min-family-size N]
+                    [--prefix-consolidation | --no-prefix-consolidation]
+                    [--prefix-min-tinyids N] [--ledger-dir DIR]
+                    [--histograms]
 
 options:
   -h, --help            show this help message and exit
@@ -43,21 +46,23 @@ options:
   --fields, -f FIELDS   Field names to extract (default: designation definition)
   -K, --k-max K_MAX     Maximum k-mer length (default: 25)
   -k, --k-min K_MIN     Minimum k-mer length (default: 3)
-  -n, --freq-min FREQ_MIN
-                        Minimum frequency threshold (default: 3)
+  -n, --freq-min N      Minimum frequency threshold (default: 3)
   -t, --min-tinyids N   Minimum distinct tinyIds (default: 2)
   --lemmatize           Apply lemmatization (default: True)
   --remove-stopwords    Remove English stopwords
-  -D, --enable-debruijn Enable de Bruijn graph extension
-  -S, --enable-subsumption
-                        Enable subsumption filtering
-  --enable-anchor       Enable anchor-based phrase extension
-  --extract-instruments Extract 'as part of <Instrument>' patterns
-  --instrument-list F   TSV file with curated instrument patterns
-  --detect-families     Enable instrument family detection
-  --family-confidence-threshold N
-                        Min confidence for family assignment (default: 0.7)
-  --family-summary      Generate instrument_families.tsv summary
+  --skip-debruijn       Skip de Bruijn contig extension
+  --skip-anchor         Skip anchor-based extension
+  --dedup               Enable whole-text dedup pre-pass (default: on)
+  --dedup-min-count N   Min CDEs sharing text for dedup (default: 2)
+  --dedup-min-tokens N  Min tokens for dedup emission (default: 3)
+  --analyze-phrase-families
+                        Analyze phrases for family groupings
+  --prefix-consolidation
+                        Extend phrases via right-context analysis (default: on)
+  --prefix-min-tinyids N
+                        Min tinyIds for prefix extension (default: 20)
+  --ledger-dir DIR      Curation ledger for pre-masking remove decisions
+  --histograms          Generate k-mer frequency histograms
 ```
 
 ---
@@ -290,6 +295,29 @@ options:
 
 ---
 
+### `tsv_concat` Command
+
+Selective column concatenation producing 2-column id+text TSV.
+
+```bash
+usage: tsv_concat [-h] -i INPUT -o OUTPUT [--id-column COL]
+                  [--concat COL ...] [--drop COL ...]
+                  [-s SEP] [--output-header NAME] [--skip-empty]
+
+options:
+  -h, --help            show this help message and exit
+  -i, --input INPUT     Path to input TSV/CSV file
+  -o, --output OUTPUT   Path to output 2-column TSV
+  --id-column COL       Column to use as ID (default: tinyId)
+  --concat COL ...      Columns to concatenate (whitelist, mutually exclusive with --drop)
+  --drop COL ...        Columns to exclude (blacklist, mutually exclusive with --concat)
+  -s, --separator SEP   Separator between values (default: " | ")
+  --output-header NAME  Header for concatenated column (default: embed_text)
+  --skip-empty          Omit rows where concatenated text is empty
+```
+
+---
+
 ### `fix_underscores` Command
 
 Fix Pydantic-incompatible field names (underscore prefix).
@@ -313,22 +341,30 @@ options:
 
 ### `extract_embed` Command
 
-Extract fields for transformer model embeddings.
+Extract fields from CDE JSON for embedding text preparation.
 
 ```bash
-usage: extract_embed [-h] --input INPUT --fields FIELDS [FIELDS ...]
-                     [--output-format {json,csv,tsv}] [--output OUTPUT]
-                     [--lemmatize | --no-lemmatize] [--remove-stopwords]
+usage: extract_embed [-h] -i INPUT -m MODEL --path-file FILE
+                     [-o OUTPUT] [--output-format {json,csv,tsv}]
+                     [--id-list IDS ...] [--id-file FILE]
+                     [--id-type TYPE] [--exclude | --no-exclude]
+                     [-c | --no-collapse]
+                     [-s | --no-simplify-permissible]
+                     [--concatenate SEP]
 
 options:
   -h, --help            show this help message and exit
-  --input INPUT         Input JSON file
-  --fields FIELDS       Field names from pydantic classes
-  --output-format FMT   Output format: json, csv, tsv
-  --output OUTPUT       Path to store results
-  --lemmatize           Convert to lemma form (default: True)
-  --remove-stopwords    Remove common English stop words
-  --verbatim            Include verbatim phrases alongside lemmas
+  -i, --input INPUT     Input JSON file
+  -m, --model MODEL     Pydantic model: CDE, Form, Embed, EmbedText
+  --path-file FILE      Paths of interest as name:path pairs
+  -o, --output FILE     Path to store results
+  --output-format FMT   Output format: json, csv, tsv (default: json)
+  --id-list IDS         List of tinyIds to exclude/include
+  --id-file FILE        File containing tinyIds (file:column format)
+  --exclude             Exclude listed IDs (default: True)
+  --collapse             Collapse repeated "None;" in list items (default: on)
+  --simplify-permissible Process permissibleValues heuristically (default: on)
+  --concatenate SEP     Concatenate non-tinyId fields into embed_text column
 ```
 
 ---

@@ -59,6 +59,14 @@ cde-analyzer subset -i INPUT -o OUTPUT -m MODEL --text-filter "PHQ-\d+" --regex
 
 **Supported fields:** `designation`, `definition`, `valueMeaningName`, `valueMeaningDefinition`
 
+### Pattern File Filtering
+
+| Argument | Description |
+|----------|-------------|
+| `--pattern-file`, `-F` FILE | File containing regex patterns (one per line). Like `grep -E -f`, matches records against any pattern. Format: `pattern` or `pattern<TAB>label` for grouping |
+| `--match-report` FILE | Output file for detailed match report (TSV with tinyId, matched patterns, labels) |
+| `--tinyid-report` FILE | Output file listing matched tinyIds only (one per line, for pipeline chaining) |
+
 ### Options
 
 | Argument | Description |

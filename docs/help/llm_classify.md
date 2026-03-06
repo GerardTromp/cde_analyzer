@@ -18,7 +18,7 @@ Agentic LLM-based classification for phrase curation. Uses multiple LLM provider
 
 ```
 -i, --input-dir DIR         Directory containing phrase_miner output files
--m, --module MODULE         Query module: instrument, temporal
+-m, --module MODULE         Query module: instrument, temporal, instrument_family
 ```
 
 ### Output
@@ -51,6 +51,23 @@ Agentic LLM-based classification for phrase curation. Uses multiple LLM provider
 --min-frequency N           Minimum phrase frequency (default: 1)
 --context-window N          Context characters per occurrence (default: 200)
 --reference-file FILE       Reference data for the module
+```
+
+### Instrument Family Adjudication
+
+```
+--adjudicate-instruments FILE   Path to instruments.tsv for family adjudication.
+                                Reads instruments with needs_review=True and submits
+                                to LLM for family classification.
+--adjudicate-threshold N        Adjudicate instruments with family_confidence below
+                                this threshold (default: 0.7)
+```
+
+### Checkpointing
+
+```
+--working-dir DIR           Versioned working directory for intermediate files
+--continue-from FILE        Resume from a checkpoint file
 ```
 
 ### Validation
