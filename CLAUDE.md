@@ -18,10 +18,10 @@ wsl -d Ubuntu-22.04 -- bash -c "cd /mnt/d/GT/Professional/NLM_CDE/clone_git/cde-
 ## Pipeline Overview
 
 ### Phase 1: Instrument Pipeline (`instrument_pipeline.yaml`)
-mine_instruments → discover_verbatim → coalesce → validate_subsumption → enrich_fields → [CURATOR] → apply_substitutions → strip_instruments
+mine_instruments → discover_abbreviations → discover_verbatim → coalesce → validate_subsumption → enrich_fields → curation_gate → [CURATOR] → finalize_curation → apply_substitutions → strip_instruments → sanity_check
 
 ### Phase 2: Phrase Pipeline (`phrase_pipeline.yaml`)
-mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR] → apply_substitutions → strip_phrases → discovery_report
+mine_phrases → discover_verbatim → coalesce → field_analysis → curation_gate → [CURATOR] → finalize_curation → apply_substitutions → strip_phrases → discovery_report
 
 ### Phase 3: Branching Strip
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (13 steps)
@@ -228,8 +228,9 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 - **Split temporal/curated stripping**: Temporal patterns stripped case-insensitively before case-sensitive curated phrase stripping
 
 ### What Remains
-- **Priority 3 — LLM-assisted classification** (not started)
-- **Priority 4 — Position-specific field-aware stripping** (architecture ready in branching_stripper)
+- **LLM pipeline integration** — `llm_classify` action exists but not yet integrated into workflow pipelines
+- **Position-specific field-aware stripping** — architecture ready in branching_stripper
+- **Full regression test** — legacy vs nway branching strip on allcde03 after curation
 
 ## Key Files
 
@@ -264,8 +265,8 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 - `workflows/branching_strip_nway.yaml` — Phase 3 (N-way single-pass, 3 steps)
 
 ### Documentation
-- `docs/vignettes/` — 7 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation)
-- `docs/help/` — 22 per-command reference pages
+- `docs/vignettes/` — 8 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation, synthetic-data)
+- `docs/help/` — 28 per-command reference pages
 - `docs/workflow-architecture.md` — pipeline diagrams + design rationale
 
 ### Data (allcde01/)
@@ -281,7 +282,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 - **K-mer mining**: Descending (k_max → k_min), masks detected phrases after each k
 - **Dedup**: Identification only (no masking), separate curation template, >k_max filter
 
-## `pattern_util` Capabilities
+## `pattern_util` Capabilities (partial — run `cde-analyzer pattern_util --help` for full list)
 
 ```bash
 cde-analyzer pattern_util --coalesce-variants FILE -o OUT         # subsumption + prefix trie

@@ -5,8 +5,8 @@
 CDE Analyzer: Automated detection and removal of repeated text patterns from NLM Common Data Elements to improve downstream embedding and clustering quality.
 
 **Author**: Gerard Tromp
-**Version**: 0.9.0
-**Date**: February 2026
+**Version**: 0.9.4
+**Date**: March 2026
 
 ---
 

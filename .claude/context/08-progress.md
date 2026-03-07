@@ -2,42 +2,47 @@
 
 ## Current Branch: field-aware-strip
 
-**Focus**: N-way single-pass branching strip engine
+**Focus**: Phrase pipeline correctness, curation UX, documentation
 
-**Version**: 0.9.2 (2026-03-03)
+**Version**: 0.9.4 (2026-03-07)
 
-## Current State (v0.9.2)
+## Current State (v0.9.4)
 
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
-**Phase 2: Phrase Pipeline** — 86 curated phrases, 6 removed; 13,640 k-mer phrases mined
+**Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
 **Phase 3: Branching Strip** — 6 variant outputs; legacy 13-step pipeline or N-way 3-step single-pass
 
-### Production Tooling — Complete
+### Phrase Pipeline Correctness (v0.9.4)
 
-- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine producing all variants simultaneously
-- **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE] [--nway]` maps codes to steps
-- **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter for any workflow
+- **Deferred parent filter** (`--defer-parent-filter`): Weak-parent patterns participate in prefix extraction before filtering
+- **No-trim-anchors** (`--no-trim-anchors`): Disables Phase 0 anchor trimming for phrases
+- **Prefix consolidation** (phrase_miner): Post-loop token-ID prefix trie recovers fragmented prefixes
+- **Ledger pre-masking** (`--ledger-dir`): Prior "remove" decisions pre-masked during mining
 
 ### Curation Infrastructure — Complete
 
-- **Multi-curator workflow** (v0.6.0): init/merge with inter-rater stats (Cohen's/Fleiss' kappa, Krippendorff's alpha)
+- **5 decision types**: keep, remove, modify, substitute, followup (v0.9.4: followup added)
+- **Multi-curator workflow** (v0.6.0): init/merge with inter-rater stats
 - **Standalone TSV editor** (v0.7.0): zipapp distribution (`cde_editor.pyz`, ~59 KB)
-- **Centralized curation server** (v0.7.0): HMAC token auth, TLS, rate limiting, admin dashboard
-- **Incremental curation ledger** (v0.8.0): auto-resolve from prior decisions, gate/finalize workflow
-- **Substitute decision** (v0.8.1): 4th decision type replacing matched text with modification content
-- **Zipf priority split** (v0.9.0): triage needs_review by word frequency for fast curation
+- **Centralized curation server** (v0.7.0): HMAC token auth, TLS, rate limiting
+- **Incremental curation ledger** (v0.8.0): auto-resolve from prior decisions, gate/finalize
+- **Zipf priority split** (v0.9.0): triage needs_review by word frequency
 
-### Tooling — Complete
+### Production Tooling — Complete
 
+- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine, all 6 variants
+- **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE] [--nway]`
+- **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter
 - **Workflow scaffold** (v0.6.0): auto-generate bash scripts with Windows→WSL conversion
-- **Documentation** (v0.5.17–v0.6.0): 7 vignettes, SVG diagrams, CLI short options, MkDocs site
+- **Documentation**: 8 vignettes, 28 help files, 4 cheatsheets, MkDocs site
 
 ## Recent Versions
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.9.4 | 2026-03-07 | Deferred parent filter, anchor trim control, followup decision, doc audit |
 | 0.9.2 | 2026-03-03 | N-way single-pass branching strip engine, tinyid_count column |
 | 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps, 6th variant (MTSTPT) |
 | 0.9.0 | 2026-02-26 | Zipf priority split, editor UX, version sync |
@@ -51,8 +56,8 @@
 ## Branches
 
 ### Active: field-aware-strip (from main)
-- **Contains**: Everything through v0.9.2
-- **Status**: N-way branching strip engine, tinyid_count column
+- **Contains**: Everything through v0.9.4
+- **Status**: Deferred parent filter, anchor trim control, followup decision, phrase pipeline improvements
 
 ### Active: main
 - **Contains**: Everything through v0.9.1 + tinyid_count + context-aware examples
@@ -63,6 +68,7 @@
 
 ## What Remains
 
-- **Priority 3 — LLM-assisted classification** (not started)
+- **LLM-assisted classification** — implemented (`llm_classify` action), not yet integrated into pipeline
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
 - **Embedding evaluation** — run extract_embed on 6 branching-strip outputs
+- **Full regression test** — legacy vs nway branching strip on allcde03 after curation
