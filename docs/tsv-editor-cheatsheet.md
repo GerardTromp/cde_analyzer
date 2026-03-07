@@ -1,6 +1,6 @@
 # TSV Pattern Editor — Quickstart Guide
 
-> **Version**: v0.8.1 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
+> **Version**: v0.9.4 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
 
 ---
 
@@ -49,7 +49,7 @@ For patterns that should be *replaced* rather than deleted, select and press **S
 
 ---
 
-## The 4 Decisions
+## The 5 Decisions
 
 | Decision | When to use | What happens |
 |----------|-------------|--------------|
@@ -57,13 +57,14 @@ For patterns that should be *replaced* rather than deleted, select and press **S
 | **remove** | False positive — not an instrument | Excluded from final pattern set |
 | **modify** | Partially correct text | `modification` becomes the new pattern to strip |
 | **substitute** | Replace, don't delete | `modification` replaces the matched text in output |
+| **followup** | Needs more evaluation | Flagged for later review; counts as undecided |
 
 !!! note "modify vs substitute"
     Both use the `modification` column with different semantics.
     **Modify** changes *what gets stripped* (corrects the pattern text before deletion).
     **Substitute** changes *what appears in the output* (matched text is replaced, not deleted).
 
-Blank decision = treated as `keep` by the pipeline (safe default).
+Blank decision = treated as `keep` by the pipeline (safe default). Followup = treated as undecided.
 
 ---
 
@@ -77,6 +78,7 @@ Blank decision = treated as `keep` by the pipeline (safe default).
 | **R** | Set selected → `remove` |
 | **M** | Set selected → `modify` |
 | **S** | Set selected → `substitute` |
+| **F** | Set selected → `followup` |
 
 Requires rows selected and not editing a cell.
 
@@ -85,6 +87,7 @@ Requires rows selected and not editing a cell.
 | Shortcut | Action |
 |----------|--------|
 | **Ctrl+A** | Select all visible rows |
+| **Ctrl+U** | Deselect all |
 | **Ctrl+Z** / **Ctrl+Shift+Z** | Undo / Redo (50 levels) |
 | **Ctrl+S** | Save (server mode) |
 | **Ctrl+F** | Focus first filter |
@@ -123,7 +126,7 @@ Each column has a filter below the header. The **decision column** uses a dropdo
 | `=10` / `!=5` | Numeric equals / not-equals |
 | `foo\|bar` | "foo" OR "bar" |
 
-Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modify` · `substitute`
+Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modify` · `substitute` · `followup`
 
 ---
 
@@ -131,7 +134,7 @@ Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modi
 
 | Element | Meaning |
 |---------|---------|
-| Green / Red / Amber / Cyan badge | Decision: keep / remove / modify / substitute |
+| Green / Red / Amber / Cyan / Purple badge | Decision: keep / remove / modify / substitute / followup |
 | Blue left border | `def-only` field profile |
 | Orange left border | `desig-only` field profile |
 | Green left border | `both` / `both-all` field profile |
@@ -143,12 +146,14 @@ Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modi
 ## Status Bar
 
 ```
-needs_review.tsv -- 458 rows (3 selected) | ✓430  ✗24  ✎4  ⇄2  ?0    server
-                                             keep  rem  mod sub  undecided
+needs_review.tsv -- 458 rows (3 selected) | ✓430  ✗24  ✎4  ⇄2  ⚑1  ?0  | tinyIds: 18,240/18,502  server
+                                             keep  rem  mod sub  flup undecided   decided/total
 ```
 
 - **Counts update in real-time** as you assign decisions
+- **`⚑N`** = flagged for followup (counts as undecided)
 - **`?0`** = all rows decided — you're done
+- **`tinyIds: N/M`** = tinyId coverage (decided / total)
 - **`server`** / **`standalone`** = save mode indicator
 
 ---

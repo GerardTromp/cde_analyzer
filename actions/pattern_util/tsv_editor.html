@@ -254,6 +254,7 @@ body {
 .decision-remove { background: var(--danger-light); color: var(--danger); }
 .decision-modify { background: #fff3e0; color: var(--warning); }
 .decision-substitute { background: #e0f7fa; color: #00838f; }
+.decision-followup { background: #f3e5f5; color: #7b1fa2; }
 
 /* Decision quick-buttons in toolbar */
 .decision-quick-btn {
@@ -276,6 +277,8 @@ body {
 .decision-quick-btn.dq-modify:hover:not(:disabled) { background: #ffe0b2; }
 .decision-quick-btn.dq-substitute { background: #e0f7fa; color: #00838f; border-color: #00838f; }
 .decision-quick-btn.dq-substitute:hover:not(:disabled) { background: #b2ebf2; }
+.decision-quick-btn.dq-followup { background: #f3e5f5; color: #7b1fa2; border-color: #7b1fa2; }
+.decision-quick-btn.dq-followup:hover:not(:disabled) { background: #e1bee7; }
 
 /* Decision select dropdown during edit */
 #grid td.editing select {
@@ -548,6 +551,7 @@ function cdeUrl(path) {
         <button class="decision-quick-btn dq-remove" id="btn-dq-remove" title="Set selected to 'remove' (R)" disabled>&#10007; Remove</button>
         <button class="decision-quick-btn dq-modify" id="btn-dq-modify" title="Set selected to 'modify' (M)" disabled>&#10038; Modify</button>
         <button class="decision-quick-btn dq-substitute" id="btn-dq-substitute" title="Set selected to 'substitute' (S)" disabled>&#8644; Subst</button>
+        <button class="decision-quick-btn dq-followup" id="btn-dq-followup" title="Set selected to 'followup' (F)" disabled>&#9873; Follow</button>
     </div>
 
     <!-- Group ops (hidden when no notes column) -->
@@ -659,6 +663,7 @@ function cdeUrl(path) {
     const btnDqRemove = $('btn-dq-remove');
     const btnDqModify = $('btn-dq-modify');
     const btnDqSubstitute = $('btn-dq-substitute');
+    const btnDqFollowup = $('btn-dq-followup');
     const groupButtons = $('group-buttons');
     const btnGroup = $('btn-group');
     const btnPropagate = $('btn-propagate');
@@ -866,6 +871,7 @@ function cdeUrl(path) {
                     ['remove', 'remove'],
                     ['modify', 'modify'],
                     ['substitute', 'substitute'],
+                    ['followup', 'followup'],
                 ];
                 for (const [val, label] of opts) {
                     const o = document.createElement('option');
@@ -1271,7 +1277,7 @@ function cdeUrl(path) {
         // Decision column: use <select> dropdown
         if (col === S.decisionCol && S.decisionCol >= 0) {
             const select = document.createElement('select');
-            const options = ['', 'keep', 'remove', 'modify', 'substitute'];
+            const options = ['', 'keep', 'remove', 'modify', 'substitute', 'followup'];
             for (const opt of options) {
                 const o = document.createElement('option');
                 o.value = opt;
@@ -2039,7 +2045,7 @@ function cdeUrl(path) {
 
         // Decision column stats + tinyId count summary
         if (S.decisionCol >= 0) {
-            let keep = 0, remove = 0, modify = 0, substitute = 0, empty = 0;
+            let keep = 0, remove = 0, modify = 0, substitute = 0, followup = 0, empty = 0;
             let tidTotal = 0, tidDecided = 0;
             const hasTidCount = S.tinyidCountCol >= 0;
             for (const r of S.rows) {
@@ -2050,10 +2056,12 @@ function cdeUrl(path) {
                 else if (d === 'remove') { remove++; tidDecided += tc; }
                 else if (d === 'modify') { modify++; tidDecided += tc; }
                 else if (d === 'substitute') { substitute++; tidDecided += tc; }
+                else if (d === 'followup') { followup++; }
                 else empty++;
             }
             text += ' | \u2713' + keep + ' \u2717' + remove + ' \u270E' + modify;
             if (substitute > 0) text += ' \u21C4' + substitute;
+            if (followup > 0) text += ' \u2691' + followup;
             if (empty > 0) text += ' ?' + empty;
             if (hasTidCount && tidTotal > 0) {
                 text += ' | tinyIds: ' + tidDecided.toLocaleString() + '/' + tidTotal.toLocaleString();
@@ -2094,6 +2102,7 @@ function cdeUrl(path) {
             btnDqRemove.disabled = sel === 0;
             btnDqModify.disabled = sel === 0;
             btnDqSubstitute.disabled = sel === 0;
+            btnDqFollowup.disabled = sel === 0;
         } else {
             decisionButtons.style.display = 'none';
         }
@@ -2168,6 +2177,9 @@ function cdeUrl(path) {
                 } else if (e.key === 's' || e.key === 'S') {
                     setDecisionForSelected('substitute');
                     e.preventDefault();
+                } else if (e.key === 'f' || e.key === 'F') {
+                    setDecisionForSelected('followup');
+                    e.preventDefault();
                 }
             }
         }
@@ -2215,6 +2227,7 @@ function cdeUrl(path) {
     btnDqRemove.addEventListener('click', () => setDecisionForSelected('remove'));
     btnDqModify.addEventListener('click', () => setDecisionForSelected('modify'));
     btnDqSubstitute.addEventListener('click', () => setDecisionForSelected('substitute'));
+    btnDqFollowup.addEventListener('click', () => setDecisionForSelected('followup'));
     btnGroup.addEventListener('click', assignGroup);
     btnPropagate.addEventListener('click', propagateGroups);
     btnClearFilters.addEventListener('click', clearAllFilters);

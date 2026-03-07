@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.1)
+# CDE Analyzer — Context (v0.9.4)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -27,7 +27,33 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → [CURATOR]
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (13 steps)
 - **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all variants) → quality_report (3 steps)
 
-## Current State (v0.9.2)
+## Current State (v0.9.4)
+
+### v0.9.4: Deferred Parent Filter + Anchor Trim Control + Followup Decision
+
+#### Phrase Pipeline Correctness
+- **Deferred parent filter** (`--defer-parent-filter`): Weak-parent patterns participate in prefix extraction before filtering. Rescued by prefix groups survive. Phrase pipeline default: true
+- **No-trim-anchors** (`--no-trim-anchors`): Disables Phase 0 anchor trimming. Critical for phrases. Phrase pipeline default: true
+- **Phase 1b protection**: Skip reverse subsumption for weak-parent patterns in deferred mode
+- **Divergence warning**: Fires when parent filter removes patterns with high actual/parent ratio (>5x)
+
+#### Phrase Miner Enhancements
+- **Prefix consolidation**: Post-loop token-ID prefix trie recovers fragmented prefixes masked across multiple k-levels
+- **Ledger pre-masking** (`--ledger-dir`): Prior "remove" decisions pre-masked during mining
+
+#### Verbatim Strip Patterns
+- Executive Order disclaimer extended with trailing "repository."
+- New patterns: `[AHRQ]` (62), `[AQ]` (50), `[HL7v3.0]` (1), AQ Adol/Adolescent (98), Ord AQ (50), REGEX: trailing AQ (50)
+
+#### TSV Editor: Followup Decision
+- **5th decision type**: `followup` — flags patterns for later evaluation (purple badge, `F` shortcut)
+- **Counts as undecided**: Does not contribute to tinyId coverage tracker
+- **Ctrl+U**: Deselect all rows
+- **Status bar**: Shows `tinyIds: decided/total` coverage
+
+#### Documentation Audit
+- 11 help files updated, 2 new (`strip_html.md`, `tsv_concat.md`)
+- Cheatsheet renamed QUICKSTART → CHEATSHEET with curator workflow guide
 
 ### v0.9.2: N-way Single-Pass Branching Strip
 

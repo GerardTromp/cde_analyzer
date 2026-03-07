@@ -179,6 +179,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 .mock-badge.remove { background: #fed7d7; color: #9b2c2c; }
 .mock-badge.modify { background: #fff3e0; color: #c05621; }
 .mock-badge.substitute { background: #e0f7fa; color: #00838f; }
+.mock-badge.followup { background: #f3e5f5; color: #7b1fa2; }
 
 /* Checkbox in mockup */
 .mock-cb { width: 0.22cm; height: 0.22cm; display: inline-block; text-align: center; }
@@ -215,6 +216,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 .mock-status .counts .cr { color: #9b2c2c; }
 .mock-status .counts .cm { color: #c05621; }
 .mock-status .counts .cs { color: #00838f; }
+.mock-status .counts .cf { color: #7b1fa2; }
 .mock-status .counts .cu { color: #718096; }
 .mock-status .mode-dot {
   display: inline-block; width: 0.16cm; height: 0.16cm;
@@ -388,6 +390,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <span class="cr">&cross;24</span>&ensp;
               <span class="cm">&#10038;4</span>&ensp;
               <span class="cs">&#8644;2</span>&ensp;
+              <span class="cf">&#9873;1</span>&ensp;
               <span class="cu">?1</span>&ensp;
               | tinyIds: 18,240/18,502&ensp;
               <span class="mode-dot"></span>server
@@ -397,7 +400,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
 
         <h3>Visual Cues</h3>
         <table>
-          <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span></td><td>Decision badges: keep / remove / modify / substitute</td></tr>
+          <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span> <span class="swatch" style="background:#f3e5f5;border:1px solid #7b1fa2;"></span></td><td>Decision badges: keep / remove / modify / substitute / followup</td></tr>
           <tr><td><span class="swatch" style="background:#fff;border-left:3px solid #4299e1;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #ed8936;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #48bb78;"></span></td><td>Left border: def-only / desig-only / both</td></tr>
           <tr><td><span class="swatch" style="background:#fff;border-right:3px solid #e91e63;"></span> <span class="swatch" style="background:#fff;border-right:3px solid #2196f3;"></span></td><td>Right border + badge: merge group (G1, G2&hellip;)</td></tr>
         </table>
@@ -407,7 +410,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
     <!-- COL 2: Decisions + Shortcuts -->
     <div>
       <div class="section green">
-        <h2>The 4 Decisions</h2>
+        <h2>The 5 Decisions</h2>
         <p>Each row is a detected <strong>pattern</strong>. Decide what happens to it:</p>
         <table>
           <tr><th>Decision</th><th>When to use</th><th>Effect</th></tr>
@@ -415,6 +418,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><span class="mock-badge remove">remove</span></td><td>False positive</td><td>Excluded entirely</td></tr>
           <tr><td><span class="mock-badge modify">modify</span></td><td>Partially correct</td><td>Modification text <em>replaces</em> pattern, then stripped</td></tr>
           <tr><td><span class="mock-badge substitute">substitute</span></td><td>Replace, don&rsquo;t delete</td><td>Modification text <em>appears in output</em></td></tr>
+          <tr><td><span class="mock-badge followup">followup</span></td><td>Needs more evaluation</td><td>Flagged; counts as undecided</td></tr>
         </table>
         <h3>Modify vs Substitute</h3>
         <p><strong>Modify</strong> changes <em>what gets stripped</em> (corrects the pattern text before deletion).
@@ -430,6 +434,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><span class="key">R</span></td><td>Set selected &rarr; <code>remove</code></td></tr>
           <tr><td><span class="key">M</span></td><td>Set selected &rarr; <code>modify</code></td></tr>
           <tr><td><span class="key">S</span></td><td>Set selected &rarr; <code>substitute</code></td></tr>
+          <tr><td><span class="key">F</span></td><td>Set selected &rarr; <code>followup</code></td></tr>
         </table>
         <p class="small">Requires rows selected &amp; not editing a cell.</p>
         <h3>Navigation &amp; Editing</h3>
@@ -485,7 +490,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
         </table>
         <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
-        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code></p>
+        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code> | <code>followup</code></p>
       </div>
 
       <div class="section">
@@ -499,6 +504,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <span class="cr">&cross;24</span>&ensp;
               <span class="cm">&#10038;4</span>&ensp;
               <span class="cs">&#8644;2</span>&ensp;
+              <span class="cf">&#9873;0</span>&ensp;
               <span class="cu">?0</span>&ensp;
               | tinyIds: 18,502/18,502&ensp;
               <span class="mode-dot"></span>server
@@ -507,6 +513,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         </div>
         <table>
           <tr><td><code>?0</code></td><td>All rows decided &mdash; you&rsquo;re done!</td></tr>
+          <tr><td><code>&#9873;N</code></td><td>Flagged for followup (counts as undecided)</td></tr>
           <tr><td><code>tinyIds: N/M</code></td><td>Decided / total tinyId coverage</td></tr>
           <tr><td><code>server</code></td><td>Ctrl+S saves in-place</td></tr>
           <tr><td><code>standalone</code></td><td>Use Save As to download</td></tr>

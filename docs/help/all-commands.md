@@ -20,6 +20,73 @@ cde-analyzer <command> --help
 
 ---
 
+## Instrument Extraction
+
+### `instrument_miner` Command
+
+Extract measurement instruments from CDE text fields using anchor-based pattern detection.
+
+```bash
+usage: instrument_miner [-h] --input INPUT [--output-dir OUTPUT_DIR]
+                         [--fields FIELDS [FIELDS ...]]
+                         [--min-tinyids N] [--min-instrument-words N]
+                         [-a] [-s] [-d]
+                         [--family-confidence-threshold N]
+                         [--family-summary]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input JSON file (list of CDE items)
+  --output-dir, -o DIR  Output directory for results (default: instrument_output)
+  --fields, -f FIELDS   Field names to extract instruments from (default: designation definition)
+  --min-tinyids N       Minimum distinct tinyIds (default: 2)
+  --min-instrument-words N
+                        Minimum words in instrument name (default: 3)
+  -a, --extract-abbreviation-only
+                        Extract abbreviation-only references like '(PHQ-9)'
+  -s, --extract-supplementary
+                        Extract non-Title-Case instruments (supplementary patterns)
+  -d, --detect-families Enable instrument family detection
+  --family-confidence-threshold N
+                        Min confidence for automatic family assignment (default: 0.7)
+  --family-summary      Generate instrument_families.tsv summary file
+```
+
+---
+
+### `batch_expand_abbreviations` Command
+
+Iterate over abbreviations, subset CDEs, and mine phrases to discover extended instrument names.
+
+```bash
+usage: batch_expand_abbreviations [-h] --input INPUT
+                                  --abbreviations FILE
+                                  [--acronym-column COL]
+                                  [--output-dir DIR]
+                                  [--fields FIELDS ...]
+                                  [--k-max N] [--k-min N]
+                                  [--min-tinyids N] [--top-phrases N]
+                                  [--min-subset-size N]
+                                  [--skip-abbreviations ABBREV ...]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input CDE JSON file
+  --abbreviations FILE  TSV file with abbreviations (from instrument_miner)
+  --acronym-column COL  Column name containing abbreviations (default: acronym)
+  --output-dir, -o DIR  Output directory (default: abbreviation_expansions)
+  --fields, -f FIELDS   Fields to search (default: designation definition)
+  --k-max N             Maximum k-mer length (default: 15)
+  --k-min N             Minimum k-mer length (default: 3)
+  --min-tinyids N       Minimum tinyIds for reporting (default: 2)
+  --top-phrases N       Top phrases per abbreviation (default: 10)
+  --min-subset-size N   Min CDEs in subset to run mining (default: 3)
+  --skip-abbreviations ABBREV
+                        Abbreviations to skip
+```
+
+---
+
 ## Phrase Detection
 
 ### `phrase_miner` Command
@@ -109,6 +176,91 @@ options:
 
 ---
 
+### `phrase_grouper` Command
+
+Groups phrases by shared prefix, suffix, or infix patterns for family analysis.
+
+```bash
+usage: phrase_grouper [-h] --input INPUT [--output-dir DIR]
+                      [--text-column COL] [--id-column COL]
+                      [--tinyid-column COL]
+                      [--k-min N] [--k-max N]
+                      [--min-content-words N] [--min-family-size N]
+                      [--min-pattern-freq N]
+                      [--trees {prefix,suffix,infix} ...]
+                      [--assignment {frequency,longest,all}]
+                      [--parallel] [--lowercase]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input TSV file (verbatim_phrases.tsv from phrase_miner)
+  --output-dir, -o DIR  Output directory (default: phrase_families)
+  --text-column COL     Column with phrase text (default: verbatim_text)
+  --id-column COL       Phrase identifier column (default: phrase_id)
+  --tinyid-column COL   Document ID column (default: tinyids)
+  --k-min, -k N         Minimum k-mer length in tokens (default: 3)
+  --k-max, -K N         Maximum k-mer length in tokens (default: 10)
+  --min-content-words N Minimum non-stopword tokens (default: 1)
+  --min-family-size, -n N
+                        Minimum phrases to form a family (default: 3)
+  --min-pattern-freq N  Minimum pattern frequency (default: 3)
+  --trees TREES         Which trees to build: prefix, suffix, infix (default: all)
+  --assignment METHOD   Assignment strategy: frequency, longest, all (default: frequency)
+  --parallel            Build trees in parallel
+  --lowercase           Normalize to lowercase before analysis
+```
+
+---
+
+### `strip_discover` Command
+
+Flexible regex discovery for finding verbatim pattern occurrences in CDE text fields.
+
+```bash
+usage: strip_discover [-h] [--input INPUT] [--model MODEL]
+                      [--output OUTPUT] [--pattern-list FILE]
+                      [--additional-patterns FILE ...]
+                      [--fields FIELDS ...] [--expand-variants]
+                      [--include-name-only | --no-include-name-only]
+                      [--discover-bare-names] [--min-bare-words N]
+                      [--allow-abbrev-variants] [--allow-embedded-abbrev]
+                      [--use-expected-tinyids] [--workers N]
+                      [--parent-column COL] [--discover-fails FILE]
+                      [--discover-abbreviations FILE]
+                      [--min-pattern-tinyids N]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Path to input JSON file (CDE records)
+  --model, -m MODEL     Pydantic model: CDE, Form, Embed, EmbedText
+  --output, -o OUTPUT   Path to output TSV file
+  --pattern-list, -p FILE
+                        TSV file with patterns. Format: 'file', 'file,col', 'file,pat_col,tid_col'
+  --additional-patterns FILE
+                        Additional TSV files to merge (repeatable)
+  --fields, -f FIELDS   Field paths to search (default: definitions, designations)
+  --expand-variants, -e Generate spelling/punctuation variants
+  --include-name-only   Include bare instrument names (default: True)
+  --discover-bare-names, -b
+                        Second pass: discover bare names without anchor prefix
+  --min-bare-words N    Minimum words for bare names (default: 2)
+  --allow-abbrev-variants
+                        Enable abbreviation variant matching
+  --allow-embedded-abbrev
+                        Allow embedded abbreviation parentheticals
+  --use-expected-tinyids
+                        Filter discovery by expected tinyIds from pattern list
+  --workers, -w N       Parallel workers (0=auto, 1=sequential, default: 1)
+  --parent-column COL   Parent phrase column for tinyId aggregation
+  --discover-fails FILE Write failed patterns to TSV
+  --discover-abbreviations, -a FILE
+                        Extract abbreviations and discover designation patterns
+  --min-pattern-tinyids N
+                        Min tinyIds for abbreviation patterns (default: 2)
+```
+
+---
+
 ### `strip_phrases` Command
 
 Remove curated phrases from specific paths in CDE documents.
@@ -170,6 +322,66 @@ options:
   --fn-anchor STRING    Anchor phrase (default: "as part of")
   --expand-variants     Generate variants for conflict analysis
   --include-name-only   Include bare names (default: True)
+```
+
+---
+
+### `diagnose_strip` Command
+
+Analyze cleaned JSON for iterative stripping improvement.
+
+```bash
+usage: diagnose_strip [-h] --input INPUT --model MODEL --output OUTPUT
+                      [--fields FIELDS ...] [--original FILE]
+                      [--anchors ANCHORS ...] [--context-chars N]
+                      [--min-count N] [--suggest-patterns] [--emit-tinyids]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input JSON file (cleaned output from strip_phrases)
+  --model, -m MODEL     Pydantic model: CDE, Form
+  --output, -o OUTPUT   Output TSV with remaining patterns and frequencies
+  --fields, -f FIELDS   Field paths to search (default: definitions, designations)
+  --original FILE       Original JSON for comparison metrics
+  --anchors ANCHORS     Anchor phrases to search for (default: 'as part of' etc.)
+  --context-chars N     Context characters after anchor (default: 100)
+  --min-count N         Minimum occurrence count (default: 1)
+  --suggest-patterns    Output suggested patterns for supplementary_patterns.yaml
+  --emit-tinyids        Include tinyIds column in output
+```
+
+---
+
+### `strip_branching` Command
+
+N-way branching strip producing all strip variants in a single pass.
+
+```bash
+usage: strip_branching [-h] --input INPUT --output-dir DIR
+                       [--model MODEL]
+                       [--inst-full-patterns FILE] [--inst-sub-patterns FILE]
+                       [--temporal-patterns FILE] [--phrase-patterns FILE]
+                       [--variants CODES] [--workers N] [--clean-remnants]
+                       [--fields FIELDS ...] [--sort-order ORDER]
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Path to input CDE JSON file
+  --output-dir, -d DIR  Output directory (writes stripped_{CODE}.json per variant)
+  --model, -m MODEL     Pydantic model: CDE, Form, Embed, EmbedText (default: CDE)
+  --inst-full-patterns FILE
+                        Full instrument patterns TSV (_full.tsv)
+  --inst-sub-patterns FILE
+                        Sub-group instrument patterns TSV (_sub.tsv)
+  --temporal-patterns FILE
+                        Expanded temporal patterns TSV
+  --phrase-patterns FILE Curated phrase patterns TSV
+  --variants CODES      Comma-separated variant codes (default: all 6).
+                        Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT
+  --workers, -w N       Parallel workers (0=auto, 1=sequential, default: 0)
+  --clean-remnants      Post-strip cleanup of orphan articles, floating punctuation
+  --fields, -f FIELDS   Field paths to strip (default: definitions, designations)
+  --sort-order ORDER    Pattern processing order: length, file, alpha (default: length)
 ```
 
 ---
@@ -538,6 +750,50 @@ options:
   --suggest-patterns F  Output suggested patterns for low-recall families
   --suggest-min-matches N
                         Min false negatives for suggestion (default: 2)
+```
+
+---
+
+## Workflow Orchestration
+
+### `workflow` Command
+
+YAML-based workflow orchestrator for CDE analysis pipelines.
+
+```bash
+usage: workflow [-h] {run,resume,status,list,copy,scaffold,configure} ...
+
+workflow commands:
+  run                   Execute a workflow from YAML file
+  resume                Resume workflow after checkpoint
+  status                Show workflow execution status
+  list                  List available workflow templates
+  copy                  Copy a workflow template for customization
+  scaffold              Generate project-specific orchestration script
+  configure             Configure branching strip for specific variants
+```
+
+**Subcommands**:
+
+```bash
+# Execute a workflow
+workflow run YAML [--set KEY=VALUE] [--from-step S] [--only-steps S1,S2] [--dry-run]
+
+# Resume after curator checkpoint
+workflow resume --state-file FILE
+
+# Check pipeline state
+workflow status [--state-file FILE] [-v]
+
+# List and copy templates
+workflow list
+workflow copy NAME [--as FILE] [--dest DIR]
+
+# Generate orchestration script
+workflow scaffold PROJECT -i JSON -d DIR [--phases 1,2,3] [--with-iterate]
+
+# Configure branching strip
+workflow configure CODE [CODE...] [-o FILE] [--no-report] [--nway]
 ```
 
 ---
