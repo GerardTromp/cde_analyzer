@@ -62,6 +62,11 @@ nul
 .claude/sessions/
 .claude/checkpoints/
 .claude/init_session.sh
+.claude/settings.json
+.claude/context/archive/
+
+# Log files
+load_times*.log
 
 # MkDocs build output
 site/
