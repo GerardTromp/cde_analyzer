@@ -3,6 +3,18 @@
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
 
+## Version String Locations — UPDATE ALL ON VERSION BUMP
+
+When changing the version, **all three files must be updated together**:
+
+| # | File | Variable | Example |
+|---|------|----------|---------|
+| 1 | `cde_analyzer/__version__.py` | `__version__` | `__version__ = "X.Y.Z"` |
+| 2 | `pyproject.toml` | `version` | `version = "X.Y.Z"` |
+| 3 | `tools/editor_standalone/__main__.py` | `_FALLBACK_VERSION` | `_FALLBACK_VERSION = "X.Y.Z"` |
+
+Also update the version in documentary headings: `CLAUDE.md`, `CLAUDE_full.md`, and `.claude/context/` files.
+
 ## Project Summary
 
 CDE Analyzer parses and analyzes Common Data Elements from the NLM CDE repository.
