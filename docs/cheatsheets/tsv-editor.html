@@ -259,6 +259,15 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
   display: inline-block; width: 0.3cm; height: 0.2cm;
   border-radius: 2px; vertical-align: middle; margin-right: 0.04cm;
 }
+
+/* Containment tree mockup */
+.mock-tree-toggle { cursor: default; font-size: 0.46rem; color: #718096; margin-right: 1px; }
+.mock-tree-badge {
+  display: inline-block; background: #ede7f6; color: #5e35b1;
+  padding: 0 0.05cm; border-radius: 6px; font-size: 0.42rem; font-weight: 700;
+}
+.mock-tree-ref { color: #78909c; font-size: 0.46rem; }
+.mock-tree-dot { color: #b0bec5; margin-right: 1px; font-size: 0.46rem; }
 </style>
 </head>
 <body>
@@ -267,7 +276,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 <div class="page">
   <div class="banner">
     <h1>TSV Pattern Editor <strong>:: CHEATSHEET</strong></h1>
-    <span class="subtitle">CDE Analyzer v0.9.4 &mdash; Browser-Based Curation Tool</span>
+    <span class="subtitle">CDE Analyzer v0.9.5 &mdash; Browser-Based Curation Tool</span>
   </div>
   <div class="columns">
 
@@ -435,8 +444,9 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><span class="key">M</span></td><td>Set selected &rarr; <code>modify</code></td></tr>
           <tr><td><span class="key">S</span></td><td>Set selected &rarr; <code>substitute</code></td></tr>
           <tr><td><span class="key">F</span></td><td>Set selected &rarr; <code>followup</code></td></tr>
+          <tr><td><span class="key">T</span></td><td>Toggle tree sort (no selection)</td></tr>
         </table>
-        <p class="small">Requires rows selected &amp; not editing a cell.</p>
+        <p class="small">Decision keys require rows selected &amp; not editing a cell.</p>
         <h3>Navigation &amp; Editing</h3>
         <table>
           <tr><td><span class="key">Ctrl</span>+<span class="key">A</span></td><td>Select all visible rows</td></tr>
@@ -522,98 +532,97 @@ python cde_editor.pyz needs_review.tsv</code></pre>
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.9.4 &bull; TSV Pattern Editor Cheatsheet &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+  <div class="footer">CDE Analyzer v0.9.5 &bull; TSV Pattern Editor Cheatsheet &bull; Page 1 of 2 &bull; Print landscape for best results</div>
 </div>
 
 <!-- PAGE 2 -->
 <div class="page">
   <div class="banner">
     <h1>TSV Pattern Editor <strong>:: CHEATSHEET</strong></h1>
-    <span class="subtitle">Groups, Advanced Features &amp; Pipeline Integration</span>
+    <span class="subtitle">Containment Tree, Groups &amp; Pipeline Integration</span>
   </div>
   <div class="columns">
 
-    <!-- COL 1: Merge Groups + Propagation -->
+    <!-- COL 1: Containment Tree + Merge Groups -->
     <div>
       <div class="section purple">
-        <h2>Merge Groups</h2>
-        <p>When multiple patterns should share the <strong>same modification</strong>:</p>
+        <h2>Containment Tree</h2>
+        <p>Auto-detects <strong>prefix + tinyId containment</strong> between patterns.
+        If &ldquo;Scale of&rdquo; (409 tinyIds) is a prefix of &ldquo;Scale of the difficulty&hellip;&rdquo; (133 tinyIds) and all 133 tinyIds appear in the 409, the child is <strong>fully contained</strong>.</p>
+
+        <h3>How to Read the Tree Column</h3>
+        <div class="mockup">
+          <table class="mock-grid">
+            <tr>
+              <th class="mock-rn">#</th>
+              <th style="max-width:0.9cm;">dec.</th>
+              <th style="max-width:0.5cm;">cnt</th>
+              <th style="max-width:1.8cm;">tree</th>
+              <th>pattern</th>
+            </tr>
+            <tr>
+              <td class="mock-rn">1</td>
+              <td><span class="mock-badge keep">keep</span></td>
+              <td>409</td>
+              <td><span class="mock-tree-toggle">&#9660;</span> <span class="mock-tree-badge">5</span></td>
+              <td>Scale of</td>
+            </tr>
+            <tr>
+              <td class="mock-rn">2</td>
+              <td><span class="mock-badge remove">remove</span></td>
+              <td>352</td>
+              <td><span class="mock-tree-dot">&middot;</span> <span class="mock-tree-toggle">&#9654;</span> <span class="mock-tree-badge">2</span></td>
+              <td>Scale of the</td>
+            </tr>
+            <tr>
+              <td class="mock-rn">3</td>
+              <td><span class="mock-badge remove">remove</span></td>
+              <td>133</td>
+              <td><span class="mock-tree-dot">&middot;&middot;</span> <span class="mock-tree-ref">&sup3; Scale of the</span></td>
+              <td>Scale of the difficulty&hellip;</td>
+            </tr>
+            <tr>
+              <td class="mock-rn">4</td>
+              <td><span class="mock-badge remove">remove</span></td>
+              <td>89</td>
+              <td><span class="mock-tree-dot">&middot;</span> <span class="mock-tree-ref">&sup3; Scale of</span></td>
+              <td>Scale of the ability&hellip;</td>
+            </tr>
+            <tr>
+              <td class="mock-rn">5</td>
+              <td></td>
+              <td>12</td>
+              <td></td>
+              <td>Gas Exchange</td>
+            </tr>
+          </table>
+        </div>
+        <table class="mt">
+          <tr><td><span class="mock-tree-toggle">&#9660;</span> <span class="mock-tree-badge">5</span></td><td>Root with 5 descendants (expanded)</td></tr>
+          <tr><td><span class="mock-tree-dot">&middot;</span> <span class="mock-tree-toggle">&#9654;</span> <span class="mock-tree-badge">2</span></td><td>Child at depth 1, itself a parent of 2</td></tr>
+          <tr><td><span class="mock-tree-dot">&middot;&middot;</span> <span class="mock-tree-ref">&sup3; parent</span></td><td>Leaf at depth 2 &mdash; contained by parent</td></tr>
+          <tr><td><em>(empty)</em></td><td>Singleton &mdash; no containment</td></tr>
+        </table>
+
+        <h3>Tree-Assisted Workflow</h3>
         <ol class="num-list blue">
-          <li>Select 2+ related rows (Shift+click)</li>
-          <li>Click <strong>[Group]</strong> &mdash; assigns G1 tag</li>
-          <li>Set <strong>one</strong> member&rsquo;s decision + modification</li>
-          <li>Click <strong>[Propagate]</strong> &mdash; copies to all members</li>
+          <li>Press <span class="key">T</span> for tree sort</li>
+          <li>Set <span class="key">K</span> on parent pattern</li>
+          <li>Select children &rarr; <span class="key">R</span> to remove</li>
+          <li>Or click <strong>[&sup3; Propagate]</strong> for bulk copy</li>
         </ol>
+        <p class="small">Tree column is virtual &mdash; <strong>not saved</strong> to TSV. Computed on load.</p>
+      </div>
 
-        <h3>Before Propagation</h3>
-        <div class="mockup">
-          <table class="mock-grid">
-            <tr>
-              <th class="mock-rn">#</th>
-              <th>dec.</th>
-              <th>modification</th>
-              <th>pattern</th>
-              <th>notes</th>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">47</td>
-              <td><span class="mock-badge modify">modify</span></td>
-              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
-              <td>I got enough sleep&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">48</td>
-              <td></td>
-              <td style="color:#a0aec0;">(empty)</td>
-              <td>I had difficulty&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">49</td>
-              <td></td>
-              <td style="color:#a0aec0;">(empty)</td>
-              <td>My sleep quality&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-          </table>
-        </div>
-
-        <h3>After Propagation</h3>
-        <div class="mockup">
-          <table class="mock-grid">
-            <tr>
-              <th class="mock-rn">#</th>
-              <th>dec.</th>
-              <th>modification</th>
-              <th>pattern</th>
-              <th>notes</th>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">47</td>
-              <td><span class="mock-badge modify">modify</span></td>
-              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
-              <td>I got enough sleep&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">48</td>
-              <td><span class="mock-badge modify">modify</span></td>
-              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
-              <td>I had difficulty&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-            <tr class="grp1">
-              <td class="mock-rn">49</td>
-              <td><span class="mock-badge modify">modify</span></td>
-              <td style="color:#c05621;font-weight:600;">in past 7 days</td>
-              <td>My sleep quality&hellip;</td>
-              <td><span class="mock-gbadge g1">G1</span></td>
-            </tr>
-          </table>
-        </div>
-        <p class="small mt">Multiple groups (G1, G2, G3&hellip;) propagate independently.
-        Propagation copies the source&rsquo;s actual decision type &mdash; works with both <code>modify</code> and <code>substitute</code>.</p>
+      <div class="section">
+        <h2>Merge Groups</h2>
+        <p>When patterns share the <strong>same modification</strong>:</p>
+        <ol class="num-list blue">
+          <li>Select 2+ rows &rarr; <strong>[Group]</strong> (assigns G1)</li>
+          <li>Set <strong>one</strong> member&rsquo;s decision + modification</li>
+          <li><strong>[Propagate]</strong> &rarr; copies to all members</li>
+        </ol>
+        <p class="small">Groups (G1, G2&hellip;) propagate independently. Copies actual decision type.</p>
       </div>
     </div>
 
@@ -632,6 +641,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><strong>Categorize</strong></td><td>Set column value for selected</td></tr>
           <tr><td><strong>Merge</strong></td><td>Combine rows (merge tinyIds)</td></tr>
           <tr><td><strong>Split</strong></td><td>Download by <code>field_profile</code></td></tr>
+          <tr><td><strong>&#9776; Tree</strong></td><td>Toggle tree sort</td></tr>
+          <tr><td><strong>&#8835; Propagate</strong></td><td>Copy parent decision to children</td></tr>
         </table>
       </div>
 
@@ -645,19 +656,19 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <th class="mock-cb">&#9744;</th>
               <th class="mock-rn">#</th>
               <th style="background:#e9d8fd;">decision</th>
-              <th style="background:#c6f6d5;">tinyid_count</th>
+              <th style="background:#c6f6d5;">cnt</th>
+              <th style="background:#ede7f6;">tree</th>
               <th style="background:#e9d8fd;">modification</th>
-              <th>group_key</th>
               <th>pattern</th>
               <th>tinyIds</th>
             </tr>
           </table>
           <div style="font-size:0.48rem;color:#718096;padding:0.04cm 0.1cm;">
-            &uarr; moved to front &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &uarr; original order follows
+            &uarr; moved to front &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &uarr; original order
           </div>
         </div>
-        <p class="small"><strong>Click any column header to sort</strong> ascending/descending.
-        <code>tinyid_count</code> is read-only and auto-computed from <code>tinyIds</code>.</p>
+        <p class="small"><strong>Click any header to sort.</strong>
+        <code>tinyid_count</code> + <code>tree</code> are virtual (not saved). Tree sort overrides column sort.</p>
       </div>
 
       <div class="section gold">
@@ -730,7 +741,7 @@ cde-analyzer workflow resume \
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.9.4 &bull; TSV Pattern Editor Cheatsheet &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
+  <div class="footer">CDE Analyzer v0.9.5 &bull; TSV Pattern Editor Cheatsheet &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
 </div>
 
 </body>

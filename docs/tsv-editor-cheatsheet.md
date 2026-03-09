@@ -1,6 +1,6 @@
 # TSV Pattern Editor — Quickstart Guide
 
-> **Version**: v0.9.4 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
+> **Version**: v0.9.5 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
 
 ---
 
@@ -79,8 +79,9 @@ Blank decision = treated as `keep` by the pipeline (safe default). Followup = tr
 | **M** | Set selected → `modify` |
 | **S** | Set selected → `substitute` |
 | **F** | Set selected → `followup` |
+| **T** | Toggle tree sort (no rows selected) |
 
-Requires rows selected and not editing a cell.
+Requires rows selected and not editing a cell (except T which requires no selection).
 
 ### Navigation
 
@@ -109,6 +110,51 @@ When several patterns share the same modification:
 3. Click **[Propagate]** → all group members receive the same decision + modification
 
 Propagation copies the source row's actual decision type — works with both `modify` and `substitute`. Multiple groups (G1, G2, G3…) propagate independently.
+
+---
+
+## Containment Tree
+
+The editor automatically detects **prefix-containment relationships** between patterns. Pattern A *contains* pattern B when:
+
+1. A is a **word-level prefix** of B (e.g., "Scale of" is a prefix of "Scale of the difficulty…")
+2. A's **tinyIds ⊇ B's tinyIds** (every CDE matching B also matches A)
+
+When containment is found, a virtual **tree** column appears as column #3. This column is not saved to the TSV file.
+
+### Reading the Tree Column
+
+| Display | Meaning |
+|---------|---------|
+| **▶ 12** (purple badge) | Root/parent with 12 descendants — click ▶ to expand |
+| **▼ 12** (purple badge) | Expanded parent — click ▼ to collapse |
+| **· ⊃ Scale of** | Child at depth 1 — contained by "Scale of" |
+| **·· ⊃ Scale of the** | Child at depth 2 — contained by "Scale of the" |
+| *(empty)* | Singleton — no containment relationship |
+
+### Tree Controls
+
+| Control | Action |
+|---------|--------|
+| **☰ Tree** button / **T** key | Toggle tree sort — groups children under parents (DFS order, sorted by tinyid_count) |
+| **⊃ Propagate** button | Copy decision from parent(s) to all contained children |
+| **Tree filter** dropdown | Filter to `root`, `child`, or `none` (singletons) |
+| **Click ▶/▼** | Collapse/expand individual subtrees |
+
+### Tree-Assisted Curation Workflow
+
+1. Press **T** to enable tree sort — parents appear above their children
+2. Set **keep** on the parent pattern (e.g., "Scale of" with 409 tinyIds)
+3. Children are visible below — most are longer phrases whose tinyIds are fully contained
+4. Select children → **R** to remove (since the parent already covers them)
+5. Or use **⊃ Propagate** to bulk-copy the parent's decision to all descendants
+
+!!! tip "Why containment matters"
+    If "Scale of" (409 tinyIds) fully contains "Scale of the difficulty…" (133 tinyIds), keeping the parent and removing the children is safe — the parent pattern already strips all text matched by its children.
+
+### Status Bar
+
+When containment trees exist, the status bar shows: `⊃N trees, M contained`
 
 ---
 
@@ -171,6 +217,8 @@ needs_review.tsv -- 458 rows (3 selected) | ✓430  ✗24  ✎4  ⇄2  ⚑1  ?0 
 | **Categorize** | Set column value for selected (modal) |
 | **Merge** | Combine rows (merge tinyIds, keep longest pattern) |
 | **Split** | Download separate TSVs by `field_profile` |
+| **☰ Tree** | Toggle tree sort (groups children under parents) |
+| **⊃ Propagate** | Propagate decision from parents to contained children |
 
 ---
 
@@ -214,6 +262,7 @@ If a pattern contains quotes (e.g., `COVID-19 Mitigation Policy`), search the JS
 - **The `K` shortcut is your friend** — after triaging removes/modifies, filter to blank, Ctrl+A, K. Done.
 - **TinyId columns** collapse to 3 IDs + count badge. Click to expand.
 - **`tinyid_count`** — read-only column auto-computed from `tinyIds`. Displayed as column 2.
+- **`tree`** — virtual column showing containment hierarchy. Displayed as column 3 when containment exists. Not saved to TSV.
 - **Drag row numbers** to reorder by drag-and-drop.
-- **Column sorting** — click any column header to sort ascending/descending.
-- **Column layout** — `decision`, `tinyid_count`, and `modification` are auto-moved to front. Save order unchanged.
+- **Column sorting** — click any column header to sort ascending/descending. Activating tree sort disables column sort.
+- **Column layout** — `decision`, `tinyid_count`, `tree`, and `modification` are auto-moved to front. Save order unchanged.

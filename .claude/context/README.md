@@ -5,7 +5,7 @@ This directory contains structured context files for session recovery.
 ## Quick Recovery (Recommended)
 
 For most session recovery, read these in order:
-1. **`CLAUDE.md`** (project root) — authoritative current state (v0.9.4)
+1. **`CLAUDE.md`** (project root) — authoritative current state (v0.9.5)
 2. **`.claude/checkpoints/checkpoint-2026-02-27-v090-consolidated.md`** — full history
 3. **`08-progress.md`** — current progress summary
 

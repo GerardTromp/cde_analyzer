@@ -345,6 +345,28 @@ body {
     resize: vertical;
 }
 
+/* Column width overrides — narrower decision + tinyid_count to make room for tree */
+.col-decision { max-width: 72px; }
+.col-tinyid-count { max-width: 52px; }
+
+/* ===== CONTAINMENT TREE COLUMN ===== */
+.col-tree { white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.tree-toggle {
+    cursor: pointer; user-select: none; display: inline-block;
+    font-size: 10px; margin-right: 2px; color: var(--text-muted);
+}
+.tree-toggle:hover { color: var(--primary); }
+.tree-desc-count {
+    display: inline-block;
+    background: #ede7f6; color: #5e35b1;
+    padding: 0 5px; border-radius: 8px;
+    font-size: 10px; font-weight: 600;
+}
+.tree-child-ref {
+    color: #78909c; font-size: 10px;
+}
+.tree-depth-dot { color: #b0bec5; margin-right: 1px; }
+
 /* tinyId cells */
 .tinyid-cell { cursor: pointer; }
 
@@ -560,6 +582,13 @@ function cdeUrl(path) {
         <button class="tb-btn" id="btn-group" title="Assign merge group to selected rows" disabled>&#9744; Group</button>
         <button class="tb-btn" id="btn-propagate" title="Propagate modifications within groups">&#8644; Propagate</button>
     </div>
+
+    <!-- Tree ops (hidden when no containment tree) -->
+    <div id="tree-buttons" style="display:none; align-items:center; gap:2px;">
+        <div class="sep"></div>
+        <button class="tb-btn" id="btn-tree-sort" title="Toggle tree sort — group children under parents (T)">&#9776; Tree</button>
+        <button class="tb-btn" id="btn-tree-propagate" title="Propagate decision from parent to all contained children">&#8674; &#8835; Propagate</button>
+    </div>
     <div class="sep"></div>
 
     <!-- Undo/redo -->
@@ -625,6 +654,14 @@ function cdeUrl(path) {
         notesCol: -1,        // 'notes' column index
         nextGroupNum: 1,     // next available merge group number
         displayOrder: [],    // column indices in display order (decision first when present)
+        // Containment tree state
+        treeParent: {},      // rowId -> parent rowId
+        treeChildren: {},    // rowId -> [child rowIds]
+        treeDepth: {},       // rowId -> depth (0 for roots)
+        treeDescCount: {},   // rowId -> total descendant count
+        hasTree: false,      // whether containment tree exists
+        collapsedTrees: new Set(), // rowIds of collapsed tree nodes
+        treeSorted: false,   // whether tree sort is active
     };
 
     // ===== DOM REFS =====
@@ -668,6 +705,9 @@ function cdeUrl(path) {
     const btnGroup = $('btn-group');
     const btnPropagate = $('btn-propagate');
     const btnClearFilters = $('btn-clear-filters');
+    const treeButtons = $('tree-buttons');
+    const btnTreeSort = $('btn-tree-sort');
+    const btnTreePropagate = $('btn-tree-propagate');
 
     // ===== TSV PARSER =====
     const TSV = {
@@ -757,6 +797,135 @@ function cdeUrl(path) {
         }
     }
 
+    // ===== BUILD CONTAINMENT TREE =====
+    // Discovers prefix-containment relationships: if pattern A is a text prefix
+    // of pattern B AND A's tinyIds fully contain B's tinyIds, then B is a child of A.
+    function _buildContainmentTree() {
+        S.treeParent = {};
+        S.treeChildren = {};
+        S.treeDepth = {};
+        S.treeDescCount = {};
+        S.hasTree = false;
+        S.collapsedTrees = new Set();
+        S.treeSorted = false;
+
+        _treePatCol = S.headers.findIndex(h => h.toLowerCase() === 'pattern');
+        if (_treePatCol < 0 || S.tinyIdCols.length === 0) return;
+        const patternCol = _treePatCol;
+        const tidCol = S.tinyIdCols[0];
+
+        // Parse tinyIds for all rows; index by exact pattern text
+        const rowTids = new Map();       // rowId -> Set of tinyIds
+        const patternToRow = new Map();  // pattern string -> row (first match)
+        for (const row of S.rows) {
+            const pat = (row.cells[patternCol] || '').trim();
+            const tids = new Set((row.cells[tidCol] || '').split(/[\s|]+/).filter(Boolean));
+            rowTids.set(row.id, tids);
+            if (pat && !patternToRow.has(pat)) patternToRow.set(pat, row);
+        }
+
+        // For each row, try word-level prefixes (longest first) to find immediate parent
+        for (const row of S.rows) {
+            const pat = (row.cells[patternCol] || '').trim();
+            const words = pat.split(' ');
+            if (words.length < 2) continue; // single-word patterns can't have parents
+
+            const childTids = rowTids.get(row.id);
+            if (childTids.size === 0) continue;
+
+            for (let w = words.length - 1; w >= 1; w--) {
+                const prefix = words.slice(0, w).join(' ');
+                const parentRow = patternToRow.get(prefix);
+                if (!parentRow || parentRow.id === row.id) continue;
+
+                const parentTids = rowTids.get(parentRow.id);
+                // Quick reject: child can't be subset of smaller set
+                if (childTids.size > parentTids.size) continue;
+
+                // Check containment: childTids ⊆ parentTids
+                let contained = true;
+                for (const tid of childTids) {
+                    if (!parentTids.has(tid)) { contained = false; break; }
+                }
+
+                if (contained) {
+                    S.treeParent[row.id] = parentRow.id;
+                    if (!S.treeChildren[parentRow.id]) S.treeChildren[parentRow.id] = [];
+                    S.treeChildren[parentRow.id].push(row.id);
+                    S.hasTree = true;
+                    break; // found immediate parent (longest matching prefix)
+                }
+            }
+        }
+
+        // Compute depths (iterative to avoid stack overflow on deep trees)
+        for (const row of S.rows) {
+            let depth = 0, id = row.id;
+            while (S.treeParent[id] !== undefined) { depth++; id = S.treeParent[id]; }
+            S.treeDepth[row.id] = depth;
+        }
+
+        // Compute descendant counts (bottom-up)
+        function countDesc(id) {
+            const children = S.treeChildren[id] || [];
+            let count = children.length;
+            for (const cid of children) count += countDesc(cid);
+            return count;
+        }
+        for (const row of S.rows) {
+            S.treeDescCount[row.id] = countDesc(row.id);
+        }
+    }
+
+    // Get tree-sorted row order (DFS: parent → children sorted by tinyid_count desc)
+    function _getTreeDfsOrder() {
+        // Build row lookup map for O(1) access
+        const rowById = new Map();
+        for (const row of S.rows) rowById.set(row.id, row);
+
+        // Separate roots (with children) and singletons (no tree relationship)
+        const rootsWithChildren = [];
+        const singletons = [];
+        for (const row of S.rows) {
+            if (S.treeParent[row.id] !== undefined) continue; // skip children
+            if ((S.treeChildren[row.id] || []).length > 0) {
+                rootsWithChildren.push(row);
+            } else {
+                singletons.push(row);
+            }
+        }
+
+        // Sort roots by tinyid_count descending
+        const tcCol = S.tinyidCountCol;
+        const byTidCount = (a, b) => {
+            const ca = tcCol >= 0 ? (parseInt(a.cells[tcCol], 10) || 0) : 0;
+            const cb = tcCol >= 0 ? (parseInt(b.cells[tcCol], 10) || 0) : 0;
+            return cb - ca;
+        };
+        rootsWithChildren.sort(byTidCount);
+
+        // DFS traversal
+        const ordered = [];
+        function dfs(rowId) {
+            const row = rowById.get(rowId);
+            if (!row) return;
+            ordered.push(row);
+            if (!S.collapsedTrees.has(rowId)) {
+                const children = (S.treeChildren[rowId] || [])
+                    .map(cid => rowById.get(cid))
+                    .filter(Boolean);
+                children.sort(byTidCount);
+                for (const child of children) dfs(child.id);
+            }
+        }
+
+        for (const root of rootsWithChildren) dfs(root.id);
+        // Append singletons after tree groups
+        for (const s of singletons) ordered.push(s);
+
+        return ordered;
+    }
+
     // ===== LOAD DATA =====
     function loadData(text, filename) {
         const parsed = TSV.parse(text);
@@ -780,6 +949,17 @@ function cdeUrl(path) {
         _injectTinyidCount();
 
         detectColumns();
+        _buildContainmentTree();
+
+        // Insert tree into display order after tinyid_count (position 3)
+        if (S.hasTree) {
+            const tcIdx = S.displayOrder.indexOf(S.tinyidCountCol);
+            if (tcIdx >= 0) {
+                S.displayOrder.splice(tcIdx + 1, 0, 'tree');
+            } else {
+                S.displayOrder.splice(0, 0, 'tree');
+            }
+        }
 
         dropZone.style.display = 'none';
         toolbar.style.display = 'flex';
@@ -827,18 +1007,30 @@ function cdeUrl(path) {
         // Data headers (display order)
         for (const i of S.displayOrder) {
             const th = document.createElement('th');
-            th.textContent = S.headers[i];
-            th.dataset.col = i;
 
-            // Sort arrow
-            if (S.sortCol === i) {
-                const arrow = document.createElement('span');
-                arrow.className = 'sort-arrow';
-                arrow.textContent = S.sortAsc ? '\u25B2' : '\u25BC';
-                th.appendChild(arrow);
+            if (i === 'tree') {
+                // Virtual tree column header
+                th.textContent = '\u2283 Tree';
+                th.className = 'col-tree';
+                th.title = 'Containment tree — prefix patterns whose tinyIds fully contain children';
+                th.addEventListener('click', () => toggleTreeSort());
+            } else {
+                th.textContent = S.headers[i];
+                th.dataset.col = i;
+                // Column width classes
+                if (i === S.decisionCol) th.classList.add('col-decision');
+                if (i === S.tinyidCountCol) th.classList.add('col-tinyid-count');
+
+                // Sort arrow
+                if (S.sortCol === i) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'sort-arrow';
+                    arrow.textContent = S.sortAsc ? '\u25B2' : '\u25BC';
+                    th.appendChild(arrow);
+                }
+
+                th.addEventListener('click', () => onHeaderClick(i));
             }
-
-            th.addEventListener('click', () => onHeaderClick(i));
             tr.appendChild(th);
         }
         thead.appendChild(tr);
@@ -858,8 +1050,32 @@ function cdeUrl(path) {
         for (const i of S.displayOrder) {
             const th = document.createElement('th');
 
+            // Tree column: dropdown filter
+            if (i === 'tree') {
+                const sel = document.createElement('select');
+                sel.className = 'filter-select';
+                sel.dataset.col = 'tree';
+                const opts = [
+                    ['', '(all)'],
+                    ['root', '\u25BC root'],
+                    ['child', '\u2283 child'],
+                    ['none', '\u2014 none'],
+                ];
+                for (const [val, label] of opts) {
+                    const o = document.createElement('option');
+                    o.value = val;
+                    o.textContent = label;
+                    sel.appendChild(o);
+                }
+                if (S.filters['tree']) {
+                    sel.value = S.filters['tree'];
+                    sel.classList.add('active');
+                }
+                sel.addEventListener('change', (e) => onFilterChange('tree', e.target.value, e.target));
+                th.appendChild(sel);
+            }
             // Decision column: use dropdown filter
-            if (i === S.decisionCol && S.decisionCol >= 0) {
+            else if (i === S.decisionCol && S.decisionCol >= 0) {
                 const sel = document.createElement('select');
                 sel.className = 'filter-select';
                 sel.dataset.col = i;
@@ -905,6 +1121,7 @@ function cdeUrl(path) {
 
     function renderBody() {
         tbody.innerHTML = '';
+        _treeRowById = null; // invalidate row-by-id cache
         const visible = getVisibleRows();
 
         for (let vi = 0; vi < visible.length; vi++) {
@@ -964,10 +1181,20 @@ function cdeUrl(path) {
         // Data cells (display order)
         for (const i of S.displayOrder) {
             const td = document.createElement('td');
+
+            // Virtual tree column
+            if (i === 'tree') {
+                td.className = 'col-tree';
+                _renderTreeCell(td, row);
+                tr.appendChild(td);
+                continue;
+            }
+
             const value = row.cells[i] || '';
 
             if (i === S.tinyidCountCol && S.tinyidCountCol >= 0) {
                 td.textContent = value;
+                td.classList.add('col-tinyid-count');
                 td.style.textAlign = 'right';
                 td.style.color = '#666';
                 td.style.backgroundColor = '#f8f8f8';
@@ -976,6 +1203,7 @@ function cdeUrl(path) {
                 renderTinyIdCell(td, value, row.id);
             } else if (i === S.decisionCol && S.decisionCol >= 0 && value.trim()) {
                 // Decision column: render as color-coded badge
+                td.classList.add('col-decision');
                 const badge = document.createElement('span');
                 const dv = value.trim().toLowerCase();
                 badge.className = 'decision-badge decision-' + dv;
@@ -1018,6 +1246,76 @@ function cdeUrl(path) {
     function _extractGroupNum(notesText) {
         const m = notesText.match(/\bG(\d+)\b/);
         return m ? parseInt(m[1], 10) : 0;
+    }
+
+    // ===== TREE CELL RENDERING =====
+    // Cached pattern column index (set during _buildContainmentTree)
+    let _treePatCol = -1;
+    // Row-by-id lookup (rebuilt each render cycle)
+    let _treeRowById = null;
+
+    function _getTreeRowById() {
+        if (!_treeRowById) {
+            _treeRowById = new Map();
+            for (const r of S.rows) _treeRowById.set(r.id, r);
+        }
+        return _treeRowById;
+    }
+
+    function _renderTreeCell(td, row) {
+        if (!S.hasTree) return;
+        const depth = S.treeDepth[row.id] || 0;
+        const children = S.treeChildren[row.id] || [];
+        const parentId = S.treeParent[row.id];
+        const descCount = S.treeDescCount[row.id] || 0;
+        const rowMap = _getTreeRowById();
+
+        if (children.length > 0) {
+            // Root or intermediate parent — show expand/collapse toggle + descendant count
+            const toggle = document.createElement('span');
+            toggle.className = 'tree-toggle';
+            const collapsed = S.collapsedTrees.has(row.id);
+            toggle.textContent = collapsed ? '\u25B6' : '\u25BC'; // ▶ or ▼
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (S.collapsedTrees.has(row.id)) S.collapsedTrees.delete(row.id);
+                else S.collapsedTrees.add(row.id);
+                renderBody();
+            });
+            td.appendChild(toggle);
+
+            const badge = document.createElement('span');
+            badge.className = 'tree-desc-count';
+            badge.textContent = descCount;
+            badge.title = descCount + ' contained descendant' + (descCount !== 1 ? 's' : '');
+            td.appendChild(badge);
+
+            // Show depth dots for intermediate parents (depth > 0)
+            if (depth > 0) {
+                const parentRow = rowMap.get(parentId);
+                const pPat = parentRow ? (parentRow.cells[_treePatCol] || '').trim() : '';
+                const dots = '\u00B7'.repeat(depth) + ' ';
+                td.insertBefore(document.createTextNode(dots), toggle);
+                td.title = '\u2283 ' + pPat;
+            }
+        } else if (parentId !== undefined) {
+            // Leaf child — show depth indicator + parent reference
+            const parentRow = rowMap.get(parentId);
+            const pPat = parentRow ? (parentRow.cells[_treePatCol] || '').trim() : '';
+            const truncPat = pPat.length > 20 ? pPat.slice(0, 18) + '\u2026' : pPat;
+
+            const dots = document.createElement('span');
+            dots.className = 'tree-depth-dot';
+            dots.textContent = '\u00B7'.repeat(depth) + ' ';
+            td.appendChild(dots);
+
+            const ref = document.createElement('span');
+            ref.className = 'tree-child-ref';
+            ref.textContent = '\u2283 ' + truncPat;
+            td.appendChild(ref);
+            td.title = 'Contained by: ' + pPat;
+        }
+        // Singletons: leave empty
     }
 
     // ===== TINYID CELL RENDERING =====
@@ -1070,6 +1368,12 @@ function cdeUrl(path) {
 
     // ===== SORTING =====
     function onHeaderClick(col) {
+        // Disable tree sort when user manually sorts a column
+        if (S.treeSorted) {
+            S.treeSorted = false;
+            setAction('Tree sort OFF');
+        }
+
         if (S.sortCol === col) {
             if (S.sortAsc) {
                 S.sortAsc = false;
@@ -1147,7 +1451,23 @@ function cdeUrl(path) {
     }
 
     function rowMatchesFilters(row) {
+        // Check if row is hidden by tree collapse
+        if (S.treeSorted && _isCollapsedChild(row.id)) return false;
+
         for (const colStr in S.filters) {
+            // Handle virtual tree column filter
+            if (colStr === 'tree') {
+                const tf = S.filters['tree'];
+                if (tf === 'root') {
+                    if (!S.treeChildren[row.id] || S.treeChildren[row.id].length === 0) return false;
+                } else if (tf === 'child') {
+                    if (S.treeParent[row.id] === undefined) return false;
+                } else if (tf === 'none') {
+                    if (S.treeParent[row.id] !== undefined || (S.treeChildren[row.id] && S.treeChildren[row.id].length > 0)) return false;
+                }
+                continue;
+            }
+
             const col = parseInt(colStr);
             const filter = S.filters[col].trim();
             const cellVal = (row.cells[col] || '').trim();
@@ -1155,6 +1475,16 @@ function cdeUrl(path) {
             if (!matchFilter(cellVal, filter)) return false;
         }
         return true;
+    }
+
+    // Check if a row is hidden because an ancestor is collapsed
+    function _isCollapsedChild(rowId) {
+        let id = S.treeParent[rowId];
+        while (id !== undefined) {
+            if (S.collapsedTrees.has(id)) return true;
+            id = S.treeParent[id];
+        }
+        return false;
     }
 
     function matchFilter(cellVal, filter) {
@@ -1202,7 +1532,8 @@ function cdeUrl(path) {
     }
 
     function getVisibleRows() {
-        return S.rows.filter(r => rowMatchesFilters(r));
+        const source = S.treeSorted && S.hasTree ? _getTreeDfsOrder() : S.rows;
+        return source.filter(r => rowMatchesFilters(r));
     }
 
     // ===== SELECTION =====
@@ -1887,6 +2218,107 @@ function cdeUrl(path) {
         setAction('Propagated to ' + totalRows + ' row(s) in ' + totalGroups + ' group(s)');
     }
 
+    // ===== CONTAINMENT TREE OPS =====
+    function toggleTreeSort() {
+        if (!S.hasTree) return;
+        S.treeSorted = !S.treeSorted;
+        if (S.treeSorted) {
+            // Disable column sort when tree sort is active
+            S.sortCol = -1;
+        }
+        btnTreeSort.classList.toggle('primary', S.treeSorted);
+        renderGrid();
+        updateStatus();
+        setAction(S.treeSorted ? 'Tree sort ON \u2014 children grouped under parents' : 'Tree sort OFF');
+    }
+
+    function propagateTree() {
+        if (!S.hasTree || S.decisionCol < 0) {
+            alert('Tree propagation requires a containment tree and a decision column.');
+            return;
+        }
+
+        // Collect parents to propagate from:
+        // If rows are selected, use selected rows that are parents (have children)
+        // Otherwise, use all parents with decisions
+        const selected = getSelectedRows();
+        let parents;
+        if (selected.length > 0) {
+            parents = selected.filter(r => (S.treeChildren[r.id] || []).length > 0);
+            if (parents.length === 0) {
+                setAction('No selected rows are tree parents');
+                return;
+            }
+        } else {
+            parents = S.rows.filter(r =>
+                (S.treeChildren[r.id] || []).length > 0 &&
+                (r.cells[S.decisionCol] || '').trim() !== ''
+            );
+        }
+
+        if (parents.length === 0) {
+            setAction('No parents with decisions to propagate');
+            return;
+        }
+
+        // Collect all descendants that would be affected
+        function allDescendants(id) {
+            const result = [];
+            for (const cid of (S.treeChildren[id] || [])) {
+                result.push(cid);
+                result.push(...allDescendants(cid));
+            }
+            return result;
+        }
+
+        let totalTargets = 0;
+        const propagations = [];
+        for (const parent of parents) {
+            const dec = (parent.cells[S.decisionCol] || '').trim();
+            if (!dec) continue;
+            const descIds = allDescendants(parent.id);
+            if (descIds.length === 0) continue;
+            propagations.push({ parent, descIds, decision: dec });
+            totalTargets += descIds.length;
+        }
+
+        if (propagations.length === 0) {
+            setAction('No parents with decisions to propagate');
+            return;
+        }
+
+        const msg = 'Propagate decision from ' + propagations.length + ' parent(s) to ' +
+                     totalTargets + ' contained descendant(s)?\n\n' +
+                     propagations.slice(0, 5).map(p => {
+                         const patCol = S.headers.findIndex(h => h.toLowerCase() === 'pattern');
+                         const pat = (p.parent.cells[patCol] || '').slice(0, 40);
+                         return '  ' + p.decision + ' \u2192 ' + pat + ' (' + p.descIds.length + ' children)';
+                     }).join('\n') +
+                     (propagations.length > 5 ? '\n  ... and ' + (propagations.length - 5) + ' more' : '');
+        if (!confirm(msg)) return;
+
+        pushUndo('Tree propagate ' + propagations.length + ' parent(s)');
+
+        for (const { parent, descIds, decision } of propagations) {
+            for (const cid of descIds) {
+                const childRow = S.rows.find(r => r.id === cid);
+                if (childRow) {
+                    childRow.cells[S.decisionCol] = decision;
+                    // Also copy modification if present and parent has one
+                    if (S.modificationCol >= 0) {
+                        const mod = (parent.cells[S.modificationCol] || '').trim();
+                        if (mod) childRow.cells[S.modificationCol] = mod;
+                    }
+                }
+            }
+        }
+
+        renderBody();
+        updateToolbarButtons();
+        updateStatus();
+        setAction('Propagated to ' + totalTargets + ' descendant(s) from ' + propagations.length + ' parent(s)');
+    }
+
     // ===== UNDO / REDO =====
     function pushUndo(description) {
         S.undoStack.push({
@@ -2068,6 +2500,13 @@ function cdeUrl(path) {
             }
         }
 
+        // Tree stats
+        if (S.hasTree) {
+            const roots = S.rows.filter(r => S.treeParent[r.id] === undefined && (S.treeChildren[r.id] || []).length > 0).length;
+            const children = S.rows.filter(r => S.treeParent[r.id] !== undefined).length;
+            text += ' | \u2283' + roots + ' trees, ' + children + ' contained';
+        }
+
         statusLeft.textContent = text;
 
         const dot = S.serverMode ? 'server' : 'standalone';
@@ -2115,6 +2554,14 @@ function cdeUrl(path) {
         } else {
             groupButtons.style.display = 'none';
         }
+
+        // Tree buttons: show only when containment tree exists
+        if (S.hasTree) {
+            treeButtons.style.display = 'flex';
+            btnTreeSort.classList.toggle('primary', S.treeSorted);
+        } else {
+            treeButtons.style.display = 'none';
+        }
     }
 
     function hasUnsavedChanges() {
@@ -2160,6 +2607,15 @@ function cdeUrl(path) {
         } else if (e.key === 'Delete' && !isInput) {
             deleteSelectedRows();
             e.preventDefault();
+        }
+
+        // Tree sort toggle: T (when no selection, or always with no decision col)
+        if (!isInput && !inModal && !S.editingCell && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if ((e.key === 't' || e.key === 'T') && S.hasTree && getSelectedRows().length === 0) {
+                toggleTreeSort();
+                e.preventDefault();
+                return;
+            }
         }
 
         // Decision shortcuts: K=keep, R=remove, M=modify (plain keys, no modifiers)
@@ -2230,6 +2686,8 @@ function cdeUrl(path) {
     btnDqFollowup.addEventListener('click', () => setDecisionForSelected('followup'));
     btnGroup.addEventListener('click', assignGroup);
     btnPropagate.addEventListener('click', propagateGroups);
+    btnTreeSort.addEventListener('click', toggleTreeSort);
+    btnTreePropagate.addEventListener('click', propagateTree);
     btnClearFilters.addEventListener('click', clearAllFilters);
 
     // File input handler

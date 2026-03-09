@@ -4,15 +4,22 @@
 
 **Focus**: Phrase pipeline correctness, curation UX, documentation
 
-**Version**: 0.9.4 (2026-03-07)
+**Version**: 0.9.5 (2026-03-09)
 
-## Current State (v0.9.4)
+## Current State (v0.9.5)
 
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
 **Phase 3: Branching Strip** — 6 variant outputs; legacy 13-step pipeline or N-way 3-step single-pass
+
+### Containment Tree in TSV Editor (v0.9.5)
+
+- **Prefix-containment tree**: Automatic hierarchical grouping by text prefix + tinyId subset containment
+- **818/4006 patterns** (20%) fully contained by shorter prefixes in allcde03
+- **Tree sort** (`T`), **tree propagate** (⊃), **tree filter** (root/child/none)
+- **Virtual column**: Not saved to TSV — computed client-side on load
 
 ### Phrase Pipeline Correctness (v0.9.4)
 
@@ -24,6 +31,7 @@
 ### Curation Infrastructure — Complete
 
 - **5 decision types**: keep, remove, modify, substitute, followup (v0.9.4: followup added)
+- **Containment tree** (v0.9.5): prefix+tinyId hierarchy for curation efficiency
 - **Multi-curator workflow** (v0.6.0): init/merge with inter-rater stats
 - **Standalone TSV editor** (v0.7.0): zipapp distribution (`cde_editor.pyz`, ~59 KB)
 - **Centralized curation server** (v0.7.0): HMAC token auth, TLS, rate limiting
@@ -42,6 +50,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.9.5 | 2026-03-09 | Containment tree view in TSV editor (prefix+tinyId hierarchy) |
 | 0.9.4 | 2026-03-07 | Deferred parent filter, anchor trim control, followup decision, doc audit |
 | 0.9.2 | 2026-03-03 | N-way single-pass branching strip engine, tinyid_count column |
 | 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps, 6th variant (MTSTPT) |
@@ -56,8 +65,8 @@
 ## Branches
 
 ### Active: field-aware-strip (from main)
-- **Contains**: Everything through v0.9.4
-- **Status**: Deferred parent filter, anchor trim control, followup decision, phrase pipeline improvements
+- **Contains**: Everything through v0.9.5
+- **Status**: Containment tree view, deferred parent filter, anchor trim control, followup decision
 
 ### Active: main
 - **Contains**: Everything through v0.9.1 + tinyid_count + context-aware examples

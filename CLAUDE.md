@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.4)
+# CDE Analyzer — Context (v0.9.5)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -39,7 +39,25 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (13 steps)
 - **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all variants) → quality_report (3 steps)
 
-## Current State (v0.9.4)
+## Current State (v0.9.5)
+
+### v0.9.5: Containment Tree in TSV Editor
+
+#### Containment Tree View
+- **Prefix-containment tree**: Automatic hierarchical grouping of patterns by text prefix + tinyId subset containment
+- **Containment rule**: Pattern A contains pattern B if A is a word-level prefix of B AND A's tinyIds ⊇ B's tinyIds
+- **Algorithm**: O(n*k) word-level prefix generation + Map lookup (not naive O(n²))
+- **Quick-reject**: Skip subset check if child tinyId set is larger than parent
+- **Tree column**: Virtual column (not saved to TSV) inserted as column #3, showing hierarchy
+- **Visual elements**: ▶/▼ collapse toggles, purple descendant count badges, `⊃ parent` child references, depth dots (·, ··)
+- **Tree sort** (`T` key): DFS traversal grouping children under parents, sorted by tinyid_count descending
+- **Tree propagate** (⊃ Propagate button): Copy decision from parent(s) to all contained children, selection-aware
+- **Tree filter**: Dropdown with (all), root, child, none options
+- **Collapse/expand**: Click ▶/▼ toggles to collapse/expand subtrees
+- **Status bar**: Shows `⊃N trees, M contained` count
+- **Design decision**: Tree is computed client-side on data load; virtual column avoids polluting saved TSV
+- **allcde03 empirical results**: 818/4006 patterns (20%) are fully contained by shorter prefixes; largest tree: "Scale related to" (38 members, depth 3, 818 tinyIds)
+- **Key file**: `actions/pattern_util/tsv_editor.html` — `_buildContainmentTree()`, `_getTreeDfsOrder()`, `_renderTreeCell()`
 
 ### v0.9.4: Deferred Parent Filter + Anchor Trim Control + Followup Decision
 
