@@ -140,26 +140,34 @@
   <line x1="920" y1="176" x2="920" y2="188" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="920" y1="218" x2="920" y2="230" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <!-- 6 outputs -->
-  <rect x="780" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
-  <text x="826" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">phrase</text>
-  <text x="826" y="310" text-anchor="middle" class="step-label-sm">only</text>
+  <!-- 7 outputs (2³-1 combinatorial grid) -->
+  <rect x="775" y="278" width="68" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="809" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">inst</text>
+  <text x="809" y="310" text-anchor="middle" class="step-label-sm">only</text>
 
-  <rect x="880" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
-  <text x="926" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">both</text>
-  <text x="926" y="310" text-anchor="middle" class="step-label-sm">full</text>
+  <rect x="851" y="278" width="68" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="885" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">phrase</text>
+  <text x="885" y="310" text-anchor="middle" class="step-label-sm">only</text>
 
-  <rect x="980" y="278" width="92" height="42" rx="5" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
-  <text x="1026" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">both</text>
-  <text x="1026" y="310" text-anchor="middle" class="step-label-sm">sub</text>
+  <rect x="927" y="278" width="68" height="42" rx="5" fill="#a5d6a7" stroke="#1b5e20" stroke-width="1"/>
+  <text x="961" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">both</text>
+  <text x="961" y="310" text-anchor="middle" class="step-label-sm">&#xD7;3</text>
 
-  <line x1="920" y1="260" x2="920" y2="276" stroke="#444" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="920" y1="268" x2="826" y2="268" stroke="#444" stroke-width="1"/>
-  <line x1="826" y1="268" x2="826" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
-  <line x1="920" y1="268" x2="1026" y2="268" stroke="#444" stroke-width="1"/>
-  <line x1="1026" y1="268" x2="1026" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+  <rect x="1003" y="278" width="68" height="42" rx="5" fill="#81c784" stroke="#1b5e20" stroke-width="1.5"/>
+  <text x="1037" y="296" text-anchor="middle" class="step-label-sm" style="font-weight:600;">max</text>
+  <text x="1037" y="310" text-anchor="middle" class="step-label-sm">strip</text>
 
-  <text x="920" y="340" text-anchor="middle" class="step-label-sm">6 variant outputs for downstream comparison</text>
+  <line x1="920" y1="260" x2="920" y2="268" stroke="#444" stroke-width="1.5"/>
+  <line x1="920" y1="268" x2="809" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="809" y1="268" x2="809" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="920" y1="268" x2="885" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="885" y1="268" x2="885" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="920" y1="268" x2="961" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="961" y1="268" x2="961" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="920" y1="268" x2="1037" y2="268" stroke="#444" stroke-width="1"/>
+  <line x1="1037" y1="268" x2="1037" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <text x="920" y="340" text-anchor="middle" class="step-label-sm">7 variant outputs (2&#xB3;&#x2212;1 grid) for downstream comparison</text>
 
   <!-- Curation Ledger feedback loop -->
   <rect x="280" y="370" width="500" height="38" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,3"/>

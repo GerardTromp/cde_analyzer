@@ -5,7 +5,7 @@
 CDE Analyzer: Automated detection and removal of repeated text patterns from NLM Common Data Elements to improve downstream embedding and clustering quality.
 
 **Author**: Gerard Tromp
-**Version**: 0.9.4
+**Version**: 0.9.6
 **Date**: March 2026
 
 ---
@@ -63,12 +63,12 @@ The instrument name **"Patient-Reported Outcomes Measurement Information System 
 - "For each of the following statements"
 - "Have you had any of the following"
 
-### Combined impact
+### Combined impact (allcde03 — 22,743 CDEs)
 | Stripping variant | Characters removed |
 |---|---|
-| Instruments only (full) | -515K |
-| Phrases only | -105K |
-| Both (full instruments + phrases) | **-553K** |
+| Instruments only (full + sub) | ~515K |
+| Phrases only | ~105K |
+| All combined (MTSTPT) | **~553K** |
 
 ---
 
@@ -95,7 +95,7 @@ Automated detection + human-in-the-loop curation + multi-variant stripping
 
 **Phase 1**: Instrument Detection — mine, discover, coalesce, validate, curate, strip
 **Phase 2**: Phrase Mining — k-mer mining, discover, coalesce, field analysis, curate, strip
-**Phase 3**: Branching Strip — 6 output variants for downstream comparison
+**Phase 3**: Branching Strip — 7 output variants for downstream comparison
 
 ### Key design features
 - **Curation ledger** persists human decisions across runs
@@ -218,23 +218,27 @@ Original surface forms tracked before normalization — "Patient Health Question
 
 ![Branching Strip](diagrams/branching_strip.svg)
 
-### 13-step pipeline producing 6 output variants
+### Two execution modes
+
+**Legacy pipeline** (`branching_strip.yaml`): 14-step sequential pipeline
+**N-way single-pass** (`branching_strip_nway.yaml`): 3 steps — loads CDE JSON once, produces all 7 variants simultaneously
 
 | Step | Operation | Case sensitivity |
 |------|-----------|:---:|
 | 1-2 | Instrument strip (full / sub-group) | Verbatim |
 | 3 | Sub-group on full-stripped (safety net) | Verbatim |
 | 4 | Temporal seed expansion | - |
-| 5-8 | Temporal strip (4 branches) | Case-insensitive |
-| 9-12 | Curated phrase strip (4 branches) | Case-sensitive |
-| 13 | Quality report (remnant scan) | - |
+| 5-8 | Temporal strip (4+ branches) | Case-insensitive |
+| 9-13 | Curated phrase strip (4+ branches) | Case-sensitive |
+| 14 | Quality report (remnant scan) | - |
 
-### 6 output variants enable downstream comparison
+### 7 output variants (2³-1 combinatorial grid)
 
 | Code | Main inst | Sub inst | Phrases | Description |
 |------|:-:|:-:|:-:|---|
 | MTSFPF | Stripped | - | - | Full instrument removal only |
 | MFSTPF | - | Stripped | - | Sub-group removal only |
+| **MTSTPF** | **Stripped** | **Stripped** | **-** | **Full + sub instruments, no phrases** |
 | MFSFPT | - | - | Stripped | Phrases only |
 | MTSFPT | Stripped | - | Stripped | Full instruments + phrases |
 | MFSTPT | - | Stripped | Stripped | Sub instruments + phrases |
@@ -242,24 +246,29 @@ Original surface forms tracked before normalization — "Patient Health Question
 
 ---
 
-## 12. Production Results (22,743 CDEs)
+## 12. Production Results (allcde03 — 22,743 CDEs)
 
-### Character reduction by variant
-
-| Code | Main inst | Sub inst | Phrases | Total removed |
-|------|:-:|:-:|:-:|--:|
-| MTSFPF | Stripped | - | - | -515K |
-| MFSTPF | - | Stripped | - | -415K |
-| MFSFPT | - | - | Stripped | -105K |
-| MTSFPT | Stripped | - | Stripped | -553K |
-| MFSTPT | - | Stripped | Stripped | -449K |
-| **MTSTPT** | **Stripped** | **Stripped** | **Stripped** | **-553K** |
+### N-way single-pass execution
+- **Engine**: `strip_branching` via `branching_strip_nway.yaml`
+- **Runtime**: **104 seconds** for 22,743 CDEs × 7 variants = 159K outputs
+- **Pattern inventory**: 458 instrument (full+sub) + 273 curated phrases + 7 substitutes + 39 verbatim + 2,100 temporal
 
 ### Quality metrics
-- **Temporal remnants**: 0 in definition/designation fields
-- **Non-temporal remnants**: 6 (trailing articles in fully-stripped outputs)
-- **Runtime**: ~4.5 minutes (down from >15 hours before optimization)
-- **Optimization**: Pattern cache + `no_expand_anchors` = 5,000x speedup
+- **Field retention**: 84.2% of fields at 90-100% retention (MTSTPT)
+- **Temporal remnants**: 0 in PT variants (confirms temporal stripping works)
+- **Non-temporal remnants**: 6 trailing_article remnants per variant (same 6 CDEs)
+- **Hollowed-out CDEs**: 33 (0.1%) — all designation-only with pure boilerplate content
+
+### Residue analysis (MTSTPT — maximum strip)
+
+| Retention Band | % of Fields |
+|---------------|------------:|
+| 90-100% | 84.2% |
+| 100% (unchanged) | 78.2% |
+| 50-89% | 10.1% |
+| 10-49% | 4.2% |
+| 1-9% | 1.2% |
+| 0% (empty) | 0.3% |
 
 ---
 
@@ -471,13 +480,14 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
 ### What's complete
 - **Three-phase pipeline**: Instrument detection, phrase mining, branching strip
 - **Curation infrastructure**: Multi-curator, ledger, gate, standalone editor, centralized server
-- **Production-tested**: 22,743 CDEs, ~4.5 min runtime, 0 temporal remnants
-- **Documentation**: 7 vignettes, 22+ command reference pages, MkDocs site
+- **Production-tested**: 22,743 CDEs × 7 variants in 104s, 0 temporal remnants
+- **N-way single-pass engine**: All 7 variants produced simultaneously
+- **Documentation**: 8 vignettes, 28 command reference pages, MkDocs site
 
 ### What remains
-- **LLM-assisted classification** (Priority 3): Automated curation decisions using multi-LLM framework
-- **Field-aware stripping** (Priority 4): Strip patterns only from specific field types
-- **Embedding evaluation**: Run extract_embed on 6 branching-strip outputs to assess clustering quality improvement
+- **LLM-assisted classification**: Automated curation decisions using multi-LLM framework
+- **Position-specific field-aware stripping**: Strip patterns only from specific field types
+- **Embedding evaluation**: Run extract_embed on 7 branching-strip outputs to assess clustering quality improvement
 
 ### Version history highlights
 | Version | Feature |
@@ -487,6 +497,10 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
 | v0.8.0 | Incremental curation ledger and gate |
 | v0.8.1 | Substitute decision type (4th curation decision) |
 | v0.9.0 | Zipf priority split, editor UX improvements |
+| v0.9.2 | N-way single-pass branching strip engine |
+| v0.9.4 | Deferred parent filter, anchor trim control |
+| v0.9.5 | Containment tree view in TSV editor |
+| v0.9.6 | 7th variant (MTSTPF), allcde03 production run |
 
 ---
 
@@ -496,7 +510,7 @@ cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
 2. **Descending k-mer mining** with masking prevents redundant detection
 3. **Curation ledger** enables incremental improvement — effort compounds across runs
 4. **Zipf triage** separates domain-specific patterns from common English for efficient review
-5. **Six stripped variants** for downstream comparison of embedding/clustering quality
+5. **Seven stripped variants** (complete 2³-1 combinatorial grid) for downstream comparison
 6. **`min_parent_tinyids`** is the single most influential parameter (18.6x impact)
 7. **Standalone editor** enables distributed curation without Excel data corruption
 

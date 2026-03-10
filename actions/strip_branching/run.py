@@ -229,3 +229,4 @@ def run_action(args: Namespace):
 
     elapsed = time.time() - t0
     logger.info(f"Total time: {elapsed:.1f}s for {len(requested_variants)} variants")
+    return 0

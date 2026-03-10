@@ -276,11 +276,11 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
 <div class="page">
   <div class="banner">
     <h1>TSV Pattern Editor <strong>:: CHEATSHEET</strong></h1>
-    <span class="subtitle">CDE Analyzer v0.9.5 &mdash; Browser-Based Curation Tool</span>
+    <span class="subtitle">CDE Analyzer v0.9.6 &mdash; Browser-Based Curation Tool</span>
   </div>
   <div class="columns">
 
-    <!-- COL 1: Launch + Mockup -->
+    <!-- COL 1: Launch + Column Filters + Editor Mockup -->
     <div>
       <div class="section blue">
         <h2>Launch the Editor</h2>
@@ -292,6 +292,22 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <p class="small">Opens <code>http://localhost:8777</code> &mdash; edit in browser, save with Ctrl+S.</p>
       </div>
 
+      <div class="section teal">
+        <h2>Column Filters</h2>
+        <table>
+          <tr><th>Syntax</th><th>Effect</th></tr>
+          <tr><td><code>abc</code></td><td>Contains &ldquo;abc&rdquo; (case-insensitive)</td></tr>
+          <tr><td><code>!abc</code></td><td>NOT containing &ldquo;abc&rdquo;</td></tr>
+          <tr><td><code>=blank</code></td><td>Empty cells only</td></tr>
+          <tr><td><code>!blank</code></td><td>Non-empty cells only</td></tr>
+          <tr><td><code>&gt;10</code> <code>&lt;5</code></td><td>Numeric comparison</td></tr>
+          <tr><td><code>=10</code> <code>!=5</code></td><td>Numeric equals / not-equals</td></tr>
+          <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
+        </table>
+        <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
+        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code> | <code>followup</code></p>
+      </div>
+
       <div class="section">
         <h2>Editor Interface</h2>
         <div class="mockup">
@@ -299,11 +315,6 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <div class="mock-toolbar">
             <span class="mock-btn">Save</span>
             <span class="mock-btn">Save As</span>
-            <span class="mock-sep"></span>
-            <span class="mock-btn">+ Add</span>
-            <span class="mock-btn">x Del</span>
-            <span class="mock-btn">&uarr;</span>
-            <span class="mock-btn">&darr;</span>
             <span class="mock-sep"></span>
             <span class="mock-btn keep">&check; Keep</span>
             <span class="mock-btn remove">&cross; Remove</span>
@@ -325,13 +336,11 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <th>modification</th>
               <th>pattern</th>
               <th>tinyIds</th>
-              <th>notes</th>
             </tr>
             <tr class="mock-filter">
               <td></td>
               <td></td>
               <td><span class="mock-filter-select">(all) &darr;</span></td>
-              <td><span class="mock-filter-input">Filter...</span></td>
               <td><span class="mock-filter-input">Filter...</span></td>
               <td><span class="mock-filter-input">Filter...</span></td>
               <td><span class="mock-filter-input">Filter...</span></td>
@@ -343,7 +352,6 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <td></td>
               <td>SF-12 Health Survey</td>
               <td>aB3k | xP7m&hellip;</td>
-              <td></td>
             </tr>
             <tr class="fp-def selected">
               <td class="mock-cb">&#9745;</td>
@@ -352,7 +360,6 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <td></td>
               <td>I felt</td>
               <td>cD9n | hJ2q&hellip;</td>
-              <td></td>
             </tr>
             <tr class="fp-both grp1">
               <td class="mock-cb">&#9744;</td>
@@ -361,34 +368,14 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <td>in past 7 d&hellip;</td>
               <td>I got enough sle&hellip;</td>
               <td>fK4p | mN8r&hellip;</td>
-              <td>G1 <span class="mock-gbadge g1">G1</span></td>
             </tr>
-            <tr class="fp-desig grp1">
+            <tr class="fp-mixed">
               <td class="mock-cb">&#9744;</td>
               <td class="mock-rn">4</td>
-              <td><span class="mock-badge modify">modify</span></td>
-              <td>in past 7 d&hellip;</td>
-              <td>I had difficulty&hellip;</td>
-              <td>gL5s | nO9t&hellip;</td>
-              <td>G1 <span class="mock-gbadge g1">G1</span></td>
-            </tr>
-            <tr class="fp-both grp2">
-              <td class="mock-cb">&#9744;</td>
-              <td class="mock-rn">5</td>
               <td><span class="mock-badge substitute">substitute</span></td>
               <td>difficulty you&hellip;</td>
               <td>Considering yo&hellip;</td>
               <td>aR2v | wQ6x&hellip;</td>
-              <td>G2 <span class="mock-gbadge g2">G2</span></td>
-            </tr>
-            <tr class="fp-mixed">
-              <td class="mock-cb">&#9744;</td>
-              <td class="mock-rn">6</td>
-              <td></td>
-              <td></td>
-              <td>Gas Exchange</td>
-              <td>jM7u</td>
-              <td></td>
             </tr>
           </table>
           <!-- Status bar -->
@@ -399,14 +386,12 @@ python cde_editor.pyz needs_review.tsv</code></pre>
               <span class="cr">&cross;24</span>&ensp;
               <span class="cm">&#10038;4</span>&ensp;
               <span class="cs">&#8644;2</span>&ensp;
-              <span class="cf">&#9873;1</span>&ensp;
               <span class="cu">?1</span>&ensp;
               | tinyIds: 18,240/18,502&ensp;
               <span class="mode-dot"></span>server
             </span>
           </div>
         </div>
-
         <h3>Visual Cues</h3>
         <table>
           <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span> <span class="swatch" style="background:#f3e5f5;border:1px solid #7b1fa2;"></span></td><td>Decision badges: keep / remove / modify / substitute / followup</td></tr>
@@ -416,23 +401,33 @@ python cde_editor.pyz needs_review.tsv</code></pre>
       </div>
     </div>
 
-    <!-- COL 2: Decisions + Shortcuts -->
+    <!-- COL 2: Status Bar + Keyboard Shortcuts -->
     <div>
-      <div class="section green">
-        <h2>The 5 Decisions</h2>
-        <p>Each row is a detected <strong>pattern</strong>. Decide what happens to it:</p>
+      <div class="section">
+        <h2>Status Bar</h2>
+        <p>Bottom bar shows real-time counts:</p>
+        <div class="mockup" style="border:none;margin:0.04cm 0;">
+          <div class="mock-status" style="border-radius:3px;">
+            <span>file.tsv &mdash; 458 rows</span>
+            <span class="counts">
+              <span class="ck">&check;430</span>&ensp;
+              <span class="cr">&cross;24</span>&ensp;
+              <span class="cm">&#10038;4</span>&ensp;
+              <span class="cs">&#8644;2</span>&ensp;
+              <span class="cf">&#9873;0</span>&ensp;
+              <span class="cu">?0</span>&ensp;
+              | tinyIds: 18,502/18,502&ensp;
+              <span class="mode-dot"></span>server
+            </span>
+          </div>
+        </div>
         <table>
-          <tr><th>Decision</th><th>When to use</th><th>Effect</th></tr>
-          <tr><td><span class="mock-badge keep">keep</span></td><td>Real instrument/scale</td><td>Stripped (deleted)</td></tr>
-          <tr><td><span class="mock-badge remove">remove</span></td><td>False positive</td><td>Excluded entirely</td></tr>
-          <tr><td><span class="mock-badge modify">modify</span></td><td>Partially correct</td><td>Modification text <em>replaces</em> pattern, then stripped</td></tr>
-          <tr><td><span class="mock-badge substitute">substitute</span></td><td>Replace, don&rsquo;t delete</td><td>Modification text <em>appears in output</em></td></tr>
-          <tr><td><span class="mock-badge followup">followup</span></td><td>Needs more evaluation</td><td>Flagged; counts as undecided</td></tr>
+          <tr><td><code>?0</code></td><td>All rows decided &mdash; you&rsquo;re done!</td></tr>
+          <tr><td><code>&#9873;N</code></td><td>Flagged for followup (counts as undecided)</td></tr>
+          <tr><td><code>tinyIds: N/M</code></td><td>Decided / total tinyId coverage</td></tr>
+          <tr><td><code>server</code></td><td>Ctrl+S saves in-place</td></tr>
+          <tr><td><code>standalone</code></td><td>Use Save As to download</td></tr>
         </table>
-        <h3>Modify vs Substitute</h3>
-        <p><strong>Modify</strong> changes <em>what gets stripped</em> (corrects the pattern text before deletion).
-        <strong>Substitute</strong> changes <em>what appears in the output</em> (matched text is replaced, not deleted).</p>
-        <p class="small">Blank decision = treated as <code>keep</code> (safe default).</p>
       </div>
 
       <div class="section purple">
@@ -465,8 +460,25 @@ python cde_editor.pyz needs_review.tsv</code></pre>
       </div>
     </div>
 
-    <!-- COL 3: Workflow + Filters -->
+    <!-- COL 3: Decisions + Suggested Workflow -->
     <div>
+      <div class="section green">
+        <h2>The 5 Decisions</h2>
+        <p>Each row is a detected <strong>pattern</strong>. Decide what happens to it:</p>
+        <table>
+          <tr><th>Decision</th><th>When to use</th><th>Effect</th></tr>
+          <tr><td><span class="mock-badge keep">keep</span></td><td>Real instrument/scale</td><td>Stripped (deleted)</td></tr>
+          <tr><td><span class="mock-badge remove">remove</span></td><td>False positive</td><td>Excluded entirely</td></tr>
+          <tr><td><span class="mock-badge modify">modify</span></td><td>Partially correct</td><td>Modification text <em>replaces</em> pattern, then stripped</td></tr>
+          <tr><td><span class="mock-badge substitute">substitute</span></td><td>Replace, don&rsquo;t delete</td><td>Modification text <em>appears in output</em></td></tr>
+          <tr><td><span class="mock-badge followup">followup</span></td><td>Needs more evaluation</td><td>Flagged; counts as undecided</td></tr>
+        </table>
+        <h3>Modify vs Substitute</h3>
+        <p><strong>Modify</strong> changes <em>what gets stripped</em> (corrects the pattern text before deletion).
+        <strong>Substitute</strong> changes <em>what appears in the output</em> (matched text is replaced, not deleted).</p>
+        <p class="small">Blank decision = treated as <code>keep</code> (safe default).</p>
+      </div>
+
       <div class="section orange">
         <h2>Suggested Curator Workflow</h2>
         <ol class="num-list orange">
@@ -486,53 +498,10 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         </ol>
         <p class="small mt">Status bar shows <strong>tinyIds: decided/total</strong> to track coverage progress.</p>
       </div>
-
-      <div class="section teal">
-        <h2>Column Filters</h2>
-        <table>
-          <tr><th>Syntax</th><th>Effect</th></tr>
-          <tr><td><code>abc</code></td><td>Contains &ldquo;abc&rdquo; (case-insensitive)</td></tr>
-          <tr><td><code>!abc</code></td><td>NOT containing &ldquo;abc&rdquo;</td></tr>
-          <tr><td><code>=blank</code></td><td>Empty cells only</td></tr>
-          <tr><td><code>!blank</code></td><td>Non-empty cells only</td></tr>
-          <tr><td><code>&gt;10</code> <code>&lt;5</code></td><td>Numeric comparison</td></tr>
-          <tr><td><code>=10</code> <code>!=5</code></td><td>Numeric equals / not-equals</td></tr>
-          <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
-        </table>
-        <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
-        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code> | <code>followup</code></p>
-      </div>
-
-      <div class="section">
-        <h2>Status Bar</h2>
-        <p>Bottom bar shows real-time counts:</p>
-        <div class="mockup" style="border:none;margin:0.04cm 0;">
-          <div class="mock-status" style="border-radius:3px;">
-            <span>file.tsv &mdash; 458 rows</span>
-            <span class="counts">
-              <span class="ck">&check;430</span>&ensp;
-              <span class="cr">&cross;24</span>&ensp;
-              <span class="cm">&#10038;4</span>&ensp;
-              <span class="cs">&#8644;2</span>&ensp;
-              <span class="cf">&#9873;0</span>&ensp;
-              <span class="cu">?0</span>&ensp;
-              | tinyIds: 18,502/18,502&ensp;
-              <span class="mode-dot"></span>server
-            </span>
-          </div>
-        </div>
-        <table>
-          <tr><td><code>?0</code></td><td>All rows decided &mdash; you&rsquo;re done!</td></tr>
-          <tr><td><code>&#9873;N</code></td><td>Flagged for followup (counts as undecided)</td></tr>
-          <tr><td><code>tinyIds: N/M</code></td><td>Decided / total tinyId coverage</td></tr>
-          <tr><td><code>server</code></td><td>Ctrl+S saves in-place</td></tr>
-          <tr><td><code>standalone</code></td><td>Use Save As to download</td></tr>
-        </table>
-      </div>
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.9.5 &bull; TSV Pattern Editor Cheatsheet &bull; Page 1 of 2 &bull; Print landscape for best results</div>
+  <div class="footer">CDE Analyzer v0.9.6 &bull; TSV Pattern Editor Cheatsheet &bull; Page 1 of 2 &bull; Print landscape for best results</div>
 </div>
 
 <!-- PAGE 2 -->
@@ -741,7 +710,7 @@ cde-analyzer workflow resume \
     </div>
 
   </div>
-  <div class="footer">CDE Analyzer v0.9.5 &bull; TSV Pattern Editor Cheatsheet &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
+  <div class="footer">CDE Analyzer v0.9.6 &bull; TSV Pattern Editor Cheatsheet &bull; Page 2 of 2 &bull; <code>cde-analyzer pattern_util --edit FILE</code></div>
 </div>
 
 </body>

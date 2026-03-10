@@ -1,6 +1,6 @@
-# TSV Pattern Editor — Quickstart Guide
+# TSV Pattern Editor — Cheatsheet
 
-> **Version**: v0.9.5 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
+> **Version**: v0.9.6 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
 
 ---
 
