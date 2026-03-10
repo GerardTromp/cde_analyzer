@@ -61,6 +61,7 @@ nul
 # Claude checkpoint system
 .claude/sessions/
 .claude/checkpoints/
+.claude/archive/
 .claude/init_session.sh
 .claude/settings.json
 .claude/context/archive/

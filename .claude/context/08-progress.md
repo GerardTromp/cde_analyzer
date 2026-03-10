@@ -4,7 +4,7 @@
 
 **Focus**: Phrase pipeline correctness, curation UX, documentation
 
-**Version**: 0.9.6 (2026-03-09)
+**Version**: 0.9.6 (2026-03-10)
 
 ## Current State (v0.9.6)
 
@@ -12,7 +12,7 @@
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
-**Phase 3: Branching Strip** — 7 variant outputs; legacy 14-step pipeline or N-way 3-step single-pass
+**Phase 3: Branching Strip** — 7 variant outputs (complete 2³-1 grid); legacy 14-step pipeline or N-way 3-step single-pass (104s for 22,743 CDEs)
 
 ### Containment Tree in TSV Editor (v0.9.5–v0.9.6)
 
@@ -50,6 +50,7 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 0.9.6 | 2026-03-09 | 7th variant (MTSTPF), allcde03 production run (104s), curator briefing |
 | 0.9.5 | 2026-03-09 | Containment tree view in TSV editor (prefix+tinyId hierarchy) |
 | 0.9.4 | 2026-03-07 | Deferred parent filter, anchor trim control, followup decision, doc audit |
 | 0.9.2 | 2026-03-03 | N-way single-pass branching strip engine, tinyid_count column |
@@ -65,8 +66,8 @@
 ## Branches
 
 ### Active: field-aware-strip (from main)
-- **Contains**: Everything through v0.9.5
-- **Status**: Containment tree view, deferred parent filter, anchor trim control, followup decision
+- **Contains**: Everything through v0.9.6
+- **Status**: 7-way branching strip, containment tree, deferred parent filter, allcde03 production run
 
 ### Active: main
 - **Contains**: Everything through v0.9.1 + tinyid_count + context-aware examples
@@ -79,5 +80,5 @@
 
 - **LLM-assisted classification** — implemented (`llm_classify` action), not yet integrated into pipeline
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
-- **Embedding evaluation** — run extract_embed on 6 branching-strip outputs
+- **Embedding evaluation** — run extract_embed on 7 branching-strip outputs
 - **Full regression test** — legacy vs nway branching strip on allcde03 after curation

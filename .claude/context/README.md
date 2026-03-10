@@ -6,7 +6,7 @@ This directory contains structured context files for session recovery.
 
 For most session recovery, read these in order:
 1. **`CLAUDE.md`** (project root) — authoritative current state (v0.9.6)
-2. **`.claude/checkpoints/checkpoint-2026-02-27-v090-consolidated.md`** — full history
+2. **`.claude/checkpoints/checkpoint-2026-03-10-v096-consolidated.md`** — full history
 3. **`08-progress.md`** — current progress summary
 
 Files 01-07 below are **deep reference** from early project phases (2026-01-07). They describe foundational architecture, patterns, and gotchas that are still largely valid, but file listings and dependency info are stale (pre-v0.6.0). Use them for understanding *how the architecture works*, not *what the current state is*.
