@@ -156,7 +156,12 @@ def _make_anchor_regex(anchor: str) -> str:
     return r'\s+'.join(escaped)
 
 
-def _make_flexible_word_regex(word: str, is_optional: bool = False, include_following_space: bool = False) -> str:
+def _make_flexible_word_regex(
+    word: str,
+    is_optional: bool = False,
+    include_following_space: bool = False,
+    is_leading_optional: bool = False,
+) -> str:
     """
     Convert a word to flexible regex.
 
@@ -165,6 +170,9 @@ def _make_flexible_word_regex(word: str, is_optional: bool = False, include_foll
         is_optional: If True, entire word is optional
         include_following_space: If True, include \\s+ in the optional group
                                  (used when the word is optional and followed by more words)
+        is_leading_optional: If True, this optional word is at position 0 (no anchor).
+                             Requires \\s before the word to prevent mid-word matching.
+                             e.g., "a scale" must not match "euthanasia scale".
 
     Returns:
         Regex fragment for this word
@@ -178,12 +186,15 @@ def _make_flexible_word_regex(word: str, is_optional: bool = False, include_foll
         escaped = r'[-\s]?'.join(escaped_parts)
 
     if is_optional:
+        # When this optional word is the leading token (position 0, no anchor),
+        # require \s before it so it can't match a trailing letter of a prior
+        # word. e.g., (?:\sa\s+)? prevents "euthanasia scale" from matching
+        # "a scale" — the \s demands whitespace before "a".
+        prefix = r'\s' if is_leading_optional else ''
         if include_following_space:
-            # Include the following space in the optional group
-            # This way, if the word is absent, no space is required
-            return f'(?:{escaped}\\s+)?'
+            return f'(?:{prefix}{escaped}\\s+)?'
         else:
-            return f'(?:{escaped}\\s*)?'
+            return f'(?:{prefix}{escaped}\\s*)?'
     else:
         return escaped
 
@@ -233,6 +244,16 @@ def make_flexible_regex(
     anchor, remainder = _find_anchor_prefix(pattern)
 
     regex_parts = []
+
+    # Leading word boundary: prevent matching mid-word at the start.
+    # e.g., "a scale" must not match trailing "a" in "euthanasia scale".
+    # Only add \b when pattern starts with a non-optional word character.
+    # When the first token is an optional article, the boundary is handled
+    # inside _make_flexible_word_regex via is_leading_optional — requiring
+    # \s before the article so it can't match a trailing letter of a prior word.
+    first_text = anchor or remainder or ''
+    if first_text and first_text[0].isalnum():
+        regex_parts.append(r'\b')
 
     # Add anchor as literal (with flexible whitespace)
     if anchor:
@@ -315,8 +336,13 @@ def make_flexible_regex(
             # Check if there are more tokens after this one
             has_following_tokens = i < len(tokens) - 1
 
+            # Detect leading optional: position 0 in remainder with no anchor
+            leading_opt = is_optional and i == 0 and not anchor
+
             regex_parts.append(_make_flexible_word_regex(
-                token, is_optional, include_following_space=(is_optional and has_following_tokens)
+                token, is_optional,
+                include_following_space=(is_optional and has_following_tokens),
+                is_leading_optional=leading_opt,
             ))
             prev_was_optional = is_optional
             prev_was_version_keyword = False
@@ -1139,7 +1165,8 @@ def coalesce_variants_tsv(
     rollup_subset_tinyids: bool = False,
     trim_anchors: bool = True,
     emit_def_variants: bool = False,
-    defer_parent_filter: bool = False
+    defer_parent_filter: bool = False,
+    min_actual_tinyids: int = 0
 ) -> Dict[str, int]:
     """
     Coalesce pattern variants by removing shorter patterns subsumed by longer ones.
@@ -1176,6 +1203,10 @@ def coalesce_variants_tsv(
             extraction (Phase 2). Patterns rescued by a prefix group survive even
             if their individual parent count is below threshold. Use for phrase
             pipelines where cross-parent aggregation matters.
+        min_actual_tinyids: Protect patterns with >= this many actual tinyIds from
+            parent filtering regardless of parent_count. Prevents high-frequency
+            verbatim boilerplate (e.g., 105 CDEs) from being lost when parent_count
+            is 0 (dedup/verbatim origin). Default 0 = disabled.
 
     Returns:
         Dict with coalesce statistics:
@@ -1262,12 +1293,27 @@ def coalesce_variants_tsv(
     parent_weak_patterns: Set[str] = set()
     # Snapshot tinyIds for parent-filtered patterns (for report/divergence diagnostics)
     parent_weak_tinyids: Dict[str, Set[str]] = {}
+    high_freq_rescued_count = 0
     if min_parent_tinyids > 0 and has_parent_columns:
         for pattern in pattern_to_tinyids:
             parent_count = pattern_to_parent_count.get(pattern, 0)
             if parent_count < min_parent_tinyids:
+                # Protect high-frequency patterns from parent filtering
+                if min_actual_tinyids > 0 and len(pattern_to_tinyids[pattern]) >= min_actual_tinyids:
+                    high_freq_rescued_count += 1
+                    logger.debug(
+                        f"High-frequency rescue: '{pattern[:60]}' "
+                        f"({len(pattern_to_tinyids[pattern])} actual tinyIds, "
+                        f"parent_count={parent_count}) — protected by min_actual_tinyids={min_actual_tinyids}"
+                    )
+                    continue
                 parent_weak_patterns.add(pattern)
 
+        if high_freq_rescued_count:
+            logger.info(
+                f"High-frequency rescue: {high_freq_rescued_count} patterns with "
+                f">= {min_actual_tinyids} actual tinyIds protected from parent filter"
+            )
         if not defer_parent_filter:
             # Immediate filter (instrument mode — current behavior)
             for pattern in parent_weak_patterns:
@@ -1804,11 +1850,14 @@ def coalesce_variants_tsv(
         removed_weak = [p for p in parent_weak_patterns if p not in kept_patterns]
         if removed_weak:
             divergences = []
+            zero_parent_high = []  # patterns with parent_count=0 but many actual tinyIds
             for p in removed_weak:
                 actual = len(parent_weak_tinyids.get(p, set()))
-                parent_c = pattern_to_parent_count.get(p, 1)
+                parent_c = pattern_to_parent_count.get(p, 0)
                 if parent_c > 0:
                     divergences.append(actual / parent_c)
+                elif actual >= 10:
+                    zero_parent_high.append((p, actual))
             if divergences:
                 max_div = max(divergences)
                 high_div = sum(1 for d in divergences if d > 5.0)
@@ -1818,6 +1867,14 @@ def coalesce_variants_tsv(
                         f"patterns had actual/parent tinyId ratio > 5x (max {max_div:.1f}x). "
                         f"Consider --defer-parent-filter if high-value phrases are lost."
                     )
+            if zero_parent_high:
+                top = sorted(zero_parent_high, key=lambda x: -x[1])[:5]
+                examples = ", ".join(f"'{p[:40]}' ({n})" for p, n in top)
+                logger.warning(
+                    f"Parent filter removed {len(zero_parent_high)} patterns with "
+                    f"parent_count=0 but >= 10 actual tinyIds: {examples}. "
+                    f"Consider --min-actual-tinyids to protect high-frequency patterns."
+                )
 
     reverse_count = len(reverse_subsumed)
     prefix_kept_count = len(prefix_kept)
@@ -1832,6 +1889,7 @@ def coalesce_variants_tsv(
         'rollup_count': rollup_count,
         'parent_filtered_count': parent_filtered_count,
         'parent_rescued_count': rescued_count,
+        'high_freq_rescued_count': high_freq_rescued_count,
         'anchor_trimmed_count': anchor_trimmed_count,
         'def_variant_count': def_variant_count,
         'subsumptions': list(subsumed.items())

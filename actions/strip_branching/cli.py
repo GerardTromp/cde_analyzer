@@ -5,7 +5,7 @@
 Strip Branching - N-way branching strip producing all variants in a single pass.
 
 Instead of the 13-step branching_strip.yaml pipeline that loads the CDE JSON
-12 times, this engine loads JSON once and computes all 6 variants per CDE
+12 times, this engine loads JSON once and computes all 7 variants per CDE
 simultaneously.
 
 Example:
@@ -15,6 +15,7 @@ Example:
       --temporal-patterns temporal_expanded.tsv \\
       --phrase-patterns curated_phrases.tsv
 """
+import argparse
 from argparse import ArgumentParser
 from utils.constants import MODEL_REGISTRY
 
@@ -67,9 +68,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--variants",
         type=str,
-        default="MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT",
-        help="Comma-separated variant codes to produce (default: all 6). "
-             "Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT",
+        default="MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT",
+        help="Comma-separated variant codes to produce (default: all 7). "
+             "Valid: MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT",
     )
 
     # Processing options
@@ -95,6 +96,13 @@ def register_subparser(subparser: ArgumentParser):
         choices=["length", "file", "alpha"],
         default="length",
         help="Pattern processing order.",
+    )
+    subparser.add_argument(
+        "--verbatim-patterns",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Merge verbatim strip patterns from config into instrument stages "
+             "(default: enabled). Use --no-verbatim-patterns to disable.",
     )
 
     def _lazy_run_action(args):

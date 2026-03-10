@@ -597,6 +597,7 @@ function cdeUrl(path) {
 
     <div class="sep"></div>
     <button class="tb-btn" id="btn-clear-filters" title="Clear all column filters (Ctrl+Shift+F)">&#10005; Filters</button>
+    <button class="tb-btn" id="btn-case-sort" title="Toggle case-sensitive sorting (for tree-adjacent use)">Aa Sort</button>
 
     <span class="spacer"></span>
 
@@ -662,6 +663,7 @@ function cdeUrl(path) {
         hasTree: false,      // whether containment tree exists
         collapsedTrees: new Set(), // rowIds of collapsed tree nodes
         treeSorted: false,   // whether tree sort is active
+        caseSensitiveSort: false, // whether column sort is case-sensitive
     };
 
     // ===== DOM REFS =====
@@ -705,6 +707,7 @@ function cdeUrl(path) {
     const btnGroup = $('btn-group');
     const btnPropagate = $('btn-propagate');
     const btnClearFilters = $('btn-clear-filters');
+    const btnCaseSort = $('btn-case-sort');
     const treeButtons = $('tree-buttons');
     const btnTreeSort = $('btn-tree-sort');
     const btnTreePropagate = $('btn-tree-propagate');
@@ -1412,7 +1415,8 @@ function cdeUrl(path) {
             if (isNumeric) {
                 cmp = Number(va) - Number(vb);
             } else {
-                cmp = va.localeCompare(vb, undefined, { sensitivity: 'base' });
+                const sens = S.caseSensitiveSort ? 'variant' : 'base';
+                cmp = va.localeCompare(vb, undefined, { sensitivity: sens });
             }
             return asc ? cmp : -cmp;
         });
@@ -1448,6 +1452,20 @@ function cdeUrl(path) {
         renderBody();
         updateStatus();
         setAction('Filters cleared');
+    }
+
+    function toggleCaseSensitiveSort() {
+        S.caseSensitiveSort = !S.caseSensitiveSort;
+        btnCaseSort.classList.toggle('primary', S.caseSensitiveSort);
+        btnCaseSort.textContent = S.caseSensitiveSort ? 'Aa\u2260a Sort' : 'Aa Sort';
+        btnCaseSort.title = S.caseSensitiveSort
+            ? 'Sorting is case-sensitive — click to switch to case-insensitive'
+            : 'Sorting is case-insensitive — click to switch to case-sensitive';
+        if (S.sortCol >= 0) {
+            sortRows();
+            renderGrid();
+        }
+        setAction('Sort: ' + (S.caseSensitiveSort ? 'case-sensitive' : 'case-insensitive'));
     }
 
     function rowMatchesFilters(row) {
@@ -2689,6 +2707,7 @@ function cdeUrl(path) {
     btnTreeSort.addEventListener('click', toggleTreeSort);
     btnTreePropagate.addEventListener('click', propagateTree);
     btnClearFilters.addEventListener('click', clearAllFilters);
+    btnCaseSort.addEventListener('click', toggleCaseSensitiveSort);
 
     // File input handler
     fileInput.addEventListener('change', (e) => {

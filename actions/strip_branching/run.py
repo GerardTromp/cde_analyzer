@@ -6,6 +6,10 @@ Orchestration for N-way branching strip action.
 
 Loads CDE JSON once, configures strip stages from pattern TSVs, and invokes
 the branching_stripper engine to produce all requested variants simultaneously.
+
+Verbatim strip patterns from config/verbatim_strip_patterns.yaml are
+automatically merged into the inst_full stage as universal (no tinyId
+restriction) patterns.  Disable with --no-verbatim-patterns.
 """
 
 import json
@@ -111,6 +115,18 @@ def run_action(args: Namespace):
     # Build StripStage configs
     stages = {}
 
+    # Load verbatim strip patterns from config (merged into instrument stages)
+    verbatim_phrase_map = []
+    if getattr(args, 'verbatim_patterns', True):
+        from utils.config_loader import load_verbatim_strip_patterns
+        verbatim = load_verbatim_strip_patterns()
+        if verbatim:
+            for pattern_text, replace_with in verbatim:
+                for fp in field_paths:
+                    verbatim_phrase_map.append((fp, pattern_text, replace_with, None))
+            logger.info(f"Loaded {len(verbatim)} verbatim patterns from config "
+                        f"({len(verbatim_phrase_map)} phrase_map entries)")
+
     if "inst_full" in needed_stages:
         if not args.inst_full_patterns:
             logger.error("--inst-full-patterns required for variants: "
@@ -121,6 +137,10 @@ def run_action(args: Namespace):
             args.inst_full_patterns, field_paths, sort_order,
             expand_anchors=True,  # instrument patterns use anchor expansion
         )
+        if verbatim_phrase_map:
+            phrase_map.extend(verbatim_phrase_map)
+            logger.info(f"  Merged {len(verbatim_phrase_map)} verbatim entries "
+                        f"into inst_full stage")
         stages["inst_full"] = StripStage(
             name="inst_full", phrase_map=phrase_map,
         )

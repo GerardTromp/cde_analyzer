@@ -448,7 +448,7 @@ in each project's output directory provide persistent customization.
 
 ### Run specific strip variants (skip unused branches)
 
-The full branching strip produces 6 variants. For production, use `workflow configure`
+The full branching strip produces 7 variants. For production, use `workflow configure`
 to determine the minimal step set for the variant(s) you need:
 
 ```bash

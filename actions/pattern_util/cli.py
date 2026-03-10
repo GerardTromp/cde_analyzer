@@ -147,6 +147,18 @@ def register_subparser(subparser: ArgumentParser):
     )
 
     subparser.add_argument(
+        "--min-actual-tinyids",
+        type=int,
+        metavar="N",
+        default=0,
+        help="Protect patterns with >= N actual tinyIds from parent filtering "
+             "regardless of parent_count. Prevents high-frequency verbatim "
+             "boilerplate (e.g., 105 CDEs) from being lost when parent_count "
+             "is 0 (dedup/verbatim origin). Default 0 = disabled. "
+             "Recommended: 20 for phrase pipelines.",
+    )
+
+    subparser.add_argument(
         "--split-tiers",
         type=int,
         metavar="MIN_TOKENS",

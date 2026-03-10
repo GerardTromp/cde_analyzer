@@ -49,6 +49,27 @@ instrument_variants:
   - pattern: "(long form) (GDSLF)"
     note: "Bare suffix left after main instrument name is stripped"
 
+  - pattern: "Patient Health Questionnaire (PHQ-9)"
+    note: "PHQ-9 with parenthetical abbreviation - orphaned in ~10 CDEs"
+
+  - pattern: "(PHQ-9)"
+    note: "Bare parenthetical left after main instrument name is stripped"
+
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticides (Work)"
+    note: "Full RFQ-U Work variant - coalesced parent misses (Work) suffix"
+
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticide (Work)"
+    note: "Singular 'Pesticide' variant of RFQ-U Work"
+
+  - pattern: "Risk Factor Questionnaire (RFQ-U) for Pesticides (Home)"
+    note: "Full RFQ-U Home variant - coalesced parent misses (Home) suffix"
+
+  - pattern: "(Work)"
+    note: "Orphan parenthetical after RFQ-U instrument name is stripped"
+
+  - pattern: "(Home)"
+    note: "Orphan parenthetical after RFQ-U instrument name is stripped"
+
 # =============================================================================
 # Short-form instrument references
 # Abbreviated names that appear alongside full instrument names
@@ -62,6 +83,12 @@ short_form_references:
 
   - pattern: "BQ form"
     note: "Short name for Berlin Questionnaire"
+
+  - pattern: "PEmb-QoL:"
+    note: "Pulmonary Embolism Quality of Life abbreviation with trailing colon"
+
+  - pattern: "PEmb-QoL"
+    note: "Pulmonary Embolism Quality of Life questionnaire abbreviation"
 
 # =============================================================================
 # Neuro-QOL subscales
@@ -85,6 +112,9 @@ bracketed_annotations:
   - pattern: "[HL7v3.0]"
     note: "HL7 version 3.0 source tag - 1 occurrence"
 
+  - pattern: "[NHANES]"
+    note: "National Health and Nutrition Examination Survey source tag"
+
 # =============================================================================
 # Bare instrument abbreviations (LOINC-style field suffixes)
 # These appear as trailing tokens in designations and LOINC value strings
@@ -101,6 +131,9 @@ bare_instrument_abbrevs:
 
   - pattern: "REGEX: AQ$"
     note: "Bare trailing ' AQ' at end of designations (e.g. 'Anxious new situations AQ') - 50 occurrences"
+
+  - pattern: "NHANES"
+    note: "National Health and Nutrition Examination Survey bare abbreviation"
 
 # =============================================================================
 # Boilerplate phrases (non-instrument)

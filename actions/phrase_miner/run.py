@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 from argparse import Namespace
 from pathlib import Path
 from typing import List
@@ -10,6 +11,23 @@ from CDE_Schema.CDE_Item import CDEItem
 from utils.file_utils import graceful_interrupt
 
 logger = logging.getLogger(__name__)
+
+
+def _is_word_boundary_substring(short: str, long: str) -> bool:
+    """Check if *short* appears in *long* at word boundaries.
+
+    Plain ``short in long`` matches mid-word (e.g. ``"a scale" in
+    "euthanasia scale"`` is True).  This function uses ``\\b`` regex
+    word-boundary anchors so that each end of the match must fall on a
+    word boundary — preventing partial-word matches.
+
+    Returns True when *short* is found at a word-boundary position
+    inside *long* (and ``short != long``).
+    """
+    if short == long:
+        return False
+    # re.escape handles special chars; \b ensures word edges
+    return bool(re.search(r'\b' + re.escape(short) + r'\b', long))
 
 
 @graceful_interrupt
@@ -354,8 +372,8 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
                     else:
                         short_compare = short_verbatim.lower()
 
-                    # Check if shorter is a substring of longer
-                    if short_compare in long_compare:
+                    # Check if shorter is a word-boundary substring of longer
+                    if _is_word_boundary_substring(short_compare, long_compare):
                         # Require tinyId overlap for conservative subsumption
                         long_tinyids = coalesced_groups[long_verbatim]["tinyids"]
                         short_tinyids = coalesced_groups[short_verbatim]["tinyids"]
@@ -385,7 +403,7 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
                     else:
                         existing_compare = existing_verbatim.lower()
 
-                    if compare_key in existing_compare and compare_key != existing_compare:
+                    if _is_word_boundary_substring(compare_key, existing_compare):
                         # Merge: add counts and tinyIds to the longer form
                         refined_groups[existing_verbatim]["count"] += coalesced_groups[verbatim]["count"]
                         refined_groups[existing_verbatim]["tinyids"].update(coalesced_groups[verbatim]["tinyids"])
@@ -423,8 +441,8 @@ def write_verbatim_phrases_tsv(phrases: List, path: Path, case_sensitive: bool =
                     short_cmp = short_v if case_sensitive else short_v.lower()
                     short_len = len(short_cmp)
 
-                    # Skip if already a substring (handled in Stage 3)
-                    if short_cmp in long_cmp:
+                    # Skip if already a word-boundary substring (handled in Stage 3)
+                    if _is_word_boundary_substring(short_cmp, long_cmp):
                         continue
 
                     # Check if short is a prefix truncation (short matches END of long)
@@ -598,7 +616,7 @@ def write_verbatim_templates_tsv(phrases: List, path: Path, case_sensitive: bool
                     if short_v in subsumed:
                         continue
                     short_cmp = short_v if case_sensitive else short_v.lower()
-                    if short_cmp in long_cmp:
+                    if _is_word_boundary_substring(short_cmp, long_cmp):
                         if coalesced_groups[long_v]["tinyids"] & coalesced_groups[short_v]["tinyids"]:
                             subsumed.add(short_v)
 
@@ -612,7 +630,7 @@ def write_verbatim_templates_tsv(phrases: List, path: Path, case_sensitive: bool
                 merged = False
                 for existing in refined_forms:
                     existing_cmp = existing if case_sensitive else existing.lower()
-                    if cmp_key in existing_cmp and cmp_key != existing_cmp:
+                    if _is_word_boundary_substring(cmp_key, existing_cmp):
                         merged = True
                         break
                 if not merged:

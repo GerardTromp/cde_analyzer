@@ -4,17 +4,17 @@
 
 **Focus**: Phrase pipeline correctness, curation UX, documentation
 
-**Version**: 0.9.5 (2026-03-09)
+**Version**: 0.9.6 (2026-03-09)
 
-## Current State (v0.9.5)
+## Current State (v0.9.6)
 
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
-**Phase 3: Branching Strip** — 6 variant outputs; legacy 13-step pipeline or N-way 3-step single-pass
+**Phase 3: Branching Strip** — 7 variant outputs; legacy 14-step pipeline or N-way 3-step single-pass
 
-### Containment Tree in TSV Editor (v0.9.5)
+### Containment Tree in TSV Editor (v0.9.5–v0.9.6)
 
 - **Prefix-containment tree**: Automatic hierarchical grouping by text prefix + tinyId subset containment
 - **818/4006 patterns** (20%) fully contained by shorter prefixes in allcde03
@@ -40,7 +40,7 @@
 
 ### Production Tooling — Complete
 
-- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine, all 6 variants
+- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine, all 7 variants
 - **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE] [--nway]`
 - **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter
 - **Workflow scaffold** (v0.6.0): auto-generate bash scripts with Windows→WSL conversion

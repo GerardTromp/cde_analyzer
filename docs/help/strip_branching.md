@@ -4,8 +4,8 @@ N-way branching strip producing all variants in a single pass.
 
 ## Overview
 
-Replaces the 13-step `branching_strip.yaml` pipeline with a single-pass engine
-that loads the CDE JSON once and produces all 6 variants simultaneously. This
+Replaces the 14-step `branching_strip.yaml` pipeline with a single-pass engine
+that loads the CDE JSON once and produces all 7 variants simultaneously. This
 avoids redundant JSON loading/parsing (the legacy pipeline loads the 22K-CDE
 file 12 times) and shares intermediate results across variants.
 
@@ -41,7 +41,7 @@ cde-analyzer strip_branching -i cdes.json -d output/ \
 | `--inst-sub-patterns` | | | Sub-group instrument patterns TSV |
 | `--temporal-patterns` | | | Expanded temporal patterns TSV |
 | `--phrase-patterns` | | | Curated phrase patterns TSV |
-| `--variants` | | all 6 | Comma-separated variant codes |
+| `--variants` | | all 7 | Comma-separated variant codes |
 | `--workers` | `-w` | `0` (auto) | Parallel workers |
 | `--clean-remnants` | | `false` | Post-strip cleanup |
 | `--fields` | `-f` | definitions + designations | Field paths to strip |
@@ -53,6 +53,7 @@ cde-analyzer strip_branching -i cdes.json -d output/ \
 |------|-----------------|
 | `MTSFPF` | Main instrument names fully removed |
 | `MFSTPF` | Sub-group instrument prefix removed |
+| `MTSTPF` | Full + sub instrument removal (no phrases) |
 | `MFSFPT` | Curated phrases removed (no instruments) |
 | `MTSFPT` | Full instrument + phrases |
 | `MFSTPT` | Sub instrument + phrases |
@@ -70,7 +71,9 @@ The engine processes each CDE once, sharing intermediate results:
               │
     original ─┼─ MFSTPF (inst_sub only)
               │
-              ├─ inst_full ─┬─ MTSFPT (+ temporal + phrase)
+              ├─ inst_full ─┬─ MTSTPF (+ inst_sub, no phrases)
+              │             │
+              │             ├─ MTSFPT (+ temporal + phrase)
               │             │
               │             └─ inst_sub ─── MTSTPT (+ temporal + phrase)
               │
@@ -93,7 +96,7 @@ Each pattern file is treated as a separate stage with specific settings:
 | `temporal` | No | Yes | Yes |
 | `phrase` | No | No | Yes |
 
-These match the settings used in the legacy 13-step pipeline.
+These match the settings used in the legacy 14-step pipeline.
 
 ## Workflow Integration
 

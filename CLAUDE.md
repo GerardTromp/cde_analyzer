@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.5)
+# CDE Analyzer — Context (v0.9.6)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -36,10 +36,23 @@ mine_instruments → discover_abbreviations → discover_verbatim → coalesce �
 mine_phrases → discover_verbatim → coalesce → field_analysis → curation_gate → [CURATOR] → finalize_curation → apply_substitutions → strip_phrases → discovery_report
 
 ### Phase 3: Branching Strip
-- **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (13 steps)
-- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all variants) → quality_report (3 steps)
+- **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (14 steps)
+- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
 
-## Current State (v0.9.5)
+## Current State (v0.9.6)
+
+### v0.9.6: 7-Way Branching Strip + allcde03 Run
+
+#### 7th Variant (MTSTPF)
+- **MTSTPF**: Full + sub instrument removal, no phrases (completes the 2³-1 combinatorial grid)
+- Pipeline extended from 6 to 7 variants (13 → 14 steps in legacy, all 7 in N-way)
+- Verbatim patterns from `config/verbatim_strip_patterns.yaml` auto-merged into `inst_full` stage via `--verbatim-patterns`
+
+#### allcde03 Production Run
+- 22,743 CDEs × 7 variants in 104s (N-way single-pass)
+- Pattern inventory: 458 instrument (full+sub) + 273 curated phrases + 7 substitutes + 39 verbatim + 2,100 temporal
+- Quality: 84.2% fields at 90-100% retention (MTSTPT), 6 trailing_article remnants per variant
+- Run details: `docs/runs/allcde03-branching-strip-run.md`
 
 ### v0.9.5: Containment Tree in TSV Editor
 
@@ -88,7 +101,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 ### v0.9.2: N-way Single-Pass Branching Strip
 
 #### N-way Branching Strip Engine (`strip_branching`)
-- **Single-pass**: Loads CDE JSON once, produces all 6 variants simultaneously
+- **Single-pass**: Loads CDE JSON once, produces all 7 variants simultaneously
 - **Shared intermediates**: `inst_full` result reused across MTSFPF, MTSFPT, MTSTPT
 - **4 strip stages**: `inst_full`, `inst_sub`, `temporal`, `phrase` — each with appropriate settings
 - **TinyId-indexed lookup**: Patterns indexed by tinyId for O(applicable) vs O(all) per CDE

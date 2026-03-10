@@ -4,7 +4,7 @@ N-way branching strip engine.
 Produces all requested strip variants in a single pass over the CDE data.
 Instead of the 13-step branching_strip.yaml pipeline that loads/parses the
 22K-CDE JSON file 12 times, this engine loads JSON once and computes all
-6 variants per CDE simultaneously.
+7 variants per CDE simultaneously.
 
 Variant dependency graph::
 
@@ -14,7 +14,9 @@ Variant dependency graph::
               │
               ├─ inst_full ─┬─ MTSFPT (+ temporal + phrase)
               │             │
-              │             └─ inst_sub ─── MTSTPT (+ temporal + phrase)
+              │             └─ inst_sub ─┬─ MTSTPF (instruments only)
+              │                          │
+              │                          └─ MTSTPT (+ temporal + phrase)
               │
               ├─ inst_sub ──── MFSTPT (+ temporal + phrase)
               │
@@ -45,6 +47,7 @@ logger = logging.getLogger(__name__)
 VARIANT_STAGES: Dict[str, List[str]] = {
     "MTSFPF": ["inst_full"],
     "MFSTPF": ["inst_sub"],
+    "MTSTPF": ["inst_full", "inst_sub"],
     "MFSFPT": ["temporal", "phrase"],
     "MTSFPT": ["inst_full", "temporal", "phrase"],
     "MFSTPT": ["inst_sub", "temporal", "phrase"],

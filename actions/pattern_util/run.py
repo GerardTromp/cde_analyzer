@@ -4591,6 +4591,7 @@ def run_action(args: Namespace):
         trim_anchors = not getattr(args, 'no_trim_anchors', False)
         emit_def_variants = getattr(args, 'emit_def_variants', False)
         defer_parent_filter = getattr(args, 'defer_parent_filter', False)
+        min_actual_tinyids = getattr(args, 'min_actual_tinyids', 0)
 
         logger.info(f"Coalesce mode: removing subsumed patterns from {coalesce_variants}")
         if trim_anchors:
@@ -4616,7 +4617,8 @@ def run_action(args: Namespace):
             rollup_subset_tinyids=rollup_subset_tinyids,
             trim_anchors=trim_anchors,
             emit_def_variants=emit_def_variants,
-            defer_parent_filter=defer_parent_filter
+            defer_parent_filter=defer_parent_filter,
+            min_actual_tinyids=min_actual_tinyids
         )
 
         print(f"\nCoalesce complete:")
@@ -4637,6 +4639,8 @@ def run_action(args: Namespace):
             print(f"  Parent filter: {stats['parent_filtered_count']} patterns below threshold")
         if stats.get('parent_rescued_count', 0) > 0:
             print(f"  Parent rescued: {stats['parent_rescued_count']} weak-parent patterns saved by prefix groups")
+        if stats.get('high_freq_rescued_count', 0) > 0:
+            print(f"  High-freq rescued: {stats['high_freq_rescued_count']} patterns protected by min_actual_tinyids={min_actual_tinyids}")
         if stats.get('def_variant_count', 0) > 0:
             print(f"  Def variants: {stats['def_variant_count']} definition-form patterns added")
         if report_path:

@@ -11,6 +11,7 @@
 # |-----------------------------|---|---|---|--------|--------------------------|
 # | Main instrument             | T | F | F | MTSFPF | stripped_MTSFPF.json     |
 # | Sub instrument              | F | T | F | MFSTPF | stripped_MFSTPF.json     |
+# | Main and sub instrument     | T | T | F | MTSTPF | stripped_MTSTPF.json     |
 # | Phrases                     | F | F | T | MFSFPT | stripped_MFSFPT.json     |
 # | Main instrument and phrases | T | F | T | MTSFPT | stripped_MTSFPT.json     |
 # | Sub instrument and phrases  | F | T | T | MFSTPT | stripped_MFSTPT.json     |
@@ -55,8 +56,8 @@ variables:
   # Temporal expansion (auto-generated from config seeds)
   temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
 
-  # Variant selection (default: all 6)
-  variants: "${VARIANTS:-MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT}"
+  # Variant selection (default: all 7)
+  variants: "${VARIANTS:-MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT}"
 
 steps:
   # [1] Expand temporal seed patterns from config

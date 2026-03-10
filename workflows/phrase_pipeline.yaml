@@ -64,6 +64,11 @@ variables:
   # collectively form a strong prefix (e.g., "The free-text field related to").
   defer_parent_filter: "${DEFER_PARENT_FILTER:-true}"
 
+  # High-frequency rescue: protect patterns with many actual tinyIds from
+  # parent filtering, even when parent_count=0 (dedup/verbatim origin).
+  # Prevents loss of high-frequency boilerplate like NEI/eyeGENE disclaimers.
+  min_actual_tinyids: "${MIN_ACTUAL_TINYIDS:-20}"
+
   # Field analysis filters
   min_field_count: "${MIN_FIELD_COUNT:-6}"
   min_tokens: "${MIN_TOKENS:-3}"
@@ -117,6 +122,7 @@ steps:
       min_prefix_tinyids: 2
       min_parent_tinyids: "${min_parent_tinyids}"
       defer_parent_filter: "${defer_parent_filter}"
+      min_actual_tinyids: "${min_actual_tinyids}"
       no_trim_anchors: true
 
   - name: field_analysis
