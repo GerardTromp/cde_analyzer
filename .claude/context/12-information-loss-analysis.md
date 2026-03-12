@@ -8,7 +8,7 @@
 
 The analysis script `scripts/branching_loss_analysis.py` extracts text from two
 CDE fields — `definitions.*.definition` and `designations.*.designation` — across
-the original (unstripped) JSON and each of the 6 branching-strip outputs.
+the original (unstripped) JSON and each of the 5 branching-strip outputs.
 
 ### Metrics
 
@@ -34,7 +34,6 @@ right tail means a minority of CDEs are predominantly formulaic.
 | `MFSFPT` | Curated phrase patterns removed, no instrument stripping |
 | `MTSFPT` | Full instrument removal + phrase removal |
 | `MFSTPT` | Sub-group instrument removal + phrase removal |
-| `MTSTPT` | Full + sub instrument removal + phrase removal (maximum) |
 
 ## Usage
 

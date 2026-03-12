@@ -4,9 +4,13 @@
 """
 Strip Branching - N-way branching strip producing all variants in a single pass.
 
-Instead of the 13-step branching_strip.yaml pipeline that loads the CDE JSON
-12 times, this engine loads JSON once and computes all 7 variants per CDE
+Instead of the 10-step branching_strip.yaml pipeline that loads the CDE JSON
+multiple times, this engine loads JSON once and computes all 5 variants per CDE
 simultaneously.
+
+Note: MT+ST combinations (MTSTPF, MTSTPT) were removed in v0.9.7 because
+full instrument removal (inst_full) subsumes sub-instrument removal (inst_sub),
+making these variants functionally equivalent to MTSFPF and MTSFPT respectively.
 
 Example:
   cde-analyzer strip_branching -i cdes.json -d output/ \\
@@ -68,9 +72,9 @@ def register_subparser(subparser: ArgumentParser):
     subparser.add_argument(
         "--variants",
         type=str,
-        default="MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT",
-        help="Comma-separated variant codes to produce (default: all 7). "
-             "Valid: MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT",
+        default="MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT",
+        help="Comma-separated variant codes to produce (default: all 5). "
+             "Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT",
     )
 
     # Processing options

@@ -30,12 +30,9 @@ logger = logging.getLogger(__name__)
 STRIP_CODE_STEPS: Dict[str, List[str]] = {
     "MTSFPF": ["strip_MTSFPF"],
     "MFSTPF": ["strip_MFSTPF"],
-    "MTSTPF": ["strip_MTSFPF", "sub_on_full_MTSTPF"],
     "MFSFPT": ["expand_temporal", "temporal_MFSFPT", "strip_MFSFPT"],
     "MTSFPT": ["strip_MTSFPF", "expand_temporal", "temporal_MTSFPT", "strip_MTSFPT"],
     "MFSTPT": ["strip_MFSTPF", "expand_temporal", "temporal_MFSTPT", "strip_MFSTPT"],
-    "MTSTPT": ["strip_MTSFPF", "sub_on_full_MTSTPT", "expand_temporal",
-                "temporal_MTSTPT", "strip_MTSTPT"],
 }
 ALL_STRIP_CODES = sorted(STRIP_CODE_STEPS.keys())
 
@@ -1079,7 +1076,7 @@ def _scaffold_header(project_name: str, timestamp: str, is_windows: bool,
     if 2 in phases:
         lines.append(f'#   {script} phase2           # Run phrase mining')
     if 3 in phases:
-        lines.append(f'#   {script} phase3           # Run 6-way branching strip')
+        lines.append(f'#   {script} phase3           # Run 5-way branching strip')
     lines.append(f'#   {script} all              # Run full pipeline (stops at checkpoints)')
     lines.extend(['', 'set -euo pipefail'])
     if is_windows:
@@ -1347,7 +1344,6 @@ phase3() {
     echo "  $PHASE3_DIR/stripped_MFSFPT.json"
     echo "  $PHASE3_DIR/stripped_MTSFPT.json"
     echo "  $PHASE3_DIR/stripped_MFSTPT.json"
-    echo "  $PHASE3_DIR/stripped_MTSTPT.json"
 }'''
 
 

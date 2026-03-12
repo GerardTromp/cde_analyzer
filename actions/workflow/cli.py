@@ -226,8 +226,8 @@ def register_subparser(subparser: ArgumentParser):
         "codes",
         nargs="+",
         metavar="CODE",
-        help="Strip codes to include (e.g., MTSFPT MTSTPT). "
-             "Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT"
+        help="Strip codes to include (e.g., MTSFPT MFSTPT). "
+             "Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT"
     )
     configure_parser.add_argument(
         "--output", "-o",

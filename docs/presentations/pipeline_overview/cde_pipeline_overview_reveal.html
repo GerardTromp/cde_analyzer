@@ -332,27 +332,26 @@
 <!-- Slide 12: Phase 3 -->
 <section>
   <h2>Phase 3: Branching Strip</h2>
-  <img src="diagrams/branching_strip.svg" class="diagram" alt="Seven-way branching strip pipeline">
-  <p class="footnote">7 variants = complete 2&sup3;&minus;1 combinatorial grid over {full inst, sub inst, phrases}</p>
+  <img src="diagrams/branching_strip.svg" class="diagram" alt="Five-way branching strip pipeline">
+  <p class="footnote">5 variants over {full inst, sub inst, phrases} &mdash; MT+ST combinations removed (functionally equivalent to MT-only)</p>
 </section>
 
 <!-- Slide 13: Production Results -->
 <section>
   <h2>Production Results (allcde03 &mdash; 22,743 CDEs)</h2>
-  <h3>7 output variants (N-way single-pass: 104 seconds)</h3>
+  <h3>5 output variants (N-way single-pass: 104 seconds)</h3>
   <table>
     <tr><th>Code</th><th>Main inst</th><th>Sub inst</th><th>Phrases</th><th>Description</th></tr>
     <tr><td>MTSFPF</td><td>Stripped</td><td>&mdash;</td><td>&mdash;</td><td>Full instrument only</td></tr>
     <tr><td>MFSTPF</td><td>&mdash;</td><td>Stripped</td><td>&mdash;</td><td>Sub-group only</td></tr>
-    <tr style="background:#e3f2fd;"><td><strong>MTSTPF</strong></td><td><strong>Stripped</strong></td><td><strong>Stripped</strong></td><td>&mdash;</td><td><strong>Full + sub instruments (new)</strong></td></tr>
     <tr><td>MFSFPT</td><td>&mdash;</td><td>&mdash;</td><td>Stripped</td><td>Phrases only</td></tr>
     <tr><td>MTSFPT</td><td>Stripped</td><td>&mdash;</td><td>Stripped</td><td>Full instruments + phrases</td></tr>
     <tr><td>MFSTPT</td><td>&mdash;</td><td>Stripped</td><td>Stripped</td><td>Sub instruments + phrases</td></tr>
-    <tr style="background:#e8f5e9;"><td><strong>MTSTPT</strong></td><td><strong>Stripped</strong></td><td><strong>Stripped</strong></td><td><strong>Stripped</strong></td><td><strong>Maximum cleaning</strong></td></tr>
   </table>
+  <p class="small">MT+ST combinations (MTSTPF, MTSTPT) removed: full instrument removal deletes entire pattern text, leaving nothing for sub-instrument removal.</p>
   <div class="two-col" style="margin-top:0.5em;">
     <div>
-      <h3>Quality (MTSTPT)</h3>
+      <h3>Quality (MTSFPT)</h3>
       <ul>
         <li>84.2% of fields at 90&ndash;100% retention</li>
         <li>Temporal remnants: <strong>0</strong> in PT variants</li>
@@ -694,14 +693,14 @@
       <ul>
         <li>Three-phase pipeline (instrument, phrase, branching strip)</li>
         <li>Curation infrastructure (ledger, gate, editor, server)</li>
-        <li>Production-tested: 22,743 CDEs &times; 7 variants in 104s</li>
+        <li>Production-tested: 22,743 CDEs &times; 5 variants in 104s</li>
         <li>Documentation: 8 vignettes, 28 reference pages</li>
       </ul>
       <h3>Remaining</h3>
       <ul>
         <li>LLM-assisted classification</li>
         <li>Position-specific field-aware stripping</li>
-        <li>Embedding evaluation on 7 variants</li>
+        <li>Embedding evaluation on 5 variants</li>
       </ul>
     </div>
     <div>
@@ -715,7 +714,7 @@
         <tr><td>v0.9.0</td><td>Zipf priority split</td></tr>
         <tr><td>v0.9.2</td><td>N-way single-pass engine</td></tr>
         <tr><td>v0.9.5</td><td>Containment tree in editor</td></tr>
-        <tr><td>v0.9.6</td><td>7th variant + allcde03 run</td></tr>
+        <tr><td>v0.9.6</td><td>5-way branching strip + allcde03 run</td></tr>
       </table>
     </div>
   </div>
@@ -729,7 +728,7 @@
     <li><strong>Descending k-mer mining</strong> with masking prevents redundant detection</li>
     <li><strong>Curation ledger</strong> enables incremental improvement &mdash; effort compounds</li>
     <li><strong>Zipf triage</strong> separates domain-specific from common English</li>
-    <li><strong>Seven stripped variants</strong> (complete 2&sup3;&minus;1 grid) for downstream comparison</li>
+    <li><strong>Five stripped variants</strong> for downstream comparison (MT+ST removed as equivalent)</li>
     <li><strong><code>min_parent_tinyids</code></strong> is the most influential parameter (18.6x)</li>
     <li><strong>Standalone editor</strong> prevents Excel data corruption</li>
   </ol>

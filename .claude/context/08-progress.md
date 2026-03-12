@@ -12,7 +12,7 @@
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
 **Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
-**Phase 3: Branching Strip** — 7 variant outputs (complete 2³-1 grid); legacy 14-step pipeline or N-way 3-step single-pass (104s for 22,743 CDEs)
+**Phase 3: Branching Strip** — 5 variant outputs; legacy 10-step pipeline or N-way 3-step single-pass (104s for 22,743 CDEs)
 
 ### Containment Tree in TSV Editor (v0.9.5–v0.9.6)
 
@@ -40,7 +40,7 @@
 
 ### Production Tooling — Complete
 
-- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine, all 7 variants
+- **N-way branching strip** (v0.9.2): `strip_branching` — single-pass engine, all 5 variants
 - **Strip configurator** (v0.9.1): `workflow configure CODE [-o FILE] [--nway]`
 - **Step filtering** (v0.9.1): `--only-steps S1,S2,...` generic step filter
 - **Workflow scaffold** (v0.6.0): auto-generate bash scripts with Windows→WSL conversion
@@ -50,11 +50,11 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
-| 0.9.6 | 2026-03-09 | 7th variant (MTSTPF), allcde03 production run (104s), curator briefing |
+| 0.9.6 | 2026-03-09 | 5-way branching strip, allcde03 production run (104s), curator briefing |
 | 0.9.5 | 2026-03-09 | Containment tree view in TSV editor (prefix+tinyId hierarchy) |
 | 0.9.4 | 2026-03-07 | Deferred parent filter, anchor trim control, followup decision, doc audit |
 | 0.9.2 | 2026-03-03 | N-way single-pass branching strip engine, tinyid_count column |
-| 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps, 6th variant (MTSTPT) |
+| 0.9.1 | 2026-03-03 | Production strip configurator, --only-steps |
 | 0.9.0 | 2026-02-26 | Zipf priority split, editor UX, version sync |
 | 0.8.1 | 2026-02-25 | Substitute decision type |
 | 0.8.0 | 2026-02-24 | Incremental curation with ledger and gate |
@@ -67,7 +67,7 @@
 
 ### Active: field-aware-strip (from main)
 - **Contains**: Everything through v0.9.6
-- **Status**: 7-way branching strip, containment tree, deferred parent filter, allcde03 production run
+- **Status**: 5-way branching strip, containment tree, deferred parent filter, allcde03 production run
 
 ### Active: main
 - **Contains**: Everything through v0.9.1 + tinyid_count + context-aware examples
@@ -80,5 +80,5 @@
 
 - **LLM-assisted classification** — implemented (`llm_classify` action), not yet integrated into pipeline
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
-- **Embedding evaluation** — run extract_embed on 7 branching-strip outputs
+- **Embedding evaluation** — run extract_embed on 5 branching-strip outputs
 - **Full regression test** — legacy vs nway branching strip on allcde03 after curation

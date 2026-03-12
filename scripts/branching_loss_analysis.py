@@ -162,7 +162,6 @@ def main():
         'MFSFPT': 'stripped_MFSFPT.json',
         'MTSFPT': 'stripped_MTSFPT.json',
         'MFSTPT': 'stripped_MFSTPT.json',
-        'MTSTPT': 'stripped_MTSTPT.json',
     }
 
     branch_dir = Path(args.branch_dir)

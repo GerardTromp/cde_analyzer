@@ -36,22 +36,23 @@ mine_instruments → discover_abbreviations → discover_verbatim → coalesce �
 mine_phrases → discover_verbatim → coalesce → field_analysis → curation_gate → [CURATOR] → finalize_curation → apply_substitutions → strip_phrases → discovery_report
 
 ### Phase 3: Branching Strip
-- **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (14 steps)
-- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
+- **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (10 steps)
+- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 5 variants) → quality_report (3 steps)
 
 ## Current State (v0.9.6)
 
-### v0.9.6: 7-Way Branching Strip + allcde03 Run
+### v0.9.6: 5-Way Branching Strip + allcde03 Run
 
-#### 7th Variant (MTSTPF)
-- **MTSTPF**: Full + sub instrument removal, no phrases (completes the 2³-1 combinatorial grid)
-- Pipeline extended from 6 to 7 variants (13 → 14 steps in legacy, all 7 in N-way)
+#### Variant Reduction (7 → 5)
+- Removed **MTSTPF** and **MTSTPT**: MT+ST combinations are functionally equivalent to their MT-only counterparts (MTSFPF, MTSFPT) because full instrument removal deletes the entire pattern text, leaving nothing for sub-instrument removal to match
+- 5 remaining variants: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT
+- Pipeline reduced from 6 to 5 variants (13 → 10 steps in legacy, all 5 in N-way)
 - Verbatim patterns from `config/verbatim_strip_patterns.yaml` auto-merged into `inst_full` stage via `--verbatim-patterns`
 
 #### allcde03 Production Run
-- 22,743 CDEs × 7 variants in 104s (N-way single-pass)
+- 22,743 CDEs × 5 variants in 104s (N-way single-pass)
 - Pattern inventory: 458 instrument (full+sub) + 273 curated phrases + 7 substitutes + 39 verbatim + 2,100 temporal
-- Quality: 84.2% fields at 90-100% retention (MTSTPT), 6 trailing_article remnants per variant
+- Quality: 84.2% fields at 90-100% retention (MTSFPT), 6 trailing_article remnants per variant
 - Run details: `docs/runs/allcde03-branching-strip-run.md`
 
 ### v0.9.5: Containment Tree in TSV Editor
@@ -101,20 +102,17 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 ### v0.9.2: N-way Single-Pass Branching Strip
 
 #### N-way Branching Strip Engine (`strip_branching`)
-- **Single-pass**: Loads CDE JSON once, produces all 7 variants simultaneously
-- **Shared intermediates**: `inst_full` result reused across MTSFPF, MTSFPT, MTSTPT
+- **Single-pass**: Loads CDE JSON once, produces all 5 variants simultaneously
+- **Shared intermediates**: `inst_full` result reused across MTSFPF, MTSFPT
 - **4 strip stages**: `inst_full`, `inst_sub`, `temporal`, `phrase` — each with appropriate settings
 - **TinyId-indexed lookup**: Patterns indexed by tinyId for O(applicable) vs O(all) per CDE
 - **Parallel processing**: Chunks CDEs across workers, each producing all variants
 - **Key files**: `logic/branching_stripper.py` (engine), `actions/strip_branching/` (action)
-- **Workflow**: `branching_strip_nway.yaml` — 3 steps vs 13 in legacy pipeline
+- **Workflow**: `branching_strip_nway.yaml` — 3 steps vs 10 in legacy pipeline
 - **Configure**: `workflow configure CODE --nway` for nway-aware configuration
 
-### v0.9.1: Production Strip Configurator + 6th Variant
+### v0.9.1: Production Strip Configurator
 
-#### 6th Branching Strip Variant (MTSTPT)
-- **MTSTPT**: Full + sub instrument removal + phrase removal (maximum stripping)
-- Pipeline extended from 5 to 6 variants (10 → 13 steps)
 - Output naming standardized to `stripped_{CODE}.json` format
 
 #### Production Strip Configurator (`workflow configure`)
@@ -304,7 +302,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 ### Workflows
 - `workflows/instrument_pipeline.yaml` — Phase 1
 - `workflows/phrase_pipeline.yaml` — Phase 2
-- `workflows/branching_strip.yaml` — Phase 3 (6-way branch, 13-step legacy)
+- `workflows/branching_strip.yaml` — Phase 3 (5-way branch, 10-step legacy)
 - `workflows/branching_strip_nway.yaml` — Phase 3 (N-way single-pass, 3 steps)
 
 ### Documentation

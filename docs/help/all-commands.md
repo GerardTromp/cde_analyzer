@@ -376,8 +376,8 @@ options:
   --temporal-patterns FILE
                         Expanded temporal patterns TSV
   --phrase-patterns FILE Curated phrase patterns TSV
-  --variants CODES      Comma-separated variant codes (default: all 7).
-                        Valid: MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT
+  --variants CODES      Comma-separated variant codes (default: all 5).
+                        Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT
   --workers, -w N       Parallel workers (0=auto, 1=sequential, default: 0)
   --clean-remnants      Post-strip cleanup of orphan articles, floating punctuation
   --fields, -f FIELDS   Field paths to strip (default: definitions, designations)

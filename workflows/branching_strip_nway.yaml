@@ -1,6 +1,6 @@
 # Workflow: N-way Branching Strip Pipeline (Single-Pass)
 #
-# Replaces the 13-step branching_strip.yaml with a 3-step pipeline that
+# Replaces the 10-step branching_strip.yaml with a 3-step pipeline that
 # loads the CDE JSON once and produces all requested variants simultaneously.
 #
 # Output filenames use the same coding as the original pipeline:
@@ -11,11 +11,14 @@
 # |-----------------------------|---|---|---|--------|--------------------------|
 # | Main instrument             | T | F | F | MTSFPF | stripped_MTSFPF.json     |
 # | Sub instrument              | F | T | F | MFSTPF | stripped_MFSTPF.json     |
-# | Main and sub instrument     | T | T | F | MTSTPF | stripped_MTSTPF.json     |
 # | Phrases                     | F | F | T | MFSFPT | stripped_MFSFPT.json     |
 # | Main instrument and phrases | T | F | T | MTSFPT | stripped_MTSFPT.json     |
 # | Sub instrument and phrases  | F | T | T | MFSTPT | stripped_MFSTPT.json     |
-# | Main, sub and phrases       | T | T | T | MTSTPT | stripped_MTSTPT.json     |
+#
+# Note: MT+ST combinations (MTSTPF, MTSTPT) are functionally equivalent to
+# their MT-only counterparts (MTSFPF, MTSFPT) because full instrument removal
+# deletes the entire pattern text, leaving nothing for sub-instrument removal
+# to match. These redundant variants were removed in v0.9.7.
 #
 # Prerequisites:
 #   - Curated instrument patterns processed through --generate-strip-patterns
@@ -32,7 +35,7 @@
 #       --set phrase_patterns=/path/to/curated_phrases.tsv
 #
 # To produce only specific variants:
-#   --set variants=MTSFPT,MTSTPT
+#   --set variants=MTSFPT,MFSTPT
 
 name: branching_strip_nway
 description: "N-way branching strip: single-pass engine producing all variants simultaneously"
@@ -56,8 +59,8 @@ variables:
   # Temporal expansion (auto-generated from config seeds)
   temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
 
-  # Variant selection (default: all 7)
-  variants: "${VARIANTS:-MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT}"
+  # Variant selection (default: all 5)
+  variants: "${VARIANTS:-MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT}"
 
 steps:
   # [1] Expand temporal seed patterns from config

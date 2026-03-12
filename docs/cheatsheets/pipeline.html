@@ -174,7 +174,7 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
           <tr><th>Phase</th><th>Input</th><th>Output</th></tr>
           <tr><td style="color:#6b46c1;font-weight:600;">1</td><td><code>allcde.json</code></td><td><code>inst_stripped.json</code></td></tr>
           <tr><td style="color:#2b6cb0;font-weight:600;">2</td><td><code>inst_stripped.json</code></td><td><code>curated_phrases.tsv</code></td></tr>
-          <tr><td style="color:#276749;font-weight:600;">3</td><td><code>allcde.json</code> + patterns</td><td>7 stripped JSON variants</td></tr>
+          <tr><td style="color:#276749;font-weight:600;">3</td><td><code>allcde.json</code> + patterns</td><td>5 stripped JSON variants</td></tr>
         </table>
       </div>
 
@@ -265,27 +265,24 @@ tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
     <div>
       <div class="section green">
         <h2>Phase 3: Branching Strip</h2>
-        <p class="small"><code>branching_strip.yaml</code> &mdash; 14 steps, 7 outputs</p>
+        <p class="small"><code>branching_strip.yaml</code> &mdash; 10 steps, 5 outputs</p>
         <ol class="step-list green">
           <li><code>strip_MTSFPF</code> &mdash; full instrument removal</li>
           <li><code>strip_MFSTPF</code> &mdash; sub-group removal</li>
-          <li><code>sub_on_full_MTSTPF</code> &mdash; sub on full-stripped (instruments only)</li>
-          <li><code>sub_on_full_MTSTPT</code> &mdash; sub on full-stripped</li>
           <li><code>expand_temporal</code> &mdash; generate temporal variants</li>
-          <li><code>strip_temporal_*</code> &mdash; temporal from 4 inputs</li>
-          <li><code>strip_phrase_*</code> &mdash; curated from 4 inputs</li>
+          <li><code>strip_temporal_*</code> &mdash; temporal from 3 inputs</li>
+          <li><code>strip_phrase_*</code> &mdash; curated from 3 inputs</li>
           <li><code>quality_report</code> &mdash; remnant detection</li>
         </ol>
-        <h3>7 Output Branches</h3>
+        <h3>5 Output Branches</h3>
         <div class="branch-grid">
           <span class="branch-label" style="color:#6b46c1;">MTSFPF</span><span>Full instrument removal only</span>
           <span class="branch-label" style="color:#6b46c1;">MFSTPF</span><span>Sub-group instrument removal only</span>
-          <span class="branch-label" style="color:#6b46c1;">MTSTPF</span><span>Full + sub instrument removal (no phrases)</span>
           <span class="branch-label" style="color:#2b6cb0;">MFSFPT</span><span>Curated phrases only (no instruments)</span>
           <span class="branch-label" style="color:#276749;">MTSFPT</span><span>Full instruments + phrases</span>
           <span class="branch-label" style="color:#276749;">MFSTPT</span><span>Sub-group instruments + phrases</span>
-          <span class="branch-label" style="color:#276749;">MTSTPT</span><span>All instruments + phrases (maximum)</span>
         </div>
+        <p class="small">MT+ST combinations (MTSTPF, MTSTPT) removed: functionally equivalent to MT-only counterparts.</p>
         <h3>Split Temporal / Curated</h3>
         <div class="flow-row">
           <span class="flow-box green">Temporal</span>
@@ -412,7 +409,7 @@ cde-analyzer workflow copy \
           <tr><th>File</th><th>Ph</th><th>Steps</th></tr>
           <tr><td><code>instrument_pipeline.yaml</code></td><td style="color:#6b46c1;font-weight:600;">1</td><td>9 (mine&rarr;strip&rarr;sanity)</td></tr>
           <tr><td><code>phrase_pipeline.yaml</code></td><td style="color:#2b6cb0;font-weight:600;">2</td><td>7 (mine&rarr;strip&rarr;report)</td></tr>
-          <tr><td><code>branching_strip.yaml</code></td><td style="color:#276749;font-weight:600;">3</td><td>14 (7-way branch)</td></tr>
+          <tr><td><code>branching_strip.yaml</code></td><td style="color:#276749;font-weight:600;">3</td><td>10 (5-way branch)</td></tr>
         </table>
       </div>
 

@@ -1,6 +1,6 @@
 # allcde03 Branching Strip Run — 2026-03-09
 
-Temporary record of the first full 7-way branching strip run on the allcde03 corpus.
+Temporary record of the first full 5-way branching strip run on the allcde03 corpus.
 
 ## Corpus
 
@@ -31,8 +31,12 @@ Applied as a pre-pass before branching strip:
 ## Execution
 
 - **Engine**: N-way single-pass (`strip_branching` via `branching_strip_nway.yaml`)
-- **Variants**: All 7 (MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT)
-- **Runtime**: 104 seconds for 22,743 CDEs x 7 variants = 159K outputs
+- **Variants**: All 5 (MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT)
+- **Runtime**: 104 seconds for 22,743 CDEs x 5 variants
+
+> **Note**: MT+ST combinations (MTSTPF, MTSTPT) were removed because full instrument
+> removal deletes the entire pattern text, leaving nothing for sub-instrument removal
+> to match — making them functionally equivalent to MTSFPF and MTSFPT respectively.
 - **Output**: `allcde03/branching_output_nway/stripped_{CODE}.json`
 
 ## Quality Report Summary
@@ -41,18 +45,18 @@ Source: `branching_output_nway/strip_report.md`
 
 ### Remnants
 
-- **6 trailing_article remnants** per variant (same 6 CDEs across all 7 variants)
+- **6 trailing_article remnants** per variant (same 6 CDEs across all 5 variants)
 - These are edge cases where an orphaned article ("a", "the") remains after stripping
 
 ### Temporal Phrases
 
-- 56 unique temporal phrases found in instrument-only variants (MTSFPF, MFSTPF, MTSTPF)
+- 56 unique temporal phrases found in instrument-only variants (MTSFPF, MFSTPF)
 - 720 total occurrences — expected, since phrases are not stripped in PF variants
 - Zero temporal phrases in PT variants — confirms temporal stripping is working
 
-## Residue Analysis (MTSTPT — Maximum Strip)
+## Residue Analysis (MTSFPT — Maximum Strip)
 
-MTSTPT is the most aggressive variant (all instruments + all phrases removed).
+MTSFPT is the most aggressive variant (full instruments + all phrases removed).
 
 ### Field Retention Distribution
 
@@ -75,7 +79,7 @@ MTSTPT is the most aggressive variant (all instruments + all phrases removed).
 
 ### Empty Definitions
 
-- **17 empty definitions** in MTSTPT
+- **17 empty definitions** in MTSFPT
 - All originally contained only "Question is reversed scored" — correctly removed
 
 ### Near-Empty Fields
@@ -104,18 +108,15 @@ From 4,006 patterns in `needs_review.tsv`:
 allcde03/branching_output_nway/
   stripped_MTSFPF.json    (~146.8 MB)
   stripped_MFSTPF.json    (~146.7 MB)
-  stripped_MTSTPF.json    (~146.6 MB)
   stripped_MFSFPT.json    (~146.8 MB)
   stripped_MTSFPT.json    (~146.6 MB)
   stripped_MFSTPT.json    (~146.6 MB)
-  stripped_MTSTPT.json    (~146.6 MB)
   temporal_expanded.tsv
   strip_report.md
 ```
 
 ## Notes
 
-- First run using the 7th variant MTSTPF (full + sub instrument, no phrases)
 - Verbatim patterns merged into inst_full stage via `--verbatim-patterns` (default: enabled)
 - Substitute pre-pass applied before branching strip (7 patterns, 39 verbatim merged)
 - Quality is excellent: the 6 trailing_article remnants are a known edge case

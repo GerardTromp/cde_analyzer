@@ -180,7 +180,7 @@ def _branch_name(filename: str) -> str:
     """Extract branch label from filename.
 
     Handles both naming conventions:
-      New-style: 'stripped_MTSTPT.json' -> 'MTSTPT'
+      New-style: 'stripped_MTSFPT.json' -> 'MTSFPT'
       Old-style: 'both_full_stripped.json' -> 'both_full'
     """
     stem = Path(filename).stem

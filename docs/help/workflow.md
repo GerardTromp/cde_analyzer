@@ -130,24 +130,24 @@ with only the needed steps and variables.
 
 ```bash
 # Show required steps for one variant
-cde-analyzer workflow configure MTSTPT
+cde-analyzer workflow configure MTSFPT
 
 # Show steps for multiple variants
-cde-analyzer workflow configure MTSFPT MTSTPT
+cde-analyzer workflow configure MTSFPT MFSTPT
 
 # Generate a production YAML with only needed steps
-cde-analyzer workflow configure MTSFPT MTSTPT -o production_strip.yaml
+cde-analyzer workflow configure MTSFPT MFSTPT -o production_strip.yaml
 
 # Without quality report
-cde-analyzer workflow configure MTSTPT --no-report
+cde-analyzer workflow configure MTSFPT --no-report
 ```
 
 Options:
-- `CODE` - One or more strip codes (positional, required). Valid: MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT
+- `CODE` - One or more strip codes (positional, required). Valid: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT
 - `-o FILE` - Write a production YAML (without: prints steps and command)
 - `--no-report` - Exclude the quality_report step
 - `--template FILE` - Use a custom template instead of built-in branching_strip.yaml
-- `--nway` - Use the N-way single-pass template instead of the 14-step pipeline
+- `--nway` - Use the N-way single-pass template instead of the 10-step pipeline
 
 When generating a YAML with `-o`, variables are filtered to only those referenced by
 the selected steps. The generated YAML can be run directly with `workflow run`.
@@ -346,7 +346,7 @@ The codebase includes pre-built workflow templates. Use `workflow list` to see t
 | `phrase_family_stripping` | Phrase family stripping |
 | `quick_strip` | Quick strip with minimal steps |
 | `full_pipeline` | Complete multi-phase stripping pipeline |
-| `branching_strip` | Phase 3: 7-way branching strip, 14-step pipeline (use `configure` for production subsets) |
+| `branching_strip` | Phase 3: 5-way branching strip, 10-step pipeline (use `configure` for production subsets) |
 | `branching_strip_nway` | Phase 3: N-way single-pass branching strip (use `configure --nway` for production subsets) |
 
 ## Related Commands

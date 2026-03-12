@@ -23,14 +23,14 @@ Architecture in `branching_stripper.py` supports position-specific stripping (e.
 ### Embedding Evaluation on Branching Strip Outputs
 **Date Added**: 2026-03-03
 
-Run `extract_embed` on all 7 branching-strip variant outputs from allcde03 to evaluate downstream impact of different stripping configurations.
+Run `extract_embed` on all 5 branching-strip variant outputs from allcde03 to evaluate downstream impact of different stripping configurations.
 
 ---
 
 ### Full Regression Test: Legacy vs N-way
 **Date Added**: 2026-03-03
 
-After phrase curation is complete, run both legacy (14-step) and N-way (3-step) branching strip on allcde03 and verify identical outputs.
+After phrase curation is complete, run both legacy (10-step) and N-way (3-step) branching strip on allcde03 and verify identical outputs.
 
 ---
 
@@ -53,5 +53,5 @@ N-way engine (`strip_branching`) doesn't load verbatim patterns from `config/ver
 - 2026-03-07: Deferred parent filter + anchor trim control (phrase pipeline correctness)
 - 2026-03-07: Iterative discovery with diagnostic reports (discovery_report action)
 - 2026-03-09: Containment tree in TSV editor (semantic span hierarchy)
-- 2026-03-09: 7th variant MTSTPF + allcde03 production run
+- 2026-03-09: allcde03 production run (reverted to 5-way in v0.9.7)
 - 2026-03-10: Curator briefing document
