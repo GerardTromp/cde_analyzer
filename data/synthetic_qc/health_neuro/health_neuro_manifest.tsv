@@ -1,0 +1,61 @@
+tinyId	domain	domain_full	sub_domain	verbosity	concept_id	expected_cluster	name
+synNR01T	neurology	Neurology Assessment	Cerebrovascular	terse	NR01	stroke	Stroke onset time
+synNR01I	neurology	Neurology Assessment	Cerebrovascular	informational	NR01	stroke	Time of acute ischemic stroke symptom onset
+synNR01E	neurology	Neurology Assessment	Cerebrovascular	expansive	NR01	stroke	Time of acute ischemic stroke symptom onset documented for thrombolysis eligibility determination
+synNR02T	neurology	Neurology Assessment	Cerebrovascular	terse	NR02	stroke	NIH Stroke Scale score
+synNR02I	neurology	Neurology Assessment	Cerebrovascular	informational	NR02	stroke	NIH Stroke Scale total score at initial assessment
+synNR02E	neurology	Neurology Assessment	Cerebrovascular	expansive	NR02	stroke	National Institutes of Health Stroke Scale total score at initial emergency department neurological assessment
+synNR03T	neurology	Neurology Assessment	Cerebrovascular	terse	NR03	stroke	Modified Rankin Scale score
+synNR03I	neurology	Neurology Assessment	Cerebrovascular	informational	NR03	stroke	Modified Rankin Scale score at follow-up assessment
+synNR03E	neurology	Neurology Assessment	Cerebrovascular	expansive	NR03	stroke	Modified Rankin Scale disability score assessed at ninety-day follow-up after acute ischemic stroke treatment
+synNR04T	neurology	Neurology Assessment	Cerebrovascular	terse	NR04	xdn:imaging	Brain CT infarct volume
+synNR04I	neurology	Neurology Assessment	Cerebrovascular	informational	NR04	xdn:imaging	Brain CT ischemic infarct volume measurement
+synNR04E	neurology	Neurology Assessment	Cerebrovascular	expansive	NR04	xdn:imaging	Brain computed tomography ischemic infarct volume measured using semi-automated planimetric segmentation
+synNR05T	neurology	Neurology Assessment	Epilepsy	terse	NR05	epilepsy	Seizure frequency
+synNR05I	neurology	Neurology Assessment	Epilepsy	informational	NR05	epilepsy	Monthly seizure frequency count
+synNR05E	neurology	Neurology Assessment	Epilepsy	expansive	NR05	epilepsy	Monthly seizure frequency count from patient seizure diary and caregiver observation log
+synNR06T	neurology	Neurology Assessment	Epilepsy	terse	NR06	epilepsy	Seizure type classification
+synNR06I	neurology	Neurology Assessment	Epilepsy	informational	NR06	epilepsy	Seizure type classified per ILAE 2017 framework
+synNR06E	neurology	Neurology Assessment	Epilepsy	expansive	NR06	epilepsy	Seizure type classified according to the International League Against Epilepsy 2017 operational classification framework
+synNR07T	neurology	Neurology Assessment	Epilepsy	terse	NR07	xdn:medication	Antiepileptic drug name
+synNR07I	neurology	Neurology Assessment	Epilepsy	informational	NR07	xdn:medication	Current antiepileptic drug generic name
+synNR07E	neurology	Neurology Assessment	Epilepsy	expansive	NR07	xdn:medication	Generic name of the primary antiepileptic drug currently prescribed for ongoing seizure management
+synNR08T	neurology	Neurology Assessment	Epilepsy	terse	NR08	epilepsy	EEG finding category
+synNR08I	neurology	Neurology Assessment	Epilepsy	informational	NR08	epilepsy	Primary electroencephalogram finding category
+synNR08E	neurology	Neurology Assessment	Epilepsy	expansive	NR08	epilepsy	Primary electroencephalogram finding category from routine scalp recording for epilepsy evaluation
+synNR09T	neurology	Neurology Assessment	Movement Disorders	terse	NR09	movement	Tremor severity rating
+synNR09I	neurology	Neurology Assessment	Movement Disorders	informational	NR09	movement	Clinical tremor severity rating at neurological examination
+synNR09E	neurology	Neurology Assessment	Movement Disorders	expansive	NR09	movement	Clinical tremor severity rating assigned during standardized neurological motor examination at clinic visit
+synNR10T	neurology	Neurology Assessment	Movement Disorders	terse	NR10	movement	UPDRS motor score
+synNR10I	neurology	Neurology Assessment	Movement Disorders	informational	NR10	movement	MDS-UPDRS Part III motor examination total score
+synNR10E	neurology	Neurology Assessment	Movement Disorders	expansive	NR10	movement	Movement Disorder Society Unified Parkinson's Disease Rating Scale Part III motor examination total score
+synNR11T	neurology	Neurology Assessment	Movement Disorders	terse	NR11	movement	Gait assessment score
+synNR11I	neurology	Neurology Assessment	Movement Disorders	informational	NR11	movement	Standardized gait assessment composite score
+synNR11E	neurology	Neurology Assessment	Movement Disorders	expansive	NR11	movement	Standardized gait assessment composite score from the movement disorder clinic clinical evaluation protocol
+synNR12T	neurology	Neurology Assessment	Movement Disorders	terse	NR12	xdn:medication	Levodopa equivalent daily dose
+synNR12I	neurology	Neurology Assessment	Movement Disorders	informational	NR12	xdn:medication	Total daily levodopa equivalent dose
+synNR12E	neurology	Neurology Assessment	Movement Disorders	expansive	NR12	xdn:medication	Total daily levodopa equivalent dose calculated from all prescribed dopaminergic medications using standard conversion factors
+synNR13T	neurology	Neurology Assessment	Headache	terse	NR13	headache	Headache pain intensity
+synNR13I	neurology	Neurology Assessment	Headache	informational	NR13	headache	Headache pain intensity on numeric rating scale
+synNR13E	neurology	Neurology Assessment	Headache	expansive	NR13	headache	Headache pain intensity rated on the eleven-point numeric rating scale at the time of clinical assessment
+synNR14T	neurology	Neurology Assessment	Headache	terse	NR14	headache	Migraine aura presence
+synNR14I	neurology	Neurology Assessment	Headache	informational	NR14	headache	Migraine with aura classification
+synNR14E	neurology	Neurology Assessment	Headache	expansive	NR14	headache	Migraine with aura classification based on International Classification of Headache Disorders diagnostic criteria
+synNR15T	neurology	Neurology Assessment	Headache	terse	NR15	headache	Monthly headache days
+synNR15I	neurology	Neurology Assessment	Headache	informational	NR15	headache	Monthly headache day frequency count
+synNR15E	neurology	Neurology Assessment	Headache	expansive	NR15	headache	Monthly headache day frequency count from prospective patient headache diary for treatment monitoring
+synNR16T	neurology	Neurology Assessment	Headache	terse	NR16	xdn:demographics	Age at headache onset
+synNR16I	neurology	Neurology Assessment	Headache	informational	NR16	xdn:demographics	Patient age at headache disorder onset
+synNR16E	neurology	Neurology Assessment	Headache	expansive	NR16	xdn:demographics	Patient age at onset of recurrent headache disorder meeting primary headache diagnostic criteria
+synNR17T	neurology	Neurology Assessment	Neuropathy	terse	NR17	neuropathy	Nerve conduction velocity
+synNR17I	neurology	Neurology Assessment	Neuropathy	informational	NR17	neuropathy	Motor nerve conduction velocity measurement
+synNR17E	neurology	Neurology Assessment	Neuropathy	expansive	NR17	neuropathy	Motor nerve conduction velocity measured during standardized electrodiagnostic nerve conduction studies
+synNR18T	neurology	Neurology Assessment	Neuropathy	terse	NR18	neuropathy	Neuropathic pain score
+synNR18I	neurology	Neurology Assessment	Neuropathy	informational	NR18	neuropathy	Neuropathic pain severity score from validated questionnaire
+synNR18E	neurology	Neurology Assessment	Neuropathy	expansive	NR18	neuropathy	Neuropathic pain severity score from validated patient-reported neuropathic pain assessment questionnaire
+synNR19T	neurology	Neurology Assessment	Neuropathy	terse	NR19	neuropathy	Vibration perception threshold
+synNR19I	neurology	Neurology Assessment	Neuropathy	informational	NR19	neuropathy	Vibration perception threshold at the great toe
+synNR19E	neurology	Neurology Assessment	Neuropathy	expansive	NR19	neuropathy	Vibration perception threshold measured at the great toe using quantitative sensory testing biothesiometry
+synNR20T	neurology	Neurology Assessment	Neuropathy	terse	NR20	xdn:lab_values	Hemoglobin A1c in neuropathy workup
+synNR20I	neurology	Neurology Assessment	Neuropathy	informational	NR20	xdn:lab_values	Hemoglobin A1c percentage in peripheral neuropathy workup
+synNR20E	neurology	Neurology Assessment	Neuropathy	expansive	NR20	xdn:lab_values	Hemoglobin A1c percentage measured as part of the comprehensive laboratory evaluation for peripheral neuropathy etiology determination
