@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDE Analyzer :: Synthetic QC Data Cheatsheet</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-size: 10pt;
+  font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  color: #2d3748;
+  background: #dedede;
+}
+@page { size: letter landscape; margin: 1.27cm; }
+.page {
+  width: 25.4cm; height: 19.05cm;
+  margin: 0.5cm auto; padding: 0.3cm;
+  background: #fff; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.page + .page { page-break-before: always; }
+@media print {
+  html { background: #fff; }
+  .page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: 100%; }
+}
+
+.banner {
+  background: #1a202c; color: #fff;
+  padding: 0.22cm 0.5cm; margin-bottom: 0.2cm;
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-radius: 3px; flex-shrink: 0;
+}
+.banner h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.02em; }
+.banner h1 strong { font-weight: 700; color: #a3bffa; }
+.banner .subtitle { font-size: 0.7rem; color: #a0aec0; font-style: italic; }
+
+.columns {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25cm; align-items: start; align-content: start;
+  min-height: 0;
+}
+
+.section {
+  border-left: 4px solid #cbd5e1; background: #f7fafc;
+  padding: 0.15cm 0.2cm; margin-bottom: 0.15cm;
+  border-radius: 0 3px 3px 0;
+}
+.section:last-child { margin-bottom: 0; }
+.section h2 {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 0.06cm; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.section h3 {
+  font-size: 0.76rem; font-weight: 600;
+  margin-top: 0.08cm; margin-bottom: 0.04cm;
+}
+.section p, .section li { font-size: 0.76rem; line-height: 1.35; margin-bottom: 0.04cm; }
+.section ul { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+.section ul li, .section ol li { margin-bottom: 0.02cm; }
+.section ol { padding-left: 0.35cm; margin-bottom: 0.06cm; }
+
+.section.purple  { border-left-color: #9f7aea; background: #faf5ff; }
+.section.blue    { border-left-color: #4299e1; background: #ebf8ff; }
+.section.green   { border-left-color: #48bb78; background: #f0fff4; }
+.section.orange  { border-left-color: #ed8936; background: #fffaf0; }
+.section.gold    { border-left-color: #eab308; background: #fefce8; }
+.section.red     { border-left-color: #e53e3e; background: #fff5f5; }
+.section.teal    { border-left-color: #38b2ac; background: #e6fffa; }
+.section.purple h2  { color: #6b46c1; }
+.section.blue h2    { color: #2b6cb0; }
+.section.green h2   { color: #276749; }
+.section.orange h2  { color: #c05621; }
+.section.gold h2    { color: #a16207; }
+.section.red h2     { color: #c53030; }
+.section.teal h2    { color: #285e61; }
+
+code {
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.72rem;
+  background: #edf2f7; color: #553c9a; padding: 0.02cm 0.06cm; border-radius: 2px;
+}
+pre {
+  background: #1a202c; color: #e2e8f0;
+  padding: 0.1cm 0.15cm; border-radius: 3px;
+  font-family: Consolas, 'Courier New', monospace; font-size: 0.68rem;
+  line-height: 1.3; overflow-x: auto; margin: 0.06cm 0;
+}
+pre code { background: none; color: inherit; padding: 0; }
+pre .kw { color: #a3bffa; } pre .str { color: #9ae6b4; } pre .cm { color: #718096; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 0.05cm 0; }
+th {
+  background: #edf2f7; font-weight: 600; text-align: left;
+  padding: 0.04cm 0.1cm; border-bottom: 1px solid #cbd5e1;
+}
+td { padding: 0.04cm 0.1cm; border-bottom: 0.5px solid #e2e8f0; vertical-align: top; }
+tr:nth-child(even) td { background: rgba(247,250,252,0.5); }
+
+.flow-row { display: flex; align-items: center; gap: 0.12cm; margin: 0.06cm 0; flex-wrap: wrap; }
+.flow-box {
+  display: inline-block; padding: 0.04cm 0.1cm; border-radius: 2px;
+  font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+}
+.flow-box.purple { background: #e9d8fd; color: #553c9a; }
+.flow-box.blue   { background: #bee3f8; color: #2a4365; }
+.flow-box.green  { background: #c6f6d5; color: #22543d; }
+.flow-box.orange { background: #feebc8; color: #7b341e; }
+.flow-box.red    { background: #fed7d7; color: #9b2c2c; }
+.flow-box.teal   { background: #b2f5ea; color: #234e52; }
+.flow-box.dark   { background: #2d3748; color: #e2e8f0; }
+.flow-arrow { color: #a0aec0; font-size: 0.72rem; font-weight: bold; }
+
+.mt { margin-top: 0.08cm; }
+.small { font-size: 0.68rem; color: #718096; }
+.badge {
+  display: inline-block; padding: 0.01cm 0.08cm; border-radius: 2px;
+  font-size: 0.62rem; font-weight: 700; vertical-align: middle;
+}
+.badge.purple { background: #e9d8fd; color: #553c9a; }
+.badge.blue { background: #bee3f8; color: #2a4365; }
+.badge.green { background: #c6f6d5; color: #22543d; }
+.badge.orange { background: #feebc8; color: #7b341e; }
+.badge.red { background: #fed7d7; color: #9b2c2c; }
+.badge.teal { background: #b2f5ea; color: #234e52; }
+
+.footer {
+  text-align: center; font-size: 0.62rem; color: #a0aec0;
+  margin-top: auto; padding-top: 0.08cm; border-top: 0.5px solid #e2e8f0;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: Overview + Datasets -->
+<div class="page">
+  <div class="banner">
+    <h1>Synthetic QC Data <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">CDE Analyzer v0.9.6 &mdash; Controlled Data for Embedding &amp; Clustering Validation</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Design Philosophy + Inventory -->
+    <div>
+      <div class="section purple">
+        <h2>Design Philosophy</h2>
+        <p>Controlled synthetic CDEs isolate two measurable effects of instrument/boilerplate noise on embeddings:</p>
+        <ul>
+          <li><strong>Gravity</strong> &mdash; shared instruments pull unrelated CDEs together in embedding space</li>
+          <li><strong>Drift</strong> &mdash; noise shifts a CDE away from its clean counterpart; terse CDEs drift more (noise is proportionally larger)</li>
+        </ul>
+        <h3>Verbosity Tiers</h3>
+        <table>
+          <tr><th>Tier</th><th>Avg chars</th><th>Noise ratio</th></tr>
+          <tr><td><strong>Terse</strong></td><td>~60</td><td>High (noise &asymp; 100%)</td></tr>
+          <tr><td><strong>Informational</strong></td><td>~200&ndash;320</td><td>Moderate</td></tr>
+          <tr><td><strong>Expansive</strong></td><td>~450&ndash;750</td><td>Low (noise &lt; 10%)</td></tr>
+        </table>
+        <h3>Cross-Domain Groups</h3>
+        <p>Each dataset includes <code>xd:</code> CDEs placed in shared expected clusters across topic boundaries (temperature, pH, imaging, lab values, medication, demographics).</p>
+      </div>
+
+      <div class="section blue">
+        <h2>Complete Inventory</h2>
+        <table>
+          <tr><th>Dataset</th><th>CDEs</th><th>Type</th><th>Domain</th></tr>
+          <tr><td><code>set1a_urban</code></td><td>60</td><td>Gravity</td><td>Environmental</td></tr>
+          <tr><td><code>set1b_clinical</code></td><td>60</td><td>Gravity</td><td>Clinical</td></tr>
+          <tr><td><code>set2_noisy</code></td><td>180</td><td>Drift</td><td>Environmental</td></tr>
+          <tr><td><code>health_base</code></td><td>60</td><td>Clean</td><td>Health</td></tr>
+          <tr><td><code>health_drift</code></td><td>180</td><td>Drift</td><td>Health</td></tr>
+          <tr><td><code>health_gravity_a</code></td><td>60</td><td>Gravity</td><td>Health</td></tr>
+          <tr><td><code>health_neuro</code></td><td>60</td><td>Clean</td><td>Neurology</td></tr>
+          <tr><td><code>health_neuro_drift</code></td><td>180</td><td>Drift</td><td>Neurology</td></tr>
+          <tr><td colspan="4" style="text-align:right;font-weight:600;">Total: 840 CDEs</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 2: Instrument Families -->
+    <div>
+      <div class="section green">
+        <h2>Instrument Families</h2>
+        <p>12 synthetic instruments across 6 datasets. Each parent has 3&ndash;5 sub-scales.</p>
+        <h3>Environmental</h3>
+        <table>
+          <tr><th>Abbr</th><th>Instrument</th><th>Dataset</th><th>Subs</th></tr>
+          <tr><td><strong>ESI</strong></td><td>Environmental Stress Index</td><td>set1a</td><td>3</td></tr>
+          <tr><td><strong>CRAT</strong></td><td>Community Resilience Assessment Tool</td><td>set1a</td><td>3</td></tr>
+          <tr><td><strong>EMP</strong></td><td>Environmental Monitoring Protocol</td><td>set2</td><td>3</td></tr>
+          <tr><td><strong>FSQA</strong></td><td>Field Sampling Quality Assurance</td><td>set2</td><td>&mdash;</td></tr>
+        </table>
+        <h3>Clinical / Health</h3>
+        <table>
+          <tr><th>Abbr</th><th>Instrument</th><th>Dataset</th><th>Subs</th></tr>
+          <tr><td><strong>SSS</strong></td><td>Symptom Severity Scale</td><td>set1b</td><td>3</td></tr>
+          <tr><td><strong>FAB</strong></td><td>Functional Assessment Battery</td><td>set1b</td><td>3</td></tr>
+          <tr><td><strong>CMP</strong></td><td>Clinical Monitoring Protocol</td><td>h_drift</td><td>3</td></tr>
+          <tr><td><strong>HDQF</strong></td><td>Health Data Quality Framework</td><td>h_drift</td><td>&mdash;</td></tr>
+          <tr><td><strong>PHI</strong></td><td>Patient Health Inventory</td><td>h_grav_a</td><td>3</td></tr>
+          <tr><td><strong>COAS</strong></td><td>Clinical Outcome Assessment Scale</td><td>h_grav_a</td><td>3</td></tr>
+        </table>
+        <h3>Neurology</h3>
+        <table>
+          <tr><th>Abbr</th><th>Instrument</th><th>Dataset</th><th>Subs</th></tr>
+          <tr><td><strong>NESS</strong></td><td>Neurological Examination Standardized Scale</td><td>h_neuro</td><td>5</td></tr>
+          <tr><td><strong>NCRF</strong></td><td>Neurology Clinical Research Framework</td><td>h_neuro</td><td>&mdash;</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 3: Noise Injection + Drift Tiers -->
+    <div>
+      <div class="section orange">
+        <h2>Noise Injection Tiers (Drift)</h2>
+        <p>All drift datasets use 3 dose tiers per source CDE:</p>
+        <table>
+          <tr><th>Tier</th><th>Suffix</th><th>Injection</th></tr>
+          <tr><td><span class="badge green">T1 light</span></td><td><code>_t1</code></td><td>Temporal phrase only</td></tr>
+          <tr><td><span class="badge orange">T2 medium</span></td><td><code>_t2</code></td><td>Instrument name only</td></tr>
+          <tr><td><span class="badge red">T3 heavy</span></td><td><code>_t3</code></td><td>Temporal + instrument + anchor</td></tr>
+        </table>
+        <h3>Injection Points</h3>
+        <ul>
+          <li><strong>Name</strong> (designation 1): prepend sub-scale</li>
+          <li><strong>Question</strong> (designation 2): prepend temporal</li>
+          <li><strong>Definition</strong>: append temporal clause + anchor</li>
+        </ul>
+      </div>
+
+      <div class="section gold">
+        <h2>Gravity Injection (set1a/1b/gravity_a)</h2>
+        <p>Per 20-CDE topic block:</p>
+        <table>
+          <tr><th>CDEs</th><th>Injection</th><th>Effect</th></tr>
+          <tr><td>0&ndash;5</td><td>Instrument A + temporal + anchor</td><td>Strong gravity</td></tr>
+          <tr><td>6&ndash;11</td><td>Instrument B + temporal + anchor</td><td>Strong gravity</td></tr>
+          <tr><td>12&ndash;14</td><td>Instrument in def only</td><td>Weak gravity</td></tr>
+          <tr><td>15&ndash;16</td><td>Temporal phrase only</td><td>Temporal gravity</td></tr>
+          <tr><td>17&ndash;19</td><td>Clean (cross-domain)</td><td>Controls</td></tr>
+        </table>
+      </div>
+
+      <div class="section teal">
+        <h2>Temporal Phrases</h2>
+        <table>
+          <tr><th>Phrase</th><th>Datasets</th></tr>
+          <tr><td>Over the past 30 days</td><td>set1a, set2, h_drift</td></tr>
+          <tr><td>During the last 12 months</td><td>set1a</td></tr>
+          <tr><td>In the past 7 days</td><td>set1a, set1b, h_grav_a</td></tr>
+          <tr><td>Over the past 2 weeks</td><td>set1b, h_grav_a</td></tr>
+          <tr><td>During the past 4 weeks</td><td>set1b, h_grav_a</td></tr>
+          <tr><td>During the past 6 months</td><td>h_neuro_drift</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.9.6 &bull; Synthetic QC Data &bull; Page 1 of 2 &bull; <code>data/synthetic_qc/</code></div>
+</div>
+
+<!-- PAGE 2: Neurology Deep Dive + Strip Patterns + Generation -->
+<div class="page">
+  <div class="banner">
+    <h1>Synthetic QC Data <strong>:: CHEATSHEET</strong></h1>
+    <span class="subtitle">Neurology Dataset &amp; Strip Patterns</span>
+  </div>
+  <div class="columns">
+
+    <!-- COL 1: Neurology Dataset -->
+    <div>
+      <div class="section purple">
+        <h2>Health Neuro (Verbosity Study)</h2>
+        <p>20 concepts &times; 3 verbosity tiers = 60 CDEs. Domain held <strong>constant</strong> (neurology) to isolate verbosity effects.</p>
+        <h3>Sub-Domains (4 concepts each)</h3>
+        <table>
+          <tr><th>Sub-Domain</th><th>Concepts</th><th>TinyId</th></tr>
+          <tr><td>Cerebrovascular</td><td>NR01&ndash;NR04</td><td><code>synNR01T/I/E</code></td></tr>
+          <tr><td>Epilepsy</td><td>NR05&ndash;NR08</td><td><code>synNR05T/I/E</code></td></tr>
+          <tr><td>Movement Disorders</td><td>NR09&ndash;NR12</td><td><code>synNR09T/I/E</code></td></tr>
+          <tr><td>Headache</td><td>NR13&ndash;NR16</td><td><code>synNR13T/I/E</code></td></tr>
+          <tr><td>Neuropathy</td><td>NR17&ndash;NR20</td><td><code>synNR17T/I/E</code></td></tr>
+        </table>
+        <h3>TinyId Scheme</h3>
+        <p><code>synNR{NN}{V}</code> &mdash; NN = concept (01&ndash;20), V = T(erse) / I(nfo) / E(xpansive)</p>
+        <h3>Cross-Domain Groups</h3>
+        <p>4 per sub-domain: <code>xdn:demographics</code>, <code>xdn:imaging</code>, <code>xdn:lab_values</code>, <code>xdn:medication</code></p>
+        <h3>Verbosity Char Stats</h3>
+        <table>
+          <tr><th>Tier</th><th>Avg</th><th>Min</th><th>Max</th></tr>
+          <tr><td>Terse</td><td>61</td><td>38</td><td>84</td></tr>
+          <tr><td>Informational</td><td>318</td><td>207</td><td>424</td></tr>
+          <tr><td>Expansive</td><td>747</td><td>514</td><td>1,044</td></tr>
+        </table>
+      </div>
+
+      <div class="section blue">
+        <h2>Neuro Drift (180 CDEs)</h2>
+        <p>3 tiers &times; 60 source CDEs. NESS sub-module assigned by sub-domain:</p>
+        <table>
+          <tr><th>Sub-Domain</th><th>NESS Module</th></tr>
+          <tr><td>Cerebrovascular</td><td>NESS Cerebrovascular Module</td></tr>
+          <tr><td>Epilepsy</td><td>NESS Seizure Module</td></tr>
+          <tr><td>Movement Disorders</td><td>NESS Motor Function Module</td></tr>
+          <tr><td>Headache</td><td>NESS Cephalgia Module</td></tr>
+          <tr><td>Neuropathy</td><td>NESS Peripheral Nerve Module</td></tr>
+        </table>
+        <p class="small mt">NCRF anchor applied on Tier 3 only.</p>
+      </div>
+    </div>
+
+    <!-- COL 2: Strip Patterns -->
+    <div>
+      <div class="section green">
+        <h2>Predefined Strip Patterns</h2>
+        <p>63 patterns across 4 TSV files, ready for the branching strip pipeline.</p>
+        <table>
+          <tr><th>File</th><th>#</th><th>Contents</th></tr>
+          <tr><td><code>inst_full_patterns.tsv</code></td><td>12</td><td>Parent instrument names</td></tr>
+          <tr><td><code>inst_sub_patterns.tsv</code></td><td>29</td><td>Sub-scale / module names</td></tr>
+          <tr><td><code>phrase_patterns.tsv</code></td><td>22</td><td>Temporal + anchor phrases</td></tr>
+          <tr><td><code>all_patterns.tsv</code></td><td>63</td><td>Combined (all above)</td></tr>
+        </table>
+        <h3>TSV Format</h3>
+        <pre><code>pattern  tinyIds  type  source  decision</code></pre>
+        <p>Each pattern has <code>tinyIds</code> resolved from manifests for selective application.</p>
+        <h3>TinyId Targeting</h3>
+        <ul>
+          <li>FSQA, HDQF, NCRF &rarr; tier 3 only (<code>_t3</code> tinyIds)</li>
+          <li>Temporal phrases &rarr; tiers 1 + 3 (<code>_t1</code>, <code>_t3</code>)</li>
+          <li>Instrument names &rarr; tiers 2 + 3 (<code>_t2</code>, <code>_t3</code>)</li>
+        </ul>
+      </div>
+
+      <div class="section orange">
+        <h2>Experiment Workflow</h2>
+        <ol>
+          <li>Generate clean + noisy CDEs</li>
+          <li>Embed all variants (multiple models)</li>
+          <li>Cluster and measure gravity/drift</li>
+          <li>Strip noise using predefined patterns</li>
+          <li>Re-embed stripped CDEs</li>
+          <li>Compare before/after clustering</li>
+        </ol>
+        <h3>Key Metrics</h3>
+        <ul>
+          <li><strong>Drift distance</strong>: cosine(clean, noisy) per tier &times; verbosity</li>
+          <li><strong>Gravity pull</strong>: cross-instrument cluster overlap</li>
+          <li><strong>Strip recovery</strong>: % drift eliminated by stripping</li>
+          <li><strong>Model sensitivity</strong>: drift variance across embedding models</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 3: Generators + CLI -->
+    <div>
+      <div class="section gold">
+        <h2>Generator Scripts</h2>
+        <table>
+          <tr><th>Script</th><th>Output</th></tr>
+          <tr><td><code>generate_synthetic_cdes.py</code></td><td>Base 60 (env)</td></tr>
+          <tr><td><code>generate_synthetic_set1a.py</code></td><td>set1a_urban 60</td></tr>
+          <tr><td><code>generate_synthetic_set1b.py</code></td><td>set1b_clinical 60</td></tr>
+          <tr><td><code>generate_synthetic_set2.py</code></td><td>set2_noisy 180</td></tr>
+          <tr><td><code>generate_health_base.py</code></td><td>health_base 60</td></tr>
+          <tr><td><code>generate_health_drift.py</code></td><td>health_drift 180</td></tr>
+          <tr><td><code>generate_health_gravity_a.py</code></td><td>health_gravity_a 60</td></tr>
+          <tr><td><code>generate_health_neuro.py</code></td><td>health_neuro 60</td></tr>
+          <tr><td><code>generate_health_neuro_drift.py</code></td><td>health_neuro_drift 180</td></tr>
+          <tr><td><code>generate_synthetic_strip_patterns.py</code></td><td>strip_patterns (4 TSVs)</td></tr>
+        </table>
+        <p class="small">All scripts in <code>scripts/</code>. Output in <code>data/synthetic_qc/</code>.</p>
+      </div>
+
+      <div class="section teal">
+        <h2>Generation Commands</h2>
+        <pre><code><span class="cm"># Neuro base (60 CDEs)</span>
+python scripts/generate_health_neuro.py \
+  <span class="kw">-o</span> data/synthetic_qc/health_neuro/\
+health_neuro.json <span class="kw">--pretty</span>
+
+<span class="cm"># Neuro drift (180 CDEs)</span>
+python scripts/generate_health_neuro_drift.py \
+  <span class="kw">-s</span> data/synthetic_qc/health_neuro/\
+health_neuro.json \
+  <span class="kw">-o</span> data/synthetic_qc/health_neuro_drift/\
+health_neuro_drift.json <span class="kw">--pretty</span>
+
+<span class="cm"># Strip patterns (all datasets)</span>
+python scripts/\
+generate_synthetic_strip_patterns.py \
+  <span class="kw">-o</span> data/synthetic_qc/strip_patterns/</code></pre>
+      </div>
+
+      <div class="section red">
+        <h2>Confound Control</h2>
+        <table>
+          <tr><th>Dataset</th><th>Domain</th><th>Verbosity</th></tr>
+          <tr><td>health_base</td><td>Varies</td><td>Confounded</td></tr>
+          <tr><td>health_neuro</td><td>Constant</td><td>Deconfounded</td></tr>
+        </table>
+        <p class="mt"><code>health_base</code>: each domain locked to one verbosity tier (cardiovascular=terse, respiratory=informational, metabolic=expansive).</p>
+        <p><code>health_neuro</code>: all 20 concepts at all 3 tiers &mdash; isolates whether verbosity alone creates clustering substructure.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">CDE Analyzer v0.9.6 &bull; Synthetic QC Data &bull; Page 2 of 2 &bull; <code>scripts/generate_*.py</code></div>
+</div>
+
+</body>
+</html>

@@ -415,9 +415,27 @@ cde-analyzer workflow copy \
           <tr><td><code>branching_strip.yaml</code></td><td style="color:#276749;font-weight:600;">3</td><td>14 (7-way branch)</td></tr>
         </table>
       </div>
+
+      <div class="section">
+        <h2>Common One-Liners</h2>
+        <pre><code><span class="cm"># Subset by tinyId</span>
+cde-analyzer subset <span class="kw">-i</span> d.json \
+  <span class="kw">-l</span> id1,id2 <span class="kw">-o</span> sub.json
+<span class="cm"># Count non-null definitions</span>
+cde-analyzer count <span class="kw">-i</span> d.json \
+  <span class="kw">--fields</span> definitions.*.definition
+<span class="cm"># Extract for embeddings</span>
+cde-analyzer extract_embed \
+  <span class="kw">-i</span> d.json <span class="kw">-o</span> embed.csv
+<span class="cm"># Merge pattern TSVs</span>
+cde-analyzer pattern_util \
+  <span class="kw">-M</span> f1.tsv f2.tsv <span class="kw">-o</span> m.tsv
+<span class="cm"># Generate temporal variants</span>
+cde-analyzer pattern_util <span class="kw">-T</span> <span class="kw">-o</span> t.tsv</code></pre>
+      </div>
     </div>
 
-    <!-- COL 3: Recipes (split into two) + One-Liners -->
+    <!-- COL 3: Recipes (split into two) -->
     <div>
       <div class="section gold">
         <h2>Recipe: Discover &amp; Curate</h2>
@@ -456,24 +474,6 @@ cde-analyzer strip_phrases \
 cde-analyzer diagnose_strip \
   <span class="kw">-i</span> stripped.json \
   <span class="kw">-o</span> residuals.tsv</code></pre>
-      </div>
-
-      <div class="section">
-        <h2>Common One-Liners</h2>
-        <pre><code><span class="cm"># Subset by tinyId</span>
-cde-analyzer subset <span class="kw">-i</span> d.json \
-  <span class="kw">-l</span> id1,id2 <span class="kw">-o</span> sub.json
-<span class="cm"># Count non-null definitions</span>
-cde-analyzer count <span class="kw">-i</span> d.json \
-  <span class="kw">--fields</span> definitions.*.definition
-<span class="cm"># Extract for embeddings</span>
-cde-analyzer extract_embed \
-  <span class="kw">-i</span> d.json <span class="kw">-o</span> embed.csv
-<span class="cm"># Merge pattern TSVs</span>
-cde-analyzer pattern_util \
-  <span class="kw">-M</span> f1.tsv f2.tsv <span class="kw">-o</span> m.tsv
-<span class="cm"># Generate temporal variants</span>
-cde-analyzer pattern_util <span class="kw">-T</span> <span class="kw">-o</span> t.tsv</code></pre>
       </div>
     </div>
 
