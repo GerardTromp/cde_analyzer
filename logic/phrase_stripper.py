@@ -50,7 +50,13 @@ def _compile_pattern_cache(
         elif word_boundary or case_insensitive:
             escaped = re.escape(phrase)
             if word_boundary:
-                escaped = r'\b' + escaped + r'\b'
+                # Only add \b where the boundary char is a word character;
+                # \b between two non-word chars (e.g. ')' followed by ' ')
+                # never fires, silently preventing the pattern from matching.
+                if phrase[0].isalnum() or phrase[0] == '_':
+                    escaped = r'\b' + escaped
+                if phrase[-1].isalnum() or phrase[-1] == '_':
+                    escaped = escaped + r'\b'
             cache[phrase] = re.compile(escaped, regex_flags)
         # Plain substring phrases don't need compilation
     return cache
