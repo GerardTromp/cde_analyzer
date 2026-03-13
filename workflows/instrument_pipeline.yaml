@@ -109,7 +109,7 @@ steps:
       output: "${field_enriched_tsv}"
 
   - name: curation_gate
-    action: pattern_util
+    action: curation
     args:
       curation_gate: "${field_enriched_tsv}"
       ledger_dir: "${curation_ledger_dir}"
@@ -131,7 +131,7 @@ steps:
         - Coalesce report: ${coalesce_report}
 
       Open the editor:
-        cde-analyzer pattern_util --edit ${output_dir}/needs_review.tsv
+        cde-analyzer curation --edit ${output_dir}/needs_review.tsv
 
       Fill in the 'decision' column (keep / remove / modify / substitute)
       for each pattern. If decision = modify, enter the new pattern text
@@ -142,7 +142,7 @@ steps:
         cde-analyzer workflow resume --state-file ${output_dir}/.workflow_state.json
 
   - name: finalize_curation
-    action: pattern_util
+    action: curation
     args:
       finalize_curation: "${output_dir}/"
       ledger_dir: "${curation_ledger_dir}"

@@ -122,6 +122,92 @@ Options:
 - `--state-file FILE` - Path to workflow state file
 - `--verbose` - Show detailed step information including variables
 
+### scaffold
+
+Generate a project-specific pipeline orchestration script with status dashboard,
+completion guards, curation resume logic, and iterative harvesting support.
+
+**Config-driven mode** (recommended):
+
+```bash
+# Generate from a YAML config file
+cde-analyzer workflow scaffold --from-config pipeline_config.yaml
+
+# Custom output path
+cde-analyzer workflow scaffold --from-config pipeline_config.yaml -o my_runner.sh
+
+# Overwrite existing
+cde-analyzer workflow scaffold --from-config pipeline_config.yaml --force
+```
+
+**Legacy CLI mode** (simpler scripts):
+
+```bash
+cde-analyzer workflow scaffold myproject -i /path/to/cdes.json -d /path/to/output
+cde-analyzer workflow scaffold myproject -i cdes.json --with-iterate
+```
+
+Options:
+- `--from-config FILE` - Generate full-featured script from YAML config
+- `project_name` - Short project name (not needed with `--from-config`)
+- `-i FILE` - Input CDE JSON path (not needed with `--from-config`)
+- `-d DIR` - Output directory (default: current)
+- `-o FILE` - Script output path (default: `run_pipeline.sh` in output dir)
+- `--phases 1,2,3` - Phases to include
+- `--with-iterate` - Include iterative harvesting (legacy mode)
+- `--force` - Overwrite existing script
+
+#### Pipeline Config YAML Format
+
+```yaml
+# pipeline_config.yaml — Configuration for run_pipeline.sh generation
+project: myproject
+description: "Full CDE analysis — production run"
+
+# Environment (paths are auto-converted from Windows to WSL format)
+cde_analyzer_dir: /path/to/cde_analyzer      # optional: for source-based invocation
+python_venv: /path/to/venv/bin/activate       # optional: virtual environment
+
+# Input
+input_json: allcde.json                       # relative to config dir, or absolute
+
+# Directory names (relative to script location)
+directories:
+  phase1: phase1_output
+  phase2: phase2_output
+  branching: branching_output_nway
+  branching_legacy: branching_output          # only if include_legacy: true
+  ledger: .curation_ledger
+
+# Phase selection
+phases: [1, 2, 3]
+
+# Phase-specific settings
+phase1:
+  with_iterate: true                          # include iterative harvesting target
+  iterate_max_rounds: 3
+
+phase2:
+  config_file: phrase_stripping_config.yaml   # auto-loaded by workflow engine
+
+phase3:
+  mode: nway                                  # nway (default) or legacy
+  include_legacy: true                        # also generate phase3_legacy target
+
+# Generated script features
+features:
+  status_dashboard: true                      # ./run_pipeline.sh status
+  completion_guards: true                     # skip phases that are already done
+  curation_resume: true                       # auto-detect and resume after curation
+```
+
+The generated script includes:
+- **Status dashboard** (`./run_pipeline.sh status`) — shows phase progress, pattern counts, ledger state
+- **Completion guards** — skips phases whose output already exists
+- **Curation resume** — detects `needs_review.tsv` vs `curated.tsv` and advises next step
+- **Iterative harvesting** — convergence-detecting residual strip-harvest loop
+- **Phase 3 strip prep** — auto-generates hierarchy + full/sub pattern files
+
 ### configure
 
 Configure the branching strip pipeline for specific strip variants. Resolves step

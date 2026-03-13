@@ -177,12 +177,23 @@ def register_subparser(subparser: ArgumentParser):
     )
     scaffold_parser.add_argument(
         "project_name",
-        help="Short project name for header/directories (e.g., 'allcde01')"
+        nargs="?",
+        default=None,
+        help="Short project name for header/directories (e.g., 'allcde01'). "
+             "Not required when using --from-config."
+    )
+    scaffold_parser.add_argument(
+        "--from-config", "-c",
+        type=str,
+        metavar="CONFIG_YAML",
+        help="Generate full-featured pipeline script from a YAML config file. "
+             "Includes status dashboard, completion guards, curation resume, "
+             "and iterative harvesting. See docs/help/workflow_scaffold.md"
     )
     scaffold_parser.add_argument(
         "--input-json", "-i",
-        required=True,
-        help="Path to raw CDE JSON input file"
+        default=None,
+        help="Path to raw CDE JSON input file (not needed with --from-config)"
     )
     scaffold_parser.add_argument(
         "--output-dir", "-d",

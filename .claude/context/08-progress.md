@@ -4,9 +4,9 @@
 
 **Focus**: Field-aware instrument splits, 7-way branching strip, documentation
 
-**Version**: 0.9.8 (2026-03-12)
+**Version**: 1.0.0 (2026-03-12)
 
-## Current State (v0.9.8)
+## Current State (v1.0.0)
 
 ### All Pipeline Phases — Complete
 

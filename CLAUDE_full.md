@@ -31,9 +31,13 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: field-aware-strip (v0.9.8)
+**Active Branch**: field-aware-strip (v1.0.0)
 
 **Recent Work** (Last 30 days):
+- **v1.0.0: Production Release**
+  - Config-driven pipeline scaffold (`workflow scaffold --from-config`)
+  - `pattern_util` split into `curation`, `instrument_util`, `pattern_diag`, `supplementary`, `llm_classify`
+  - Development Status → Production/Stable
 - **v0.9.8: Field-Aware Splits + 7-Way Branching Strip**
   - Three-component decomposition: Full (group prefix) + Sub (separator + suffix) + Abbreviation
   - `inst_full` and `inst_sub` operate on different text spans → all 7 variants genuinely distinct

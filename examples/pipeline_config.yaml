@@ -1,0 +1,68 @@
+# pipeline_config.yaml — Configuration for run_pipeline.sh generation
+#
+# This file drives `cde-analyzer workflow scaffold --from-config` to produce
+# a full-featured pipeline orchestration script with status dashboard,
+# completion guards, curation resume logic, and iterative harvesting.
+#
+# Usage:
+#   cde-analyzer workflow scaffold --from-config pipeline_config.yaml
+#
+# The generated script supports:
+#   ./run_pipeline.sh phase1           # Run instrument detection
+#   ./run_pipeline.sh phase1_iterate   # Iterative residual harvesting
+#   ./run_pipeline.sh phase2           # Run phrase mining
+#   ./run_pipeline.sh phase3           # Run 7-way N-way branching strip
+#   ./run_pipeline.sh phase3_legacy    # Run legacy branching strip
+#   ./run_pipeline.sh status           # Show pipeline state
+
+# ── Project identity ────────────────────────────────────────────────────
+project: allcde03
+description: "Full CDE repository — production curation run"
+
+# ── Environment ─────────────────────────────────────────────────────────
+# For source-based invocation (running from the repo checkout).
+# Omit both to use an installed `cde-analyzer` command instead.
+#
+# Paths are auto-converted from Windows to WSL format when running on
+# Windows (e.g., D:\code\cde_analyzer → /mnt/d/code/cde_analyzer).
+cde_analyzer_dir: /path/to/cde_analyzer
+python_venv: /path/to/venv/bin/activate
+
+# ── Input ───────────────────────────────────────────────────────────────
+# Relative paths are resolved from the generated script's directory ($BASE).
+# Absolute paths are used as-is.
+input_json: allcde.json
+
+# ── Output directories ──────────────────────────────────────────────────
+# All relative to the generated script's directory ($BASE).
+directories:
+  phase1: phase1_output
+  phase2: phase2_output
+  branching: branching_output_nway
+  branching_legacy: branching_output    # only used if phase3.include_legacy: true
+  ledger: .curation_ledger
+
+# ── Phases to include ───────────────────────────────────────────────────
+phases: [1, 2, 3]
+
+# ── Phase 1: Instrument Detection ──────────────────────────────────────
+phase1:
+  with_iterate: true          # generate phase1_iterate target
+  iterate_max_rounds: 3       # default max rounds for harvesting loop
+
+# ── Phase 2: Phrase Mining ──────────────────────────────────────────────
+phase2:
+  # Optional: reference a local config file that the workflow engine
+  # auto-discovers in output_dir (no --set overrides needed).
+  config_file: phrase_stripping_config.yaml
+
+# ── Phase 3: Branching Strip ───────────────────────────────────────────
+phase3:
+  mode: nway                  # nway (single-pass, all 7 variants) or legacy
+  include_legacy: true        # also generate a phase3_legacy target
+
+# ── Generated script features ──────────────────────────────────────────
+features:
+  status_dashboard: true      # ./run_pipeline.sh status
+  completion_guards: true     # skip phases whose output already exists
+  curation_resume: true       # auto-detect needs_review.tsv / curated.tsv

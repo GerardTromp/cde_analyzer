@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.8)
+# CDE Analyzer — Context (v1.0.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -49,7 +49,22 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (10 steps)
 - **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
 
-## Current State (v0.9.8)
+## Current State (v1.0.0)
+
+### v1.0.0: Production Release
+
+#### Config-Driven Pipeline Scaffold
+- **`workflow scaffold --from-config`**: Generate full-featured `run_pipeline.sh` from YAML config
+- Status dashboard, completion guards, curation resume, iterative harvesting
+- Windows→WSL path auto-conversion
+- Example config: `examples/pipeline_config.yaml`
+
+#### Action Refactoring
+- `pattern_util` split into focused actions: `curation`, `instrument_util`, `pattern_diag`, `supplementary`, `llm_classify`
+- All workflow YAMLs and pipeline scripts updated to new action names
+
+#### pyproject.toml
+- Development Status upgraded from "Beta" to "Production/Stable"
 
 ### v0.9.8: Field-Aware Splits + 7-Way Branching Strip
 

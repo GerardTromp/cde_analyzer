@@ -61,8 +61,28 @@ ACTION_REGISTRY = {
     },
     "pattern_util": {
         "module": "actions.pattern_util.cli",
-        "help": "TSV pattern utilities (merge, coalesce, import)",
-        "description": "Manipulate pattern TSV files without CDE input",
+        "help": "Core TSV pattern utilities (merge, coalesce, field analysis, expand)",
+        "description": "Core pattern manipulation: merge, coalesce, field analysis, expand",
+    },
+    "curation": {
+        "module": "actions.curation.cli",
+        "help": "Curation lifecycle (editor, multi-curator, ledger, priority split)",
+        "description": "Curation lifecycle management for pattern review",
+    },
+    "instrument_util": {
+        "module": "actions.instrument_util.cli",
+        "help": "Instrument hierarchy analysis and strip pattern generation",
+        "description": "Group hierarchy, instrument splits, and strip pattern generation",
+    },
+    "pattern_diag": {
+        "module": "actions.pattern_diag.cli",
+        "help": "Pattern diagnostics (rare words, remnant analysis, recovery)",
+        "description": "Pre-strip and post-strip diagnostic tools",
+    },
+    "supplementary": {
+        "module": "actions.supplementary.cli",
+        "help": "Supplementary pattern management (import, harvest, YAML/TSV conversion)",
+        "description": "Manage supplementary patterns and cross-format conversions",
     },
     "lemma_fasta": {
         "module": "actions.lemma_fasta.cli",
@@ -96,8 +116,8 @@ ACTION_REGISTRY = {
     },
     "llm_classify": {
         "module": "actions.llm_classify.cli",
-        "help": "Classify phrases using multi-LLM queries",
-        "description": "Agentic LLM-based classification for phrase curation",
+        "help": "LLM-based classification and semantic proxy generation",
+        "description": "Multi-LLM classification, instrument adjudication, and semantic proxy generation",
     },
     "diagnose_strip": {
         "module": "actions.diagnose_strip.cli",
