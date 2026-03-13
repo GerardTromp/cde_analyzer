@@ -308,11 +308,11 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 ## Key Files
 
 ### Source Code (cde_analyzer/)
-- `actions/pattern_util/cli.py` — CLI definitions for pattern_util (incl. init-curation, merge-curation, serve-curation, curation-gate, finalize-curation)
-- `actions/pattern_util/run.py` — pattern_util orchestration (coalesce, merge, field analysis, validate subsumption, expand temporal seeds, init-curation, merge-curation, serve-curation, curation-gate, finalize-curation)
-- `actions/pattern_util/centralized_server.py` — centralized multi-curator curation server (CurationState, CuratorSession, serve_curation)
-- `actions/pattern_util/editor_config.py` — curation server config parsing (CurationServerConfig, load_config)
-- `actions/pattern_util/editor_security.py` — token gen/verify, RateLimiter, TLS setup
+- `actions/pattern_util/` — Pattern TSV utilities (coalesce, merge, field analysis, validate, expand temporal, edit, split-priority)
+- `actions/curation/` — Curation lifecycle (edit, gate, finalize, init/merge multi-curator, serve centralized)
+- `actions/instrument_util/` — Instrument-specific utilities (group-hierarchy, generate-strip-patterns, analyze-instrument-splits)
+- `actions/supplementary/` — Supplementary pattern management (harvest-residuals, update-ledger, harvest-to-supplementary, promote)
+- `actions/pattern_diag/` — Pattern diagnostics (curation-status)
 - `actions/workflow/cli.py` — CLI definitions for workflow (incl. scaffold, configure)
 - `actions/workflow/run.py` — workflow orchestration (run, resume, scaffold, list, copy, status, skip_if_file, configure)
 - `logic/curation_ledger.py` — CurationLedger, CurationDecision, classify_patterns (incremental curation)
@@ -342,9 +342,11 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - `docs/help/` — 28 per-command reference pages
 - `docs/workflow-architecture.md` — pipeline diagrams + design rationale
 
-### Data (allcde01/)
-- `phase1_output/inst_stripped.json` — instrument-stripped JSON (22,743 CDEs)
-- `phase2_output/` — phrase pipeline output (in progress)
+### Data
+- `data/reference_ledger/` — Official starting-point curation ledger (allcde03: 458 instrument + 4,023 phrase decisions)
+  - Copy to `.curation_ledger/` to bootstrap incremental curation for new projects
+  - `MANIFEST.yaml` — provenance, checksums, decision counts
+- `examples/pipeline_config.yaml` — Example YAML config for `workflow scaffold --from-config`
 
 ## Architecture Reminders
 
@@ -355,36 +357,53 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - **K-mer mining**: Descending (k_max → k_min), masks detected phrases after each k
 - **Dedup**: Identification only (no masking), separate curation template, >k_max filter
 
-## `pattern_util` Capabilities (partial — run `cde-analyzer pattern_util --help` for full list)
+## Action Capabilities
 
+### `pattern_util` — Pattern TSV utilities
 ```bash
 cde-analyzer pattern_util --coalesce-variants FILE -o OUT         # subsumption + prefix trie
 cde-analyzer pattern_util --merge-patterns FILE FILE -o OUT       # deduplicate/merge TSVs
 cde-analyzer pattern_util --field-analysis FILE --input JSON -o OUT  # add field counts
 cde-analyzer pattern_util --validate-subsumption FILE --input JSON -o OUT  # empirical validation
 cde-analyzer pattern_util --expand-temporal-seeds -o OUT          # temporal seed expansion
-cde-analyzer pattern_util --harvest-to-supplementary FILE         # ingest to local supplementary
-cde-analyzer pattern_util --promote-supplementary                 # promote to global config
-cde-analyzer pattern_util --edit FILE                             # browser-based TSV editor
-cde-analyzer pattern_util --init-curation FILE -o DIR             # initialize multi-curator curation
-cde-analyzer pattern_util --merge-curation FILE -o OUT            # merge curator annotations + stats
-cde-analyzer pattern_util --serve-curation CONFIG --curation-source FILE  # centralized server
-cde-analyzer pattern_util --curation-status DIR                   # check centralized session status
-cde-analyzer pattern_util --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR  # incremental curation gate
-cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i JSON      # finalize + update ledger
-cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]                     # Zipf-based priority split
+cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]  # Zipf-based priority split
 ```
 
-## `workflow` Capabilities
-
+### `curation` — Curation lifecycle
 ```bash
-cde-analyzer workflow run YAML [--set K=V] [--from-step S] [--only-steps S1,S2] [--dry-run]  # execute pipeline
-cde-analyzer workflow resume --state-file FILE                          # resume after checkpoint
-cde-analyzer workflow status [--state-file FILE] [-v]                   # check pipeline state
-cde-analyzer workflow list                                              # list built-in workflows
+cde-analyzer curation --edit FILE                                       # browser-based TSV editor
+cde-analyzer curation --curation-gate FILE --ledger-dir DIR --phase P -i JSON -o DIR  # incremental gate
+cde-analyzer curation --finalize-curation DIR --ledger-dir DIR --phase P -i JSON      # finalize + update ledger
+cde-analyzer curation --init-curation FILE -o DIR                       # initialize multi-curator curation
+cde-analyzer curation --merge-curation FILE -o OUT                      # merge curator annotations + stats
+cde-analyzer curation --serve-curation CONFIG --curation-source FILE    # centralized server
+```
+
+### `instrument_util` — Instrument-specific utilities
+```bash
+cde-analyzer instrument_util --group-hierarchy FILE -o OUT              # assign group hierarchy
+cde-analyzer instrument_util --generate-strip-patterns FILE -o BASE     # generate inst_full/sub TSVs
+cde-analyzer instrument_util --analyze-instrument-splits FILE -i JSON -o OUT  # field-aware split analysis
+```
+
+### `supplementary` — Supplementary pattern management
+```bash
+cde-analyzer supplementary --harvest-residuals FILE --curated FILE -i JSON -o OUT  # harvest residuals
+cde-analyzer supplementary --update-ledger FILE --ledger FILE -o OUT    # update pattern ledger
+cde-analyzer supplementary --harvest-to-supplementary FILE              # ingest to local supplementary
+cde-analyzer supplementary --promote-supplementary                      # promote to global config
+```
+
+### `workflow` — Pipeline orchestration
+```bash
+cde-analyzer workflow run YAML [--set K=V] [--from-step S] [--only-steps S1,S2] [--dry-run]
+cde-analyzer workflow resume --state-file FILE
+cde-analyzer workflow status [--state-file FILE] [-v]
+cde-analyzer workflow list                                              # list built-in templates
 cde-analyzer workflow copy NAME [--as FILE]                             # copy template to project
-cde-analyzer workflow scaffold PROJECT -i JSON -d DIR [--phases 1,2,3] [--with-iterate]  # generate orchestration script
-cde-analyzer workflow configure CODE [CODE...] [-o FILE] [--no-report] [--nway]  # configure branching strip for specific variants
+cde-analyzer workflow scaffold --from-config CONFIG.yaml [-o FILE]      # config-driven script generation
+cde-analyzer workflow scaffold PROJECT -i JSON -d DIR [--with-iterate]  # legacy CLI mode
+cde-analyzer workflow configure CODE [CODE...] [-o FILE] [--nway]       # configure branching strip
 ```
 
 ## `strip_branching` Capabilities
