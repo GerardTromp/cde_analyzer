@@ -1,0 +1,55 @@
+# Reference Curation Ledger — MANIFEST
+#
+# Official starting-point ledger from the allcde03 production curation run.
+# Contains curated decisions for 458 instrument patterns and 4,023 phrase
+# patterns across 22,743 CDEs from the NLM CDE repository.
+#
+# Usage:
+#   Copy this directory to your project's .curation_ledger/ to bootstrap
+#   incremental curation. The curation gate will auto-resolve patterns
+#   that match prior decisions, presenting only new/changed patterns
+#   for human review.
+#
+#   cp -r data/reference_ledger/ /path/to/project/.curation_ledger/
+#
+# Production systems should maintain their own ledgers. This reference
+# ledger is a convenience for new projects working with the same or
+# similar CDE corpus.
+
+provenance:
+  source: allcde03
+  description: "Full NLM CDE repository — production curation run"
+  cde_analyzer_version: "1.0.0"
+  snapshot_date: "2026-03-12"
+  corpus:
+    n_cdes: 22743
+    tinyids_hash: "4701b1d0ec9d62ab1914616379b49cc601b215aa5a82b2a4523049622e259bf5"
+
+phases:
+  instrument:
+    run_id: run_20260224_164627
+    timestamp: "2026-02-25T10:20:44"
+    n_patterns: 458
+    decisions: {keep: 458, remove: 0, modify: 0, substitute: 0}
+
+  phrase:
+    run_id: run_20260305_165403
+    timestamp: "2026-03-09T22:33:40"
+    n_patterns: 4023
+    decisions: {keep: 171, remove: 3743, modify: 102, substitute: 7}
+
+files:
+  instrument_decisions.tsv:
+    lines: 459
+    size_bytes: 161668
+    md5: "8ed012e4c887860f65d0b1accbc42c66"
+    sha1: "eabf1f603846691a5ff4bcfe8afa56e2b84a486d"
+
+  phrase_decisions.tsv:
+    lines: 4024
+    size_bytes: 1303265
+    md5: "ab50d78f761741aefbc8d653044e5718"
+    sha1: "d038cda0fab9a16c0ec79d8c335ed500da789c14"
+
+  ledger_meta.yaml:
+    description: "Run history metadata (original from allcde03)"
