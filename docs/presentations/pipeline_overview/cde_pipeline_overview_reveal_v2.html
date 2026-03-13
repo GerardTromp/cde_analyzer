@@ -86,7 +86,7 @@
 <section>
   <h1>CDE Text Normalization<br>for Semantic Clustering</h1>
   <p>Automated detection and removal of repeated text patterns<br>from NLM Common Data Elements</p>
-  <p class="dim" style="margin-top:2em;">Gerard Tromp &mdash; CDE Analyzer v0.9.6 &mdash; March 2026</p>
+  <p class="dim" style="margin-top:2em;">Gerard Tromp &mdash; CDE Analyzer v1.0.0 &mdash; March 2026<br><span style="font-size:0.8em;">Updated: 2026-03-13 (cosine similarity analysis appended)</span></p>
 </section>
 
 <!-- Slide 2: Intention -->
@@ -735,13 +735,228 @@
     <li><strong>Descending k-mer mining</strong> with masking prevents redundant detection</li>
     <li><strong>Curation ledger</strong> enables incremental improvement &mdash; effort compounds</li>
     <li><strong>Zipf triage</strong> separates domain-specific from common English</li>
-    <li><strong>Seven stripped variants</strong> for downstream comparison (field-aware splits make all distinct)</li>
+    <li><strong>Seven stripped variants</strong> for downstream comparison (field-aware splits, v0.9.8+)</li>
     <li><strong><code>min_parent_tinyids</code></strong> is the most influential parameter (18.6x)</li>
     <li><strong>Standalone editor</strong> prevents Excel data corruption</li>
   </ol>
   <blockquote style="margin-top:1em;">
     Automate detection, curate decisions, persist knowledge, strip with variants.
   </blockquote>
+</section>
+
+<!-- ================================================================== -->
+<!-- APPENDIX: Cosine Similarity Analysis (added 2026-03-13)            -->
+<!-- ================================================================== -->
+
+<!-- Slide 24: Cosine Title -->
+<section>
+  <h2>Appendix: Semantic Loss Analysis</h2>
+  <h3>Pairwise cosine similarity across 8 stripping variants &times; 10 models</h3>
+  <p style="margin-top: 1em;">
+    <strong>Question</strong>: How much semantic content does each stripping variant remove?<br>
+    <strong>Method</strong>: Cosine similarity between embeddings of the same CDE under different stripping configurations.<br>
+    <strong>Scale</strong>: C(8,2) = 28 pairs &times; 10 models &times; 22,743 tinyIds = <span class="highlight">6,368,040</span> comparisons
+  </p>
+  <p class="footnote">Embeddings: cde08 v2, 1024-dim, concatenated designation + definition text</p>
+</section>
+
+<!-- Slide 25: Distribution -->
+<section>
+  <h2>Semantic Preservation Distribution</h2>
+  <h3>79% of CDEs retain &ge; 0.95 mean cosine across all variants and models</h3>
+
+  <div style="width:70%; margin:0.5em auto;">
+    <div style="display:flex; align-items:center; margin:3px 0; font-size:0.55em;">
+      <span style="width:80px; text-align:right; padding-right:8px; font-weight:600;">0.99&ndash;1.00</span>
+      <div style="height:20px; width:44.6%; background:#1565c0; border-radius:2px; color:#fff; padding-left:6px; font-weight:600; display:flex; align-items:center;">10,133</div>
+      <span style="padding-left:6px; color:#666;">44.6%</span>
+    </div>
+    <div style="display:flex; align-items:center; margin:3px 0; font-size:0.55em;">
+      <span style="width:80px; text-align:right; padding-right:8px; font-weight:600;">0.98&ndash;0.99</span>
+      <div style="height:20px; width:13.0%; background:#1976d2; border-radius:2px; color:#fff; padding-left:6px; font-weight:600; display:flex; align-items:center;">2,961</div>
+      <span style="padding-left:6px; color:#666;">13.0%</span>
+    </div>
+    <div style="display:flex; align-items:center; margin:3px 0; font-size:0.55em;">
+      <span style="width:80px; text-align:right; padding-right:8px; font-weight:600;">0.95&ndash;0.98</span>
+      <div style="height:20px; width:21.5%; background:#42a5f5; border-radius:2px; color:#fff; padding-left:6px; font-weight:600; display:flex; align-items:center;">4,897</div>
+      <span style="padding-left:6px; color:#666;">21.5%</span>
+    </div>
+    <div style="display:flex; align-items:center; margin:3px 0; font-size:0.55em;">
+      <span style="width:80px; text-align:right; padding-right:8px; font-weight:600;">0.90&ndash;0.95</span>
+      <div style="height:20px; width:17.3%; background:#90caf9; border-radius:2px; padding-left:6px; font-weight:600; display:flex; align-items:center;">3,941</div>
+      <span style="padding-left:6px; color:#666;">17.3%</span>
+    </div>
+    <div style="display:flex; align-items:center; margin:3px 0; font-size:0.55em;">
+      <span style="width:80px; text-align:right; padding-right:8px; font-weight:600;">&lt; 0.90</span>
+      <div style="height:20px; width:3.6%; min-width:30px; background:#ef5350; border-radius:2px; color:#fff; padding-left:6px; font-weight:600; display:flex; align-items:center;">811</div>
+      <span style="padding-left:6px; color:#666;">3.6%</span>
+    </div>
+  </div>
+  <p style="text-align:center; font-size:0.55em;">Global mean: <strong>0.9736</strong> | Range: [0.032, 1.000]</p>
+</section>
+
+<!-- Slide 26: Heatmap -->
+<section>
+  <h2>8&times;8 Variant Similarity Matrix</h2>
+  <h3>Across-model mean cosine &mdash; two clusters emerge</h3>
+  <div style="position:relative; display:inline-block;">
+  <table style="font-size:0.48em; border-collapse:collapse; margin:0.5em auto;">
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;"></th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSFPF</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSFPT</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSTPF</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSTPT</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSFPF</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSFPT</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSTPF</th>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSTPT</th>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSFPF</th>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.971</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.968</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.961</td>
+      <td style="background:#fff9c4;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.949</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.959</td>
+      <td style="background:#fff9c4;text-align:center;padding:4px;font-weight:700;color:#e65100;border:1px solid #fff;">.947</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSFPT</th>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.971</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.981</td>
+      <td style="background:#81c784;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.997</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.967</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.977</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.965</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.975</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSTPF</th>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.981</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.972</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.959</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.973</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.960</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MFSTPT</th>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.968</td>
+      <td style="background:#81c784;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.997</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.964</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.974</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.965</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.975</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSFPF</th>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.961</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.967</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.972</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.964</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.987</td>
+      <td style="background:#66bb6a;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.998</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSFPT</th>
+      <td style="background:#fff9c4;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.949</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.977</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.959</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.974</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.987</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.985</td>
+      <td style="background:#81c784;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.997</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSTPF</th>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.959</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.965</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.973</td>
+      <td style="background:#dcedc8;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.965</td>
+      <td style="background:#66bb6a;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.998</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.985</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.987</td>
+    </tr>
+    <tr>
+      <th style="background:#1565c0;color:#fff;padding:4px 6px;">MTSTPT</th>
+      <td style="background:#fff9c4;text-align:center;padding:4px;font-weight:700;color:#e65100;border:1px solid #fff;">.947</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.975</td>
+      <td style="background:#e8f5e9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.960</td>
+      <td style="background:#c8e6c9;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.975</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.984</td>
+      <td style="background:#81c784;text-align:center;padding:4px;font-weight:700;color:#fff;border:1px solid #fff;">.997</td>
+      <td style="background:#a5d6a7;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">.987</td>
+      <td style="background:#e3f2fd;text-align:center;padding:4px;font-weight:600;border:1px solid #fff;">1.000</td>
+    </tr>
+  </table>
+  <!-- Animated cluster outlines — blue box, blue text, orange box, orange text -->
+  <div class="fragment" data-fragment-index="1" style="position:absolute; top:11%; left:10.5%; width:44.5%; height:46%; border:3px solid #1565c0; border-radius:6px; pointer-events:none; box-shadow:0 0 8px rgba(21,101,192,0.4);"></div>
+  <div class="fragment" data-fragment-index="3" style="position:absolute; top:57%; left:55.5%; width:43%; height:43%; border:3px solid #e65100; border-radius:6px; pointer-events:none; box-shadow:0 0 8px rgba(230,81,0,0.4);"></div>
+  </div>
+  <p style="text-align:center; font-size:0.5em;">
+    <span class="fragment" data-fragment-index="2" style="display:inline;"><strong style="color:#1565c0;">Cluster A</strong> (MF*: no inst_full strip)</span>
+    <span class="fragment" data-fragment-index="4" style="display:inline;"> | <strong style="color:#e65100;">Cluster B</strong> (MT*: inst_full stripped)</span><br>
+    <span class="fragment" data-fragment-index="4" style="display:inline;">Within-cluster &ge; 0.96 | Between-cluster: 0.95&ndash;0.97</span>
+  </p>
+</section>
+
+<!-- Slide 27: Axis Impact -->
+<section>
+  <h2>Stripping Axis Contribution</h2>
+  <h3>Instrument full stripping dominates semantic shift</h3>
+  <table>
+    <tr><th>Axis</th><th>Toggle</th><th>Mean Cosine</th><th>Impact</th></tr>
+    <tr><td><strong>Instrument Full (M)</strong></td><td>MF&harr;MT</td><td>0.960</td><td style="color:#e65100;font-weight:700;">Highest</td></tr>
+    <tr><td><strong>Phrases (P)</strong></td><td>PF&harr;PT</td><td>0.971</td><td style="color:#f57c00;">Moderate</td></tr>
+    <tr><td><strong>Instrument Sub (S)</strong></td><td>SF&harr;ST</td><td>0.998</td><td style="color:#4caf50;">Minimal</td></tr>
+  </table>
+  <div class="two-col" style="margin-top:0.5em;">
+    <div>
+      <h3>Interpretation</h3>
+      <ul>
+        <li>inst_full: long patterns (~40 chars), removes instrument identity</li>
+        <li>Phrases: boilerplate removal, moderate but meaningful</li>
+        <li>inst_sub: short suffixes, nearly invisible in embedding space</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Model sensitivity (5&times; range)</h3>
+      <table>
+        <tr><th>Model</th><th>Mean</th><th>Sensitivity</th></tr>
+        <tr><td>medbert</td><td>0.950</td><td>Most sensitive</td></tr>
+        <tr><td>minilm</td><td>0.952</td><td>High</td></tr>
+        <tr><td>mpnet</td><td>0.953</td><td>High</td></tr>
+        <tr><td>clinbert2</td><td>0.999</td><td>Near-invariant</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="footnote">General-purpose models detect more change than domain-specialized ones.</p>
+</section>
+
+<!-- Slide 28: Cosine Takeaways -->
+<section>
+  <h2>Semantic Loss: Key Findings</h2>
+  <ol>
+    <li><strong>Stripping is semantically conservative</strong>: 79.1% of CDEs retain &ge; 0.95 cosine similarity &mdash; boilerplate removed without distorting meaning</li>
+    <li><strong>Instrument stripping dominates</strong>: The MF&harr;MT axis accounts for the largest embedding divergence</li>
+    <li><strong>Sub-instrument stripping is invisible</strong>: MTSFPF&harr;MTSTPF = 0.998 &mdash; validates field-aware split design</li>
+    <li><strong>Two natural variant clusters</strong>: {MF*} and {MT*} &mdash; the inst_full decision is the most consequential choice</li>
+    <li><strong>Extreme outliers are degenerate CDEs</strong>: &ldquo;If other, please specify&rdquo; with no definition &mdash; trivial content, not stripping damage</li>
+  </ol>
+  <p style="margin-top:0.5em; font-size:0.6em;"><strong>Implication for downstream clustering</strong>: Stripping preserves semantic content while removing the shared-instrument similarity signal that drives false clustering.</p>
+  <p class="footnote">6,368,040 comparisons: 10 models &times; 28 pairs &times; 22,743 CDEs (allcde03, cde08 v2 embeddings, 2026-03-13)</p>
 </section>
 
 </div>

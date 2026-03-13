@@ -167,7 +167,7 @@
   <line x1="920" y1="268" x2="1037" y2="268" stroke="#444" stroke-width="1"/>
   <line x1="1037" y1="268" x2="1037" y2="276" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <text x="920" y="340" text-anchor="middle" class="step-label-sm">5 variant outputs for downstream comparison</text>
+  <text x="920" y="340" text-anchor="middle" class="step-label-sm">7 variant outputs for downstream comparison</text>
 
   <!-- Curation Ledger feedback loop -->
   <rect x="280" y="370" width="500" height="38" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" stroke-dasharray="6,3"/>

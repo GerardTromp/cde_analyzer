@@ -13,11 +13,23 @@ For most session recovery, read these in order:
 
 ### [01-architecture.md](01-architecture.md)
 **Core system architecture** — layered monolithic design, action system, data flow.
-Valid for understanding foundational architecture.
+
+### [02-codebase-map.md](02-codebase-map.md)
+**Directory structure** — actions, logic, utils, core, CDE_Schema, config, workflows.
+
+### [03-data-models.md](03-data-models.md)
+**Data models** — Pydantic CDE schemas, pattern TSV format, ledger format, workflow YAML.
 
 ### [04-patterns.md](04-patterns.md)
 **Design patterns and coding conventions** — plugin registry, factory, visitor,
-configuration patterns. Core patterns still valid.
+configuration patterns.
+
+### [05-decisions.md](05-decisions.md)
+**Architecture Decision Records** — 13 ADRs covering layout, lazy loading, branching
+strip, field-aware splits, incremental curation, action refactoring.
+
+### [06-dependencies.md](06-dependencies.md)
+**Dependencies** — runtime, dev, optional packages; spaCy model; Python version; tool config.
 
 ### [07-gotchas.md](07-gotchas.md)
 **Known issues, pitfalls, workarounds** — configuration, performance, data handling.
@@ -36,8 +48,4 @@ configuration patterns. Core patterns still valid.
 
 Files in `archive/` are from early project phases (2026-01-07) and reference a
 different project context (cde-clustering with Hydra, PostgreSQL, MLflow, CVIs).
-Retained for historical reference:
-- `02-codebase-map.md` — stale file/directory listings
-- `03-data-models.md` — PostgreSQL/MLflow schemas (not this project)
-- `05-decisions.md` — ADRs for Hydra/PostgreSQL (not this project)
-- `06-dependencies.md` — stale dependency listings
+Retained for historical reference only.

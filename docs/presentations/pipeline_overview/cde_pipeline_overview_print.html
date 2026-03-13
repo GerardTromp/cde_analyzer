@@ -371,23 +371,30 @@
 <!-- Slide 12 -->
 <div class="slide" id="s12">
   <h2><span class="slide-num">12</span>Phase 3: Branching Strip</h2>
-  <img src="diagrams/branching_strip.svg" class="diagram" alt="Five-way branching strip pipeline">
-  <p class="footnote">5 variants over {full inst, sub inst, phrases} &mdash; MT+ST combinations removed (functionally equivalent to MT-only)</p>
+  <img src="diagrams/branching_strip.svg" class="diagram" alt="Seven-way branching strip pipeline">
+  <p class="footnote">7 variants (2&sup3;&minus;1) over {full inst, sub inst, phrases} &mdash; field-aware splits make all combinations distinct</p>
 </div>
 
 <!-- Slide 13 -->
 <div class="slide" id="s13">
   <h2><span class="slide-num">13</span>Production Results (allcde03 &mdash; 22,743 CDEs)</h2>
-  <h3>5 output variants (N-way single-pass: 104 seconds)</h3>
+  <h3>7 output variants (N-way single-pass: 104 seconds)</h3>
   <table>
     <tr><th>Code</th><th>Main inst</th><th>Sub inst</th><th>Phrases</th><th>Description</th></tr>
     <tr><td>MTSFPF</td><td>Stripped</td><td>&mdash;</td><td>&mdash;</td><td>Full instrument only</td></tr>
     <tr><td>MFSTPF</td><td>&mdash;</td><td>Stripped</td><td>&mdash;</td><td>Sub-group only</td></tr>
+    <tr><td>MTSTPF</td><td>Stripped</td><td>Stripped</td><td>&mdash;</td><td>Full + sub instruments</td></tr>
     <tr><td>MFSFPT</td><td>&mdash;</td><td>&mdash;</td><td>Stripped</td><td>Phrases only</td></tr>
     <tr><td>MTSFPT</td><td>Stripped</td><td>&mdash;</td><td>Stripped</td><td>Full instruments + phrases</td></tr>
     <tr><td>MFSTPT</td><td>&mdash;</td><td>Stripped</td><td>Stripped</td><td>Sub instruments + phrases</td></tr>
+    <tr><td>MTSTPT</td><td>Stripped</td><td>Stripped</td><td>Stripped</td><td>Maximum stripping</td></tr>
   </table>
-  <p class="footnote">MT+ST combinations (MTSTPF, MTSTPT) removed: full instrument removal deletes entire pattern text, leaving nothing for sub-instrument removal.</p>
+  <p class="footnote">Field-aware splits: inst_full and inst_sub operate on different text spans, making all 7 combinations genuinely distinct.</p>
+</div>
+
+<!-- Slide 13b -->
+<div class="slide" id="s13b">
+  <h2><span class="slide-num">13b</span>Quality &amp; Pattern Inventory</h2>
   <div class="two-col">
     <div>
       <h3>Quality (MTSFPT)</h3>
@@ -727,14 +734,14 @@
       <ul>
         <li>Three-phase pipeline (instrument, phrase, branching strip)</li>
         <li>Curation infrastructure (ledger, gate, editor, server)</li>
-        <li>Production-tested: 22,743 CDEs &times; 5 variants in 104s</li>
+        <li>Production-tested: 22,743 CDEs &times; 7 variants in 104s</li>
         <li>Documentation: 8 vignettes, 28 reference pages</li>
       </ul>
       <h3>Remaining</h3>
       <ul>
         <li>LLM-assisted classification</li>
         <li>Position-specific field-aware stripping</li>
-        <li>Embedding evaluation on 5 variants</li>
+        <li>Embedding evaluation on 7 variants</li>
       </ul>
     </div>
     <div>
@@ -762,7 +769,7 @@
     <li><strong>Descending k-mer mining</strong> with masking prevents redundant detection</li>
     <li><strong>Curation ledger</strong> enables incremental improvement &mdash; effort compounds across runs</li>
     <li><strong>Zipf triage</strong> separates domain-specific patterns from common English</li>
-    <li><strong>Five stripped variants</strong> for downstream comparison (MT+ST removed as equivalent)</li>
+    <li><strong>Seven stripped variants</strong> for downstream comparison (field-aware splits make all distinct)</li>
     <li><strong><code>min_parent_tinyids</code></strong> is the single most influential parameter (18.6x)</li>
     <li><strong>Standalone editor</strong> prevents Excel data corruption during curation</li>
   </ol>
