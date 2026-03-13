@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v0.9.6)
+# CDE Analyzer — Context (v0.9.8)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -13,7 +13,17 @@ When changing the version, **all three files must be updated together**:
 | 2 | `pyproject.toml` | `version` | `version = "X.Y.Z"` |
 | 3 | `tools/editor_standalone/__main__.py` | `_FALLBACK_VERSION` | `_FALLBACK_VERSION = "X.Y.Z"` |
 
-Also update the version in documentary headings: `CLAUDE.md`, `CLAUDE_full.md`, and `.claude/context/` files.
+Also update the version in these documentary locations:
+
+| # | File | Location |
+|---|------|----------|
+| 4 | `CLAUDE.md` | Heading `# CDE Analyzer — Context (vX.Y.Z)` + `## Current State` |
+| 5 | `CLAUDE_full.md` | `**Active Branch**` line |
+| 6 | `.claude/context/08-progress.md` | `**Version**` line + `## Current State` heading |
+| 7 | `.claude/context/README.md` | Quick Recovery item 1 |
+| 8 | `docs/curator-briefing.md` | `> **Version**:` line (line 3) |
+| 9 | `docs/tsv-editor-cheatsheet.md` | `> **Version**:` line (line 3) |
+| 10 | `docs/presentations/pipeline_overview/cde_pipeline_overview.md` | `**Version**:` line (line 8) |
 
 ## Project Summary
 
@@ -37,23 +47,30 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 
 ### Phase 3: Branching Strip
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (10 steps)
-- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 5 variants) → quality_report (3 steps)
+- **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
 
-## Current State (v0.9.6)
+## Current State (v0.9.8)
 
-### v0.9.6: 5-Way Branching Strip + allcde03 Run
+### v0.9.8: Field-Aware Splits + 7-Way Branching Strip
 
-#### Variant Reduction (7 → 5)
-- Removed **MTSTPF** and **MTSTPT**: MT+ST combinations are functionally equivalent to their MT-only counterparts (MTSFPF, MTSFPT) because full instrument removal deletes the entire pattern text, leaving nothing for sub-instrument removal to match
-- 5 remaining variants: MTSFPF, MFSTPF, MFSFPT, MTSFPT, MFSTPT
-- Pipeline reduced from 6 to 5 variants (13 → 10 steps in legacy, all 5 in N-way)
+#### Field-Aware Instrument Splits
+- **Three-component decomposition**: Each curated instrument pattern split into Full (group prefix), Sub (separator + suffix), and Abbreviation
+- `inst_full` and `inst_sub` now operate on **different text spans**, making all 7 variants genuinely distinct
+- **Group-scoped re-matching**: Sub-patterns only matched against CDEs within their instrument group's tinyId scope, preventing cross-instrument contamination
+- **QC validated**: 20 double-space artifacts (v2/unscoped) → 0 (v3/scoped)
+- 7 variants: MTSFPF, MFSTPF, MTSTPF, MFSFPT, MTSFPT, MFSTPT, MTSTPT
 - Verbatim patterns from `config/verbatim_strip_patterns.yaml` auto-merged into `inst_full` stage via `--verbatim-patterns`
 
-#### allcde03 Production Run
-- 22,743 CDEs × 5 variants in 104s (N-way single-pass)
-- Pattern inventory: 458 instrument (full+sub) + 273 curated phrases + 7 substitutes + 39 verbatim + 2,100 temporal
-- Quality: 84.2% fields at 90-100% retention (MTSFPT), 6 trailing_article remnants per variant
+#### allcde03 Production Run (v3 strip patterns)
+- 22,743 CDEs × 7 variants (N-way single-pass)
+- Pattern inventory: 383 inst_full + 252 inst_sub + 273 curated phrases + 7 substitutes + 39 verbatim + 2,100 temporal
+- Quality: 84.2% fields at 90-100% retention (MTSFPT), 0 stripping artifacts, 6 trailing_article remnants per variant
 - Run details: `docs/runs/allcde03-branching-strip-run.md`
+
+### v0.9.6: 5-Way Branching Strip + allcde03 Run (superseded by v0.9.8)
+
+- Pre-field-aware-splits version with identical inst_full/inst_sub patterns
+- 5 variants (MT+ST combinations degenerate)
 
 ### v0.9.5: Containment Tree in TSV Editor
 

@@ -1,6 +1,6 @@
 # Curator Briefing — Efficient Pattern Curation
 
-> **Version**: v0.9.6 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
+> **Version**: v0.9.8 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
 
 This document explains *how to curate efficiently*, not just which buttons to press. It assumes you have the editor open and a `needs_review.tsv` loaded.
 
@@ -159,6 +159,44 @@ Knowing what you're looking at speeds up decisions:
 
 - Detected `Considering your level of difficulty, you have` — deleting leaves broken grammar. Substitute with a clean connector phrase if needed.
 - Rare in practice (typically <2% of decisions)
+
+---
+
+## Semantic Retention: When NOT to Delete
+
+The goal of stripping is to remove **noise** (repeated instrument names, boilerplate
+preambles) without destroying **signal** (clinical content, semantic meaning). Two
+decisions help preserve meaning when pure deletion would cause information loss:
+
+### Use substitute when deletion loses meaning
+
+If a pattern like `Patient-Reported Outcomes Measurement Information System (PROMIS)`
+appears at the start of many definitions, deleting it entirely removes the instrument
+reference. If downstream analysis benefits from knowing *which instrument family* a
+CDE belongs to, **substitute** with a short form (e.g., `PROMIS`) instead of deleting.
+
+**When to substitute**:
+- Deletion would leave orphaned grammar ("the" before a deleted name)
+- The pattern contains both boilerplate *and* a meaningful identifier
+- You want a shorter reference preserved, not total removal
+
+### Use modify when boundaries are wrong
+
+If the miner detected `Patient Health Questionnaire depression screening` but
+`depression screening` is meaningful clinical content, **modify** to trim the
+pattern to just `Patient Health Questionnaire`. Only the modified (shorter) text
+gets stripped; the clinical content stays.
+
+**When to modify**:
+- The detected pattern extends beyond the actual instrument/boilerplate boundary
+- A shorter prefix or suffix is the real repeated element
+- The "extra" text carries clinical or semantic meaning
+
+### The principle
+
+Ask: *"After stripping this pattern from every CDE where it appears, does each
+CDE still make sense on its own?"* If not, use substitute or modify to preserve
+the meaningful portion.
 
 ---
 

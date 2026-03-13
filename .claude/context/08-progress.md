@@ -2,17 +2,17 @@
 
 ## Current Branch: field-aware-strip
 
-**Focus**: Phrase pipeline correctness, curation UX, documentation
+**Focus**: Field-aware instrument splits, 7-way branching strip, documentation
 
-**Version**: 0.9.6 (2026-03-10)
+**Version**: 0.9.8 (2026-03-12)
 
-## Current State (v0.9.6)
+## Current State (v0.9.8)
 
 ### All Pipeline Phases — Complete
 
-**Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns
+**Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns → field-aware splits (383 full + 252 sub)
 **Phase 2: Phrase Pipeline** — 4,006 patterns (with deferred parent filter + no-trim-anchors); curation in progress
-**Phase 3: Branching Strip** — 5 variant outputs; legacy 10-step pipeline or N-way 3-step single-pass (104s for 22,743 CDEs)
+**Phase 3: Branching Strip** — 7 variant outputs; N-way 3-step single-pass with field-aware splits (all 7 distinct)
 
 ### Containment Tree in TSV Editor (v0.9.5–v0.9.6)
 

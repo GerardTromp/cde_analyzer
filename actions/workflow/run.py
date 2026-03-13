@@ -30,9 +30,11 @@ logger = logging.getLogger(__name__)
 STRIP_CODE_STEPS: Dict[str, List[str]] = {
     "MTSFPF": ["strip_MTSFPF"],
     "MFSTPF": ["strip_MFSTPF"],
+    "MTSTPF": ["strip_MTSFPF", "strip_MFSTPF"],
     "MFSFPT": ["expand_temporal", "temporal_MFSFPT", "strip_MFSFPT"],
     "MTSFPT": ["strip_MTSFPF", "expand_temporal", "temporal_MTSFPT", "strip_MTSFPT"],
     "MFSTPT": ["strip_MFSTPF", "expand_temporal", "temporal_MFSTPT", "strip_MFSTPT"],
+    "MTSTPT": ["strip_MTSFPF", "strip_MFSTPF", "expand_temporal", "temporal_MTSTPT", "strip_MTSTPT"],
 }
 ALL_STRIP_CODES = sorted(STRIP_CODE_STEPS.keys())
 

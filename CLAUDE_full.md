@@ -31,9 +31,16 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Active Branch**: field-aware-strip (v0.9.4)
+**Active Branch**: field-aware-strip (v0.9.8)
 
 **Recent Work** (Last 30 days):
+- **v0.9.8: Field-Aware Splits + 7-Way Branching Strip**
+  - Three-component decomposition: Full (group prefix) + Sub (separator + suffix) + Abbreviation
+  - `inst_full` and `inst_sub` operate on different text spans → all 7 variants genuinely distinct
+  - Group-scoped re-matching: sub-patterns only matched within instrument group tinyId scope
+  - QC validated: 20 double-space artifacts (v2) → 0 (v3) across all 7 variants
+  - 383 inst_full + 252 inst_sub patterns (from 458 curated instruments)
+  - New `--analyze-instrument-splits` and updated `--generate-strip-patterns` (splits mode)
 - **v0.6.0: Multi-Curator Curation + Workflow Scaffold + Vignettes**
   - `--init-curation` / `--merge-curation` in pattern_util for multi-curator workflows
   - `logic/inter_rater.py` — Cohen's kappa, Fleiss' kappa, Krippendorff's alpha

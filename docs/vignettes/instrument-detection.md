@@ -303,7 +303,151 @@ This filters low-frequency noise while retaining real instruments.
 
 ---
 
-## 7. Tuning Parameters
+## 7. Field-Aware Splits for Branching Strip
+
+After curation, the branching strip (Phase 3) needs separate **inst_full** and
+**inst_sub** pattern files to produce all 7 strip variants. The
+`--analyze-instrument-splits` command prepares a curation TSV that proposes how
+to split each curated instrument pattern into a group prefix (inst_full) and a
+separator+suffix (inst_sub).
+
+### How separators are detected
+
+The hierarchy grouper identifies groups of patterns sharing a common prefix.
+The separator between prefix and suffix varies by instrument family:
+
+| Pattern | Group | proposed_full | proposed_sub | Separator |
+|---------|-------|--------------|-------------|-----------|
+| `PROMIS - Anxiety` | PROMIS | `PROMIS` | ` - Anxiety` | ` - ` |
+| `PROMIS - Depression` | PROMIS | `PROMIS` | ` - Depression` | ` - ` |
+| `NIH Toolbox - Flanker` | NIH Toolbox | `NIH Toolbox` | ` - Flanker` | ` - ` |
+| `NIH Toolbox Anger` | NIH Toolbox | `NIH Toolbox` | ` Anger` | ` ` (space) |
+| `NIH Toolbox Cognitive Battery` | NIH Toolbox | `NIH Toolbox` | ` Cognitive Battery` | ` ` (space) |
+
+The separator is always included as prefix to `proposed_sub`. This ensures that
+when both inst_full and inst_sub are applied (MTSTPF/MTSTPT), the complete
+pattern text is fully consumed with no dangling separator.
+
+### Mixed separators within a group
+
+Some instrument families use **both** dash-separated and space-separated naming.
+The NIH Toolbox group illustrates this:
+
+- `NIH Toolbox - Anger` → sub = ` - Anger` (dash separator)
+- `NIH Toolbox Anger` → sub = ` Anger` (space separator)
+
+Both are valid group members with the same `proposed_full = "NIH Toolbox"`.
+The splits approach handles this naturally because the separator is detected
+per-pattern, not per-group.
+
+### Why this matters for stripping
+
+Consider a definition field containing:
+
+> "..., as part of the NIH Toolbox Anger Physical Aggression"
+
+The curated pattern is `NIH Toolbox Anger` (the longest match the miner found).
+With field-aware splits:
+
+- **MTSFPF** (inst_full only): removes `NIH Toolbox` → `" Anger Physical Aggression"`
+- **MFSTPF** (inst_sub only): removes ` Anger` → `"NIH Toolbox Physical Aggression"`
+- **MTSTPF** (both): removes `NIH Toolbox` + ` Anger` → `" Physical Aggression"`
+
+The remaining text ("Physical Aggression") was never part of the curated
+instrument pattern — it is CDE-specific content that should be preserved.
+Each variant produces a genuinely different result, which is the goal of
+field-aware splits.
+
+### Singletons
+
+Patterns that are not part of any group (193 in allcde03) are classified as
+**singletons**. They go into inst_full only (the complete match) with nothing
+in inst_sub. For singletons, MTSFPF and MTSTPF produce the same output — this
+is expected and correct, since there is no sub-component to strip independently.
+
+### Three-component decomposition
+
+Each curated instrument pattern is decomposed into up to three components:
+
+| Component | Description | Example |
+|-----------|-------------|---------|
+| **Full** (inst_full) | Group prefix — the instrument family name | `PROMIS` |
+| **Sub** (inst_sub) | Separator + suffix — the sub-domain identifier | ` - Anxiety` |
+| **Abbreviation** | Parenthesized acronym (future use) | `(PHQ-9)` |
+
+For **singletons** (patterns not part of any group), the complete match goes
+into inst_full with nothing in inst_sub. For **group bases** (e.g., `PROMIS`
+itself), similarly only inst_full is populated.
+
+The separator (` - `, ` `, etc.) is always included as prefix to the sub
+component. This ensures that applying both inst_full and inst_sub fully
+consumes the original pattern text with no dangling separator.
+
+### Group-scoped re-matching
+
+When generating strip patterns, sub-pattern texts are re-matched against CDE
+fields to find all CDEs where they appear. A critical constraint: **sub-patterns
+are only matched against CDEs within their instrument group's tinyId scope**.
+
+Without this scoping, a bare-word sub-pattern like `Assessment` (from the group
+`Vineland Adaptive Behavior Scales Assessment`) would match hundreds of unrelated
+CDEs containing the common word "Assessment". This cross-instrument contamination
+causes stripping artifacts (double-space gaps) in CDEs that should not be affected.
+
+The group-scoped approach builds a `sub_text_scopes` dict mapping each proposed_sub
+text to the union of tinyIds from its instrument group(s). During re-matching,
+each sub-pattern text is only scanned against CDEs in its scope, not the full
+corpus.
+
+**QC validation** (allcde03, v3 strip patterns): Group-scoped re-matching reduced
+double-space artifacts from 20 (v2, unscoped) to 0 (v3, scoped) across all 7
+branching strip variants.
+
+### Workflow
+
+```bash
+# 1. Analyze splits from curated instruments
+cde-analyzer pattern_util --analyze-instrument-splits curated.tsv \
+    --input cdes.json -o instrument_splits.tsv
+
+# 2. Curate in TSV editor (review group_member rows)
+cde-analyzer pattern_util --edit instrument_splits.tsv
+
+# 3. Generate separate inst_full and inst_sub pattern files
+#    (--input enables group-scoped re-matching for sub-patterns)
+cde-analyzer pattern_util --generate-strip-patterns instrument_splits.tsv \
+    --input cdes.json -o inst_patterns
+# → produces inst_patterns_full.tsv and inst_patterns_sub.tsv
+
+# 4. Run 7-way branching strip
+cde-analyzer strip_branching -i cdes.json -d output/ \
+    --inst-full-patterns inst_patterns_full.tsv \
+    --inst-sub-patterns inst_patterns_sub.tsv \
+    --temporal-patterns temporal_expanded.tsv \
+    --phrase-patterns curated_phrases.tsv
+```
+
+### Curation decisions for semantic retention
+
+During instrument split curation, some patterns require **substitute** or
+**modify** decisions to preserve semantic content:
+
+- **Substitute**: When deleting the matched text would leave broken grammar or
+  lose meaning, replace it with a shorter semantically equivalent phrase. For
+  example, substituting a full instrument preamble with just the instrument
+  abbreviation preserves the reference without the boilerplate.
+
+- **Modify**: When the detected pattern boundaries are wrong — the match is too
+  long or too short. Correct the boundaries so that only the true boilerplate
+  is stripped.
+
+The key principle: stripping should remove **noise** (repeated instrument names,
+boilerplate preambles) without destroying **signal** (clinical content, semantic
+meaning). When in doubt, use substitute to replace rather than delete.
+
+---
+
+## 9. Tuning Parameters
 
 | Parameter | Default | When to change |
 |-----------|---------|---------------|
@@ -317,7 +461,7 @@ dataset-size-specific settings.
 
 ---
 
-## 8. Common Issues
+## 10. Common Issues
 
 ### Trailing-punctuation trie truncation
 

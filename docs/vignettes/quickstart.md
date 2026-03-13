@@ -219,21 +219,20 @@ cde-analyzer workflow resume \
 ./run_pipeline.sh phase3
 ```
 
-This runs `branching_strip.yaml`, which produces **five stripped variants**
-from the original (un-stripped) CDE JSON:
+This runs `branching_strip_nway.yaml`, which produces **seven stripped variants**
+from the original (un-stripped) CDE JSON. Field-aware splits make inst_full
+(group prefix) and inst_sub (separator + suffix) operate on different text spans,
+so all 7 combinations are genuinely distinct:
 
 | Code | Main inst | Sub inst | Phrases | Description |
 |------|:-:|:-:|:-:|---|
-| MTSFPF | Stripped | - | - | Full instrument removal only |
-| MFSTPF | - | Stripped | - | Sub-group removal only |
+| MTSFPF | Stripped | - | - | Full instrument prefix removed |
+| MFSTPF | - | Stripped | - | Sub-instrument suffix removed |
+| MTSTPF | Stripped | Stripped | - | Both instrument components removed |
 | MFSFPT | - | - | Stripped | Phrases only |
-| MTSFPT | Stripped | - | Stripped | Full instruments + phrases |
-| MFSTPT | - | Stripped | Stripped | Sub instruments + phrases |
-
-> **Note — MT+ST equivalence**: Combinations with both Main and Sub stripped
-> (MTSTPF, MTSTPT) are omitted because full instrument removal (`inst_full`)
-> deletes the entire pattern text, leaving nothing for sub-instrument removal
-> (`inst_sub`) to match. They are functionally identical to MTSFPF and MTSFPT.
+| MTSFPT | Stripped | - | Stripped | Full instrument + phrases |
+| MFSTPT | - | Stripped | Stripped | Sub instrument + phrases |
+| MTSTPT | Stripped | Stripped | Stripped | All removed |
 
 Temporal patterns (e.g., "in the past 7 days") are automatically expanded
 from seed patterns and stripped case-insensitively before curated phrases are
@@ -248,21 +247,25 @@ Phase 3 generates a quality report automatically. A typical summary
 |------|-------------------|
 | MTSFPF | -515K |
 | MFSTPF | -415K |
+| MTSTPF | -623K |
 | MFSFPT | -105K |
 | MTSFPT | -553K |
 | MFSTPT | -449K |
+| MTSTPT | -660K |
 
 ```
 Phase 3 complete. Outputs:
   branching_output/stripped_MTSFPF.json
   branching_output/stripped_MFSTPF.json
+  branching_output/stripped_MTSTPF.json
   branching_output/stripped_MFSFPT.json
   branching_output/stripped_MTSFPT.json
   branching_output/stripped_MFSTPT.json
+  branching_output/stripped_MTSTPT.json
 ```
 
 !!! tip "Production: run only the variants you need"
-    The full pipeline produces all 5 variants. For production, use
+    The full pipeline produces all 7 variants. For production, use
     `workflow configure` to generate a minimal pipeline:
 
         cde-analyzer workflow configure MTSFPT -o production_strip.yaml
@@ -307,7 +310,7 @@ cde-analyzer workflow run workflows/branching_strip.yaml \
 !!! note "Phase 3 input is the original JSON"
     `branching_strip.yaml` takes the **original un-stripped JSON** as input,
     not the instrument-stripped output. It applies instrument and phrase
-    patterns independently to produce 5 distinct combinations.
+    patterns independently to produce 7 distinct combinations.
 
 ---
 

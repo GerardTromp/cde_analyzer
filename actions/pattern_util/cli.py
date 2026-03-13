@@ -211,7 +211,23 @@ def register_subparser(subparser: ArgumentParser):
         help="Generate strip-ready pattern files from a group-hierarchy TSV. "
              "Produces two files: {output}_full.tsv (full removal) and "
              "{output}_sub.tsv (group prefix removed, suffix retained). "
-             "Both files are ready for use with strip_phrases --patterns.",
+             "Both files are ready for use with strip_phrases --patterns. "
+             "If the input contains 'proposed_full' and 'proposed_sub' columns "
+             "(output of --analyze-instrument-splits after curation), uses "
+             "field-aware splits mode producing genuinely different pattern "
+             "text in full vs sub files.",
+    )
+
+    # Analyze instrument patterns for field-aware full/sub splits
+    subparser.add_argument(
+        "--analyze-instrument-splits",
+        type=str,
+        metavar="FILE",
+        help="Analyze curated instrument patterns for field-aware full/sub "
+             "splits. Input: curated patterns TSV (pattern + tinyIds columns). "
+             "Requires --input (CDE JSON) for frequency analysis. "
+             "Produces a curation TSV with proposed_full, proposed_sub, "
+             "separator, and frequency columns for curator review.",
     )
 
     # Semantic grouping mode

@@ -7,18 +7,20 @@
 #   M = Main (full) instrument, S = Sub instrument, P = Phrase
 #   T = stripped, F = not stripped
 #
-# | Text removed                | M | S | P | Code   | Output file              |
-# |-----------------------------|---|---|---|--------|--------------------------|
-# | Main instrument             | T | F | F | MTSFPF | stripped_MTSFPF.json     |
-# | Sub instrument              | F | T | F | MFSTPF | stripped_MFSTPF.json     |
-# | Phrases                     | F | F | T | MFSFPT | stripped_MFSFPT.json     |
-# | Main instrument and phrases | T | F | T | MTSFPT | stripped_MTSFPT.json     |
-# | Sub instrument and phrases  | F | T | T | MFSTPT | stripped_MFSTPT.json     |
+# | Text removed                    | M | S | P | Code   | Output file              |
+# |---------------------------------|---|---|---|--------|--------------------------|
+# | Main instrument                 | T | F | F | MTSFPF | stripped_MTSFPF.json     |
+# | Sub instrument                  | F | T | F | MFSTPF | stripped_MFSTPF.json     |
+# | Main + sub instrument           | T | T | F | MTSTPF | stripped_MTSTPF.json     |
+# | Phrases                         | F | F | T | MFSFPT | stripped_MFSFPT.json     |
+# | Main instrument and phrases     | T | F | T | MTSFPT | stripped_MTSFPT.json     |
+# | Sub instrument and phrases      | F | T | T | MFSTPT | stripped_MFSTPT.json     |
+# | Main + sub instrument + phrases | T | T | T | MTSTPT | stripped_MTSTPT.json     |
 #
-# Note: MT+ST combinations (MTSTPF, MTSTPT) are functionally equivalent to
-# their MT-only counterparts (MTSFPF, MTSFPT) because full instrument removal
-# deletes the entire pattern text, leaving nothing for sub-instrument removal
-# to match. These redundant variants were removed in v0.9.7.
+# Field-aware splits (v0.9.8+): inst_full and inst_sub operate on different
+# text spans — inst_full matches the group prefix (e.g., "PROMIS"), inst_sub
+# matches the separator + suffix (e.g., " - Anxiety"). This makes all 7
+# variants genuinely distinct.
 #
 # Prerequisites:
 #   - Curated instrument patterns processed through --generate-strip-patterns
@@ -59,8 +61,8 @@ variables:
   # Temporal expansion (auto-generated from config seeds)
   temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
 
-  # Variant selection (default: all 5)
-  variants: "${VARIANTS:-MTSFPF,MFSTPF,MFSFPT,MTSFPT,MFSTPT}"
+  # Variant selection (default: all 7)
+  variants: "${VARIANTS:-MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT}"
 
 steps:
   # [1] Expand temporal seed patterns from config

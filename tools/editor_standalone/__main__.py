@@ -26,7 +26,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
 
-_FALLBACK_VERSION = "0.9.7"  # updated by build_editor_zipapp.py
+_FALLBACK_VERSION = "0.9.8"  # updated by build_editor_zipapp.py
 
 def _resolve_version() -> str:
     """Return the cde_analyzer version if importable, else the fallback."""

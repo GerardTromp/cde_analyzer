@@ -555,6 +555,7 @@ function cdeUrl(path) {
 
     <!-- Row ops -->
     <button class="tb-btn" id="btn-add-row" title="Add empty row">+ Row</button>
+    <button class="tb-btn" id="btn-dup-row" title="Duplicate selected row (Ctrl+D)" disabled>&#8892; Dup</button>
     <button class="tb-btn danger" id="btn-delete" title="Delete selected rows (Del)" disabled>&#10005; Delete</button>
     <button class="tb-btn" id="btn-move-up" title="Move selected rows up" disabled>&#9650;</button>
     <button class="tb-btn" id="btn-move-down" title="Move selected rows down" disabled>&#9660;</button>
@@ -687,6 +688,7 @@ function cdeUrl(path) {
     const btnSaveAs = $('btn-save-as');
     const btnOpen = $('btn-open');
     const btnAddRow = $('btn-add-row');
+    const btnDupRow = $('btn-dup-row');
     const btnDelete = $('btn-delete');
     const btnMoveUp = $('btn-move-up');
     const btnMoveDown = $('btn-move-down');
@@ -749,14 +751,16 @@ function cdeUrl(path) {
         S.decisionCol = -1;
         S.modificationCol = -1;
         S.notesCol = -1;
+        S.groupCol = -1;
         for (let i = 0; i < S.headers.length; i++) {
             const h = S.headers[i].toLowerCase();
             if (h === 'field_profile') S.fpCol = i;
             if (h === 'tinyid_count') S.tinyidCountCol = i;
-            else if (h.includes('tinyid') || h.includes('tinyids')) S.tinyIdCols.push(i);
+            else if ((h.includes('tinyid') || h.includes('tinyids')) && !h.endsWith('_count')) S.tinyIdCols.push(i);
             if (h === 'decision') S.decisionCol = i;
             if (h === 'modification') S.modificationCol = i;
             if (h === 'notes') S.notesCol = i;
+            if (h === 'group') S.groupCol = i;
         }
         // Scan existing notes for group numbers to initialize nextGroupNum
         S.nextGroupNum = 1;
@@ -772,11 +776,13 @@ function cdeUrl(path) {
             }
         }
 
-        // Compute display order: move curation columns to front, tinyid_count as col 2
+        // Compute display order: move curation columns to front
+        // Order: decision, tinyid_count, group (if present), modification, then rest
         S.displayOrder = [];
         const frontCols = new Set();
         if (S.decisionCol >= 0) { S.displayOrder.push(S.decisionCol); frontCols.add(S.decisionCol); }
         if (S.tinyidCountCol >= 0) { S.displayOrder.push(S.tinyidCountCol); frontCols.add(S.tinyidCountCol); }
+        if (S.groupCol >= 0) { S.displayOrder.push(S.groupCol); frontCols.add(S.groupCol); }
         if (S.modificationCol >= 0) { S.displayOrder.push(S.modificationCol); frontCols.add(S.modificationCol); }
         for (let i = 0; i < S.headers.length; i++) {
             if (!frontCols.has(i)) S.displayOrder.push(i);
@@ -1755,6 +1761,23 @@ function cdeUrl(path) {
         setAction('Added row');
     }
 
+    function duplicateRow() {
+        const sel = getSelectedRows();
+        if (sel.length === 0) return;
+        pushUndo('Duplicate ' + sel.length + ' row(s)');
+        let inserted = 0;
+        for (let i = sel.length - 1; i >= 0; i--) {
+            const src = sel[i];
+            const idx = S.rows.indexOf(src);
+            const newRow = { id: S.nextId++, cells: [...src.cells], selected: false };
+            S.rows.splice(idx + 1, 0, newRow);
+            inserted++;
+        }
+        renderBody();
+        updateStatus();
+        setAction('Duplicated ' + inserted + ' row(s)');
+    }
+
     function deleteSelectedRows() {
         const sel = getSelectedRows();
         if (sel.length === 0) return;
@@ -2542,6 +2565,7 @@ function cdeUrl(path) {
     function updateToolbarButtons() {
         const sel = getSelectedRows().length;
         btnDelete.disabled = sel === 0;
+        btnDupRow.disabled = sel === 0;
         btnMoveUp.disabled = sel === 0;
         btnMoveDown.disabled = sel === 0;
         btnCategorize.disabled = sel === 0;
@@ -2622,6 +2646,9 @@ function cdeUrl(path) {
         } else if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
             deselectAll();
             e.preventDefault();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'd' && !isInput) {
+            duplicateRow();
+            e.preventDefault();
         } else if (e.key === 'Delete' && !isInput) {
             deleteSelectedRows();
             e.preventDefault();
@@ -2687,6 +2714,7 @@ function cdeUrl(path) {
     btnSaveAs.addEventListener('click', saveAsDialog);
     btnOpen.addEventListener('click', openFile);
     btnAddRow.addEventListener('click', addRow);
+    btnDupRow.addEventListener('click', duplicateRow);
     btnDelete.addEventListener('click', deleteSelectedRows);
     btnMoveUp.addEventListener('click', () => moveSelectedRows(-1));
     btnMoveDown.addEventListener('click', () => moveSelectedRows(1));

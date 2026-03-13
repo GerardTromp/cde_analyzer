@@ -4,24 +4,28 @@ N-way branching strip engine.
 Produces all requested strip variants in a single pass over the CDE data.
 Instead of the 10-step branching_strip.yaml pipeline that loads/parses the
 22K-CDE JSON file multiple times, this engine loads JSON once and computes
-all 5 variants per CDE simultaneously.
+all 7 variants per CDE simultaneously.
 
 Variant dependency graph::
 
               ┌─ MTSFPF (inst_full only)
               │
-    original ─┼─ MFSTPF (inst_sub only)
+              ├─ MFSTPF (inst_sub only)
+              │
+    original ─┼─ MTSTPF (inst_full then inst_sub)
               │
               ├─ inst_full ──── MTSFPT (+ temporal + phrase)
               │
               ├─ inst_sub ───── MFSTPT (+ temporal + phrase)
               │
+              ├─ inst_full+sub ─ MTSTPT (+ temporal + phrase)
+              │
               └─ temporal ───── MFSFPT (+ phrase)
 
-Note: MT+ST combinations (MTSTPF, MTSTPT) are functionally equivalent to
-their MT-only counterparts (MTSFPF, MTSFPT) because full instrument removal
-(inst_full) deletes the entire pattern text, leaving nothing for inst_sub
-to match. These redundant variants were removed in v0.9.7.
+With field-aware splits (v0.9.8+), inst_full and inst_sub operate on
+different text spans: inst_full matches the group prefix (e.g. "PROMIS"),
+inst_sub matches the separator+suffix (e.g. " - Anxiety").  This makes
+MT+ST genuinely different from MT alone — all 7 variants are distinct.
 
 Each variant is computed by chaining the required stages on a deep copy
 of the original CDE dict.
@@ -48,9 +52,11 @@ logger = logging.getLogger(__name__)
 VARIANT_STAGES: Dict[str, List[str]] = {
     "MTSFPF": ["inst_full"],
     "MFSTPF": ["inst_sub"],
+    "MTSTPF": ["inst_full", "inst_sub"],
     "MFSFPT": ["temporal", "phrase"],
     "MTSFPT": ["inst_full", "temporal", "phrase"],
     "MFSTPT": ["inst_sub", "temporal", "phrase"],
+    "MTSTPT": ["inst_full", "inst_sub", "temporal", "phrase"],
 }
 
 ALL_VARIANT_CODES = list(VARIANT_STAGES.keys())
@@ -281,6 +287,21 @@ def _strip_single_cde_nway(
             stage_indexes.get("inst_sub"),
         )
 
+    # ── Compute inst_full+sub intermediate (for MTSTPF, MTSTPT) ──
+
+    need_inst_both = any(
+        "inst_full" in VARIANT_STAGES[v] and "inst_sub" in VARIANT_STAGES[v]
+        for v in variants
+    )
+    inst_both_data = None
+    if need_inst_both and inst_full_data is not None and "inst_sub" in stages:
+        inst_both_data = copy.deepcopy(inst_full_data)
+        stage = stages["inst_sub"]
+        _apply_phrase_map_to_dict(
+            inst_both_data, stage.phrase_map, stage.compiled_cache,
+            stage_indexes.get("inst_sub"),
+        )
+
     # ── Collect instrument-only outputs ──
 
     if "MTSFPF" in variants and inst_full_data is not None:
@@ -288,6 +309,9 @@ def _strip_single_cde_nway(
 
     if "MFSTPF" in variants and inst_sub_data is not None:
         results["MFSTPF"] = copy.deepcopy(inst_sub_data)
+
+    if "MTSTPF" in variants and inst_both_data is not None:
+        results["MTSTPF"] = copy.deepcopy(inst_both_data)
 
     # ── Stage 2+3: Temporal then phrase stripping ──
 
@@ -321,6 +345,11 @@ def _strip_single_cde_nway(
     if "MFSTPT" in variants and inst_sub_data is not None:
         data = copy.deepcopy(inst_sub_data)
         results["MFSTPT"] = _apply_temporal_phrase(data)
+
+    # MTSTPT: temporal + phrase on inst_full+sub
+    if "MTSTPT" in variants and inst_both_data is not None:
+        data = copy.deepcopy(inst_both_data)
+        results["MTSTPT"] = _apply_temporal_phrase(data)
 
     return results
 
