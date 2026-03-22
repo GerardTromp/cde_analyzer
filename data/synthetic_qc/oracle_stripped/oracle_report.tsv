@@ -1,0 +1,1675 @@
+dataset	tinyId	field	removed_text
+set1a_urban	synUHI001	name	ESI Heat Exposure -
+set1a_urban	synUHI001	question	Over the past 30 days, observed deviation from baseline surface temperature
+set1a_urban	synUHI001	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI002	name	ESI Heat Exposure -
+set1a_urban	synUHI002	question	During the last 12 months, severity score for prolonged heat events
+set1a_urban	synUHI002	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI003	name	ESI Heat Exposure -
+set1a_urban	synUHI003	question	In the past 7 days, proportion of land covered by sealed surfaces
+set1a_urban	synUHI003	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI004	name	ESI Heat Exposure -
+set1a_urban	synUHI004	question	Over the past 30 days, solar reflectivity of building exterior materials
+set1a_urban	synUHI004	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI005	name	ESI Heat Exposure -
+set1a_urban	synUHI005	question	During the last 12 months, rate of heat released by human activities
+set1a_urban	synUHI005	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI006	name	ESI Heat Exposure -
+set1a_urban	synUHI006	question	In the past 7 days, composite health burden from elevated urban temperatures
+set1a_urban	synUHI006	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synUHI007	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI007	question	Over the past 30 days, risk level of thermal damage to built structures
+set1a_urban	synUHI007	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI008	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI008	question	During the last 12 months, temperature of road and sidewalk surfaces
+set1a_urban	synUHI008	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI009	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI009	question	In the past 7 days, extent of rooftop vegetation installations
+set1a_urban	synUHI009	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI010	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI010	question	Over the past 30 days, proportion of overhead tree cover in the urban area
+set1a_urban	synUHI010	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI011	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI011	question	During the last 12 months, ground-level temperature recorded at the station
+set1a_urban	synUHI011	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI012	name	CRAT Infrastructure Vulnerability -
+set1a_urban	synUHI012	question	In the past 7 days, perceived heat stress for outdoor pedestrians
+set1a_urban	synUHI012	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synUHI013	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synUHI014	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synUHI015	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synUHI016	question	Over the past 30 days, geographic position of the measurement station
+set1a_urban	synUHI016	definition	[definition modified: 93 -> 61 chars]
+set1a_urban	synUHI017	question	During the last 12 months, recurring annual cycle of heat island intensity
+set1a_urban	synUHI017	definition	[definition modified: 92 -> 56 chars]
+set1a_urban	synUHI018	(clean)	
+set1a_urban	synUHI019	(clean)	
+set1a_urban	synUHI020	(clean)	
+set1a_urban	synSRM001	name	ESI Water Stress -
+set1a_urban	synSRM001	question	Over the past 30 days, maximum volume of stormwater flowing from the catchment during a storm event
+set1a_urban	synSRM001	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM002	name	ESI Water Stress -
+set1a_urban	synSRM002	question	During the last 12 months, ratio of runoff to total precipitation over the catchment area
+set1a_urban	synSRM002	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM003	name	ESI Water Stress -
+set1a_urban	synSRM003	question	In the past 7 days, contaminant level in the initial volume of stormwater runoff
+set1a_urban	synSRM003	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM004	name	ESI Water Stress -
+set1a_urban	synSRM004	question	Over the past 30 days, mass of particulate matter carried by stormwater flow
+set1a_urban	synSRM004	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM005	name	ESI Water Stress -
+set1a_urban	synSRM005	question	During the last 12 months, mass of contaminants delivered per unit time during a storm event
+set1a_urban	synSRM005	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM006	name	ESI Water Stress -
+set1a_urban	synSRM006	question	In the past 7 days, health hazard rating from contaminated stormwater exposure
+set1a_urban	synSRM006	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synSRM007	name	CRAT Environmental Burden -
+set1a_urban	synSRM007	question	Over the past 30 days, maximum throughput of the underground stormwater conveyance system
+set1a_urban	synSRM007	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM008	name	CRAT Environmental Burden -
+set1a_urban	synSRM008	question	During the last 12 months, fraction of the sub-catchment covered by non-permeable surfaces
+set1a_urban	synSRM008	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM009	name	CRAT Environmental Burden -
+set1a_urban	synSRM009	question	In the past 7 days, stormwater volume retained by bioretention and permeable features
+set1a_urban	synSRM009	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM010	name	CRAT Environmental Burden -
+set1a_urban	synSRM010	question	Over the past 30 days, rate at which stormwater percolates through the bioswale soil medium
+set1a_urban	synSRM010	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM011	name	CRAT Environmental Burden -
+set1a_urban	synSRM011	question	During the last 12 months, thermal state of stormwater at the point of discharge
+set1a_urban	synSRM011	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM012	name	CRAT Environmental Burden -
+set1a_urban	synSRM012	question	In the past 7 days, proportion of gutter flow captured by the curb inlet
+set1a_urban	synSRM012	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synSRM013	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synSRM014	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synSRM015	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synSRM016	question	Over the past 30 days, geographic position of the stormwater discharge monitoring point
+set1a_urban	synSRM016	definition	[definition modified: 195 -> 163 chars]
+set1a_urban	synSRM017	question	During the last 12 months, recurring annual cycle of stormwater generation and quality variation
+set1a_urban	synSRM017	definition	[definition modified: 242 -> 206 chars]
+set1a_urban	synSRM018	(clean)	
+set1a_urban	synSRM019	(clean)	
+set1a_urban	synSRM020	(clean)	
+set1a_urban	synIAQ001	name	ESI Air Contamination -
+set1a_urban	synIAQ001	question	Over the past 30 days, level of CO2 measured in the occupied indoor space
+set1a_urban	synIAQ001	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ002	name	ESI Air Contamination -
+set1a_urban	synIAQ002	question	During the last 12 months, concentration of formaldehyde released from building materials
+set1a_urban	synIAQ002	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ003	name	ESI Air Contamination -
+set1a_urban	synIAQ003	question	In the past 7 days, radioactivity level from radon gas accumulated in the enclosed space
+set1a_urban	synIAQ003	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ004	name	ESI Air Contamination -
+set1a_urban	synIAQ004	question	Over the past 30 days, number of culturable airborne mold spores per unit volume of indoor air
+set1a_urban	synIAQ004	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ005	name	ESI Air Contamination -
+set1a_urban	synIAQ005	question	During the last 12 months, fine particulate matter level in the indoor air of the building
+set1a_urban	synIAQ005	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ006	name	ESI Air Contamination -
+set1a_urban	synIAQ006	question	In the past 7 days, proportion of building occupants reporting health symptoms
+set1a_urban	synIAQ006	definition	As part of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ007	name	CRAT Health Impact -
+set1a_urban	synIAQ007	question	Over the past 30 days, volume of outdoor air delivered to the indoor space per unit time
+set1a_urban	synIAQ007	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ008	name	CRAT Health Impact -
+set1a_urban	synIAQ008	question	During the last 12 months, sum of all measured volatile organic compounds in the indoor air
+set1a_urban	synIAQ008	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ009	name	CRAT Health Impact -
+set1a_urban	synIAQ009	question	In the past 7 days, cumulative time the occupant is exposed to indoor contaminants
+set1a_urban	synIAQ009	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ010	name	CRAT Health Impact -
+set1a_urban	synIAQ010	question	Over the past 30 days, number of complete indoor air volume replacements per hour
+set1a_urban	synIAQ010	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ011	name	CRAT Health Impact -
+set1a_urban	synIAQ011	question	During the last 12 months, dry-bulb temperature of the air inside the occupied space
+set1a_urban	synIAQ011	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ012	name	CRAT Health Impact -
+set1a_urban	synIAQ012	question	In the past 7 days, ability of the HVAC system to maintain target indoor humidity levels
+set1a_urban	synIAQ012	definition	Based on the Community Resilience Assessment Tool (CRAT).
+set1a_urban	synIAQ013	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ014	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ015	definition	A field of the Environmental Stress Index (ESI).
+set1a_urban	synIAQ016	question	Over the past 30 days, position of the air quality sensor within the building
+set1a_urban	synIAQ016	definition	[definition modified: 460 -> 428 chars]
+set1a_urban	synIAQ017	question	During the last 12 months, recurring annual cycle of indoor pollutant concentrations
+set1a_urban	synIAQ017	definition	[definition modified: 463 -> 427 chars]
+set1a_urban	synIAQ018	(clean)	
+set1a_urban	synIAQ019	(clean)	
+set1a_urban	synIAQ020	(clean)	
+set1b_clinical	synPAN001	name	SSS Pain Interference -
+set1b_clinical	synPAN001	question	In the past 7 days, how would you rate your current pain level
+set1b_clinical	synPAN001	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN002	name	SSS Pain Interference -
+set1b_clinical	synPAN002	question	Over the past 2 weeks, primary body area where pain is experienced
+set1b_clinical	synPAN002	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN003	name	SSS Pain Interference -
+set1b_clinical	synPAN003	question	During the past 4 weeks, how often pain episodes occur
+set1b_clinical	synPAN003	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN004	name	SSS Pain Interference -
+set1b_clinical	synPAN004	question	In the past 7 days, when did the current pain episode begin
+set1b_clinical	synPAN004	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN005	name	SSS Pain Interference -
+set1b_clinical	synPAN005	question	Over the past 2 weeks, how long each pain episode typically lasts
+set1b_clinical	synPAN005	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN006	name	SSS Pain Interference -
+set1b_clinical	synPAN006	question	During the past 4 weeks, global rating of symptom burden experienced by the subject
+set1b_clinical	synPAN006	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN007	name	FAB Physical Function -
+set1b_clinical	synPAN007	question	In the past 7 days, maximum force exerted by the hand during a grip test
+set1b_clinical	synPAN007	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN008	name	FAB Physical Function -
+set1b_clinical	synPAN008	question	Over the past 2 weeks, maximum distance walked during a timed test
+set1b_clinical	synPAN008	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN009	name	FAB Physical Function -
+set1b_clinical	synPAN009	question	During the past 4 weeks, number of stairs ascended without assistance
+set1b_clinical	synPAN009	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN010	name	FAB Physical Function -
+set1b_clinical	synPAN010	question	In the past 7 days, maximum weight safely lifted from floor to waist height
+set1b_clinical	synPAN010	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN011	name	FAB Physical Function -
+set1b_clinical	synPAN011	question	Over the past 2 weeks, degree of limitation in daily physical activities
+set1b_clinical	synPAN011	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN012	name	FAB Physical Function -
+set1b_clinical	synPAN012	question	During the past 4 weeks, angular excursion of the affected joint
+set1b_clinical	synPAN012	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synPAN013	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN014	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN015	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synPAN016	question	In the past 7 days, subject's age at the time of the clinical evaluation
+set1b_clinical	synPAN016	definition	[definition modified: 89 -> 60 chars]
+set1b_clinical	synPAN017	question	Over the past 2 weeks, number of concurrent medical conditions reported
+set1b_clinical	synPAN017	definition	[definition modified: 104 -> 72 chars]
+set1b_clinical	synPAN018	(clean)	
+set1b_clinical	synPAN019	(clean)	
+set1b_clinical	synPAN020	(clean)	
+set1b_clinical	synCOG001	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG001	question	In the past 7 days, number of items correctly recalled in sequence
+set1b_clinical	synCOG001	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG002	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG002	question	Over the past 2 weeks, length of time the subject maintains focused attention on the task
+set1b_clinical	synCOG002	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG003	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG003	question	During the past 4 weeks, rate at which simple cognitive operations are completed
+set1b_clinical	synCOG003	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG004	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG004	question	In the past 7 days, number of words generated within a time-limited category task
+set1b_clinical	synCOG004	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG005	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG005	question	Over the past 2 weeks, overall score on tests of planning, inhibition, and cognitive flexibility
+set1b_clinical	synCOG005	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG006	name	SSS Cognitive Difficulty -
+set1b_clinical	synCOG006	question	During the past 4 weeks, self-reported severity of cognitive complaints
+set1b_clinical	synCOG006	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG007	name	FAB Daily Living Activities -
+set1b_clinical	synCOG007	question	In the past 7 days, duration required to complete a standardized functional task
+set1b_clinical	synCOG007	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG008	name	FAB Daily Living Activities -
+set1b_clinical	synCOG008	question	Over the past 2 weeks, performance rating on complex daily living activities
+set1b_clinical	synCOG008	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG009	name	FAB Daily Living Activities -
+set1b_clinical	synCOG009	question	During the past 4 weeks, number of social activities engaged in during the assessment period
+set1b_clinical	synCOG009	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG010	name	FAB Daily Living Activities -
+set1b_clinical	synCOG010	question	In the past 7 days, ability to convey and comprehend information in conversation
+set1b_clinical	synCOG010	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG011	name	FAB Daily Living Activities -
+set1b_clinical	synCOG011	question	Over the past 2 weeks, degree of independence in performing routine daily tasks
+set1b_clinical	synCOG011	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG012	name	FAB Daily Living Activities -
+set1b_clinical	synCOG012	question	During the past 4 weeks, proportion of novel problems correctly solved
+set1b_clinical	synCOG012	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synCOG013	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG014	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG015	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synCOG016	question	In the past 7 days, age of the participant at the time of cognitive testing
+set1b_clinical	synCOG016	definition	[definition modified: 256 -> 227 chars]
+set1b_clinical	synCOG017	question	Over the past 2 weeks, number of active medical diagnoses at the time of evaluation
+set1b_clinical	synCOG017	definition	[definition modified: 265 -> 233 chars]
+set1b_clinical	synCOG018	(clean)	
+set1b_clinical	synCOG019	(clean)	
+set1b_clinical	synCOG020	(clean)	
+set1b_clinical	synSLP001	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP001	question	In the past 7 days, time elapsed from lights-out to the onset of sleep
+set1b_clinical	synSLP001	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP002	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP002	question	Over the past 2 weeks, proportion of time in bed actually spent sleeping
+set1b_clinical	synSLP002	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP003	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP003	question	During the past 4 weeks, cumulative duration of sleep obtained during the sleep period
+set1b_clinical	synSLP003	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP004	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP004	question	In the past 7 days, count of discrete awakenings occurring during the sleep period
+set1b_clinical	synSLP004	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP005	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP005	question	Over the past 2 weeks, percentage of total sleep time spent in each sleep stage
+set1b_clinical	synSLP005	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP006	name	SSS Sleep Disturbance -
+set1b_clinical	synSLP006	question	During the past 4 weeks, overall severity of the subject's sleep complaints
+set1b_clinical	synSLP006	definition	As part of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP007	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP007	question	In the past 7 days, propensity to fall asleep during normal waking activities
+set1b_clinical	synSLP007	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP008	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP008	question	Over the past 2 weeks, degree to which fatigue interferes with daily activities
+set1b_clinical	synSLP008	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP009	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP009	question	During the past 4 weeks, number and length of daytime sleep episodes during the recall period
+set1b_clinical	synSLP009	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP010	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP010	question	In the past 7 days, consistency of the subject's habitual bedtime across nights
+set1b_clinical	synSLP010	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP011	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP011	question	Over the past 2 weeks, impact of poor sleep on the subject's daily functioning
+set1b_clinical	synSLP011	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP012	name	FAB Emotional Well-Being -
+set1b_clinical	synSLP012	question	During the past 4 weeks, suitability of the bedroom environment for restorative sleep
+set1b_clinical	synSLP012	definition	Based on the Functional Assessment Battery (FAB).
+set1b_clinical	synSLP013	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP014	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP015	definition	A field of the Symptom Severity Scale (SSS).
+set1b_clinical	synSLP016	question	In the past 7 days, age of the participant at the time of the sleep evaluation
+set1b_clinical	synSLP016	definition	[definition modified: 398 -> 369 chars]
+set1b_clinical	synSLP017	question	Over the past 2 weeks, number of medical conditions known to affect sleep quality
+set1b_clinical	synSLP017	definition	[definition modified: 403 -> 371 chars]
+set1b_clinical	synSLP018	(clean)	
+set1b_clinical	synSLP019	(clean)	
+set1b_clinical	synSLP020	(clean)	
+health_gravity_a	synMHL001	name	PHI Emotional Distress -
+health_gravity_a	synMHL001	question	In the past 7 days, self-reported depression severity rating
+health_gravity_a	synMHL001	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL002	name	PHI Emotional Distress -
+health_gravity_a	synMHL002	question	Over the past 2 weeks, self-reported generalized anxiety severity level
+health_gravity_a	synMHL002	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL003	name	PHI Emotional Distress -
+health_gravity_a	synMHL003	question	During the past 4 weeks, rating of overall perceived psychological stress
+health_gravity_a	synMHL003	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL004	name	PHI Emotional Distress -
+health_gravity_a	synMHL004	question	In the past 7 days, ability to manage and modulate emotional responses
+health_gravity_a	synMHL004	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL005	name	PHI Emotional Distress -
+health_gravity_a	synMHL005	question	Over the past 2 weeks, presence of thoughts of self-harm or suicide
+health_gravity_a	synMHL005	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL006	name	PHI Emotional Distress -
+health_gravity_a	synMHL006	question	During the past 4 weeks, global rating of psychiatric symptom burden
+health_gravity_a	synMHL006	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL007	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL007	question	In the past 7 days, ability to engage in social interactions and relationships
+health_gravity_a	synMHL007	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL008	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL008	question	Over the past 2 weeks, impact of mental health on work or school performance
+health_gravity_a	synMHL008	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL009	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL009	question	During the past 4 weeks, capacity to recover from adverse psychological experiences
+health_gravity_a	synMHL009	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL010	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL010	question	In the past 7 days, belief in ability to accomplish daily tasks
+health_gravity_a	synMHL010	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL011	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL011	question	Over the past 2 weeks, degree of disability caused by mental health symptoms
+health_gravity_a	synMHL011	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL012	name	COAS Psychological Well-Being -
+health_gravity_a	synMHL012	question	During the past 4 weeks, prior exposure to potentially traumatic events
+health_gravity_a	synMHL012	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMHL013	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL014	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL015	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMHL016	question	In the past 7 days, patient age at the time of psychiatric evaluation
+health_gravity_a	synMHL016	definition	[definition modified: 92 -> 63 chars]
+health_gravity_a	synMHL017	question	Over the past 2 weeks, number of concurrent psychiatric diagnoses
+health_gravity_a	synMHL017	definition	[definition modified: 97 -> 65 chars]
+health_gravity_a	synMHL018	(clean)	
+health_gravity_a	synMHL019	(clean)	
+health_gravity_a	synMHL020	(clean)	
+health_gravity_a	synMSK001	name	PHI Physical Limitation -
+health_gravity_a	synMSK001	question	In the past 7 days, self-reported severity of joint pain at the most affected site
+health_gravity_a	synMSK001	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK002	name	PHI Physical Limitation -
+health_gravity_a	synMSK002	question	Over the past 2 weeks, angular excursion of the joint during voluntary movement
+health_gravity_a	synMSK002	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK003	name	PHI Physical Limitation -
+health_gravity_a	synMSK003	question	During the past 4 weeks, maximum force exerted during a hand grip dynamometry test
+health_gravity_a	synMSK003	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK004	name	PHI Physical Limitation -
+health_gravity_a	synMSK004	question	In the past 7 days, manual muscle testing grade for the affected muscle group
+health_gravity_a	synMSK004	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK005	name	PHI Physical Limitation -
+health_gravity_a	synMSK005	question	Over the past 2 weeks, standard deviation of bone density relative to young adult reference
+health_gravity_a	synMSK005	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK006	name	PHI Physical Limitation -
+health_gravity_a	synMSK006	question	During the past 4 weeks, global rating of musculoskeletal symptom burden
+health_gravity_a	synMSK006	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK007	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK007	question	In the past 7 days, walking velocity measured over a standardized distance
+health_gravity_a	synMSK007	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK008	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK008	question	Over the past 2 weeks, composite assessment of the patient's risk of falling
+health_gravity_a	synMSK008	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK009	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK009	question	During the past 4 weeks, number of joints with detectable swelling on examination
+health_gravity_a	synMSK009	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK010	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK010	question	In the past 7 days, length of time morning joint stiffness persists after waking
+health_gravity_a	synMSK010	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK011	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK011	question	Over the past 2 weeks, degree of disability in daily activities due to musculoskeletal conditions
+health_gravity_a	synMSK011	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK012	name	COAS Rehabilitation Progress -
+health_gravity_a	synMSK012	question	During the past 4 weeks, clinical improvement following physical rehabilitation program
+health_gravity_a	synMSK012	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synMSK013	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK014	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK015	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synMSK016	question	In the past 7 days, patient age at the time of musculoskeletal evaluation
+health_gravity_a	synMSK016	definition	[definition modified: 199 -> 170 chars]
+health_gravity_a	synMSK017	question	Over the past 2 weeks, number of concurrent conditions affecting the musculoskeletal system
+health_gravity_a	synMSK017	definition	[definition modified: 181 -> 149 chars]
+health_gravity_a	synMSK018	(clean)	
+health_gravity_a	synMSK019	(clean)	
+health_gravity_a	synMSK020	(clean)	
+health_gravity_a	synGIH001	name	PHI Digestive Function -
+health_gravity_a	synGIH001	question	In the past 7 days, self-reported severity of abdominal pain over the assessment period
+health_gravity_a	synGIH001	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH002	name	PHI Digestive Function -
+health_gravity_a	synGIH002	question	Over the past 2 weeks, average number of bowel movements per day during the recall period
+health_gravity_a	synGIH002	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH003	name	PHI Digestive Function -
+health_gravity_a	synGIH003	question	During the past 4 weeks, classification of stool consistency using the seven-type Bristol chart
+health_gravity_a	synGIH003	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH004	name	PHI Digestive Function -
+health_gravity_a	synGIH004	question	In the past 7 days, self-reported intensity of nausea symptoms during the assessment period
+health_gravity_a	synGIH004	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH005	name	PHI Digestive Function -
+health_gravity_a	synGIH005	question	Over the past 2 weeks, composite score of heartburn and regurgitation severity and frequency
+health_gravity_a	synGIH005	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH006	name	PHI Digestive Function -
+health_gravity_a	synGIH006	question	During the past 4 weeks, global rating of gastrointestinal symptom burden across all domains
+health_gravity_a	synGIH006	definition	As part of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH007	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH007	question	In the past 7 days, grade of swallowing difficulty assessed by clinical evaluation
+health_gravity_a	synGIH007	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH008	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH008	question	Over the past 2 weeks, histological or non-invasive staging of liver fibrosis severity
+health_gravity_a	synGIH008	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH009	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH009	question	During the past 4 weeks, standardized classification of findings during gastrointestinal endoscopy
+health_gravity_a	synGIH009	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH010	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH010	question	In the past 7 days, result of diagnostic testing for Helicobacter pylori infection
+health_gravity_a	synGIH010	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH011	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH011	question	Over the past 2 weeks, degree of disability in daily activities due to gastrointestinal symptoms
+health_gravity_a	synGIH011	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH012	name	COAS Somatic Symptom Burden -
+health_gravity_a	synGIH012	question	During the past 4 weeks, composite score quantifying disease activity in inflammatory bowel disease
+health_gravity_a	synGIH012	definition	Based on the Clinical Outcome Assessment Scale (COAS).
+health_gravity_a	synGIH013	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH014	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH015	definition	A field of the Patient Health Inventory (PHI).
+health_gravity_a	synGIH016	question	In the past 7 days, patient age at the time of the gastrointestinal health assessment
+health_gravity_a	synGIH016	definition	[definition modified: 461 -> 432 chars]
+health_gravity_a	synGIH017	question	Over the past 2 weeks, number of concurrent conditions affecting the gastrointestinal system
+health_gravity_a	synGIH017	definition	[definition modified: 476 -> 444 chars]
+health_gravity_a	synGIH018	(clean)	
+health_gravity_a	synGIH019	(clean)	
+health_gravity_a	synGIH020	(clean)	
+set2_noisy	synAIR001_t1	question	Over the past 30 days, measured PM2.5 level
+set2_noisy	synAIR001_t1	definition	[definition modified: 87 -> 55 chars]
+set2_noisy	synAIR002_t1	question	Over the past 30 days, measured PM10 level
+set2_noisy	synAIR002_t1	definition	[definition modified: 82 -> 50 chars]
+set2_noisy	synAIR003_t1	question	Over the past 30 days, ozone reading at surface
+set2_noisy	synAIR003_t1	definition	[definition modified: 81 -> 49 chars]
+set2_noisy	synAIR004_t1	question	Over the past 30 days, ambient NO2 concentration
+set2_noisy	synAIR004_t1	definition	[definition modified: 64 -> 32 chars]
+set2_noisy	synAIR005_t1	question	Over the past 30 days, ambient SO2 concentration
+set2_noisy	synAIR005_t1	definition	[definition modified: 82 -> 50 chars]
+set2_noisy	synAIR006_t1	question	Over the past 30 days, ambient CO concentration
+set2_noisy	synAIR006_t1	definition	[definition modified: 63 -> 31 chars]
+set2_noisy	synAIR007_t1	question	Over the past 30 days, composite AQI score
+set2_noisy	synAIR007_t1	definition	[definition modified: 80 -> 48 chars]
+set2_noisy	synAIR008_t1	question	Over the past 30 days, lead in ambient air
+set2_noisy	synAIR008_t1	definition	[definition modified: 70 -> 38 chars]
+set2_noisy	synAIR009_t1	question	Over the past 30 days, ambient benzene concentration
+set2_noisy	synAIR009_t1	definition	[definition modified: 78 -> 46 chars]
+set2_noisy	synAIR010_t1	question	Over the past 30 days, total volatile organics
+set2_noisy	synAIR010_t1	definition	[definition modified: 73 -> 41 chars]
+set2_noisy	synAIR011_t1	question	Over the past 30 days, air temperature at site
+set2_noisy	synAIR011_t1	definition	[definition modified: 79 -> 47 chars]
+set2_noisy	synAIR012_t1	question	Over the past 30 days, humidity percentage
+set2_noisy	synAIR012_t1	definition	[definition modified: 76 -> 44 chars]
+set2_noisy	synAIR013_t1	question	Over the past 30 days, wind velocity at station
+set2_noisy	synAIR013_t1	definition	[definition modified: 71 -> 39 chars]
+set2_noisy	synAIR014_t1	question	Over the past 30 days, barometric pressure reading
+set2_noisy	synAIR014_t1	definition	[definition modified: 67 -> 35 chars]
+set2_noisy	synAIR015_t1	question	Over the past 30 days, optical visibility range
+set2_noisy	synAIR015_t1	definition	[definition modified: 78 -> 46 chars]
+set2_noisy	synAIR016_t1	question	Over the past 30 days, measurement interval
+set2_noisy	synAIR016_t1	definition	[definition modified: 78 -> 46 chars]
+set2_noisy	synAIR017_t1	question	Over the past 30 days, geographic location of station
+set2_noisy	synAIR017_t1	definition	[definition modified: 82 -> 50 chars]
+set2_noisy	synAIR018_t1	question	Over the past 30 days, days exceeding threshold
+set2_noisy	synAIR018_t1	definition	[definition modified: 91 -> 59 chars]
+set2_noisy	synAIR019_t1	question	Over the past 30 days, rainwater pH value
+set2_noisy	synAIR019_t1	definition	[definition modified: 70 -> 38 chars]
+set2_noisy	synAIR020_t1	question	Over the past 30 days, seasonal concentration pattern
+set2_noisy	synAIR020_t1	definition	[definition modified: 86 -> 54 chars]
+set2_noisy	synWAT001_t1	question	Over the past 30 days, amount of oxygen dissolved in the water sample
+set2_noisy	synWAT001_t1	definition	[definition modified: 243 -> 211 chars]
+set2_noisy	synWAT002_t1	question	Over the past 30 days, acidity or alkalinity of the water sample
+set2_noisy	synWAT002_t1	definition	[definition modified: 205 -> 173 chars]
+set2_noisy	synWAT003_t1	question	Over the past 30 days, clarity of the water measured by light scattering
+set2_noisy	synWAT003_t1	definition	[definition modified: 230 -> 198 chars]
+set2_noisy	synWAT004_t1	question	Over the past 30 days, dissolved nitrate level in the sample
+set2_noisy	synWAT004_t1	definition	[definition modified: 221 -> 189 chars]
+set2_noisy	synWAT005_t1	question	Over the past 30 days, dissolved phosphate concentration in the sample
+set2_noisy	synWAT005_t1	definition	[definition modified: 220 -> 188 chars]
+set2_noisy	synWAT006_t1	question	Over the past 30 days, number of E. coli colonies per volume of water
+set2_noisy	synWAT006_t1	definition	[definition modified: 205 -> 173 chars]
+set2_noisy	synWAT007_t1	question	Over the past 30 days, total coliform colonies detected in the water sample
+set2_noisy	synWAT007_t1	definition	[definition modified: 194 -> 162 chars]
+set2_noisy	synWAT008_t1	question	Over the past 30 days, ability of the water sample to conduct an electric current
+set2_noisy	synWAT008_t1	definition	[definition modified: 192 -> 160 chars]
+set2_noisy	synWAT009_t1	question	Over the past 30 days, temperature of the water at the time and location of collection
+set2_noisy	synWAT009_t1	definition	[definition modified: 229 -> 197 chars]
+set2_noisy	synWAT010_t1	question	Over the past 30 days, oxygen consumed by microorganisms decomposing organic matter
+set2_noisy	synWAT010_t1	definition	[definition modified: 223 -> 191 chars]
+set2_noisy	synWAT011_t1	question	Over the past 30 days, oxygen equivalent of chemically oxidizable matter in the sample
+set2_noisy	synWAT011_t1	definition	[definition modified: 229 -> 197 chars]
+set2_noisy	synWAT012_t1	question	Over the past 30 days, dissolved lead level in the water sample
+set2_noisy	synWAT012_t1	definition	[definition modified: 213 -> 181 chars]
+set2_noisy	synWAT013_t1	question	Over the past 30 days, dissolved mercury concentration in the sample
+set2_noisy	synWAT013_t1	definition	[definition modified: 215 -> 183 chars]
+set2_noisy	synWAT014_t1	question	Over the past 30 days, photosynthetic pigment level indicating algal abundance
+set2_noisy	synWAT014_t1	definition	[definition modified: 218 -> 186 chars]
+set2_noisy	synWAT015_t1	question	Over the past 30 days, combined content of all dissolved substances in the water
+set2_noisy	synWAT015_t1	definition	[definition modified: 238 -> 206 chars]
+set2_noisy	synWAT016_t1	question	Over the past 30 days, technique used to collect the water sample
+set2_noisy	synWAT016_t1	definition	[definition modified: 220 -> 188 chars]
+set2_noisy	synWAT017_t1	question	Over the past 30 days, latitude and longitude of the water sampling location
+set2_noisy	synWAT017_t1	definition	[definition modified: 219 -> 187 chars]
+set2_noisy	synWAT018_t1	question	Over the past 30 days, whether the measured parameter exceeds the applicable regulatory limit
+set2_noisy	synWAT018_t1	definition	[definition modified: 234 -> 202 chars]
+set2_noisy	synWAT019_t1	question	Over the past 30 days, salt content of the water expressed as practical salinity units
+set2_noisy	synWAT019_t1	definition	[definition modified: 239 -> 207 chars]
+set2_noisy	synWAT020_t1	question	Over the past 30 days, pattern of water quality change associated with seasonal cycles
+set2_noisy	synWAT020_t1	definition	[definition modified: 276 -> 244 chars]
+set2_noisy	synSOL001_t1	question	Over the past 30 days, proportion of organic material present in the soil sample expressed as a percentage of total dry weight
+set2_noisy	synSOL001_t1	definition	[definition modified: 457 -> 425 chars]
+set2_noisy	synSOL002_t1	question	Over the past 30 days, combined mass of all nitrogen forms present in the soil including organic nitrogen, ammonium, and nitrate fractions
+set2_noisy	synSOL002_t1	definition	[definition modified: 436 -> 404 chars]
+set2_noisy	synSOL003_t1	question	Over the past 30 days, amount of phosphorus in the soil that is accessible for uptake by plant root systems under standard extraction conditions
+set2_noisy	synSOL003_t1	definition	[definition modified: 477 -> 445 chars]
+set2_noisy	synSOL004_t1	question	Over the past 30 days, concentration of potassium ions adsorbed onto soil particle surfaces that are available for exchange with the soil solution
+set2_noisy	synSOL004_t1	definition	[definition modified: 464 -> 432 chars]
+set2_noisy	synSOL005_t1	question	Over the past 30 days, acidity or alkalinity of the soil determined by measuring the hydrogen ion activity in a standardized soil-water mixture
+set2_noisy	synSOL005_t1	definition	[definition modified: 493 -> 461 chars]
+set2_noisy	synSOL006_t1	question	Over the past 30 days, total capacity of the soil to retain and exchange positively charged nutrient ions on its particle surfaces
+set2_noisy	synSOL006_t1	definition	[definition modified: 518 -> 486 chars]
+set2_noisy	synSOL007_t1	question	Over the past 30 days, mass of oven-dried soil per unit volume of undisturbed soil collected using a core sampling device at the designated depth interval
+set2_noisy	synSOL007_t1	definition	[definition modified: 447 -> 415 chars]
+set2_noisy	synSOL008_t1	question	Over the past 30 days, mass of water contained in the soil sample expressed as a proportion of the oven-dry soil mass at the time of collection
+set2_noisy	synSOL008_t1	definition	[definition modified: 476 -> 444 chars]
+set2_noisy	synSOL009_t1	question	Over the past 30 days, mass of carbon contained within the living microbial community of the soil sample expressed per unit dry weight of soil
+set2_noisy	synSOL009_t1	definition	[definition modified: 480 -> 448 chars]
+set2_noisy	synSOL010_t1	question	Over the past 30 days, total mass of lead present per unit dry weight of soil as determined by acid digestion and instrumental analysis
+set2_noisy	synSOL010_t1	definition	[definition modified: 493 -> 461 chars]
+set2_noisy	synSOL011_t1	question	Over the past 30 days, total cadmium content of the soil sample measured after complete acid digestion of the dried and homogenized material
+set2_noisy	synSOL011_t1	definition	[definition modified: 516 -> 484 chars]
+set2_noisy	synSOL012_t1	question	Over the past 30 days, categorization of the soil into a textural class determined by the relative proportions of sand, silt, and clay-sized particles
+set2_noisy	synSOL012_t1	definition	[definition modified: 498 -> 466 chars]
+set2_noisy	synSOL013_t1	question	Over the past 30 days, temperature of the soil measured at the designated depth below the surface at the time of sample collection
+set2_noisy	synSOL013_t1	definition	[definition modified: 461 -> 429 chars]
+set2_noisy	synSOL014_t1	question	Over the past 30 days, ability of the soil saturation paste extract to conduct electrical current as an indicator of total soluble salt concentration
+set2_noisy	synSOL014_t1	definition	[definition modified: 510 -> 478 chars]
+set2_noisy	synSOL015_t1	question	Over the past 30 days, vertical distance from the soil surface to the midpoint of the sampling interval from which the soil core or grab sample was obtained
+set2_noisy	synSOL015_t1	definition	[definition modified: 437 -> 405 chars]
+set2_noisy	synSOL016_t1	question	Over the past 30 days, latitude and longitude of the exact location from which the soil sample was collected recorded using a global positioning system
+set2_noisy	synSOL016_t1	definition	[definition modified: 438 -> 406 chars]
+set2_noisy	synSOL017_t1	question	Over the past 30 days, whether the measured concentration of a regulated contaminant in the soil exceeds the applicable screening level or action level
+set2_noisy	synSOL017_t1	definition	[definition modified: 494 -> 462 chars]
+set2_noisy	synSOL018_t1	question	Over the past 30 days, pattern of change in the soil organic matter fraction that corresponds to annual cycles of plant growth, decomposition, and temperature
+set2_noisy	synSOL018_t1	definition	[definition modified: 530 -> 498 chars]
+set2_noisy	synSOL019_t1	question	Over the past 30 days, ratio of the mass of organic carbon to the mass of total nitrogen in the soil sample indicating the decomposition status of organic matter
+set2_noisy	synSOL019_t1	definition	[definition modified: 513 -> 481 chars]
+set2_noisy	synSOL020_t1	question	Over the past 30 days, resistance of soil aggregates to disintegration when subjected to the disruptive forces of water and mechanical stress
+set2_noisy	synSOL020_t1	definition	[definition modified: 589 -> 557 chars]
+set2_noisy	synAIR001_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR001_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR002_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR002_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR003_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR003_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR004_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR004_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR005_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR005_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR006_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR006_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR007_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR007_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR008_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR008_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR009_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR009_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR010_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR010_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR011_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR011_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR012_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR012_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR013_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR013_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR014_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR014_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR015_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR015_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR016_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR016_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR017_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR017_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR018_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR018_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR019_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR019_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR020_t2	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR020_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT001_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT001_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT002_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT002_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT003_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT003_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT004_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT004_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT005_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT005_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT006_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT006_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT007_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT007_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT008_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT008_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT009_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT009_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT010_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT010_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT011_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT011_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT012_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT012_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT013_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT013_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT014_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT014_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT015_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT015_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT016_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT016_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT017_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT017_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT018_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT018_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT019_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT019_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synWAT020_t2	name	EMP Aquatic Assessment -
+set2_noisy	synWAT020_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL001_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL001_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL002_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL002_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL003_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL003_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL004_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL004_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL005_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL005_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL006_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL006_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL007_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL007_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL008_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL008_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL009_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL009_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL010_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL010_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL011_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL011_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL012_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL012_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL013_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL013_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL014_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL014_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL015_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL015_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL016_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL016_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL017_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL017_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL018_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL018_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL019_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL019_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synSOL020_t2	name	EMP Pedological Survey -
+set2_noisy	synSOL020_t2	definition	A field of the Environmental Monitoring Protocol (EMP).
+set2_noisy	synAIR001_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR001_t3	question	Over the past 30 days, measured PM2.5 level
+set2_noisy	synAIR001_t3	definition	[definition modified: 197 -> 55 chars]
+set2_noisy	synAIR002_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR002_t3	question	Over the past 30 days, measured PM10 level
+set2_noisy	synAIR002_t3	definition	[definition modified: 192 -> 50 chars]
+set2_noisy	synAIR003_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR003_t3	question	Over the past 30 days, ozone reading at surface
+set2_noisy	synAIR003_t3	definition	[definition modified: 191 -> 49 chars]
+set2_noisy	synAIR004_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR004_t3	question	Over the past 30 days, ambient NO2 concentration
+set2_noisy	synAIR004_t3	definition	[definition modified: 174 -> 32 chars]
+set2_noisy	synAIR005_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR005_t3	question	Over the past 30 days, ambient SO2 concentration
+set2_noisy	synAIR005_t3	definition	[definition modified: 192 -> 50 chars]
+set2_noisy	synAIR006_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR006_t3	question	Over the past 30 days, ambient CO concentration
+set2_noisy	synAIR006_t3	definition	[definition modified: 173 -> 31 chars]
+set2_noisy	synAIR007_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR007_t3	question	Over the past 30 days, composite AQI score
+set2_noisy	synAIR007_t3	definition	[definition modified: 190 -> 48 chars]
+set2_noisy	synAIR008_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR008_t3	question	Over the past 30 days, lead in ambient air
+set2_noisy	synAIR008_t3	definition	[definition modified: 180 -> 38 chars]
+set2_noisy	synAIR009_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR009_t3	question	Over the past 30 days, ambient benzene concentration
+set2_noisy	synAIR009_t3	definition	[definition modified: 188 -> 46 chars]
+set2_noisy	synAIR010_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR010_t3	question	Over the past 30 days, total volatile organics
+set2_noisy	synAIR010_t3	definition	[definition modified: 183 -> 41 chars]
+set2_noisy	synAIR011_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR011_t3	question	Over the past 30 days, air temperature at site
+set2_noisy	synAIR011_t3	definition	[definition modified: 189 -> 47 chars]
+set2_noisy	synAIR012_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR012_t3	question	Over the past 30 days, humidity percentage
+set2_noisy	synAIR012_t3	definition	[definition modified: 186 -> 44 chars]
+set2_noisy	synAIR013_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR013_t3	question	Over the past 30 days, wind velocity at station
+set2_noisy	synAIR013_t3	definition	[definition modified: 181 -> 39 chars]
+set2_noisy	synAIR014_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR014_t3	question	Over the past 30 days, barometric pressure reading
+set2_noisy	synAIR014_t3	definition	[definition modified: 177 -> 35 chars]
+set2_noisy	synAIR015_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR015_t3	question	Over the past 30 days, optical visibility range
+set2_noisy	synAIR015_t3	definition	[definition modified: 188 -> 46 chars]
+set2_noisy	synAIR016_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR016_t3	question	Over the past 30 days, measurement interval
+set2_noisy	synAIR016_t3	definition	[definition modified: 188 -> 46 chars]
+set2_noisy	synAIR017_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR017_t3	question	Over the past 30 days, geographic location of station
+set2_noisy	synAIR017_t3	definition	[definition modified: 192 -> 50 chars]
+set2_noisy	synAIR018_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR018_t3	question	Over the past 30 days, days exceeding threshold
+set2_noisy	synAIR018_t3	definition	[definition modified: 201 -> 59 chars]
+set2_noisy	synAIR019_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR019_t3	question	Over the past 30 days, rainwater pH value
+set2_noisy	synAIR019_t3	definition	[definition modified: 180 -> 38 chars]
+set2_noisy	synAIR020_t3	name	EMP Atmospheric Analysis -
+set2_noisy	synAIR020_t3	question	Over the past 30 days, seasonal concentration pattern
+set2_noisy	synAIR020_t3	definition	[definition modified: 196 -> 54 chars]
+set2_noisy	synWAT001_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT001_t3	question	Over the past 30 days, amount of oxygen dissolved in the water sample
+set2_noisy	synWAT001_t3	definition	[definition modified: 353 -> 211 chars]
+set2_noisy	synWAT002_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT002_t3	question	Over the past 30 days, acidity or alkalinity of the water sample
+set2_noisy	synWAT002_t3	definition	[definition modified: 315 -> 173 chars]
+set2_noisy	synWAT003_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT003_t3	question	Over the past 30 days, clarity of the water measured by light scattering
+set2_noisy	synWAT003_t3	definition	[definition modified: 340 -> 198 chars]
+set2_noisy	synWAT004_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT004_t3	question	Over the past 30 days, dissolved nitrate level in the sample
+set2_noisy	synWAT004_t3	definition	[definition modified: 331 -> 189 chars]
+set2_noisy	synWAT005_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT005_t3	question	Over the past 30 days, dissolved phosphate concentration in the sample
+set2_noisy	synWAT005_t3	definition	[definition modified: 330 -> 188 chars]
+set2_noisy	synWAT006_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT006_t3	question	Over the past 30 days, number of E. coli colonies per volume of water
+set2_noisy	synWAT006_t3	definition	[definition modified: 315 -> 173 chars]
+set2_noisy	synWAT007_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT007_t3	question	Over the past 30 days, total coliform colonies detected in the water sample
+set2_noisy	synWAT007_t3	definition	[definition modified: 304 -> 162 chars]
+set2_noisy	synWAT008_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT008_t3	question	Over the past 30 days, ability of the water sample to conduct an electric current
+set2_noisy	synWAT008_t3	definition	[definition modified: 302 -> 160 chars]
+set2_noisy	synWAT009_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT009_t3	question	Over the past 30 days, temperature of the water at the time and location of collection
+set2_noisy	synWAT009_t3	definition	[definition modified: 339 -> 197 chars]
+set2_noisy	synWAT010_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT010_t3	question	Over the past 30 days, oxygen consumed by microorganisms decomposing organic matter
+set2_noisy	synWAT010_t3	definition	[definition modified: 333 -> 191 chars]
+set2_noisy	synWAT011_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT011_t3	question	Over the past 30 days, oxygen equivalent of chemically oxidizable matter in the sample
+set2_noisy	synWAT011_t3	definition	[definition modified: 339 -> 197 chars]
+set2_noisy	synWAT012_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT012_t3	question	Over the past 30 days, dissolved lead level in the water sample
+set2_noisy	synWAT012_t3	definition	[definition modified: 323 -> 181 chars]
+set2_noisy	synWAT013_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT013_t3	question	Over the past 30 days, dissolved mercury concentration in the sample
+set2_noisy	synWAT013_t3	definition	[definition modified: 325 -> 183 chars]
+set2_noisy	synWAT014_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT014_t3	question	Over the past 30 days, photosynthetic pigment level indicating algal abundance
+set2_noisy	synWAT014_t3	definition	[definition modified: 328 -> 186 chars]
+set2_noisy	synWAT015_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT015_t3	question	Over the past 30 days, combined content of all dissolved substances in the water
+set2_noisy	synWAT015_t3	definition	[definition modified: 348 -> 206 chars]
+set2_noisy	synWAT016_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT016_t3	question	Over the past 30 days, technique used to collect the water sample
+set2_noisy	synWAT016_t3	definition	[definition modified: 330 -> 188 chars]
+set2_noisy	synWAT017_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT017_t3	question	Over the past 30 days, latitude and longitude of the water sampling location
+set2_noisy	synWAT017_t3	definition	[definition modified: 329 -> 187 chars]
+set2_noisy	synWAT018_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT018_t3	question	Over the past 30 days, whether the measured parameter exceeds the applicable regulatory limit
+set2_noisy	synWAT018_t3	definition	[definition modified: 344 -> 202 chars]
+set2_noisy	synWAT019_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT019_t3	question	Over the past 30 days, salt content of the water expressed as practical salinity units
+set2_noisy	synWAT019_t3	definition	[definition modified: 349 -> 207 chars]
+set2_noisy	synWAT020_t3	name	EMP Aquatic Assessment -
+set2_noisy	synWAT020_t3	question	Over the past 30 days, pattern of water quality change associated with seasonal cycles
+set2_noisy	synWAT020_t3	definition	[definition modified: 386 -> 244 chars]
+set2_noisy	synSOL001_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL001_t3	question	Over the past 30 days, proportion of organic material present in the soil sample expressed as a percentage of total dry weight
+set2_noisy	synSOL001_t3	definition	[definition modified: 567 -> 425 chars]
+set2_noisy	synSOL002_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL002_t3	question	Over the past 30 days, combined mass of all nitrogen forms present in the soil including organic nitrogen, ammonium, and nitrate fractions
+set2_noisy	synSOL002_t3	definition	[definition modified: 546 -> 404 chars]
+set2_noisy	synSOL003_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL003_t3	question	Over the past 30 days, amount of phosphorus in the soil that is accessible for uptake by plant root systems under standard extraction conditions
+set2_noisy	synSOL003_t3	definition	[definition modified: 587 -> 445 chars]
+set2_noisy	synSOL004_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL004_t3	question	Over the past 30 days, concentration of potassium ions adsorbed onto soil particle surfaces that are available for exchange with the soil solution
+set2_noisy	synSOL004_t3	definition	[definition modified: 574 -> 432 chars]
+set2_noisy	synSOL005_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL005_t3	question	Over the past 30 days, acidity or alkalinity of the soil determined by measuring the hydrogen ion activity in a standardized soil-water mixture
+set2_noisy	synSOL005_t3	definition	[definition modified: 603 -> 461 chars]
+set2_noisy	synSOL006_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL006_t3	question	Over the past 30 days, total capacity of the soil to retain and exchange positively charged nutrient ions on its particle surfaces
+set2_noisy	synSOL006_t3	definition	[definition modified: 628 -> 486 chars]
+set2_noisy	synSOL007_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL007_t3	question	Over the past 30 days, mass of oven-dried soil per unit volume of undisturbed soil collected using a core sampling device at the designated depth interval
+set2_noisy	synSOL007_t3	definition	[definition modified: 557 -> 415 chars]
+set2_noisy	synSOL008_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL008_t3	question	Over the past 30 days, mass of water contained in the soil sample expressed as a proportion of the oven-dry soil mass at the time of collection
+set2_noisy	synSOL008_t3	definition	[definition modified: 586 -> 444 chars]
+set2_noisy	synSOL009_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL009_t3	question	Over the past 30 days, mass of carbon contained within the living microbial community of the soil sample expressed per unit dry weight of soil
+set2_noisy	synSOL009_t3	definition	[definition modified: 590 -> 448 chars]
+set2_noisy	synSOL010_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL010_t3	question	Over the past 30 days, total mass of lead present per unit dry weight of soil as determined by acid digestion and instrumental analysis
+set2_noisy	synSOL010_t3	definition	[definition modified: 603 -> 461 chars]
+set2_noisy	synSOL011_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL011_t3	question	Over the past 30 days, total cadmium content of the soil sample measured after complete acid digestion of the dried and homogenized material
+set2_noisy	synSOL011_t3	definition	[definition modified: 626 -> 484 chars]
+set2_noisy	synSOL012_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL012_t3	question	Over the past 30 days, categorization of the soil into a textural class determined by the relative proportions of sand, silt, and clay-sized particles
+set2_noisy	synSOL012_t3	definition	[definition modified: 608 -> 466 chars]
+set2_noisy	synSOL013_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL013_t3	question	Over the past 30 days, temperature of the soil measured at the designated depth below the surface at the time of sample collection
+set2_noisy	synSOL013_t3	definition	[definition modified: 571 -> 429 chars]
+set2_noisy	synSOL014_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL014_t3	question	Over the past 30 days, ability of the soil saturation paste extract to conduct electrical current as an indicator of total soluble salt concentration
+set2_noisy	synSOL014_t3	definition	[definition modified: 620 -> 478 chars]
+set2_noisy	synSOL015_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL015_t3	question	Over the past 30 days, vertical distance from the soil surface to the midpoint of the sampling interval from which the soil core or grab sample was obtained
+set2_noisy	synSOL015_t3	definition	[definition modified: 547 -> 405 chars]
+set2_noisy	synSOL016_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL016_t3	question	Over the past 30 days, latitude and longitude of the exact location from which the soil sample was collected recorded using a global positioning system
+set2_noisy	synSOL016_t3	definition	[definition modified: 548 -> 406 chars]
+set2_noisy	synSOL017_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL017_t3	question	Over the past 30 days, whether the measured concentration of a regulated contaminant in the soil exceeds the applicable screening level or action level
+set2_noisy	synSOL017_t3	definition	[definition modified: 604 -> 462 chars]
+set2_noisy	synSOL018_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL018_t3	question	Over the past 30 days, pattern of change in the soil organic matter fraction that corresponds to annual cycles of plant growth, decomposition, and temperature
+set2_noisy	synSOL018_t3	definition	[definition modified: 640 -> 498 chars]
+set2_noisy	synSOL019_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL019_t3	question	Over the past 30 days, ratio of the mass of organic carbon to the mass of total nitrogen in the soil sample indicating the decomposition status of organic matter
+set2_noisy	synSOL019_t3	definition	[definition modified: 623 -> 481 chars]
+set2_noisy	synSOL020_t3	name	EMP Pedological Survey -
+set2_noisy	synSOL020_t3	question	Over the past 30 days, resistance of soil aggregates to disintegration when subjected to the disruptive forces of water and mechanical stress
+set2_noisy	synSOL020_t3	definition	[definition modified: 699 -> 557 chars]
+health_drift	synCRD001_t1	question	Over the past 30 days, heart rate measured at rest in beats per minute
+health_drift	synCRD001_t1	definition	[definition modified: 96 -> 64 chars]
+health_drift	synCRD002_t1	question	Over the past 30 days, peak arterial pressure during cardiac contraction
+health_drift	synCRD002_t1	definition	[definition modified: 99 -> 67 chars]
+health_drift	synCRD003_t1	question	Over the past 30 days, minimum arterial pressure between heartbeats
+health_drift	synCRD003_t1	definition	[definition modified: 99 -> 67 chars]
+health_drift	synCRD004_t1	question	Over the past 30 days, average arterial pressure over one cardiac cycle
+health_drift	synCRD004_t1	definition	[definition modified: 102 -> 70 chars]
+health_drift	synCRD005_t1	question	Over the past 30 days, volume of blood pumped by the heart per minute
+health_drift	synCRD005_t1	definition	[definition modified: 97 -> 65 chars]
+health_drift	synCRD006_t1	question	Over the past 30 days, percentage of blood ejected from left ventricle per beat
+health_drift	synCRD006_t1	definition	[definition modified: 99 -> 67 chars]
+health_drift	synCRD007_t1	question	Over the past 30 days, time from QRS complex onset to T-wave end
+health_drift	synCRD007_t1	definition	[definition modified: 97 -> 65 chars]
+health_drift	synCRD008_t1	question	Over the past 30 days, serum cardiac troponin I level
+health_drift	synCRD008_t1	definition	[definition modified: 98 -> 66 chars]
+health_drift	synCRD009_t1	question	Over the past 30 days, plasma BNP concentration
+health_drift	synCRD009_t1	definition	[definition modified: 95 -> 63 chars]
+health_drift	synCRD010_t1	question	Over the past 30 days, total serum cholesterol concentration
+health_drift	synCRD010_t1	definition	[definition modified: 97 -> 65 chars]
+health_drift	synCRD011_t1	question	Over the past 30 days, low-density lipoprotein cholesterol level
+health_drift	synCRD011_t1	definition	[definition modified: 100 -> 68 chars]
+health_drift	synCRD012_t1	question	Over the past 30 days, high-density lipoprotein cholesterol level
+health_drift	synCRD012_t1	definition	[definition modified: 101 -> 69 chars]
+health_drift	synCRD013_t1	question	Over the past 30 days, fasting serum triglyceride concentration
+health_drift	synCRD013_t1	definition	[definition modified: 93 -> 61 chars]
+health_drift	synCRD014_t1	question	Over the past 30 days, high-sensitivity CRP concentration
+health_drift	synCRD014_t1	definition	[definition modified: 103 -> 71 chars]
+health_drift	synCRD015_t1	question	Over the past 30 days, ultrasound measurement of carotid artery wall thickness
+health_drift	synCRD015_t1	definition	[definition modified: 95 -> 63 chars]
+health_drift	synCRD016_t1	question	Over the past 30 days, variation in time between consecutive heartbeats
+health_drift	synCRD016_t1	definition	[definition modified: 100 -> 68 chars]
+health_drift	synCRD017_t1	question	Over the past 30 days, bMI calculated from height and weight at cardiac visit
+health_drift	synCRD017_t1	definition	[definition modified: 97 -> 65 chars]
+health_drift	synCRD018_t1	question	Over the past 30 days, self-reported adherence to prescribed cardiac medications
+health_drift	synCRD018_t1	definition	[definition modified: 102 -> 70 chars]
+health_drift	synCRD019_t1	question	Over the past 30 days, patient age at time of cardiac risk evaluation
+health_drift	synCRD019_t1	definition	[definition modified: 98 -> 66 chars]
+health_drift	synCRD020_t1	question	Over the past 30 days, overall response to cardiovascular treatment regimen
+health_drift	synCRD020_t1	definition	[definition modified: 95 -> 63 chars]
+health_drift	synRSP001_t1	question	Over the past 30 days, maximum volume of air exhaled in the first second of a forced breath
+health_drift	synRSP001_t1	definition	[definition modified: 222 -> 190 chars]
+health_drift	synRSP002_t1	question	Over the past 30 days, total volume of air exhaled during a complete forced expiration
+health_drift	synRSP002_t1	definition	[definition modified: 220 -> 188 chars]
+health_drift	synRSP003_t1	question	Over the past 30 days, ratio of forced expiratory volume to forced vital capacity
+health_drift	synRSP003_t1	definition	[definition modified: 216 -> 184 chars]
+health_drift	synRSP004_t1	question	Over the past 30 days, maximum airflow speed achieved during forced exhalation
+health_drift	synRSP004_t1	definition	[definition modified: 191 -> 159 chars]
+health_drift	synRSP005_t1	question	Over the past 30 days, peripheral blood oxygen saturation measured noninvasively
+health_drift	synRSP005_t1	definition	[definition modified: 220 -> 188 chars]
+health_drift	synRSP006_t1	question	Over the past 30 days, number of breaths taken per minute at rest
+health_drift	synRSP006_t1	definition	[definition modified: 216 -> 184 chars]
+health_drift	synRSP007_t1	question	Over the past 30 days, oxygen tension in arterial blood sample
+health_drift	synRSP007_t1	definition	[definition modified: 199 -> 167 chars]
+health_drift	synRSP008_t1	question	Over the past 30 days, carbon dioxide tension in arterial blood sample
+health_drift	synRSP008_t1	definition	[definition modified: 206 -> 174 chars]
+health_drift	synRSP009_t1	question	Over the past 30 days, total distance walked in six minutes on a flat corridor
+health_drift	synRSP009_t1	definition	[definition modified: 226 -> 194 chars]
+health_drift	synRSP010_t1	question	Over the past 30 days, rate of carbon monoxide transfer across the alveolar membrane
+health_drift	synRSP010_t1	definition	[definition modified: 212 -> 180 chars]
+health_drift	synRSP011_t1	question	Over the past 30 days, volume of air inhaled or exhaled in a normal resting breath
+health_drift	synRSP011_t1	definition	[definition modified: 206 -> 174 chars]
+health_drift	synRSP012_t1	question	Over the past 30 days, change in FEV1 after inhaled bronchodilator administration
+health_drift	synRSP012_t1	definition	[definition modified: 230 -> 198 chars]
+health_drift	synRSP013_t1	question	Over the past 30 days, patient-reported breathlessness severity rating
+health_drift	synRSP013_t1	definition	[definition modified: 206 -> 174 chars]
+health_drift	synRSP014_t1	question	Over the past 30 days, fractional concentration of nitric oxide in exhaled breath
+health_drift	synRSP014_t1	definition	[definition modified: 196 -> 164 chars]
+health_drift	synRSP015_t1	question	Over the past 30 days, diagnostic category assigned to the chest X-ray findings
+health_drift	synRSP015_t1	definition	[definition modified: 210 -> 178 chars]
+health_drift	synRSP016_t1	question	Over the past 30 days, resting blood pressure recorded at pulmonary clinic appointment
+health_drift	synRSP016_t1	definition	[definition modified: 215 -> 183 chars]
+health_drift	synRSP017_t1	question	Over the past 30 days, bMI at the time of pulmonary function evaluation
+health_drift	synRSP017_t1	definition	[definition modified: 211 -> 179 chars]
+health_drift	synRSP018_t1	question	Over the past 30 days, self-reported adherence to prescribed respiratory medications
+health_drift	synRSP018_t1	definition	[definition modified: 217 -> 185 chars]
+health_drift	synRSP019_t1	question	Over the past 30 days, patient age at the time of lung function testing
+health_drift	synRSP019_t1	definition	[definition modified: 195 -> 163 chars]
+health_drift	synRSP020_t1	question	Over the past 30 days, clinician-rated response to respiratory treatment plan
+health_drift	synRSP020_t1	definition	[definition modified: 210 -> 178 chars]
+health_drift	synMET001_t1	question	Over the past 30 days, blood sugar level measured after an overnight fast of at least eight hours used to screen for diabetes mellitus
+health_drift	synMET001_t1	definition	[definition modified: 448 -> 416 chars]
+health_drift	synMET002_t1	question	Over the past 30 days, glycated hemoglobin level reflecting average blood glucose over the preceding two to three months
+health_drift	synMET002_t1	definition	[definition modified: 454 -> 422 chars]
+health_drift	synMET003_t1	question	Over the past 30 days, serum insulin concentration measured after overnight fasting used to evaluate insulin secretion and resistance
+health_drift	synMET003_t1	definition	[definition modified: 433 -> 401 chars]
+health_drift	synMET004_t1	question	Over the past 30 days, homeostatic model assessment score estimating insulin resistance from fasting glucose and fasting insulin values
+health_drift	synMET004_t1	definition	[definition modified: 460 -> 428 chars]
+health_drift	synMET005_t1	question	Over the past 30 days, circumferential measurement of the abdomen at the level of the iliac crest used to assess central adiposity
+health_drift	synMET005_t1	definition	[definition modified: 447 -> 415 chars]
+health_drift	synMET006_t1	question	Over the past 30 days, proportion of total body mass composed of adipose tissue estimated using bioelectrical impedance analysis
+health_drift	synMET006_t1	definition	[definition modified: 488 -> 456 chars]
+health_drift	synMET007_t1	question	Over the past 30 days, total serum cholesterol concentration as part of the comprehensive metabolic lipid assessment
+health_drift	synMET007_t1	definition	[definition modified: 443 -> 411 chars]
+health_drift	synMET008_t1	question	Over the past 30 days, fasting serum triglyceride level measured as part of the metabolic lipid profile evaluation
+health_drift	synMET008_t1	definition	[definition modified: 456 -> 424 chars]
+health_drift	synMET009_t1	question	Over the past 30 days, serum uric acid concentration reflecting purine metabolism and renal excretion balance
+health_drift	synMET009_t1	definition	[definition modified: 419 -> 387 chars]
+health_drift	synMET010_t1	question	Over the past 30 days, serum ALT enzyme level as a marker of hepatocellular injury in metabolic liver disease screening
+health_drift	synMET010_t1	definition	[definition modified: 454 -> 422 chars]
+health_drift	synMET011_t1	question	Over the past 30 days, serum AST enzyme level as a marker of tissue injury used alongside ALT in metabolic liver screening
+health_drift	synMET011_t1	definition	[definition modified: 451 -> 419 chars]
+health_drift	synMET012_t1	question	Over the past 30 days, blood creatinine level as a marker of kidney filtration function in metabolic health assessment
+health_drift	synMET012_t1	definition	[definition modified: 437 -> 405 chars]
+health_drift	synMET013_t1	question	Over the past 30 days, calculated measure of kidney filtration capacity derived from serum creatinine, age, sex, and race
+health_drift	synMET013_t1	definition	[definition modified: 438 -> 406 chars]
+health_drift	synMET014_t1	question	Over the past 30 days, serum TSH concentration used to evaluate thyroid function in the context of metabolic health screening
+health_drift	synMET014_t1	definition	[definition modified: 524 -> 492 chars]
+health_drift	synMET015_t1	question	Over the past 30 days, ultrasound imaging of the liver to assess for fatty infiltration in the context of metabolic syndrome screening
+health_drift	synMET015_t1	definition	[definition modified: 453 -> 421 chars]
+health_drift	synMET016_t1	question	Over the past 30 days, resting blood pressure recorded during the metabolic health assessment appointment to evaluate cardiovascular risk
+health_drift	synMET016_t1	definition	[definition modified: 448 -> 416 chars]
+health_drift	synMET017_t1	question	Over the past 30 days, bMI calculated from measured height and weight at the metabolic health evaluation visit
+health_drift	synMET017_t1	definition	[definition modified: 439 -> 407 chars]
+health_drift	synMET018_t1	question	Over the past 30 days, self-reported adherence to prescribed medications for metabolic conditions including diabetes and dyslipidemia
+health_drift	synMET018_t1	definition	[definition modified: 433 -> 401 chars]
+health_drift	synMET019_t1	question	Over the past 30 days, patient age at the time of the metabolic health assessment used as a covariate in cardiovascular risk estimation
+health_drift	synMET019_t1	definition	[definition modified: 403 -> 371 chars]
+health_drift	synMET020_t1	question	Over the past 30 days, composite clinical assessment of response to metabolic intervention including lifestyle and pharmacological therapy
+health_drift	synMET020_t1	definition	[definition modified: 473 -> 441 chars]
+health_drift	synCRD001_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD001_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD002_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD002_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD003_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD003_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD004_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD004_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD005_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD005_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD006_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD006_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD007_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD007_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD008_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD008_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD009_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD009_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD010_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD010_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD011_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD011_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD012_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD012_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD013_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD013_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD014_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD014_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD015_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD015_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD016_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD016_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD017_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD017_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD018_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD018_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD019_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD019_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD020_t2	name	CMP Cardiac Assessment -
+health_drift	synCRD020_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP001_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP001_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP002_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP002_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP003_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP003_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP004_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP004_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP005_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP005_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP006_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP006_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP007_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP007_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP008_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP008_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP009_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP009_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP010_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP010_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP011_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP011_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP012_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP012_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP013_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP013_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP014_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP014_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP015_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP015_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP016_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP016_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP017_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP017_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP018_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP018_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP019_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP019_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synRSP020_t2	name	CMP Pulmonary Evaluation -
+health_drift	synRSP020_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET001_t2	name	CMP Metabolic Panel -
+health_drift	synMET001_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET002_t2	name	CMP Metabolic Panel -
+health_drift	synMET002_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET003_t2	name	CMP Metabolic Panel -
+health_drift	synMET003_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET004_t2	name	CMP Metabolic Panel -
+health_drift	synMET004_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET005_t2	name	CMP Metabolic Panel -
+health_drift	synMET005_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET006_t2	name	CMP Metabolic Panel -
+health_drift	synMET006_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET007_t2	name	CMP Metabolic Panel -
+health_drift	synMET007_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET008_t2	name	CMP Metabolic Panel -
+health_drift	synMET008_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET009_t2	name	CMP Metabolic Panel -
+health_drift	synMET009_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET010_t2	name	CMP Metabolic Panel -
+health_drift	synMET010_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET011_t2	name	CMP Metabolic Panel -
+health_drift	synMET011_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET012_t2	name	CMP Metabolic Panel -
+health_drift	synMET012_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET013_t2	name	CMP Metabolic Panel -
+health_drift	synMET013_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET014_t2	name	CMP Metabolic Panel -
+health_drift	synMET014_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET015_t2	name	CMP Metabolic Panel -
+health_drift	synMET015_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET016_t2	name	CMP Metabolic Panel -
+health_drift	synMET016_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET017_t2	name	CMP Metabolic Panel -
+health_drift	synMET017_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET018_t2	name	CMP Metabolic Panel -
+health_drift	synMET018_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET019_t2	name	CMP Metabolic Panel -
+health_drift	synMET019_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synMET020_t2	name	CMP Metabolic Panel -
+health_drift	synMET020_t2	definition	A field of the Clinical Monitoring Protocol (CMP).
+health_drift	synCRD001_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD001_t3	question	Over the past 30 days, heart rate measured at rest in beats per minute
+health_drift	synCRD001_t3	definition	[definition modified: 198 -> 64 chars]
+health_drift	synCRD002_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD002_t3	question	Over the past 30 days, peak arterial pressure during cardiac contraction
+health_drift	synCRD002_t3	definition	[definition modified: 201 -> 67 chars]
+health_drift	synCRD003_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD003_t3	question	Over the past 30 days, minimum arterial pressure between heartbeats
+health_drift	synCRD003_t3	definition	[definition modified: 201 -> 67 chars]
+health_drift	synCRD004_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD004_t3	question	Over the past 30 days, average arterial pressure over one cardiac cycle
+health_drift	synCRD004_t3	definition	[definition modified: 204 -> 70 chars]
+health_drift	synCRD005_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD005_t3	question	Over the past 30 days, volume of blood pumped by the heart per minute
+health_drift	synCRD005_t3	definition	[definition modified: 199 -> 65 chars]
+health_drift	synCRD006_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD006_t3	question	Over the past 30 days, percentage of blood ejected from left ventricle per beat
+health_drift	synCRD006_t3	definition	[definition modified: 201 -> 67 chars]
+health_drift	synCRD007_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD007_t3	question	Over the past 30 days, time from QRS complex onset to T-wave end
+health_drift	synCRD007_t3	definition	[definition modified: 199 -> 65 chars]
+health_drift	synCRD008_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD008_t3	question	Over the past 30 days, serum cardiac troponin I level
+health_drift	synCRD008_t3	definition	[definition modified: 200 -> 66 chars]
+health_drift	synCRD009_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD009_t3	question	Over the past 30 days, plasma BNP concentration
+health_drift	synCRD009_t3	definition	[definition modified: 197 -> 63 chars]
+health_drift	synCRD010_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD010_t3	question	Over the past 30 days, total serum cholesterol concentration
+health_drift	synCRD010_t3	definition	[definition modified: 199 -> 65 chars]
+health_drift	synCRD011_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD011_t3	question	Over the past 30 days, low-density lipoprotein cholesterol level
+health_drift	synCRD011_t3	definition	[definition modified: 202 -> 68 chars]
+health_drift	synCRD012_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD012_t3	question	Over the past 30 days, high-density lipoprotein cholesterol level
+health_drift	synCRD012_t3	definition	[definition modified: 203 -> 69 chars]
+health_drift	synCRD013_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD013_t3	question	Over the past 30 days, fasting serum triglyceride concentration
+health_drift	synCRD013_t3	definition	[definition modified: 195 -> 61 chars]
+health_drift	synCRD014_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD014_t3	question	Over the past 30 days, high-sensitivity CRP concentration
+health_drift	synCRD014_t3	definition	[definition modified: 205 -> 71 chars]
+health_drift	synCRD015_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD015_t3	question	Over the past 30 days, ultrasound measurement of carotid artery wall thickness
+health_drift	synCRD015_t3	definition	[definition modified: 197 -> 63 chars]
+health_drift	synCRD016_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD016_t3	question	Over the past 30 days, variation in time between consecutive heartbeats
+health_drift	synCRD016_t3	definition	[definition modified: 202 -> 68 chars]
+health_drift	synCRD017_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD017_t3	question	Over the past 30 days, bMI calculated from height and weight at cardiac visit
+health_drift	synCRD017_t3	definition	[definition modified: 199 -> 65 chars]
+health_drift	synCRD018_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD018_t3	question	Over the past 30 days, self-reported adherence to prescribed cardiac medications
+health_drift	synCRD018_t3	definition	[definition modified: 204 -> 70 chars]
+health_drift	synCRD019_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD019_t3	question	Over the past 30 days, patient age at time of cardiac risk evaluation
+health_drift	synCRD019_t3	definition	[definition modified: 200 -> 66 chars]
+health_drift	synCRD020_t3	name	CMP Cardiac Assessment -
+health_drift	synCRD020_t3	question	Over the past 30 days, overall response to cardiovascular treatment regimen
+health_drift	synCRD020_t3	definition	[definition modified: 197 -> 63 chars]
+health_drift	synRSP001_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP001_t3	question	Over the past 30 days, maximum volume of air exhaled in the first second of a forced breath
+health_drift	synRSP001_t3	definition	[definition modified: 324 -> 190 chars]
+health_drift	synRSP002_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP002_t3	question	Over the past 30 days, total volume of air exhaled during a complete forced expiration
+health_drift	synRSP002_t3	definition	[definition modified: 322 -> 188 chars]
+health_drift	synRSP003_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP003_t3	question	Over the past 30 days, ratio of forced expiratory volume to forced vital capacity
+health_drift	synRSP003_t3	definition	[definition modified: 318 -> 184 chars]
+health_drift	synRSP004_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP004_t3	question	Over the past 30 days, maximum airflow speed achieved during forced exhalation
+health_drift	synRSP004_t3	definition	[definition modified: 293 -> 159 chars]
+health_drift	synRSP005_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP005_t3	question	Over the past 30 days, peripheral blood oxygen saturation measured noninvasively
+health_drift	synRSP005_t3	definition	[definition modified: 322 -> 188 chars]
+health_drift	synRSP006_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP006_t3	question	Over the past 30 days, number of breaths taken per minute at rest
+health_drift	synRSP006_t3	definition	[definition modified: 318 -> 184 chars]
+health_drift	synRSP007_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP007_t3	question	Over the past 30 days, oxygen tension in arterial blood sample
+health_drift	synRSP007_t3	definition	[definition modified: 301 -> 167 chars]
+health_drift	synRSP008_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP008_t3	question	Over the past 30 days, carbon dioxide tension in arterial blood sample
+health_drift	synRSP008_t3	definition	[definition modified: 308 -> 174 chars]
+health_drift	synRSP009_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP009_t3	question	Over the past 30 days, total distance walked in six minutes on a flat corridor
+health_drift	synRSP009_t3	definition	[definition modified: 328 -> 194 chars]
+health_drift	synRSP010_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP010_t3	question	Over the past 30 days, rate of carbon monoxide transfer across the alveolar membrane
+health_drift	synRSP010_t3	definition	[definition modified: 314 -> 180 chars]
+health_drift	synRSP011_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP011_t3	question	Over the past 30 days, volume of air inhaled or exhaled in a normal resting breath
+health_drift	synRSP011_t3	definition	[definition modified: 308 -> 174 chars]
+health_drift	synRSP012_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP012_t3	question	Over the past 30 days, change in FEV1 after inhaled bronchodilator administration
+health_drift	synRSP012_t3	definition	[definition modified: 332 -> 198 chars]
+health_drift	synRSP013_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP013_t3	question	Over the past 30 days, patient-reported breathlessness severity rating
+health_drift	synRSP013_t3	definition	[definition modified: 308 -> 174 chars]
+health_drift	synRSP014_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP014_t3	question	Over the past 30 days, fractional concentration of nitric oxide in exhaled breath
+health_drift	synRSP014_t3	definition	[definition modified: 298 -> 164 chars]
+health_drift	synRSP015_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP015_t3	question	Over the past 30 days, diagnostic category assigned to the chest X-ray findings
+health_drift	synRSP015_t3	definition	[definition modified: 312 -> 178 chars]
+health_drift	synRSP016_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP016_t3	question	Over the past 30 days, resting blood pressure recorded at pulmonary clinic appointment
+health_drift	synRSP016_t3	definition	[definition modified: 317 -> 183 chars]
+health_drift	synRSP017_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP017_t3	question	Over the past 30 days, bMI at the time of pulmonary function evaluation
+health_drift	synRSP017_t3	definition	[definition modified: 313 -> 179 chars]
+health_drift	synRSP018_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP018_t3	question	Over the past 30 days, self-reported adherence to prescribed respiratory medications
+health_drift	synRSP018_t3	definition	[definition modified: 319 -> 185 chars]
+health_drift	synRSP019_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP019_t3	question	Over the past 30 days, patient age at the time of lung function testing
+health_drift	synRSP019_t3	definition	[definition modified: 297 -> 163 chars]
+health_drift	synRSP020_t3	name	CMP Pulmonary Evaluation -
+health_drift	synRSP020_t3	question	Over the past 30 days, clinician-rated response to respiratory treatment plan
+health_drift	synRSP020_t3	definition	[definition modified: 312 -> 178 chars]
+health_drift	synMET001_t3	name	CMP Metabolic Panel -
+health_drift	synMET001_t3	question	Over the past 30 days, blood sugar level measured after an overnight fast of at least eight hours used to screen for diabetes mellitus
+health_drift	synMET001_t3	definition	[definition modified: 550 -> 416 chars]
+health_drift	synMET002_t3	name	CMP Metabolic Panel -
+health_drift	synMET002_t3	question	Over the past 30 days, glycated hemoglobin level reflecting average blood glucose over the preceding two to three months
+health_drift	synMET002_t3	definition	[definition modified: 556 -> 422 chars]
+health_drift	synMET003_t3	name	CMP Metabolic Panel -
+health_drift	synMET003_t3	question	Over the past 30 days, serum insulin concentration measured after overnight fasting used to evaluate insulin secretion and resistance
+health_drift	synMET003_t3	definition	[definition modified: 535 -> 401 chars]
+health_drift	synMET004_t3	name	CMP Metabolic Panel -
+health_drift	synMET004_t3	question	Over the past 30 days, homeostatic model assessment score estimating insulin resistance from fasting glucose and fasting insulin values
+health_drift	synMET004_t3	definition	[definition modified: 562 -> 428 chars]
+health_drift	synMET005_t3	name	CMP Metabolic Panel -
+health_drift	synMET005_t3	question	Over the past 30 days, circumferential measurement of the abdomen at the level of the iliac crest used to assess central adiposity
+health_drift	synMET005_t3	definition	[definition modified: 549 -> 415 chars]
+health_drift	synMET006_t3	name	CMP Metabolic Panel -
+health_drift	synMET006_t3	question	Over the past 30 days, proportion of total body mass composed of adipose tissue estimated using bioelectrical impedance analysis
+health_drift	synMET006_t3	definition	[definition modified: 590 -> 456 chars]
+health_drift	synMET007_t3	name	CMP Metabolic Panel -
+health_drift	synMET007_t3	question	Over the past 30 days, total serum cholesterol concentration as part of the comprehensive metabolic lipid assessment
+health_drift	synMET007_t3	definition	[definition modified: 545 -> 411 chars]
+health_drift	synMET008_t3	name	CMP Metabolic Panel -
+health_drift	synMET008_t3	question	Over the past 30 days, fasting serum triglyceride level measured as part of the metabolic lipid profile evaluation
+health_drift	synMET008_t3	definition	[definition modified: 558 -> 424 chars]
+health_drift	synMET009_t3	name	CMP Metabolic Panel -
+health_drift	synMET009_t3	question	Over the past 30 days, serum uric acid concentration reflecting purine metabolism and renal excretion balance
+health_drift	synMET009_t3	definition	[definition modified: 521 -> 387 chars]
+health_drift	synMET010_t3	name	CMP Metabolic Panel -
+health_drift	synMET010_t3	question	Over the past 30 days, serum ALT enzyme level as a marker of hepatocellular injury in metabolic liver disease screening
+health_drift	synMET010_t3	definition	[definition modified: 556 -> 422 chars]
+health_drift	synMET011_t3	name	CMP Metabolic Panel -
+health_drift	synMET011_t3	question	Over the past 30 days, serum AST enzyme level as a marker of tissue injury used alongside ALT in metabolic liver screening
+health_drift	synMET011_t3	definition	[definition modified: 553 -> 419 chars]
+health_drift	synMET012_t3	name	CMP Metabolic Panel -
+health_drift	synMET012_t3	question	Over the past 30 days, blood creatinine level as a marker of kidney filtration function in metabolic health assessment
+health_drift	synMET012_t3	definition	[definition modified: 539 -> 405 chars]
+health_drift	synMET013_t3	name	CMP Metabolic Panel -
+health_drift	synMET013_t3	question	Over the past 30 days, calculated measure of kidney filtration capacity derived from serum creatinine, age, sex, and race
+health_drift	synMET013_t3	definition	[definition modified: 540 -> 406 chars]
+health_drift	synMET014_t3	name	CMP Metabolic Panel -
+health_drift	synMET014_t3	question	Over the past 30 days, serum TSH concentration used to evaluate thyroid function in the context of metabolic health screening
+health_drift	synMET014_t3	definition	[definition modified: 626 -> 492 chars]
+health_drift	synMET015_t3	name	CMP Metabolic Panel -
+health_drift	synMET015_t3	question	Over the past 30 days, ultrasound imaging of the liver to assess for fatty infiltration in the context of metabolic syndrome screening
+health_drift	synMET015_t3	definition	[definition modified: 555 -> 421 chars]
+health_drift	synMET016_t3	name	CMP Metabolic Panel -
+health_drift	synMET016_t3	question	Over the past 30 days, resting blood pressure recorded during the metabolic health assessment appointment to evaluate cardiovascular risk
+health_drift	synMET016_t3	definition	[definition modified: 550 -> 416 chars]
+health_drift	synMET017_t3	name	CMP Metabolic Panel -
+health_drift	synMET017_t3	question	Over the past 30 days, bMI calculated from measured height and weight at the metabolic health evaluation visit
+health_drift	synMET017_t3	definition	[definition modified: 541 -> 407 chars]
+health_drift	synMET018_t3	name	CMP Metabolic Panel -
+health_drift	synMET018_t3	question	Over the past 30 days, self-reported adherence to prescribed medications for metabolic conditions including diabetes and dyslipidemia
+health_drift	synMET018_t3	definition	[definition modified: 535 -> 401 chars]
+health_drift	synMET019_t3	name	CMP Metabolic Panel -
+health_drift	synMET019_t3	question	Over the past 30 days, patient age at the time of the metabolic health assessment used as a covariate in cardiovascular risk estimation
+health_drift	synMET019_t3	definition	[definition modified: 505 -> 371 chars]
+health_drift	synMET020_t3	name	CMP Metabolic Panel -
+health_drift	synMET020_t3	question	Over the past 30 days, composite clinical assessment of response to metabolic intervention including lifestyle and pharmacological therapy
+health_drift	synMET020_t3	definition	[definition modified: 575 -> 441 chars]
+health_neuro_drift	synNR01T_t1	question	During the past 6 months, time of acute stroke symptom onset
+health_neuro_drift	synNR01T_t1	definition	[definition modified: 99 -> 64 chars]
+health_neuro_drift	synNR01I_t1	question	During the past 6 months, documented clock time at which the patient or a witness first noticed neurological symptoms consistent with acute stroke
+health_neuro_drift	synNR01I_t1	definition	[definition modified: 281 -> 246 chars]
+health_neuro_drift	synNR01E_t1	question	During the past 6 months, precise clock time at which the patient or a reliable witness first observed focal neurological deficits consistent with acute ischemic stroke, recorded for treatment window assessment
+health_neuro_drift	synNR01E_t1	definition	[definition modified: 571 -> 536 chars]
+health_neuro_drift	synNR02T_t1	question	During the past 6 months, nIHSS total score at presentation
+health_neuro_drift	synNR02T_t1	definition	[definition modified: 104 -> 69 chars]
+health_neuro_drift	synNR02I_t1	question	During the past 6 months, sum of individual NIHSS item scores reflecting the severity of neurological impairment at the time of initial clinical evaluation
+health_neuro_drift	synNR02I_t1	definition	[definition modified: 427 -> 392 chars]
+health_neuro_drift	synNR02E_t1	question	During the past 6 months, composite score from the standardized 15-item NIHSS assessment performed at initial evaluation quantifying the severity of acute neurological deficits across multiple functional domains
+health_neuro_drift	synNR02E_t1	definition	[definition modified: 818 -> 783 chars]
+health_neuro_drift	synNR03T_t1	question	During the past 6 months, post-stroke disability level on the mRS
+health_neuro_drift	synNR03T_t1	definition	[definition modified: 99 -> 64 chars]
+health_neuro_drift	synNR03I_t1	question	During the past 6 months, clinician-assigned disability grade on the modified Rankin Scale assessed at the follow-up visit after acute stroke treatment
+health_neuro_drift	synNR03I_t1	definition	[definition modified: 330 -> 295 chars]
+health_neuro_drift	synNR03E_t1	question	During the past 6 months, ordinal disability grade assigned by a trained evaluator using the modified Rankin Scale at the ninety-day post-stroke follow-up visit reflecting functional independence level
+health_neuro_drift	synNR03E_t1	definition	[definition modified: 682 -> 647 chars]
+health_neuro_drift	synNR04T_t1	question	During the past 6 months, volume of ischemic infarct on brain CT
+health_neuro_drift	synNR04T_t1	definition	[definition modified: 100 -> 65 chars]
+health_neuro_drift	synNR04I_t1	question	During the past 6 months, quantified volume of acute ischemic infarction measured on non-contrast computed tomography of the brain
+health_neuro_drift	synNR04I_t1	definition	[definition modified: 313 -> 278 chars]
+health_neuro_drift	synNR04E_t1	question	During the past 6 months, quantified total volume of acute ischemic infarction in cubic centimeters determined from non-contrast computed tomography of the brain using semi-automated volumetric analysis software
+health_neuro_drift	synNR04E_t1	definition	[definition modified: 671 -> 636 chars]
+health_neuro_drift	synNR05T_t1	question	During the past 6 months, number of seizures per month
+health_neuro_drift	synNR05T_t1	definition	[definition modified: 95 -> 60 chars]
+health_neuro_drift	synNR05I_t1	question	During the past 6 months, total number of observed or patient-reported seizure episodes occurring within the preceding calendar month
+health_neuro_drift	synNR05I_t1	definition	[definition modified: 317 -> 282 chars]
+health_neuro_drift	synNR05E_t1	question	During the past 6 months, total number of clinically apparent seizure episodes recorded in the patient seizure diary and corroborated by caregiver observation during the preceding calendar month
+health_neuro_drift	synNR05E_t1	definition	[definition modified: 736 -> 701 chars]
+health_neuro_drift	synNR06T_t1	question	During the past 6 months, iLAE classification of seizure type
+health_neuro_drift	synNR06T_t1	definition	[definition modified: 97 -> 62 chars]
+health_neuro_drift	synNR06I_t1	question	During the past 6 months, seizure type assigned according to the International League Against Epilepsy 2017 operational classification system
+health_neuro_drift	synNR06I_t1	definition	[definition modified: 355 -> 320 chars]
+health_neuro_drift	synNR06E_t1	question	During the past 6 months, primary seizure type assigned by a neurologist according to the ILAE 2017 classification based on clinical semiology and electroencephalographic findings
+health_neuro_drift	synNR06E_t1	definition	[definition modified: 735 -> 700 chars]
+health_neuro_drift	synNR07T_t1	question	During the past 6 months, name of current antiepileptic medication
+health_neuro_drift	synNR07T_t1	definition	[definition modified: 85 -> 50 chars]
+health_neuro_drift	synNR07I_t1	question	During the past 6 months, generic name of the antiepileptic medication currently prescribed for seizure control
+health_neuro_drift	synNR07I_t1	definition	[definition modified: 321 -> 286 chars]
+health_neuro_drift	synNR07E_t1	question	During the past 6 months, international nonproprietary name of the principal antiepileptic medication prescribed for the management of the patient's epilepsy syndrome
+health_neuro_drift	synNR07E_t1	definition	[definition modified: 642 -> 607 chars]
+health_neuro_drift	synNR08T_t1	question	During the past 6 months, primary EEG finding classification
+health_neuro_drift	synNR08T_t1	definition	[definition modified: 94 -> 59 chars]
+health_neuro_drift	synNR08I_t1	question	During the past 6 months, dominant abnormality classification from the routine scalp electroencephalogram recording
+health_neuro_drift	synNR08I_t1	definition	[definition modified: 318 -> 283 chars]
+health_neuro_drift	synNR08E_t1	question	During the past 6 months, dominant electroencephalographic abnormality classified from the routine scalp EEG recording obtained as part of the comprehensive epilepsy diagnostic evaluation
+health_neuro_drift	synNR08E_t1	definition	[definition modified: 729 -> 694 chars]
+health_neuro_drift	synNR09T_t1	question	During the past 6 months, clinical tremor severity grade
+health_neuro_drift	synNR09T_t1	definition	[definition modified: 91 -> 56 chars]
+health_neuro_drift	synNR09I_t1	question	During the past 6 months, ordinal severity grade assigned to the patient's tremor during the standard neurological motor examination
+health_neuro_drift	synNR09I_t1	definition	[definition modified: 330 -> 295 chars]
+health_neuro_drift	synNR09E_t1	question	During the past 6 months, ordinal severity grade for resting and action tremor assigned by the examining neurologist based on visual assessment of amplitude, frequency, and functional impact during the standardized motor examination
+health_neuro_drift	synNR09E_t1	definition	[definition modified: 784 -> 749 chars]
+health_neuro_drift	synNR10T_t1	question	During the past 6 months, unified Parkinson's Disease Rating Scale Part III total
+health_neuro_drift	synNR10T_t1	definition	[definition modified: 93 -> 58 chars]
+health_neuro_drift	synNR10I_t1	question	During the past 6 months, total score from the Movement Disorder Society Unified Parkinson's Disease Rating Scale Part III motor examination
+health_neuro_drift	synNR10I_t1	definition	[definition modified: 447 -> 412 chars]
+health_neuro_drift	synNR10E_t1	question	During the past 6 months, composite score from the MDS-UPDRS Part III standardized motor examination assessing eighteen items across speech, facial expression, rigidity, bradykinesia, tremor, gait, and postural stability domains
+health_neuro_drift	synNR10E_t1	definition	[definition modified: 920 -> 885 chars]
+health_neuro_drift	synNR11T_t1	question	During the past 6 months, standardized gait evaluation rating
+health_neuro_drift	synNR11T_t1	definition	[definition modified: 92 -> 57 chars]
+health_neuro_drift	synNR11I_t1	question	During the past 6 months, composite numeric score from the standardized clinical gait evaluation performed during the movement disorder examination
+health_neuro_drift	synNR11I_t1	definition	[definition modified: 365 -> 330 chars]
+health_neuro_drift	synNR11E_t1	question	During the past 6 months, composite numeric score from the standardized gait evaluation protocol assessing stride length, cadence, arm swing symmetry, turning stability, and freezing of gait episodes during the movement disorder examination
+health_neuro_drift	synNR11E_t1	definition	[definition modified: 783 -> 748 chars]
+health_neuro_drift	synNR12T_t1	question	During the past 6 months, total daily levodopa equivalent dose in milligrams
+health_neuro_drift	synNR12T_t1	definition	[definition modified: 106 -> 71 chars]
+health_neuro_drift	synNR12I_t1	question	During the past 6 months, sum of all dopaminergic medications converted to levodopa equivalent dose in milligrams per day
+health_neuro_drift	synNR12I_t1	definition	[definition modified: 353 -> 318 chars]
+health_neuro_drift	synNR12E_t1	question	During the past 6 months, aggregate daily dopaminergic medication burden expressed as the sum of all prescribed antiparkinsonian agents converted to levodopa milligram equivalents using published conversion ratios
+health_neuro_drift	synNR12E_t1	definition	[definition modified: 779 -> 744 chars]
+health_neuro_drift	synNR13T_t1	question	During the past 6 months, current headache pain severity score
+health_neuro_drift	synNR13T_t1	definition	[definition modified: 93 -> 58 chars]
+health_neuro_drift	synNR13I_t1	question	During the past 6 months, patient-reported headache pain intensity on a numeric rating scale from zero for no pain to ten for worst imaginable pain
+health_neuro_drift	synNR13I_t1	definition	[definition modified: 341 -> 306 chars]
+health_neuro_drift	synNR13E_t1	question	During the past 6 months, patient self-reported headache pain intensity score on the standard eleven-point numeric rating scale ranging from zero for no pain to ten for the worst pain imaginable, recorded at the headache clinic evaluation
+health_neuro_drift	synNR13E_t1	definition	[definition modified: 822 -> 787 chars]
+health_neuro_drift	synNR14T_t1	question	During the past 6 months, whether migraine is preceded by aura
+health_neuro_drift	synNR14T_t1	definition	[definition modified: 96 -> 61 chars]
+health_neuro_drift	synNR14I_t1	question	During the past 6 months, whether the patient's migraine attacks are preceded by reversible focal neurological symptoms meeting aura criteria
+health_neuro_drift	synNR14I_t1	definition	[definition modified: 335 -> 300 chars]
+health_neuro_drift	synNR14E_t1	question	During the past 6 months, binary classification indicating whether the patient's migraine attacks are preceded by fully reversible focal neurological symptoms meeting ICHD-3 aura diagnostic criteria including visual, sensory, or language phenomena
+health_neuro_drift	synNR14E_t1	definition	[definition modified: 858 -> 823 chars]
+health_neuro_drift	synNR15T_t1	question	During the past 6 months, number of headache days per month
+health_neuro_drift	synNR15T_t1	definition	[definition modified: 95 -> 60 chars]
+health_neuro_drift	synNR15I_t1	question	During the past 6 months, total number of calendar days on which headache of any duration occurred during the preceding month
+health_neuro_drift	synNR15I_t1	definition	[definition modified: 338 -> 303 chars]
+health_neuro_drift	synNR15E_t1	question	During the past 6 months, total number of unique calendar days on which headache of any type or duration occurred during the preceding month as recorded prospectively in the validated patient headache diary
+health_neuro_drift	synNR15E_t1	definition	[definition modified: 750 -> 715 chars]
+health_neuro_drift	synNR16T_t1	question	During the past 6 months, patient age when headaches first began
+health_neuro_drift	synNR16T_t1	definition	[definition modified: 89 -> 54 chars]
+health_neuro_drift	synNR16I_t1	question	During the past 6 months, age in years at which the patient first experienced recurrent headaches meeting diagnostic criteria
+health_neuro_drift	synNR16I_t1	definition	[definition modified: 406 -> 371 chars]
+health_neuro_drift	synNR16E_t1	question	During the past 6 months, age in years at which the patient first experienced recurrent headache episodes meeting International Classification of Headache Disorders criteria for a primary headache disorder
+health_neuro_drift	synNR16E_t1	definition	[definition modified: 782 -> 747 chars]
+health_neuro_drift	synNR17T_t1	question	During the past 6 months, motor nerve conduction speed measurement
+health_neuro_drift	synNR17T_t1	definition	[definition modified: 99 -> 64 chars]
+health_neuro_drift	synNR17I_t1	question	During the past 6 months, speed of electrical impulse propagation along a motor nerve measured during nerve conduction studies
+health_neuro_drift	synNR17I_t1	definition	[definition modified: 349 -> 314 chars]
+health_neuro_drift	synNR17E_t1	question	During the past 6 months, speed of electrical impulse propagation along a motor nerve segment in meters per second measured during standardized nerve conduction studies as part of the electrodiagnostic evaluation of peripheral neuropathy
+health_neuro_drift	synNR17E_t1	definition	[definition modified: 893 -> 858 chars]
+health_neuro_drift	synNR18T_t1	question	During the past 6 months, neuropathy-specific pain severity rating
+health_neuro_drift	synNR18T_t1	definition	[definition modified: 98 -> 63 chars]
+health_neuro_drift	synNR18I_t1	question	During the past 6 months, total score from a validated neuropathic pain assessment questionnaire reflecting the severity of pain symptoms attributable to peripheral nerve damage
+health_neuro_drift	synNR18I_t1	definition	[definition modified: 350 -> 315 chars]
+health_neuro_drift	synNR18E_t1	question	During the past 6 months, total symptom severity score from a validated neuropathic pain questionnaire quantifying the intensity and character of pain symptoms including burning, shooting, and electric shock sensations attributable to peripheral nerve damage
+health_neuro_drift	synNR18E_t1	definition	[definition modified: 885 -> 850 chars]
+health_neuro_drift	synNR19T_t1	question	During the past 6 months, quantitative vibration sense measurement
+health_neuro_drift	synNR19T_t1	definition	[definition modified: 100 -> 65 chars]
+health_neuro_drift	synNR19I_t1	question	During the past 6 months, quantitative threshold of vibration detection at the great toe measured using a biothesiometer or similar device
+health_neuro_drift	synNR19I_t1	definition	[definition modified: 390 -> 355 chars]
+health_neuro_drift	synNR19E_t1	question	During the past 6 months, quantitative vibration detection threshold at the dorsal surface of the great toe measured using biothesiometer quantitative sensory testing expressed in micrometers of displacement or voltage units
+health_neuro_drift	synNR19E_t1	definition	[definition modified: 897 -> 862 chars]
+health_neuro_drift	synNR20T_t1	question	During the past 6 months, hbA1c level for diabetic neuropathy screening
+health_neuro_drift	synNR20T_t1	definition	[definition modified: 101 -> 66 chars]
+health_neuro_drift	synNR20I_t1	question	During the past 6 months, glycated hemoglobin level measured as part of the laboratory evaluation for suspected diabetic peripheral neuropathy
+health_neuro_drift	synNR20I_t1	definition	[definition modified: 388 -> 353 chars]
+health_neuro_drift	synNR20E_t1	question	During the past 6 months, glycated hemoglobin percentage measured in the comprehensive laboratory panel for peripheral neuropathy etiological evaluation to assess glycemic status as a contributing factor to nerve damage
+health_neuro_drift	synNR20E_t1	definition	[definition modified: 899 -> 864 chars]
+health_neuro_drift	synNR01T_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR01I_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR01E_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR02T_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR02I_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR02E_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR03T_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR03I_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR03E_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR04T_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR04I_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR04E_t2	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR05T_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR05T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR05I_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR05I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR05E_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR05E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR06T_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR06T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR06I_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR06I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR06E_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR06E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR07T_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR07T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR07I_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR07I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR07E_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR07E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR08T_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR08T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR08I_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR08I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR08E_t2	name	NESS Seizure Module -
+health_neuro_drift	synNR08E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR09T_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR09T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR09I_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR09I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR09E_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR09E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR10T_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR10T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR10I_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR10I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR10E_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR10E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR11T_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR11T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR11I_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR11I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR11E_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR11E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR12T_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR12T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR12I_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR12I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR12E_t2	name	NESS Motor Function Module -
+health_neuro_drift	synNR12E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR13T_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR13I_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR13E_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR14T_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR14I_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR14E_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR15T_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR15I_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR15E_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR16T_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR16I_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR16E_t2	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR17T_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR17I_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR17E_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR18T_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR18I_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR18E_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR19T_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR19I_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR19E_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR20T_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20T_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR20I_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20I_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR20E_t2	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20E_t2	definition	A component of the Neurological Examination Standardized Scale (NESS).
+health_neuro_drift	synNR01T_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01T_t3	question	During the past 6 months, time of acute stroke symptom onset
+health_neuro_drift	synNR01T_t3	definition	[definition modified: 229 -> 64 chars]
+health_neuro_drift	synNR01I_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01I_t3	question	During the past 6 months, documented clock time at which the patient or a witness first noticed neurological symptoms consistent with acute stroke
+health_neuro_drift	synNR01I_t3	definition	[definition modified: 411 -> 246 chars]
+health_neuro_drift	synNR01E_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR01E_t3	question	During the past 6 months, precise clock time at which the patient or a reliable witness first observed focal neurological deficits consistent with acute ischemic stroke, recorded for treatment window assessment
+health_neuro_drift	synNR01E_t3	definition	[definition modified: 701 -> 536 chars]
+health_neuro_drift	synNR02T_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02T_t3	question	During the past 6 months, nIHSS total score at presentation
+health_neuro_drift	synNR02T_t3	definition	[definition modified: 234 -> 69 chars]
+health_neuro_drift	synNR02I_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02I_t3	question	During the past 6 months, sum of individual NIHSS item scores reflecting the severity of neurological impairment at the time of initial clinical evaluation
+health_neuro_drift	synNR02I_t3	definition	[definition modified: 557 -> 392 chars]
+health_neuro_drift	synNR02E_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR02E_t3	question	During the past 6 months, composite score from the standardized 15-item NIHSS assessment performed at initial evaluation quantifying the severity of acute neurological deficits across multiple functional domains
+health_neuro_drift	synNR02E_t3	definition	[definition modified: 948 -> 783 chars]
+health_neuro_drift	synNR03T_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03T_t3	question	During the past 6 months, post-stroke disability level on the mRS
+health_neuro_drift	synNR03T_t3	definition	[definition modified: 229 -> 64 chars]
+health_neuro_drift	synNR03I_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03I_t3	question	During the past 6 months, clinician-assigned disability grade on the modified Rankin Scale assessed at the follow-up visit after acute stroke treatment
+health_neuro_drift	synNR03I_t3	definition	[definition modified: 460 -> 295 chars]
+health_neuro_drift	synNR03E_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR03E_t3	question	During the past 6 months, ordinal disability grade assigned by a trained evaluator using the modified Rankin Scale at the ninety-day post-stroke follow-up visit reflecting functional independence level
+health_neuro_drift	synNR03E_t3	definition	[definition modified: 812 -> 647 chars]
+health_neuro_drift	synNR04T_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04T_t3	question	During the past 6 months, volume of ischemic infarct on brain CT
+health_neuro_drift	synNR04T_t3	definition	[definition modified: 230 -> 65 chars]
+health_neuro_drift	synNR04I_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04I_t3	question	During the past 6 months, quantified volume of acute ischemic infarction measured on non-contrast computed tomography of the brain
+health_neuro_drift	synNR04I_t3	definition	[definition modified: 443 -> 278 chars]
+health_neuro_drift	synNR04E_t3	name	NESS Cerebrovascular Module -
+health_neuro_drift	synNR04E_t3	question	During the past 6 months, quantified total volume of acute ischemic infarction in cubic centimeters determined from non-contrast computed tomography of the brain using semi-automated volumetric analysis software
+health_neuro_drift	synNR04E_t3	definition	[definition modified: 801 -> 636 chars]
+health_neuro_drift	synNR05T_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR05T_t3	question	During the past 6 months, number of seizures per month
+health_neuro_drift	synNR05T_t3	definition	[definition modified: 225 -> 60 chars]
+health_neuro_drift	synNR05I_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR05I_t3	question	During the past 6 months, total number of observed or patient-reported seizure episodes occurring within the preceding calendar month
+health_neuro_drift	synNR05I_t3	definition	[definition modified: 447 -> 282 chars]
+health_neuro_drift	synNR05E_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR05E_t3	question	During the past 6 months, total number of clinically apparent seizure episodes recorded in the patient seizure diary and corroborated by caregiver observation during the preceding calendar month
+health_neuro_drift	synNR05E_t3	definition	[definition modified: 866 -> 701 chars]
+health_neuro_drift	synNR06T_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR06T_t3	question	During the past 6 months, iLAE classification of seizure type
+health_neuro_drift	synNR06T_t3	definition	[definition modified: 227 -> 62 chars]
+health_neuro_drift	synNR06I_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR06I_t3	question	During the past 6 months, seizure type assigned according to the International League Against Epilepsy 2017 operational classification system
+health_neuro_drift	synNR06I_t3	definition	[definition modified: 485 -> 320 chars]
+health_neuro_drift	synNR06E_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR06E_t3	question	During the past 6 months, primary seizure type assigned by a neurologist according to the ILAE 2017 classification based on clinical semiology and electroencephalographic findings
+health_neuro_drift	synNR06E_t3	definition	[definition modified: 865 -> 700 chars]
+health_neuro_drift	synNR07T_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR07T_t3	question	During the past 6 months, name of current antiepileptic medication
+health_neuro_drift	synNR07T_t3	definition	[definition modified: 215 -> 50 chars]
+health_neuro_drift	synNR07I_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR07I_t3	question	During the past 6 months, generic name of the antiepileptic medication currently prescribed for seizure control
+health_neuro_drift	synNR07I_t3	definition	[definition modified: 451 -> 286 chars]
+health_neuro_drift	synNR07E_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR07E_t3	question	During the past 6 months, international nonproprietary name of the principal antiepileptic medication prescribed for the management of the patient's epilepsy syndrome
+health_neuro_drift	synNR07E_t3	definition	[definition modified: 772 -> 607 chars]
+health_neuro_drift	synNR08T_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR08T_t3	question	During the past 6 months, primary EEG finding classification
+health_neuro_drift	synNR08T_t3	definition	[definition modified: 224 -> 59 chars]
+health_neuro_drift	synNR08I_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR08I_t3	question	During the past 6 months, dominant abnormality classification from the routine scalp electroencephalogram recording
+health_neuro_drift	synNR08I_t3	definition	[definition modified: 448 -> 283 chars]
+health_neuro_drift	synNR08E_t3	name	NESS Seizure Module -
+health_neuro_drift	synNR08E_t3	question	During the past 6 months, dominant electroencephalographic abnormality classified from the routine scalp EEG recording obtained as part of the comprehensive epilepsy diagnostic evaluation
+health_neuro_drift	synNR08E_t3	definition	[definition modified: 859 -> 694 chars]
+health_neuro_drift	synNR09T_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR09T_t3	question	During the past 6 months, clinical tremor severity grade
+health_neuro_drift	synNR09T_t3	definition	[definition modified: 221 -> 56 chars]
+health_neuro_drift	synNR09I_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR09I_t3	question	During the past 6 months, ordinal severity grade assigned to the patient's tremor during the standard neurological motor examination
+health_neuro_drift	synNR09I_t3	definition	[definition modified: 460 -> 295 chars]
+health_neuro_drift	synNR09E_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR09E_t3	question	During the past 6 months, ordinal severity grade for resting and action tremor assigned by the examining neurologist based on visual assessment of amplitude, frequency, and functional impact during the standardized motor examination
+health_neuro_drift	synNR09E_t3	definition	[definition modified: 914 -> 749 chars]
+health_neuro_drift	synNR10T_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR10T_t3	question	During the past 6 months, unified Parkinson's Disease Rating Scale Part III total
+health_neuro_drift	synNR10T_t3	definition	[definition modified: 223 -> 58 chars]
+health_neuro_drift	synNR10I_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR10I_t3	question	During the past 6 months, total score from the Movement Disorder Society Unified Parkinson's Disease Rating Scale Part III motor examination
+health_neuro_drift	synNR10I_t3	definition	[definition modified: 577 -> 412 chars]
+health_neuro_drift	synNR10E_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR10E_t3	question	During the past 6 months, composite score from the MDS-UPDRS Part III standardized motor examination assessing eighteen items across speech, facial expression, rigidity, bradykinesia, tremor, gait, and postural stability domains
+health_neuro_drift	synNR10E_t3	definition	[definition modified: 1050 -> 885 chars]
+health_neuro_drift	synNR11T_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR11T_t3	question	During the past 6 months, standardized gait evaluation rating
+health_neuro_drift	synNR11T_t3	definition	[definition modified: 222 -> 57 chars]
+health_neuro_drift	synNR11I_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR11I_t3	question	During the past 6 months, composite numeric score from the standardized clinical gait evaluation performed during the movement disorder examination
+health_neuro_drift	synNR11I_t3	definition	[definition modified: 495 -> 330 chars]
+health_neuro_drift	synNR11E_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR11E_t3	question	During the past 6 months, composite numeric score from the standardized gait evaluation protocol assessing stride length, cadence, arm swing symmetry, turning stability, and freezing of gait episodes during the movement disorder examination
+health_neuro_drift	synNR11E_t3	definition	[definition modified: 913 -> 748 chars]
+health_neuro_drift	synNR12T_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR12T_t3	question	During the past 6 months, total daily levodopa equivalent dose in milligrams
+health_neuro_drift	synNR12T_t3	definition	[definition modified: 236 -> 71 chars]
+health_neuro_drift	synNR12I_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR12I_t3	question	During the past 6 months, sum of all dopaminergic medications converted to levodopa equivalent dose in milligrams per day
+health_neuro_drift	synNR12I_t3	definition	[definition modified: 483 -> 318 chars]
+health_neuro_drift	synNR12E_t3	name	NESS Motor Function Module -
+health_neuro_drift	synNR12E_t3	question	During the past 6 months, aggregate daily dopaminergic medication burden expressed as the sum of all prescribed antiparkinsonian agents converted to levodopa milligram equivalents using published conversion ratios
+health_neuro_drift	synNR12E_t3	definition	[definition modified: 909 -> 744 chars]
+health_neuro_drift	synNR13T_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13T_t3	question	During the past 6 months, current headache pain severity score
+health_neuro_drift	synNR13T_t3	definition	[definition modified: 223 -> 58 chars]
+health_neuro_drift	synNR13I_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13I_t3	question	During the past 6 months, patient-reported headache pain intensity on a numeric rating scale from zero for no pain to ten for worst imaginable pain
+health_neuro_drift	synNR13I_t3	definition	[definition modified: 471 -> 306 chars]
+health_neuro_drift	synNR13E_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR13E_t3	question	During the past 6 months, patient self-reported headache pain intensity score on the standard eleven-point numeric rating scale ranging from zero for no pain to ten for the worst pain imaginable, recorded at the headache clinic evaluation
+health_neuro_drift	synNR13E_t3	definition	[definition modified: 952 -> 787 chars]
+health_neuro_drift	synNR14T_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14T_t3	question	During the past 6 months, whether migraine is preceded by aura
+health_neuro_drift	synNR14T_t3	definition	[definition modified: 226 -> 61 chars]
+health_neuro_drift	synNR14I_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14I_t3	question	During the past 6 months, whether the patient's migraine attacks are preceded by reversible focal neurological symptoms meeting aura criteria
+health_neuro_drift	synNR14I_t3	definition	[definition modified: 465 -> 300 chars]
+health_neuro_drift	synNR14E_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR14E_t3	question	During the past 6 months, binary classification indicating whether the patient's migraine attacks are preceded by fully reversible focal neurological symptoms meeting ICHD-3 aura diagnostic criteria including visual, sensory, or language phenomena
+health_neuro_drift	synNR14E_t3	definition	[definition modified: 988 -> 823 chars]
+health_neuro_drift	synNR15T_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15T_t3	question	During the past 6 months, number of headache days per month
+health_neuro_drift	synNR15T_t3	definition	[definition modified: 225 -> 60 chars]
+health_neuro_drift	synNR15I_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15I_t3	question	During the past 6 months, total number of calendar days on which headache of any duration occurred during the preceding month
+health_neuro_drift	synNR15I_t3	definition	[definition modified: 468 -> 303 chars]
+health_neuro_drift	synNR15E_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR15E_t3	question	During the past 6 months, total number of unique calendar days on which headache of any type or duration occurred during the preceding month as recorded prospectively in the validated patient headache diary
+health_neuro_drift	synNR15E_t3	definition	[definition modified: 880 -> 715 chars]
+health_neuro_drift	synNR16T_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16T_t3	question	During the past 6 months, patient age when headaches first began
+health_neuro_drift	synNR16T_t3	definition	[definition modified: 219 -> 54 chars]
+health_neuro_drift	synNR16I_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16I_t3	question	During the past 6 months, age in years at which the patient first experienced recurrent headaches meeting diagnostic criteria
+health_neuro_drift	synNR16I_t3	definition	[definition modified: 536 -> 371 chars]
+health_neuro_drift	synNR16E_t3	name	NESS Cephalgia Module -
+health_neuro_drift	synNR16E_t3	question	During the past 6 months, age in years at which the patient first experienced recurrent headache episodes meeting International Classification of Headache Disorders criteria for a primary headache disorder
+health_neuro_drift	synNR16E_t3	definition	[definition modified: 912 -> 747 chars]
+health_neuro_drift	synNR17T_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17T_t3	question	During the past 6 months, motor nerve conduction speed measurement
+health_neuro_drift	synNR17T_t3	definition	[definition modified: 229 -> 64 chars]
+health_neuro_drift	synNR17I_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17I_t3	question	During the past 6 months, speed of electrical impulse propagation along a motor nerve measured during nerve conduction studies
+health_neuro_drift	synNR17I_t3	definition	[definition modified: 479 -> 314 chars]
+health_neuro_drift	synNR17E_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR17E_t3	question	During the past 6 months, speed of electrical impulse propagation along a motor nerve segment in meters per second measured during standardized nerve conduction studies as part of the electrodiagnostic evaluation of peripheral neuropathy
+health_neuro_drift	synNR17E_t3	definition	[definition modified: 1023 -> 858 chars]
+health_neuro_drift	synNR18T_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18T_t3	question	During the past 6 months, neuropathy-specific pain severity rating
+health_neuro_drift	synNR18T_t3	definition	[definition modified: 228 -> 63 chars]
+health_neuro_drift	synNR18I_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18I_t3	question	During the past 6 months, total score from a validated neuropathic pain assessment questionnaire reflecting the severity of pain symptoms attributable to peripheral nerve damage
+health_neuro_drift	synNR18I_t3	definition	[definition modified: 480 -> 315 chars]
+health_neuro_drift	synNR18E_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR18E_t3	question	During the past 6 months, total symptom severity score from a validated neuropathic pain questionnaire quantifying the intensity and character of pain symptoms including burning, shooting, and electric shock sensations attributable to peripheral nerve damage
+health_neuro_drift	synNR18E_t3	definition	[definition modified: 1015 -> 850 chars]
+health_neuro_drift	synNR19T_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19T_t3	question	During the past 6 months, quantitative vibration sense measurement
+health_neuro_drift	synNR19T_t3	definition	[definition modified: 230 -> 65 chars]
+health_neuro_drift	synNR19I_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19I_t3	question	During the past 6 months, quantitative threshold of vibration detection at the great toe measured using a biothesiometer or similar device
+health_neuro_drift	synNR19I_t3	definition	[definition modified: 520 -> 355 chars]
+health_neuro_drift	synNR19E_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR19E_t3	question	During the past 6 months, quantitative vibration detection threshold at the dorsal surface of the great toe measured using biothesiometer quantitative sensory testing expressed in micrometers of displacement or voltage units
+health_neuro_drift	synNR19E_t3	definition	[definition modified: 1027 -> 862 chars]
+health_neuro_drift	synNR20T_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20T_t3	question	During the past 6 months, hbA1c level for diabetic neuropathy screening
+health_neuro_drift	synNR20T_t3	definition	[definition modified: 231 -> 66 chars]
+health_neuro_drift	synNR20I_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20I_t3	question	During the past 6 months, glycated hemoglobin level measured as part of the laboratory evaluation for suspected diabetic peripheral neuropathy
+health_neuro_drift	synNR20I_t3	definition	[definition modified: 518 -> 353 chars]
+health_neuro_drift	synNR20E_t3	name	NESS Peripheral Nerve Module -
+health_neuro_drift	synNR20E_t3	question	During the past 6 months, glycated hemoglobin percentage measured in the comprehensive laboratory panel for peripheral neuropathy etiological evaluation to assess glycemic status as a contributing factor to nerve damage
+health_neuro_drift	synNR20E_t3	definition	[definition modified: 1029 -> 864 chars]

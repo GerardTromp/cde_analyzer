@@ -109,6 +109,12 @@ bracketed_annotations:
   - pattern: "[AQ]"
     note: "Autism Quotient instrument tag - 50 occurrences"
 
+  - pattern: "[PROMIS]"
+    note: "Patient-Reported Outcomes Measurement Information System tag - 40 CDEs"
+
+  - pattern: "[PROMIS.PEDS]"
+    note: "PROMIS Pediatric variant tag - 1 CDE"
+
   - pattern: "[HL7v3.0]"
     note: "HL7 version 3.0 source tag - 1 occurrence"
 
@@ -131,6 +137,9 @@ bare_instrument_abbrevs:
 
   - pattern: "REGEX: AQ$"
     note: "Bare trailing ' AQ' at end of designations (e.g. 'Anxious new situations AQ') - 50 occurrences"
+
+  - pattern: "REGEX: PROMIS\\s+.*?v\\d+[\\d.]*\\s+\\S+"
+    note: "PROMIS instrument prefix with form/version/item code (e.g. 'PROMIS  8a Pain Interference v1.0 PAININ31') - 31 CDEs"
 
   - pattern: "NHANES"
     note: "National Health and Nutrition Examination Survey bare abbreviation"
@@ -172,6 +181,16 @@ boilerplate_temporal:
 
   - pattern: "past 7 day frequency scale"
     note: "PROMIS frequency scale descriptor"
+
+repository_typos:
+  - pattern: "Patient- Reported Outcome Information Measurement System (PROMIS)"
+    note: "Transposed word order + spurious hyphen-space variant of PROMIS instrument name - 1 CDE"
+
+  - pattern: "Patient-Reported Outcome Information Measurement System (PROMIS)"
+    note: "Transposed word order variant of PROMIS instrument name - 1 CDE"
+
+  - pattern: "Outcome Information Measurement System (PROMIS)"
+    note: "Transposed PROMIS suffix without Patient-Reported prefix - catches anchor-stripped variants"
 
 boilerplate_nlm:
   - pattern: 'NLM disclaimer: Consistent with Executive Order 14168, "gender" should not be used as a replacement for the element "sex" in the NIH CDE repository.'

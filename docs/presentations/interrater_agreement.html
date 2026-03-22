@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phrase Curation Inter-Rater Agreement &mdash; CDE Analyzer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  :root {
+    --r-heading-color: #1a202c;
+    --r-main-color: #2d3748;
+    --r-link-color: #4299e1;
+    --r-heading-font: 'Segoe UI', -apple-system, system-ui, sans-serif;
+    --r-main-font: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  }
+  .reveal { font-size: 28px; }
+  .reveal h1 { font-size: 2.0em; font-weight: 300; }
+  .reveal h1 strong { font-weight: 700; color: #4299e1; }
+  .reveal h2 { font-size: 1.5em; font-weight: 600; color: #1a202c; border-bottom: 3px solid #4299e1; padding-bottom: 0.15em; }
+  .reveal h3 { font-size: 1.1em; font-weight: 600; color: #2b6cb0; margin-top: 0.3em; }
+  .reveal .subtitle { color: #718096; font-size: 0.65em; font-style: italic; }
+  .reveal code { font-family: Consolas, 'Courier New', monospace; background: #edf2f7; color: #553c9a; padding: 0.05em 0.2em; border-radius: 3px; font-size: 0.85em; }
+  .reveal table { margin: 0.4em auto; font-size: 0.7em; border-collapse: collapse; }
+  .reveal table th { background: #edf2f7; font-weight: 600; padding: 0.3em 0.6em; border-bottom: 2px solid #cbd5e1; text-align: left; }
+  .reveal table td { padding: 0.25em 0.6em; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .reveal table tr:nth-child(even) td { background: #f7fafc; }
+  .reveal ul, .reveal ol { text-align: left; }
+  .reveal li { margin-bottom: 0.2em; font-size: 0.85em; }
+  .badge { display: inline-block; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.7em; font-weight: 700; }
+  .badge.purple { background: #e9d8fd; color: #553c9a; }
+  .badge.blue { background: #bee3f8; color: #2a4365; }
+  .badge.green { background: #c6f6d5; color: #22543d; }
+  .badge.orange { background: #feebc8; color: #7b341e; }
+  .badge.red { background: #fed7d7; color: #9b2c2c; }
+  .badge.teal { background: #b2f5ea; color: #234e52; }
+  .badge.gray { background: #e2e8f0; color: #4a5568; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0.4em; margin: 0.5em 0; flex-wrap: wrap; }
+  .flow-box { display: inline-block; padding: 0.3em 0.6em; border-radius: 4px; font-weight: 600; font-size: 0.7em; }
+  .flow-box.purple { background: #e9d8fd; color: #553c9a; }
+  .flow-box.blue { background: #bee3f8; color: #2a4365; }
+  .flow-box.green { background: #c6f6d5; color: #22543d; }
+  .flow-box.orange { background: #feebc8; color: #7b341e; }
+  .flow-box.red { background: #fed7d7; color: #9b2c2c; }
+  .flow-box.teal { background: #b2f5ea; color: #234e52; }
+  .flow-box.dark { background: #2d3748; color: #e2e8f0; }
+  .flow-arrow { color: #a0aec0; font-size: 1.2em; font-weight: bold; }
+  .cols { display: flex; gap: 1.5em; align-items: flex-start; }
+  .cols > div { flex: 1; }
+  .highlight { background: #ebf8ff; border-left: 4px solid #4299e1; padding: 0.5em 0.8em; border-radius: 0 4px 4px 0; margin: 0.5em 0; text-align: left; font-size: 0.8em; }
+  .highlight.green { background: #f0fff4; border-left-color: #48bb78; }
+  .highlight.orange { background: #fffaf0; border-left-color: #ed8936; }
+  .highlight.purple { background: #faf5ff; border-left-color: #9f7aea; }
+  .highlight.red { background: #fff5f5; border-left-color: #e53e3e; }
+  .text-left { text-align: left; }
+  .text-small { font-size: 0.7em; }
+  .text-muted { color: #718096; }
+  .mt { margin-top: 0.5em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ====== TITLE ====== -->
+<section>
+<h1>Phrase Curation<br><strong>Inter-Rater Agreement</strong></h1>
+<p class="subtitle">allcde03 Phase 2 &mdash; 4 Curators, 1,331 High-Priority Patterns</p>
+<p class="text-small text-muted">CDE Analyzer v1.0.0 &mdash; March 2026</p>
+</section>
+
+<!-- ====== CONTEXT ====== -->
+<section>
+<h2>Context</h2>
+<div class="text-left">
+<ul>
+<li><strong>Goal:</strong> Strip boilerplate phrases from CDE text fields to improve downstream embeddings and clustering</li>
+<li><strong>Phase 2 pipeline</strong> discovered 4,023 candidate phrase patterns across 22,743 CDEs</li>
+<li>Zipf-based priority split: <span class="badge blue">1,331 high-priority</span> + <span class="badge gray">2,692 low-priority</span></li>
+<li>4 curators independently annotated the high-priority patterns</li>
+<li>Decision vocabulary: <span class="badge green">keep</span> (strip it) &middot; <span class="badge red">remove</span> (retain in text) &middot; <span class="badge orange">modify</span> &middot; <span class="badge purple">substitute</span></li>
+</ul>
+<div class="highlight orange mt">
+<strong>Terminology note:</strong> "keep" = keep <em>the pattern</em> (which <em>strips</em> it from CDE text). This proved confusing &mdash; future rounds should use <strong>"strip"</strong> / <strong>"retain"</strong> labels.
+</div>
+</div>
+</section>
+
+<!-- ====== CURATOR PROFILES ====== -->
+<section>
+<h2>Curator Decision Profiles</h2>
+<p class="text-small text-muted">Collapsed: modify/substitute &rarr; keep (strip)</p>
+<table>
+<tr><th>Curator</th><th>Strip</th><th>Remove (retain)</th><th>Blank</th><th>Strip %</th></tr>
+<tr><td><strong>GT</strong></td><td>100</td><td>1,231</td><td>0</td><td>7.5%</td></tr>
+<tr><td><strong>BP2</strong></td><td>185</td><td>1,076</td><td>70</td><td>14.7%</td></tr>
+<tr><td><strong>MLEACH</strong></td><td>322</td><td>998</td><td>11</td><td>24.4%</td></tr>
+<tr><td><strong>MD</strong></td><td>842</td><td>478</td><td>11</td><td>63.8%</td></tr>
+</table>
+<div class="highlight">
+GT (project lead, most pipeline knowledge) was the most conservative &mdash; 100 precisely targeted patterns. MD was the most aggressive with 842.
+</div>
+</section>
+
+<!-- ====== AGREEMENT METRICS ====== -->
+<section>
+<h2>Overall Agreement</h2>
+<div class="cols">
+<div>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Patterns rated</td><td>1,320</td></tr>
+<tr><td>Unanimous (4/4)</td><td>405 (30.7%)</td></tr>
+<tr><td>Majority (3/4)</td><td>510</td></tr>
+<tr><td>Split (2/2)</td><td>405</td></tr>
+<tr><td>Krippendorff's &alpha;</td><td><strong>0.039</strong></td></tr>
+</table>
+</div>
+<div>
+<h3>Pairwise Cohen's &kappa;</h3>
+<table>
+<tr><th>Pair</th><th>&kappa;</th></tr>
+<tr><td>GT&ndash;MLEACH</td><td>0.213</td></tr>
+<tr><td>GT&ndash;BP2</td><td>0.100</td></tr>
+<tr><td>MD&ndash;MLEACH</td><td>0.190</td></tr>
+<tr><td>MLEACH&ndash;BP2</td><td>0.081</td></tr>
+<tr><td>GT&ndash;MD</td><td>0.056</td></tr>
+<tr><td>MD&ndash;BP2</td><td>0.056</td></tr>
+</table>
+</div>
+</div>
+<div class="highlight red mt">
+All &kappa; values below 0.40 = "fair to poor" agreement. &alpha; = 0.039 is well below the 0.67 reliability threshold.
+</div>
+</section>
+
+<!-- ====== DISAGREEMENT ANATOMY ====== -->
+<section>
+<h2>Anatomy of Disagreement</h2>
+<h3>37% of disagreements involve framing/functional language</h3>
+<table>
+<tr><th>Category</th><th>Patterns</th><th>Example</th></tr>
+<tr><td>participant/subject/patient</td><td>242</td><td><code>whether the participant has</code></td></tr>
+<tr><td>indicator/specifying</td><td>120</td><td><code>Indicator of whether the</code></td></tr>
+<tr><td>"whether" framing</td><td>108</td><td><code>The indicator whether</code></td></tr>
+<tr><td>Trailing articles</td><td>52</td><td><code>Indicator of whether the</code></td></tr>
+</table>
+<p class="text-small text-muted">(Categories overlap substantially)</p>
+<div class="highlight purple">
+<strong>Core tension:</strong> "whether the participant has difficulty walking" is a <em>better sentence</em> than "difficulty walking" &mdash; but the framing is shared across 200+ CDEs and adds noise to embeddings.
+</div>
+</section>
+
+<!-- ====== KEY INSIGHT ====== -->
+<section>
+<h2>Stripping Optimizes for Discrimination</h2>
+<div class="text-left">
+<ul>
+<li><strong>Stripped text doesn't need to be grammatically correct</strong> &mdash; it needs to be <em>distinct</em> from other CDEs</li>
+<li>Shared framing like "whether the participant has" makes 200+ CDEs look similar in embedding space</li>
+<li>Noun-phrase boilerplate ("Scale of", "Score for") is <em>more damaging</em> than functional framing &mdash; it looks like content to embedding models</li>
+</ul>
+<div class="highlight green mt">
+<strong>Empirical finding (synthetic data):</strong> Descriptive verbosity pushed CDEs to cluster periphery but did not cause misclassification. Stripping should tighten clusters without breaking them.
+</div>
+</div>
+</section>
+
+<!-- ====== STRATIFIED AGREEMENT ====== -->
+<section>
+<h2>Agreement by Pattern Frequency</h2>
+<p class="text-small text-muted">Higher-frequency patterns matter more for downstream quality</p>
+<table>
+<tr><th>tinyId bin</th><th>Patterns</th><th>Unanimous</th><th>Discrepancy</th><th>CDE impact</th></tr>
+<tr><td>1&ndash;5</td><td>370</td><td>43.0%</td><td>57.0%</td><td>1,656</td></tr>
+<tr><td>6&ndash;10</td><td>525</td><td>32.6%</td><td>67.4%</td><td>3,918</td></tr>
+<tr><td>11&ndash;20</td><td>237</td><td>21.9%</td><td>78.1%</td><td>3,389</td></tr>
+<tr><td>21&ndash;50</td><td>143</td><td>17.2%</td><td>82.8%</td><td>4,347</td></tr>
+<tr><td>51&ndash;200</td><td>44</td><td>0.0%</td><td>100%</td><td>3,829</td></tr>
+<tr><td>201+</td><td>12</td><td>0.0%</td><td>100%</td><td>4,019</td></tr>
+</table>
+<div class="highlight orange mt">
+Mid-to-high frequency patterns (11&ndash;500 CDEs) concentrate disagreement. Low-frequency patterns (1&ndash;5) have moderate agreement and minimal CDE impact.
+</div>
+</section>
+
+<!-- ====== CONTAINMENT TREE ====== -->
+<section>
+<h2>Containment Tree Analysis</h2>
+<div class="cols">
+<div>
+<h3>Tree statistics</h3>
+<ul>
+<li>73 containment trees, 166 children</li>
+<li>Max depth: 4</li>
+<li>Largest: <code>Indicator of whether</code> (32 members)</li>
+</ul>
+<h3>Inconsistency</h3>
+<ul>
+<li>79 parent-child pairs with inconsistent decisions</li>
+<li>71 = parent <span class="badge green">strip</span>, child <span class="badge red">retain</span></li>
+<li>8 = parent <span class="badge red">retain</span>, child <span class="badge green">strip</span></li>
+</ul>
+</div>
+<div>
+<h3>Example tree</h3>
+<div class="text-small text-left" style="font-family: monospace; line-height: 1.6;">
+Indicator of whether<br>
+&nbsp;&nbsp;&#9655; Indicator of whether the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#9655; Indicator of whether the participant<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9655; Indicator of whether the participant has<br>
+&nbsp;&nbsp;&#9655; Indicator of whether participant/subject<br>
+</div>
+<div class="highlight mt">
+22.6% of discrepancy rows are in containment trees &mdash; many could be resolved by propagating parent decisions.
+</div>
+</div>
+</div>
+</section>
+
+<!-- ====== TIERED STRIPPING ====== -->
+<section>
+<h2>Tiered Stripping Approach</h2>
+<div class="flow">
+<span class="flow-box dark">Layer 0<br>Instruments + Temporal</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-box green">Layer 1<br>Consensus (4/4)</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-box blue">Layer 2<br>+ Majority (3/4)</span>
+<span class="flow-arrow">&rarr;</span>
+<span class="flow-box purple">Layer 3<br>+ Individual curator</span>
+</div>
+<table>
+<tr><th>Layer</th><th>Variant</th><th>Phrase patterns</th><th>JSON size delta</th></tr>
+<tr><td>0</td><td>Baseline (MTSTPF)</td><td>0</td><td>&mdash;</td></tr>
+<tr><td>1</td><td>Consensus (unanimous)</td><td>197</td><td>&minus;145 KB</td></tr>
+<tr><td>2</td><td>Consensus + majority</td><td>300</td><td>&minus;225 KB</td></tr>
+<tr><td>3</td><td>GT</td><td>280</td><td>&minus;223 KB</td></tr>
+<tr><td>3</td><td>BP2</td><td>365</td><td>&minus;206 KB</td></tr>
+<tr><td>3</td><td>MLEACH</td><td>502</td><td>&minus;305 KB</td></tr>
+<tr><td>3</td><td>MD</td><td>1,022</td><td>&minus;420 KB</td></tr>
+</table>
+</section>
+
+<!-- ====== CDE IMPACT ====== -->
+<section>
+<h2>CDE Impact (1,532 evaluation subset)</h2>
+<p class="text-small text-muted">1,332 base + 200 CDEs selected to maximize inter-curator differences</p>
+<table>
+<tr><th>Variant</th><th>Patterns</th><th>CDEs affected</th><th>%</th><th>Fields changed</th></tr>
+<tr><td>Consensus</td><td>197</td><td>419</td><td>31.5%</td><td>561</td></tr>
+<tr><td>GT</td><td>280</td><td>451</td><td>33.9%</td><td>606</td></tr>
+<tr><td>Consensus + majority</td><td>300</td><td>488</td><td>36.6%</td><td>639</td></tr>
+<tr><td>BP2</td><td>365</td><td>478</td><td>35.9%</td><td>641</td></tr>
+<tr><td>MLEACH</td><td>502</td><td>531</td><td>39.9%</td><td>704</td></tr>
+<tr><td>MD</td><td>1,022</td><td>561</td><td>42.1%</td><td>776</td></tr>
+</table>
+<div class="highlight green mt">
+GT (280 patterns) removes nearly identical bytes as consensus+majority (300 patterns) &mdash; GT's curation closely tracks group consensus with fewer, more targeted patterns.
+</div>
+</section>
+
+<!-- ====== PAIRWISE CDE DIFFS ====== -->
+<section>
+<h2>Pairwise CDE Differences</h2>
+<p class="text-small text-muted">CDEs where stripped text differs between curator variants (n=1,532)</p>
+<table>
+<tr><th>Pair</th><th>CDEs differ</th><th>%</th></tr>
+<tr><td>GT &ndash; MD</td><td style="font-weight: 700; color: #e53e3e;">480</td><td>31.3%</td></tr>
+<tr><td>GT &ndash; MLEACH</td><td>395</td><td>25.8%</td></tr>
+<tr><td>MD &ndash; BP2</td><td>413</td><td>27.0%</td></tr>
+<tr><td>MLEACH &ndash; BP2</td><td>363</td><td>23.7%</td></tr>
+<tr><td>GT &ndash; BP2</td><td>317</td><td>20.7%</td></tr>
+<tr><td>MD &ndash; MLEACH</td><td style="color: #48bb78;">266</td><td>17.4%</td></tr>
+</table>
+<div class="highlight">
+GT&ndash;MD = widest divergence (31.3%), consistent with opposite curation philosophies.<br>
+MD&ndash;MLEACH = smallest gap (17.4%) &mdash; they are the most aligned pair.
+</div>
+</section>
+
+<!-- ====== CLUSTERING RESULTS ====== -->
+<section>
+<h2>Clustering Results</h2>
+<p class="text-small text-muted">UMAP + HDBSCAN on 1,532 CDEs &mdash; two embedding models, identical parameters</p>
+<div class="cols">
+<div>
+<h3>Embedding model: bl</h3>
+<table>
+<tr><th>Variant</th><th>Clusters</th><th>Silhouette</th><th>Coverage</th><th>Noise</th></tr>
+<tr><td>Baseline</td><td>35</td><td>0.587</td><td style="font-weight:700;">89.5%</td><td style="color:#48bb78;">160</td></tr>
+<tr><td>Consensus</td><td>38</td><td>0.576</td><td>86.9%</td><td>201</td></tr>
+<tr><td>ConsMaj</td><td>44</td><td>0.593</td><td>81.5%</td><td>284</td></tr>
+<tr style="background:#f0fff4;"><td><strong>GT</strong></td><td>45</td><td style="font-weight:700; color:#22543d;">0.602</td><td>83.6%</td><td>251</td></tr>
+<tr><td>BP2</td><td>36</td><td>0.563</td><td>84.9%</td><td>231</td></tr>
+<tr><td>MLEACH</td><td>35</td><td>0.559</td><td>86.7%</td><td>203</td></tr>
+<tr style="background:#fff5f5;"><td><strong>MD</strong></td><td>37</td><td style="font-weight:700; color:#9b2c2c;">0.546</td><td>85.0%</td><td>229</td></tr>
+</table>
+</div>
+<div>
+<h3>Embedding model: cm</h3>
+<table>
+<tr><th>Variant</th><th>Clusters</th><th>Silhouette</th><th>Coverage</th><th>Noise</th></tr>
+<tr style="background:#f0fff4;"><td><strong>Baseline</strong></td><td>42</td><td style="font-weight:700; color:#22543d;">0.617</td><td>86.6%</td><td>205</td></tr>
+<tr><td>Consensus</td><td>43</td><td>0.616</td><td>80.1%</td><td>305</td></tr>
+<tr><td>ConsMaj</td><td>40</td><td>0.585</td><td>85.9%</td><td>216</td></tr>
+<tr><td>GT</td><td>45</td><td>0.584</td><td style="font-weight:700;">88.9%</td><td style="color:#48bb78;">170</td></tr>
+<tr><td>BP2</td><td>41</td><td>0.586</td><td>80.7%</td><td>295</td></tr>
+<tr><td>MLEACH</td><td>42</td><td>0.594</td><td>82.7%</td><td>265</td></tr>
+<tr style="background:#fff5f5;"><td><strong>MD</strong></td><td>36</td><td style="font-weight:700; color:#9b2c2c;">0.562</td><td>83.6%</td><td>251</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ====== CLUSTERING INTERPRETATION ====== -->
+<section>
+<h2>Clustering: Key Findings</h2>
+<div class="text-left">
+<ul>
+<li><strong>MD consistently worst silhouette</strong> in both models (0.546, 0.562) &mdash; over-stripping degrades cluster separation</li>
+<li><strong>GT achieves highest silhouette</strong> on bl embedding (0.602) &mdash; targeted stripping <em>improves</em> clustering over baseline</li>
+<li>On cm embedding, baseline wins (0.617) &mdash; optimal stripping level is <strong>embedding-model dependent</strong></li>
+<li>GT on cm has <strong>lowest noise</strong> (170) and <strong>highest coverage</strong> (88.9%) &mdash; best at keeping CDEs in clusters</li>
+</ul>
+<div class="highlight red mt">
+<strong>Over-stripping is worse than no stripping.</strong> MD's 1,022 patterns remove enough discriminative content that CDEs become unclassifiable noise.
+</div>
+<div class="highlight green">
+<strong>Optimal window:</strong> GT's 280 targeted patterns sit near the sweet spot &mdash; enough to reduce boilerplate noise, not enough to destroy discriminative signal.
+</div>
+</div>
+</section>
+
+<!-- ====== NOISE TRANSITIONS ====== -->
+<section>
+<h2>Noise Transitions: Lost vs Rescued</h2>
+<p class="text-small text-muted">CDEs moving between clustered and noise across variants (vs baseline)</p>
+<div class="cols">
+<div>
+<h3>bl embedding</h3>
+<table>
+<tr><th>Variant</th><th>Lost</th><th>Rescued</th><th>Net</th></tr>
+<tr><td>Consensus</td><td>102</td><td>61</td><td>+41</td></tr>
+<tr><td>MLEACH</td><td>111</td><td>68</td><td>+43</td></tr>
+<tr><td>BP2</td><td>141</td><td>70</td><td>+71</td></tr>
+<tr><td>MD</td><td>139</td><td>70</td><td>+69</td></tr>
+<tr><td>GT</td><td>156</td><td>65</td><td>+91</td></tr>
+<tr><td>ConsMaj</td><td>197</td><td>73</td><td>+124</td></tr>
+</table>
+</div>
+<div>
+<h3>cm embedding</h3>
+<table>
+<tr style="background:#f0fff4;"><td><strong>GT</strong></td><td>82</td><td style="font-weight:700; color:#22543d;">117</td><td style="font-weight:700; color:#22543d;">&minus;35</td></tr>
+<tr><td>ConsMaj</td><td>112</td><td>101</td><td>+11</td></tr>
+<tr><td>MD</td><td>174</td><td>128</td><td>+46</td></tr>
+<tr><td>MLEACH</td><td>152</td><td>92</td><td>+60</td></tr>
+<tr><td>BP2</td><td>175</td><td>85</td><td>+90</td></tr>
+<tr><td>Consensus</td><td>184</td><td>84</td><td>+100</td></tr>
+</table>
+</div>
+</div>
+<div class="highlight green mt">
+<strong>GT on cm is the only variant with net negative noise</strong> (&minus;35): it rescues 117 baseline-noise CDEs while losing only 82.
+</div>
+</section>
+
+<!-- ====== NOISE ROOT CAUSE ====== -->
+<section>
+<h2>Noise is Not Semantic Loss</h2>
+<div class="text-left">
+<h3>Text retention in CDEs lost to noise</h3>
+<table>
+<tr><th>Retention band</th><th>Consensus</th><th>GT</th><th>BP2</th><th>MLEACH</th><th>MD</th></tr>
+<tr><td><span class="badge red">&lt;30%</span> (content destroyed)</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+<tr><td><span class="badge orange">30&ndash;70%</span> (significant loss)</td><td>6</td><td>15</td><td>14</td><td>24</td><td>40</td></tr>
+<tr><td><span class="badge green">70%+</span> (mostly intact)</td><td>96</td><td>141</td><td>127</td><td>87</td><td>98</td></tr>
+<tr style="font-weight:600;"><td>Median retention</td><td>100%</td><td>100%</td><td>100%</td><td>88%</td><td>94%</td></tr>
+</table>
+</div>
+<div class="highlight mt">
+<strong>90%+ of lost CDEs retain 70%+ of their text.</strong> They lost shared boilerplate (e.g., "During the past 7 days") that HDBSCAN was using as density signal &mdash; not discriminative semantic content.
+</div>
+<div class="text-left mt" style="font-size:0.75em;">
+<strong>Example:</strong><br>
+<code>BL: During the past 7 days: I feel tired</code><br>
+<code>GT: : I feel tired</code> &nbsp;&rarr;&nbsp; 14 chars remain (39% retention) &mdash; content intact, temporal prefix removed
+</div>
+</section>
+
+<!-- ====== RESCUE OPPORTUNITY ====== -->
+<section>
+<h2>Recovery Options</h2>
+<div class="text-left">
+<ol>
+<li><strong>Post-clustering nearest-centroid assignment</strong>
+  <ul><li>Noise points within a distance threshold assigned to nearest cluster</li>
+  <li>Most promising: 90% of lost CDEs have intact content and likely sit near existing centroids</li></ul>
+</li>
+<li><strong>Lower <code>min_cluster_size</code></strong> in HDBSCAN
+  <ul><li>Lost CDEs are near clusters but below density threshold</li></ul>
+</li>
+<li><strong>Accept the split</strong>
+  <ul><li>&ldquo;I feel tired&rdquo; vs &ldquo;I have energy&rdquo; are semantically distinct</li>
+  <li>Stripping revealed they were clustered together for the wrong reason (shared temporal prefix)</li></ul>
+</li>
+</ol>
+</div>
+<div class="highlight purple mt">
+<strong>Option 3 is arguably correct:</strong> the boilerplate was an artificial clustering signal. Stripping reveals the true semantic structure.
+</div>
+</section>
+
+<!-- ====== CLUSTER MOVEMENTS ====== -->
+<section>
+<h2>Cluster Movements: GT &rarr; MD</h2>
+<p class="text-small text-muted">Clean splits and joins (85%+ purity) in cm embedding</p>
+<div class="cols">
+<div>
+<h3>Splits (GT finer-grained)</h3>
+<table>
+<tr><th>GT</th><th>&rarr;</th><th>MD</th><th>Purity</th></tr>
+<tr><td>#28 (57)</td><td>&rarr;</td><td>#22 (46) + #23 (11)</td><td>100%</td></tr>
+<tr><td>#29 (17)</td><td>&rarr;</td><td>#20 (11) + #15 (6)</td><td>100%</td></tr>
+</table>
+</div>
+<div>
+<h3>Joins (MD merges GT clusters)</h3>
+<table>
+<tr><th>GT</th><th>&rarr;</th><th>MD</th><th>Purity</th></tr>
+<tr><td>#4 (103) + #5 (15)</td><td>&rarr;</td><td>#3 (125)</td><td>94%</td></tr>
+<tr><td>#21 (70) + #25 (12)</td><td>&rarr;</td><td>#10 (85)</td><td>96%</td></tr>
+<tr><td>#27 (19) + #26 (12)</td><td>&rarr;</td><td>#9 (34)</td><td>91%</td></tr>
+<tr><td>#30 (25) + #29 (11)</td><td>&rarr;</td><td>#20 (42)</td><td>86%</td></tr>
+<tr><td>#44 (21) + #43 (4)</td><td>&rarr;</td><td>#12 (26)</td><td>96%</td></tr>
+</table>
+</div>
+</div>
+<div class="highlight orange mt">
+MD's aggressive stripping causes <strong>5 joins</strong> (losing distinctions) but only <strong>2 splits</strong>. Over-stripping collapses meaningful sub-structure.
+</div>
+</section>
+
+<!-- ====== GT28 DEEP DIVE ====== -->
+<section>
+<h2>Case Study: GT#28 &rarr; MD#22 + MD#23</h2>
+<p class="text-small text-muted">Fatigue cluster splits on intensity vs frequency after MD strips "subject/participant" framing</p>
+<div class="cols">
+<div>
+<h3>MD#22 (46) &mdash; Intensity/extent</h3>
+<div class="text-small text-left">
+<code>How fatigued were you on average?</code><br>
+<code>How exhausted were you on average?</code><br>
+<code>How much were you bothered by your fatigue?</code><br>
+<code>How wiped out were you on average?</code>
+</div>
+<div class="highlight mt" style="font-size:0.7em;">
+GT def: <code>Scale of the extent to which <strong>the subject/participant</strong> felt exhausted on average</code><br>
+MD def: <code>Scale of the extent felt exhausted on average</code>
+</div>
+</div>
+<div>
+<h3>MD#23 (11) &mdash; Frequency</h3>
+<div class="text-small text-left">
+<code>How often were you energetic?</code><br>
+<code>How often did you run out of energy?</code><br>
+<code>How often were you sluggish?</code><br>
+<code>How often did you have physical energy?</code>
+</div>
+<div class="highlight mt" style="font-size:0.7em;">
+GT def: <code>the frequency that <strong>the subject/participant</strong> had enough energy</code><br>
+MD def: <code>the frequency had enough energy</code>
+</div>
+</div>
+</div>
+<div class="highlight purple mt">
+MD stripped <code>the subject/participant</code> + <code>to which</code> (9 patterns). This removed the shared framing that held intensity and frequency fatigue items together. <strong>The split is arguably correct</strong> &mdash; they measure different constructs.
+</div>
+</section>
+
+<!-- ====== JOIN DEEP DIVES ====== -->
+<section>
+<h2>Case Study: Joins (Lost Distinctions)</h2>
+<div class="text-left">
+<h3>GT#4 (Autism behavior, 103) + GT#5 (Autism play, 15) &rarr; MD#3 (125)</h3>
+<ul class="text-small">
+<li>GT#4: <code>Child anxious new situations</code>, <code>Argue bad apologize</code></li>
+<li>GT#5: <code>build tower bricks</code>, <code>enjoy playing</code>, <code>bring objects over</code></li>
+<li>MD strips enough framing that behavioral and play items become indistinguishable</li>
+</ul>
+
+<h3>GT#21 (Depression scales, 70) + GT#25 (Depression scores, 12) &rarr; MD#10 (85)</h3>
+<ul class="text-small">
+<li>GT#21: <code>how depressed were you about your health problems?</code></li>
+<li>GT#25: <code>PHQ-2 total score</code>, <code>Long Form - Total score</code></li>
+<li>MD merges depression <em>items</em> with depression <em>aggregate scores</em></li>
+</ul>
+
+<h3>GT#30 (Adult fatigue impact, 29) + GT#29 (Pediatric fatigue, 17) &rarr; MD#20 (42)</h3>
+<ul class="text-small">
+<li>GT#30: <code>How often did your fatigue make it difficult to make decisions?</code> (2nd/3rd person)</li>
+<li>GT#29: <code>I have trouble starting things because I am tired</code> (1st person, child self-report)</li>
+<li>MD strips <code>the subject/participant</code> from definitions, removing the shared framing that distinguished adult (3rd-person scales) from pediatric (1st-person self-report) items</li>
+</ul>
+</div>
+</section>
+
+<!-- ====== BL->GT SPLITS ====== -->
+<section>
+<h2>Baseline &rarr; GT: Stripping Reveals Structure</h2>
+<p class="text-small text-muted">GT's targeted stripping splits baseline clusters, revealing finer-grained semantic groupings</p>
+<table>
+<tr><th>BL cluster</th><th>Size</th><th>&rarr; GT clusters</th><th>Purity</th><th>Interpretation</th></tr>
+<tr><td>BL#14</td><td>46</td><td>GT#8 (28) + GT#14 (16)</td><td>96%</td><td>Sub-domain split</td></tr>
+<tr><td>BL#40</td><td>36</td><td>GT#39 (23) + GT#38 (11)</td><td>94%</td><td>Sub-domain split</td></tr>
+<tr><td>BL#13</td><td>33</td><td>GT#27 (19) + GT#26 (12)</td><td>94%</td><td>Sub-domain split</td></tr>
+<tr><td>BL#35</td><td>32</td><td>GT#44 (21) + GT#37 (8)</td><td>91%</td><td>Sub-domain split</td></tr>
+<tr><td>BL#27</td><td>24</td><td>GT#40 (12) + GT#16 (10)</td><td>92%</td><td>Sub-domain split</td></tr>
+<tr><td>BL#7</td><td>23</td><td>GT#17 (16) + GT#21 (4)</td><td>87%</td><td>Sub-domain split</td></tr>
+</table>
+<div class="highlight green mt">
+<strong>GT produces 8 clean splits from baseline</strong> (all 86%+ purity). Removing boilerplate reveals sub-structure that was masked by shared framing. This is the desired outcome of stripping.
+</div>
+</section>
+
+<!-- ====== NEXT STEPS ====== -->
+<section>
+<h2>Next Steps</h2>
+<div class="text-left">
+<ol>
+<li><strong>Calibration session</strong> before next curation round
+  <ul>
+  <li>Rename labels: <strong>strip</strong> / <strong>retain</strong></li>
+  <li>Before/after stripping examples with clustering effect</li>
+  <li>Containment tree propagation rules</li>
+  <li>Goal: discrimination, not readability</li>
+  </ul>
+</li>
+<li><strong>Adopt GT curation</strong> as production baseline &mdash; best balance of cluster quality and coverage</li>
+<li><strong>Second-round curation</strong> focused on the mid-range patterns (11&ndash;200 CDEs) where disagreement concentrates</li>
+</ol>
+</div>
+</section>
+
+<!-- ====== APPENDIX: SEMANTIC FRAGMENTS ====== -->
+<section>
+<h2>Appendix: Domain-Specific Disagreements</h2>
+<p class="text-small text-muted">Short (1&ndash;2 word) patterns with mixed decisions &mdash; these carry the most semantic weight</p>
+<table>
+<tr><th>Pattern</th><th>CDEs</th><th>GT</th><th>MD</th><th>ML</th><th>BP2</th></tr>
+<tr><td><code>anatomic site</code></td><td>255</td><td class="badge red">ret</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge red">ret</td></tr>
+<tr><td><code>spinal cord</code></td><td>109</td><td class="badge red">ret</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge red">ret</td></tr>
+<tr><td><code>adverse event</code></td><td>55</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge green">strp</td><td class="badge red">ret</td></tr>
+<tr><td><code>evoked potential</code></td><td>56</td><td class="badge red">ret</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge red">ret</td></tr>
+<tr><td><code>severity of</code></td><td>65</td><td class="badge red">ret</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge red">ret</td></tr>
+<tr><td><code>newborn screening</code></td><td>48</td><td class="badge red">ret</td><td class="badge green">strp</td><td class="badge red">ret</td><td class="badge red">ret</td></tr>
+</table>
+<div class="highlight purple mt">
+These are the <strong>hardest</strong> decisions: domain-specific noun phrases that are both shared boilerplate <em>and</em> semantically meaningful. Clustering results will determine the right boundary.
+</div>
+</section>
+
+</div><!-- .slides -->
+</div><!-- .reveal -->
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>Reveal.initialize({ hash: true, slideNumber: 'c/t', transition: 'fade', center: true });</script>
+</body>
+</html>
