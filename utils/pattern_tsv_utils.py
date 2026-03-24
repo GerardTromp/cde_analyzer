@@ -72,6 +72,25 @@ def find_column_name(headers: List[str], column_name: str) -> str:
     raise ValueError(f"Column '{column_name}' not found (case-insensitive)")
 
 
+def parse_tinyid_set(tinyids_str: str) -> Set[str]:
+    """
+    Parse a space-or-pipe-delimited tinyId string into a set.
+
+    Handles both ``"id1 id2 id3"`` (space-delimited) and
+    ``"id1|id2|id3"`` (pipe-delimited) formats, as well as mixed.
+    Empty or whitespace-only strings return an empty set.
+
+    Args:
+        tinyids_str: Raw tinyId string from a TSV column.
+
+    Returns:
+        Set of non-empty tinyId strings.
+    """
+    if not tinyids_str:
+        return set()
+    return set(t for t in re.split(r'[\s|]+', tinyids_str) if t)
+
+
 def load_pattern_list(
     spec: str,
     expand_variants: bool = False,

@@ -58,9 +58,48 @@
 | 0.7.0 | 2026-02-23 | Standalone editor zipapp, centralized server, synthetic QC |
 | 0.6.0 | 2026-02-21 | Multi-curator, workflow scaffold, 7 vignettes |
 
+## Post-v1.0.0 Work (2026-03-17 — 2026-03-24)
+
+### Inter-Rater Agreement Analysis (4 curators)
+- **4-curator merge**: GT, MD, MLEACH, BP2 — 1,331 patterns, Krippendorff's α = 0.039
+- **Collapsed agreement** (modify/substitute → keep): 405 unanimous (30.7%), 510 majority
+- **Stratified analysis**: High-frequency patterns (201+ CDEs) have best agreement; mid-range (11-200) concentrates disagreement
+- **Containment tree analysis**: 37.4% of disagreements involve framing/functional language ("whether", "participant/subject")
+- **Cluster consequence study**: GT achieves 86% cluster stability (best); MD matches baseline at 57% (over-stripping = no stripping)
+- **Key finding**: "subject/participant" framing carries 1st vs 3rd person structure useful for clustering; domain noun phrases should be retained
+
+### Per-Curator Stripping Comparison
+- **7 strip variants**: Baseline (MTSTPF), Consensus, ConsMaj, GT, BP2, MLEACH, MD
+- **Noise analysis**: GT on cm embedding is the only net-negative noise variant (-35); 90% of CDEs lost to noise retained 70%+ text
+- **Cluster splits/joins**: GT#28 (fatigue) splits cleanly by intensity vs frequency in MD; 6/14 large clusters immune to curation differences
+
+### Verbatim Strip Pattern Updates
+- **[PROMIS] tag**: 41 CDEs with bracketed `[PROMIS]`/`[PROMIS.PEDS]` tags
+- **PROMIS regex**: `PROMIS\s+.*?v\d+[\d.]*\s+\S+` for instrument prefix with form/version/item code (31 CDEs)
+- **Repository typos**: "Information Measurement" transposition (2 CDEs), "Patient- Reported" spurious hyphen-space (1 CDE)
+
+### Oracle Strip for Synthetic Data
+- `scripts/oracle_strip_synthetic.py`: Reverses known injections per-dataset using manifest metadata
+- Combined oracle-stripped JSON (900 CDEs) for embedding comparison
+
+### Codebase Quality Improvements
+- **Test coverage**: 128 → 297 tests (+132%), test-to-code ratio 1:30 → 1:15
+  - New: `test_phrase_miner.py` (41 tests), `test_flexible_pattern_matcher.py` (68 tests), `test_workflow_engine.py` (60 tests)
+  - Fixed 4 failing tests, removed stale `test_smart_strip_order.py`
+- **Shared utilities**: `scripts/synthetic_common.py` (injection engine, CLI scaffold, manifest builder)
+- **`parse_tinyid_set()`**: Added to `pattern_tsv_utils.py` — consolidates 27 duplicate parsing patterns
+- **.gitignore**: Fixed overly broad `test*` pattern that excluded all test files
+- **Codebase metrics report**: `docs/codebase-metrics-report.md`
+
+### Embedding Feature Selection (New Codebase)
+- **`clone_git/embedding_feature_selection/`**: Sibling repo for identifying boilerplate-encoding vs signal-carrying embedding dimensions
+- Two orthogonal lenses: curator stripping (real data, no ground truth) + synthetic injection (controlled, known ground truth)
+- **Finding**: minilm (384 dims) provides best clustering anecdotally — smallest model may naturally filter boilerplate
+
 ## What Remains
 
 - **LLM-assisted classification** — implemented (`llm_classify` action), not yet integrated into pipeline
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
-- **Embedding evaluation** — run extract_embed on 7 branching-strip outputs
-- **Full regression test** — legacy vs nway branching strip on allcde03 after curation
+- **Script refactoring** — 6 generators → use `synthetic_common.py` (tag structure variations need care)
+- **tinyId parsing migration** — 27 call sites → `parse_tinyid_set()` (gradual)
+- **Complexity reduction** — top 5 files, ~40-50 helper extractions possible (gradual)
