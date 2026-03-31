@@ -5,7 +5,7 @@
 CDE Analyzer: Automated detection and removal of repeated text patterns from NLM Common Data Elements to improve downstream embedding and clustering quality.
 
 **Author**: Gerard Tromp
-**Version**: 1.0.0
+**Version**: 1.0.1
 **Date**: March 2026
 
 ---
@@ -115,9 +115,9 @@ Automated detection + human-in-the-loop curation + multi-variant stripping
 | Run 3 (further expanded) | 1,480 | ~1,200 | ~280 | 81% reduction |
 
 ### How it works
-- **keep** decisions always auto-apply (pattern recognized = valid)
-- **remove/modify/substitute** auto-apply only if affected CDEs unchanged
-- New tinyIds (CDEs) trigger re-review for non-keep decisions
+- **strip** decisions always auto-apply (pattern recognized = valid)
+- **skip/modify/substitute** auto-apply only if affected CDEs unchanged
+- New tinyIds (CDEs) trigger re-review for non-strip decisions
 
 ### Zipf-based priority triage (v0.9.0)
 - **High-priority** (any domain-specific word, Zipf < 4.0): multi-reviewer queue
@@ -136,7 +136,7 @@ Automated detection + human-in-the-loop curation + multi-variant stripping
 5. **Validate subsumption**: Empirical verification against actual text
 6. **Enrich fields**: Add definition/designation counts
 7. **Curation gate**: Auto-resolve from ledger or present new patterns
-8. **Human curation**: Keep / Remove / Modify / Substitute decisions
+8. **Human curation**: Strip / Skip / Modify / Substitute decisions
 9. **Strip**: Remove curated patterns from text
 
 ### Key parameters
@@ -315,7 +315,7 @@ during re-matching to prevent cross-instrument contamination.
 ### Recommended approach
 Use **permissive settings** (fewer false negatives) and manage the queue with:
 - `--split-priority`: separate domain-specific from common phrases
-- `--split-auto-remove`: pre-fill remove decisions for low-priority
+- `--split-auto-skip`: pre-fill skip decisions for low-priority
 - Curation ledger auto-resolves returning patterns
 
 ### Heuristic for `min_parent_tinyids`
@@ -338,7 +338,7 @@ min_parent_tinyids ~ max(2, N / 1000)
 ### Stage 1: Independent Review
 - Each curator receives their own copy of the pattern file
 - Reviews independently using the TSV editor
-- Assigns decisions: **keep** / **remove** / **modify** / **substitute**
+- Assigns decisions: **strip** / **skip** / **modify** / **substitute**
 
 ### Stage 2: Joint Review of Discrepancies
 - Merge produces inter-rater statistics (Cohen's kappa, Krippendorff's alpha)
@@ -387,7 +387,7 @@ Outputs: consensus.tsv, discrepancies.tsv, inter_rater_report.md, discrepancies.
 - Google Sheets reformats TSV columns unpredictably
 
 **Problem 2: Restricted vocabulary**
-- Curation decisions must be exactly: `keep`, `remove`, `modify`, `substitute`
+- Curation decisions must be exactly: `strip`, `skip`, `modify`, `substitute`
 - Free-text entry invites typos and inconsistency
 - Need dropdown constraints on decision column
 
@@ -404,13 +404,13 @@ Browser-based TSV editor distributed as a Python zipapp (~59 KB, zero dependenci
 ## 18. TSV Editor Features
 
 ### Decision assignment
-- **Keyboard shortcuts**: K (keep), R (remove), M (modify), S (substitute)
-- **Color-coded badges**: Green (keep), Red (remove), Orange (modify), Cyan (substitute)
+- **Keyboard shortcuts**: S (strip), K (skip), M (modify), U (substitute)
+- **Color-coded badges**: Green (strip), Red (skip), Orange (modify), Cyan (substitute)
 - **Dropdown constraint**: Only valid decisions accepted
 
 ### Filtering and navigation
 - **Column filters**: Text search, numeric operators (=, !=, >=, <=)
-- **Decision filter**: Dropdown to show only keep/remove/modify/substitute/empty
+- **Decision filter**: Dropdown to show only strip/skip/modify/substitute/empty
 - **Clear all filters**: Ctrl+Shift+F
 - **Field profile colors**: Blue (definition), Orange (designation), Green (both), Purple (mixed)
 
@@ -420,7 +420,7 @@ Browser-based TSV editor distributed as a Python zipapp (~59 KB, zero dependenci
 - **Undo/redo**: Full history with Ctrl+Z / Ctrl+Shift+Z
 
 ### Zipf pre-fill (v0.9.0)
-- `--split-auto-remove` pre-fills `decision=remove` for low-priority patterns
+- `--split-auto-skip` pre-fills `decision=skip` for low-priority patterns
 - Reviewer only needs to override exceptions
 
 ---
@@ -430,14 +430,14 @@ Browser-based TSV editor distributed as a Python zipapp (~59 KB, zero dependenci
 ### Layout
 ```
 +----------------------------------------------------------+
-| [Open] [Save] [Add] [Del]  |  [K] [R] [M] [S]  | [Clear|
+| [Open] [Save] [Add] [Del]  |  [S] [K] [M] [U]  | [Clear|
 +----------------------------------------------------------+
 | Filter row: [pattern___] [tinyIds___] [decision v] [___] |
 +----------------------------------------------------------+
 | [ ] | pattern              | tinyIds  | decision | notes  |
 |-----|----------------------|----------|----------|--------|
-| [x] | Patient Health Qu... | 12 tinyI | keep     |        |
-| [ ] | In the past 7 da... | 89 tinyI | remove   |        |
+| [x] | Patient Health Qu... | 12 tinyI | strip    |        |
+| [ ] | In the past 7 da... | 89 tinyI | skip     |        |
 | [x] | Please respond t... | 45 tinyI |          |        |
 +----------------------------------------------------------+
 | 1,480 rows | 3 visible | 2 selected       | Saved [OK] |
@@ -476,7 +476,7 @@ cde-analyzer pattern_util --merge-patterns FILE FILE -o OUT
 cde-analyzer pattern_util --field-analysis FILE --input JSON -o OUT
 cde-analyzer pattern_util --validate-subsumption FILE --input JSON -o OUT
 cde-analyzer pattern_util --expand-temporal-seeds -o OUT
-cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]
+cde-analyzer pattern_util --split-priority FILE [--split-auto-skip]
 ```
 
 ---

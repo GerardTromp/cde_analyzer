@@ -59,7 +59,7 @@ cde-analyzer pattern_util --finalize-curation DIR --ledger-dir DIR --phase P -i 
 cde-analyzer pattern_util --detect-rare-words -i cdes.json -m CDE -o rare.tsv
 
 # Split needs_review into high/low priority (Zipf-based)
-cde-analyzer pattern_util --split-priority needs_review.tsv [--split-auto-remove]
+cde-analyzer pattern_util --split-priority needs_review.tsv [--split-auto-skip]
 
 # Pre-strip remnant analysis
 cde-analyzer pattern_util --remnant-analysis patterns.tsv -i cdes.json -o remnants.tsv
@@ -400,7 +400,7 @@ Outputs:
 | File | Contents |
 |------|----------|
 | `gate_result.json` | Classification summary: counts, file paths, skip flag |
-| `auto_resolved.tsv` | Patterns resolved from prior decisions (keep/remove/modify/substitute) |
+| `auto_resolved.tsv` | Patterns resolved from prior decisions (strip/skip/modify/substitute) |
 | `needs_review.tsv` | New or changed patterns requiring human curation |
 | `curated.tsv` | Written ONLY when needs_review is empty (signals checkpoint skip) |
 | `substitute_patterns.tsv` | Patterns with `replace_with` column (from substitute decisions) |
@@ -416,7 +416,7 @@ If the checkpoint was skipped (all auto-resolved), `curated.tsv` and
 `substitute_patterns.tsv` already exist and the ledger is updated with
 timestamps. If the checkpoint paused for human review, `auto_resolved.tsv`
 and the human-curated `needs_review.tsv` are merged into `curated.tsv`
-(keep/modify patterns) and `substitute_patterns.tsv` (substitute patterns
+(strip/modify patterns) and `substitute_patterns.tsv` (substitute patterns
 with `replace_with` column), and all decisions are recorded in the ledger.
 
 **Decision rules:**
@@ -424,9 +424,9 @@ with `replace_with` column), and all decisions are recorded in the ledger.
 | Prior decision | Current tinyIds vs prior | Action |
 |---------------|------------------------|--------|
 | (not in ledger) | — | needs_review (new pattern) |
-| keep | any | auto_keep (validity is inherent) |
-| remove | same or subset | auto_remove |
-| remove | has new tinyIds | needs_review (new context) |
+| strip | any | auto_strip (validity is inherent) |
+| skip | same or subset | auto_skip |
+| skip | has new tinyIds | needs_review (new context) |
 | modify | same or subset | auto_modify (apply stored modification) |
 | modify | has new tinyIds | needs_review (new context) |
 | substitute | same or subset | auto_substitute (apply stored replacement) |
@@ -475,7 +475,7 @@ between them uses `skip_if_file` to skip when all patterns are auto-resolved:
 
 - **First run** (no ledger): All patterns go to `needs_review.tsv`. Full curation required (same as current behavior).
 - **Re-run, same CDEs**: All patterns auto-resolved. Checkpoint skipped entirely.
-- **Re-run, new CDEs**: Prior keep/remove/modify decisions auto-applied; only new patterns presented to curators.
+- **Re-run, new CDEs**: Prior strip/skip/modify decisions auto-applied; only new patterns presented to curators.
 
 ## Options
 
@@ -638,7 +638,7 @@ between them uses `skip_if_file` to skip when all patterns are auto-resolved:
 | Option | Description |
 |--------|-------------|
 | `--split-priority FILE` | Split a needs_review TSV into high-priority (domain-specific) and low-priority (common English) files using wordfreq Zipf scores. Outputs `{stem}_high.tsv` and `{stem}_low.tsv` |
-| `--split-auto-remove` | Pre-fill `decision=remove` in low-priority patterns (default: leave blank) |
+| `--split-auto-skip` | Pre-fill `decision=skip` in low-priority patterns (default: leave blank) |
 
 ### Remnant Analysis Options
 

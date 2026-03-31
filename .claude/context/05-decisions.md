@@ -60,7 +60,7 @@
 
 **Rationale**: Full re-curation of 4,000+ patterns per run is impractical. The ledger reduces subsequent runs to reviewing only genuinely new patterns.
 
-**Classification rules**: `keep` + any tinyIds → auto_keep; `remove`/`modify`/`substitute` + same tinyIds → auto_resolve; different tinyIds → needs_review.
+**Classification rules**: `strip` + any tinyIds → auto_strip; `skip`/`modify`/`substitute` + same tinyIds → auto_resolve; different tinyIds → needs_review.
 
 ## ADR-9: Containment Tree (Client-Side, Virtual Column)
 

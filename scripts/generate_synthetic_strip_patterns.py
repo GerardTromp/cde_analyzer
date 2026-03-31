@@ -202,7 +202,7 @@ def _write_pattern_tsv(rows, path):
         writer.writerows(rows)
 
 
-def _make_row(pattern, tinyids, ptype, source, decision="keep"):
+def _make_row(pattern, tinyids, ptype, source, decision="strip"):
     """Build a pattern row dict."""
     return {
         "pattern": pattern,

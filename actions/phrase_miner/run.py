@@ -103,7 +103,7 @@ def run_action(args: Namespace):
         ledger_patterns=None,  # populated below if --ledger-dir provided
     )
 
-    # Load ledger "remove" patterns for pre-masking if --ledger-dir provided
+    # Load ledger "skip" patterns for pre-masking if --ledger-dir provided
     ledger_dir = getattr(args, 'ledger_dir', None)
     if ledger_dir:
         from logic.curation_ledger import CurationLedger
@@ -112,12 +112,12 @@ def run_action(args: Namespace):
             decisions = ledger.get_decisions("phase2")
             ledger_patterns = {
                 d.pattern for d in decisions.values()
-                if d.decision == "remove"
+                if d.decision in ("skip", "remove")  # accept legacy "remove"
             }
             if ledger_patterns:
                 config.ledger_patterns = ledger_patterns
                 logger.info(
-                    f"Ledger: {len(ledger_patterns)} 'remove' patterns "
+                    f"Ledger: {len(ledger_patterns)} 'skip' patterns "
                     f"loaded for pre-masking"
                 )
         else:

@@ -128,7 +128,7 @@ options:
                         Extend phrases via right-context analysis (default: on)
   --prefix-min-tinyids N
                         Min tinyIds for prefix extension (default: 20)
-  --ledger-dir DIR      Curation ledger for pre-masking remove decisions
+  --ledger-dir DIR      Curation ledger for pre-masking skip decisions
   --histograms          Generate k-mer frequency histograms
 ```
 

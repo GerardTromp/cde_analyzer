@@ -86,7 +86,7 @@ Each file contains all original columns plus four curation columns:
 
 | Column | Curator fills | Example |
 |--------|---------------|---------|
-| `decision` | Required: `keep`, `remove`, or `modify` | `keep` |
+| `decision` | Required: `strip`, `skip`, or `modify` | `strip` |
 | `modification` | Optional: replacement text (when decision = modify) | `PHQ-9 Total` |
 | `notes` | Optional: commentary | `Only in designations` |
 | `curator` | Pre-filled with curator name | `alice` |
@@ -113,8 +113,8 @@ Attachments: cde_editor.pyz, coalesced_fields.alice.tsv
 2. The browser opens with the pattern table loaded.
 
 3. For each pattern, fill in the `decision` column:
-   - **`keep`** — recognized instrument / valid pattern
-   - **`remove`** — false positive / sentence fragment
+   - **`strip`** — recognized instrument / valid pattern
+   - **`skip`** — false positive / sentence fragment
    - **`modify`** — valid pattern but needs text correction (enter the
      corrected text in `modification`)
 
@@ -157,7 +157,7 @@ Each pattern gets a `consensus_decision` based on majority vote:
 |----------------|---------|
 | `unanimous` | All curators chose the same decision |
 | `majority` | >50% chose the same decision |
-| `split` | No majority; tie-break order: keep > modify > remove |
+| `split` | No majority; tie-break order: strip > modify > skip |
 | `single` | Only one curator reviewed this pattern |
 
 ---
@@ -190,7 +190,7 @@ A single reliability metric across all curators. Handles missing data
 
 ### Per-category agreement
 
-Shows which decisions are most consistent. Typical pattern: `keep` has
+Shows which decisions are most consistent. Typical pattern: `strip` has
 high agreement, `modify` has lower agreement (subjective edit choices).
 
 ---
@@ -453,7 +453,7 @@ With this setup, use `port: 8080` and `tls.mode: proxy` in your config.
 - **Two curators minimum**, three recommended for Krippendorff's alpha
 - **Pilot round**: Run a small sample (50 patterns) first to calibrate
   curation guidelines before the full set
-- **Decision consistency**: Agree on definitions of "keep" vs "modify"
+- **Decision consistency**: Agree on definitions of "strip" vs "modify"
   before starting — ambiguity here drives most disagreements
 - **Instrument vs phrase**: If Phase 1 patterns include sentence fragments,
   document this in your guidelines so all curators handle them consistently

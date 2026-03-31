@@ -210,8 +210,8 @@
     <div>
       <h3>Ledger auto-resolution rules</h3>
       <ul>
-        <li><strong>keep</strong> &rarr; always auto-apply</li>
-        <li><strong>remove/modify/substitute</strong> &rarr; auto-apply only if CDEs unchanged</li>
+        <li><strong>strip</strong> &rarr; always auto-apply</li>
+        <li><strong>skip/modify/substitute</strong> &rarr; auto-apply only if CDEs unchanged</li>
         <li>New tinyIds &rarr; re-review</li>
       </ul>
     </div>
@@ -411,7 +411,7 @@
       <p>Use <strong>permissive settings</strong> + Zipf split:</p>
       <ul>
         <li>High-priority (582): multi-reviewer</li>
-        <li>Low-priority (898): fast single triage, pre-filled <code>remove</code></li>
+        <li>Low-priority (898): fast single triage, pre-filled <code>skip</code></li>
         <li>Ledger auto-resolves returning patterns</li>
       </ul>
     </div>
@@ -484,7 +484,7 @@
       </ul>
       <h3>Problem: Restricted vocabulary</h3>
       <ul>
-        <li>Decisions must be exactly: <span class="badge-keep">keep</span> <span class="badge-remove">remove</span> <span class="badge-modify">modify</span> <span class="badge-substitute">substitute</span></li>
+        <li>Decisions must be exactly: <span class="badge-keep">strip</span> <span class="badge-remove">skip</span> <span class="badge-modify">modify</span> <span class="badge-substitute">substitute</span></li>
         <li>Free-text invites typos and inconsistency</li>
       </ul>
     </div>
@@ -513,7 +513,7 @@
     <div>
       <h3>Decision assignment</h3>
       <ul>
-        <li>Keyboard: <strong>K</strong> (keep), <strong>R</strong> (remove), <strong>M</strong> (modify), <strong>S</strong> (substitute)</li>
+        <li>Keyboard: <strong>S</strong> (strip), <strong>K</strong> (skip), <strong>M</strong> (modify), <strong>U</strong> (substitute)</li>
         <li>Color-coded badges inline</li>
         <li>Dropdown constraint on decision column</li>
       </ul>
@@ -539,7 +539,7 @@
         <li>Group stripes (8 rotating hues)</li>
       </ul>
       <h3>Zipf pre-fill (v0.9.0)</h3>
-      <p><code>--split-auto-remove</code> pre-fills <span class="badge-remove">remove</span> for low-priority</p>
+      <p><code>--split-auto-skip</code> pre-fills <span class="badge-remove">skip</span> for low-priority</p>
     </div>
   </div>
 </section>
@@ -557,8 +557,8 @@
       <span class="mock-btn">&uarr;</span>
       <span class="mock-btn">&darr;</span>
       <span class="mock-sep"></span>
-      <span class="mock-btn keep">&check; Keep</span>
-      <span class="mock-btn remove">&cross; Remove</span>
+      <span class="mock-btn keep">&check; Strip</span>
+      <span class="mock-btn remove">&cross; Skip</span>
       <span class="mock-btn modify">&#10038; Modify</span>
       <span class="mock-btn substitute">&#8644; Subst</span>
       <span class="mock-sep"></span>
@@ -588,7 +588,7 @@
       </tr>
       <tr class="fp-both">
         <td class="mock-cb">&#9744;</td><td class="mock-rn">1</td>
-        <td><span class="mock-badge keep">keep</span></td>
+        <td><span class="mock-badge keep">strip</span></td>
         <td></td>
         <td>SF-12 Health Survey</td>
         <td>aB3k | xP7m&hellip;</td>
@@ -596,7 +596,7 @@
       </tr>
       <tr class="fp-def selected">
         <td class="mock-cb">&#9745;</td><td class="mock-rn">2</td>
-        <td><span class="mock-badge remove">remove</span></td>
+        <td><span class="mock-badge remove">skip</span></td>
         <td></td>
         <td>I felt</td>
         <td>cD9n | hJ2q&hellip;</td>
@@ -672,7 +672,7 @@
         <li>Extracts columns by header name (not position)</li>
       </ul>
       <h3>Split operations</h3>
-      <pre><code>--split-priority needs_review.tsv --split-auto-remove</code></pre>
+      <pre><code>--split-priority needs_review.tsv --split-auto-skip</code></pre>
       <ul>
         <li>Zipf-based priority triage</li>
         <li>Field-profile-based splitting</li>

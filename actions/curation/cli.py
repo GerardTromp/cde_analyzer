@@ -204,9 +204,11 @@ def register_subparser(subparser: ArgumentParser):
              "Use --zipf-threshold to control the cutoff (default: 4.0).",
     )
     subparser.add_argument(
-        "--split-auto-remove",
+        "--split-auto-skip",
+        "--split-auto-remove",  # backwards-compatible alias
         action="store_true",
-        help="Pre-fill decision='remove' in low-priority patterns "
+        dest="split_auto_remove",  # keep internal attr name for compat
+        help="Pre-fill decision='skip' in low-priority patterns "
              "(used with --split-priority). Default: leave decision blank.",
     )
     subparser.add_argument(

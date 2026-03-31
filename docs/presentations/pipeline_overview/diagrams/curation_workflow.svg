@@ -158,6 +158,6 @@
   <line x1="800" y1="507" x2="602" y2="507" stroke="#444" stroke-width="1.5" marker-end="url(#aw)"/>
 
   <!-- Ledger feedback note -->
-  <text x="475" y="555" text-anchor="middle" class="note">Ledger auto-resolves returning patterns in future runs (keep decisions always auto-apply;</text>
-  <text x="475" y="570" text-anchor="middle" class="note">remove/modify/substitute auto-apply only if affected CDEs unchanged)</text>
+  <text x="475" y="555" text-anchor="middle" class="note">Ledger auto-resolves returning patterns in future runs (strip decisions always auto-apply;</text>
+  <text x="475" y="570" text-anchor="middle" class="note">skip/modify/substitute auto-apply only if affected CDEs unchanged)</text>
 </svg>

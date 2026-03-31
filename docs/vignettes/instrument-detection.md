@@ -14,7 +14,7 @@ analysis.
 This vignette covers:
 
 - Running the instrument pipeline and interpreting its output
-- Curation decisions: what to keep, remove, and investigate
+- Curation decisions: what to strip, skip, and investigate
 - Iterative harvesting to catch instruments missed in the first pass
 - Supplementary pattern management
 - Tuning parameters and troubleshooting common issues
@@ -136,7 +136,7 @@ the server.
 
 ## 4. Curation Decisions
 
-### True instruments — keep
+### True instruments — strip
 
 ```tsv
 Patient Health Questionnaire (PHQ-9)       abc|def|ghi     12    45    definition+designation
@@ -145,9 +145,9 @@ Berg Balance Scale                         pqr|stu          5    18    definitio
 ```
 
 These are recognized assessment instruments. The example columns confirm they
-appear in instrument-related context. Keep them.
+appear in instrument-related context. Strip them.
 
-### Verb fragments — remove
+### Verb fragments — skip
 
 ```tsv
 think about         uvw|xyz     0     3     designation_only
@@ -158,14 +158,14 @@ to your             eee|fff     0     5     designation_only
 
 These contain verbs or pronouns (`think`, `tired`, `my`, `your`) and are
 sentence fragments, not instrument names. They have zero definition counts
-and low designation counts. Remove them.
+and low designation counts. Skip them.
 
 !!! tip "Quick filter for verb fragments"
     Sort by `def_count` ascending. Patterns with `def_count=0` and
     `field_profile=designation_only` are the most likely false positives.
     Check the `example_context` column to confirm they are sentence fragments.
 
-### Sub-domain families — keep both
+### Sub-domain families — strip both
 
 ```tsv
 Neuro-QOL                                  jkl|mno|pqr     15    60    definition+designation

@@ -121,6 +121,9 @@ bracketed_annotations:
   - pattern: "[NHANES]"
     note: "National Health and Nutrition Examination Survey source tag"
 
+  - pattern: "[PhenX]"
+    note: "PhenX toolkit source tag - 1935 occurrences in designations"
+
 # =============================================================================
 # Bare instrument abbreviations (LOINC-style field suffixes)
 # These appear as trailing tokens in designations and LOINC value strings
@@ -143,6 +146,12 @@ bare_instrument_abbrevs:
 
   - pattern: "NHANES"
     note: "National Health and Nutrition Examination Survey bare abbreviation"
+
+  - pattern: "PhenX"
+    note: "PhenX toolkit bare abbreviation - 1892 trailing occurrences in designations"
+
+  - pattern: "REGEX: PhenX$"
+    note: "Trailing PhenX at end of designations (e.g. '# Ds miss school nRate PhenX')"
 
 # =============================================================================
 # Boilerplate phrases (non-instrument)
@@ -191,6 +200,59 @@ repository_typos:
 
   - pattern: "Outcome Information Measurement System (PROMIS)"
     note: "Transposed PROMIS suffix without Patient-Reported prefix - catches anchor-stripped variants"
+
+boilerplate_eyegene:
+  - pattern: "This term was developed in collaboration with the National Institute of Health's National Eye Institute (NEI) as part of an effort to standardize the data elements collected by the National Ophthalmic Disease Genotyping and Phenotyping Network (eyeGENE)."
+    note: "eyeGENE boilerplate definition - 105 CDEs. Full sentence including period."
+
+instrument_residuals:
+  - pattern: "contextual and cue fear conditioning test"
+    note: "Behavioral neuroscience test - 25 occurrences (not caught by instrument mining)"
+
+  - pattern: "Contextual and cue fear conditioning test"
+    note: "Sentence-case variant"
+
+  - pattern: "Neurological deficit score"
+    note: "Clinical scale - 8 occurrences"
+
+  - pattern: "the Neurological deficit score"
+    note: "With leading article - 8 occurrences"
+
+  - pattern: "the Substance Abuse Questions"
+    note: "Instrument reference - 7 occurrences"
+
+  - pattern: "Substance Abuse Questions"
+    note: "Without leading article"
+
+  - pattern: "the speech and language therapy treatment session"
+    note: "Therapy session reference - 14 occurrences"
+
+  - pattern: "speech and language therapy treatment session"
+    note: "Without leading article"
+
+  - pattern: "the past and current illness assessment"
+    note: "Assessment reference - 3 occurrences"
+
+  - pattern: "past and current illness assessment"
+    note: "Without leading article"
+
+  - pattern: "the single-question screening test for drug use"
+    note: "Screening test reference - 2 occurrences"
+
+  - pattern: "single-question screening test for drug use"
+    note: "Without leading article"
+
+  - pattern: "the motor examination"
+    note: "Clinical examination reference - 3 occurrences"
+
+  - pattern: "motor examination"
+    note: "Without leading article"
+
+  - pattern: "nocturnal oximetry"
+    note: "Diagnostic test - 3 occurrences"
+
+  - pattern: "the PROMIS"
+    note: "Residual PROMIS reference after instrument stripping - 3 occurrences"
 
 boilerplate_nlm:
   - pattern: 'NLM disclaimer: Consistent with Executive Order 14168, "gender" should not be used as a replacement for the element "sex" in the NIH CDE repository.'

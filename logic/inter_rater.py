@@ -19,8 +19,11 @@ from typing import Dict, List, Optional, Set, Tuple
 logger = logging.getLogger(__name__)
 
 # Default decision categories and tie-break order (highest priority first)
-DEFAULT_CATEGORIES = ["keep", "remove", "modify"]
-TIE_BREAK_ORDER = {"keep": 0, "modify": 1, "remove": 2}
+DEFAULT_CATEGORIES = ["strip", "skip", "modify"]
+TIE_BREAK_ORDER = {"strip": 0, "modify": 1, "skip": 2}
+
+# Backwards compatibility: normalize legacy decision values
+_DECISION_COMPAT = {"keep": "strip", "remove": "skip"}
 
 
 # ──────────────────────────────────────────────────────────────
@@ -265,7 +268,7 @@ def compute_agreement_stats(
     curators : list[str]
         Ordered list of curator names.
     categories : list[str], optional
-        Valid decision categories.  Default: ["keep", "remove", "modify"].
+        Valid decision categories.  Default: ["strip", "skip", "modify"].
 
     Returns
     -------
@@ -274,6 +277,14 @@ def compute_agreement_stats(
     """
     if categories is None:
         categories = DEFAULT_CATEGORIES
+
+    # Normalize legacy decision values (keep→strip, remove→skip)
+    normalized: Dict[str, Dict[str, str]] = {}
+    for pattern, curator_map in decisions.items():
+        normalized[pattern] = {
+            c: _DECISION_COMPAT.get(d, d) for c, d in curator_map.items()
+        }
+    decisions = normalized
 
     n_patterns = len(decisions)
     n_curators = len(curators)

@@ -1,7 +1,7 @@
 """
 Curation Ledger — persistent record of human curation decisions.
 
-Tracks keep/remove/modify decisions across pipeline runs so that
+Tracks strip/skip/modify decisions across pipeline runs so that
 re-runs with expanded CDE repositories only present genuinely new
 patterns for curation.
 
@@ -17,9 +17,9 @@ Decision rules for classify_patterns():
     Prior decision  | Current tinyIds vs prior  | Action
     ----------------+---------------------------+--------------------------
     (not in ledger) | —                         | needs_review (new)
-    keep            | any                       | auto_keep
-    remove          | same or subset            | auto_remove
-    remove          | has new tinyIds           | needs_review
+    strip           | any                       | auto_strip
+    skip            | same or subset            | auto_skip
+    skip            | has new tinyIds           | needs_review
     modify          | same or subset            | auto_modify (apply mod)
     modify          | has new tinyIds           | needs_review
     substitute      | same or subset            | auto_substitute
@@ -45,7 +45,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 class CurationDecision:
     """A single curation decision for one pattern."""
     pattern: str
-    decision: str          # "keep" | "remove" | "modify" | "substitute"
+    decision: str          # "strip" | "skip" | "modify" | "substitute"
     modification: str = ""
     tinyIds: Set[str] = field(default_factory=set)
     n_tinyIds: int = 0
@@ -162,12 +162,12 @@ class CurationLedger:
         }
         if summary:
             record.update({
-                "n_auto_kept": summary.get("auto_keep", 0),
-                "n_auto_removed": summary.get("auto_remove", 0),
+                "n_auto_stripped": summary.get("auto_strip", 0),
+                "n_auto_skipped": summary.get("auto_skip", 0),
                 "n_auto_modified": summary.get("auto_modify", 0),
                 "n_auto_substituted": summary.get("auto_substitute", 0),
                 "n_new_reviewed": summary.get("new_pattern", 0)
-                    + summary.get("changed_tinyids_remove", 0)
+                    + summary.get("changed_tinyids_skip", 0)
                     + summary.get("changed_tinyids_modify", 0)
                     + summary.get("changed_tinyids_substitute", 0),
             })
@@ -211,19 +211,19 @@ def classify_patterns(
         Patterns that need human curation.  Each dict has all original
         columns plus empty ``decision``, ``modification``, ``notes``.
     summary : dict
-        Counts: auto_keep, auto_remove, auto_modify, auto_substitute,
-        new_pattern, changed_tinyids_remove, changed_tinyids_modify,
+        Counts: auto_strip, auto_skip, auto_modify, auto_substitute,
+        new_pattern, changed_tinyids_skip, changed_tinyids_modify,
         changed_tinyids_substitute.
     """
     auto_resolved: List[Dict[str, str]] = []
     needs_review: List[Dict[str, str]] = []
     summary = {
-        "auto_keep": 0,
-        "auto_remove": 0,
+        "auto_strip": 0,
+        "auto_skip": 0,
         "auto_modify": 0,
         "auto_substitute": 0,
         "new_pattern": 0,
-        "changed_tinyids_remove": 0,
+        "changed_tinyids_skip": 0,
         "changed_tinyids_modify": 0,
         "changed_tinyids_substitute": 0,
     }
@@ -247,29 +247,29 @@ def classify_patterns(
 
         has_new = _has_new_tinyids(current_tinyids, prior.tinyIds)
 
-        if prior.decision == "keep":
+        if prior.decision == "strip":
             ar = dict(row)
-            ar["prior_decision"] = "keep"
-            ar["resolution_source"] = "ledger_auto_keep"
+            ar["prior_decision"] = "strip"
+            ar["resolution_source"] = "ledger_auto_strip"
             ar["modification"] = ""
             auto_resolved.append(ar)
-            summary["auto_keep"] += 1
+            summary["auto_strip"] += 1
 
-        elif prior.decision == "remove":
+        elif prior.decision == "skip":
             if has_new:
                 nr = dict(row)
                 nr["decision"] = ""
                 nr["modification"] = ""
-                nr["notes"] = f"Previously removed; new tinyIds detected"
+                nr["notes"] = f"Previously skipped; new tinyIds detected"
                 needs_review.append(nr)
-                summary["changed_tinyids_remove"] += 1
+                summary["changed_tinyids_skip"] += 1
             else:
                 ar = dict(row)
-                ar["prior_decision"] = "remove"
-                ar["resolution_source"] = "ledger_auto_remove"
+                ar["prior_decision"] = "skip"
+                ar["resolution_source"] = "ledger_auto_skip"
                 ar["modification"] = ""
                 auto_resolved.append(ar)
-                summary["auto_remove"] += 1
+                summary["auto_skip"] += 1
 
         elif prior.decision == "modify":
             if has_new:
@@ -332,6 +332,9 @@ def _has_new_tinyids(current: Set[str], prior: Set[str]) -> bool:
 
 def _load_decisions_tsv(path: Path) -> Dict[str, CurationDecision]:
     """Load a decisions TSV into a pattern-keyed dict."""
+    # Normalize legacy decision values (keep→strip, remove→skip)
+    _DECISION_COMPAT = {"keep": "strip", "remove": "skip"}
+
     decisions: Dict[str, CurationDecision] = {}
     with open(path, encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
@@ -341,9 +344,11 @@ def _load_decisions_tsv(path: Path) -> Dict[str, CurationDecision]:
                 continue
             tinyids_str = row.get("tinyIds", "")
             tinyids = set(t for t in re.split(r"[\s|]+", tinyids_str) if t)
+            raw_decision = row.get("decision", "strip")
+            decision = _DECISION_COMPAT.get(raw_decision, raw_decision)
             decisions[pattern] = CurationDecision(
                 pattern=pattern,
-                decision=row.get("decision", "keep"),
+                decision=decision,
                 modification=row.get("modification", ""),
                 tinyIds=tinyids,
                 n_tinyIds=len(tinyids),

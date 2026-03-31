@@ -160,4 +160,4 @@ def register_subparser(subparser: ArgumentParser):
              "Use this flag to suppress that behavior.",
     )
 
-    subparser.set_defaults(run=_get_run_action())
+    subparser.set_defaults(func=_get_run_action())

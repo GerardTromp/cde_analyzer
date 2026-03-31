@@ -1,6 +1,6 @@
 # TSV Pattern Editor — Cheatsheet
 
-> **Version**: v1.0.0 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
+> **Version**: v1.0.1 &nbsp;|&nbsp; **Visual reference**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html) (print-friendly, includes interface mockup)
 
 ---
 
@@ -20,9 +20,9 @@ Opens at `http://localhost:8777`. The editor auto-detects curation columns (`dec
 
 ## 5-Minute Curation
 
-### 1. Remove false positives
+### 1. Skip false positives
 
-Scan patterns. Select bad rows (click checkboxes, Shift+click for ranges). Press **R**.
+Scan patterns. Select bad rows (click checkboxes, Shift+click for ranges). Press **K**.
 
 Common false positives: generic phrases ("I felt", "Return to"), imaging techniques (PET, MRI unless actual questionnaire names), government agencies (OMB), overly short acronyms.
 
@@ -34,13 +34,13 @@ For multiple rows sharing the same modification, **group** them first (select 2+
 
 ### 3. Substitute instead of delete
 
-For patterns that should be *replaced* rather than deleted, select and press **S**. Double-click the **modification** column and type the replacement text that will appear in the output.
+For patterns that should be *replaced* rather than deleted, select and press **U**. Double-click the **modification** column and type the replacement text that will appear in the output.
 
-### 4. Mass keep — approve the rest
+### 4. Mass strip — approve the rest
 
 1. Set the decision filter to **`blank`** (dropdown in the filter row)
 2. **Ctrl+A** to select all visible (undecided) rows
-3. Press **K** to set them all to `keep`
+3. Press **S** to set them all to `strip`
 4. Reset filter to `(all)` to verify
 
 ### 5. Save
@@ -53,8 +53,8 @@ For patterns that should be *replaced* rather than deleted, select and press **S
 
 | Decision | When to use | What happens |
 |----------|-------------|--------------|
-| **keep** | Real instrument/scale name | Stripped (deleted) from CDE text |
-| **remove** | False positive — not an instrument | Excluded from final pattern set |
+| **strip** | Real instrument/scale name | Stripped (deleted) from CDE text |
+| **skip** | False positive — not an instrument | Excluded from final pattern set |
 | **modify** | Partially correct text | `modification` becomes the new pattern to strip |
 | **substitute** | Replace, don't delete | `modification` replaces the matched text in output |
 | **followup** | Needs more evaluation | Flagged for later review; counts as undecided |
@@ -64,7 +64,7 @@ For patterns that should be *replaced* rather than deleted, select and press **S
     **Modify** changes *what gets stripped* (corrects the pattern text before deletion).
     **Substitute** changes *what appears in the output* (matched text is replaced, not deleted).
 
-Blank decision = treated as `keep` by the pipeline (safe default). Followup = treated as undecided.
+Blank decision = treated as `strip` by the pipeline (safe default). Followup = treated as undecided.
 
 ---
 
@@ -74,10 +74,10 @@ Blank decision = treated as `keep` by the pipeline (safe default). Followup = tr
 
 | Key | Action |
 |-----|--------|
-| **K** | Set selected → `keep` |
-| **R** | Set selected → `remove` |
+| **S** | Set selected → `strip` |
+| **K** | Set selected → `skip` |
 | **M** | Set selected → `modify` |
-| **S** | Set selected → `substitute` |
+| **U** | Set selected → `substitute` |
 | **F** | Set selected → `followup` |
 | **T** | Toggle tree sort (no rows selected) |
 
@@ -144,13 +144,13 @@ When containment is found, a virtual **tree** column appears as column #3. This 
 ### Tree-Assisted Curation Workflow
 
 1. Press **T** to enable tree sort — parents appear above their children
-2. Set **keep** on the parent pattern (e.g., "Scale of" with 409 tinyIds)
+2. Set **strip** on the parent pattern (e.g., "Scale of" with 409 tinyIds)
 3. Children are visible below — most are longer phrases whose tinyIds are fully contained
-4. Select children → **R** to remove (since the parent already covers them)
+4. Select children → **K** to skip (since the parent already covers them)
 5. Or use **⊃ Propagate** to bulk-copy the parent's decision to all descendants
 
 !!! tip "Why containment matters"
-    If "Scale of" (409 tinyIds) fully contains "Scale of the difficulty…" (133 tinyIds), keeping the parent and removing the children is safe — the parent pattern already strips all text matched by its children.
+    If "Scale of" (409 tinyIds) fully contains "Scale of the difficulty…" (133 tinyIds), stripping the parent and skipping the children is safe — the parent pattern already strips all text matched by its children.
 
 ### Status Bar
 
@@ -172,7 +172,7 @@ Each column has a filter below the header. The **decision column** uses a dropdo
 | `=10` / `!=5` | Numeric equals / not-equals |
 | `foo\|bar` | "foo" OR "bar" |
 
-Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modify` · `substitute` · `followup`
+Decision dropdown: `(all)` · `blank` · `filled` · `strip` · `skip` · `modify` · `substitute` · `followup`
 
 ---
 
@@ -180,7 +180,7 @@ Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modi
 
 | Element | Meaning |
 |---------|---------|
-| Green / Red / Amber / Cyan / Purple badge | Decision: keep / remove / modify / substitute / followup |
+| Green / Red / Amber / Cyan / Purple badge | Decision: strip / skip / modify / substitute / followup |
 | Blue left border | `def-only` field profile |
 | Orange left border | `desig-only` field profile |
 | Green left border | `both` / `both-all` field profile |
@@ -193,7 +193,7 @@ Decision dropdown: `(all)` · `blank` · `filled` · `keep` · `remove` · `modi
 
 ```
 needs_review.tsv -- 458 rows (3 selected) | ✓430  ✗24  ✎4  ⇄2  ⚑1  ?0  | tinyIds: 18,240/18,502  server
-                                             keep  rem  mod sub  flup undecided   decided/total
+                                             strip skip mod sub  flup undecided   decided/total
 ```
 
 - **Counts update in real-time** as you assign decisions
@@ -227,7 +227,7 @@ needs_review.tsv -- 458 rows (3 selected) | ✓430  ✗24  ✎4  ⇄2  ⚑1  ?0 
 Return your curated TSV. The pipeline will:
 
 1. **Merge** your edits with auto-resolved patterns
-2. **Apply decisions**: keep → strip, modify → rewrite + strip, substitute → replace, remove → exclude
+2. **Apply decisions**: strip → strip, modify → rewrite + strip, substitute → replace, skip → exclude
 3. **Update the curation ledger** for future incremental runs
 4. **Strip/substitute** from CDE text fields
 
@@ -259,7 +259,7 @@ If a pattern contains quotes (e.g., `COVID-19 Mitigation Policy`), search the JS
 - **Undo is generous** — 50 levels. Don't fear mistakes.
 - **Shift+click** checkboxes for range selection — much faster than individual clicks.
 - **Double-click** a decision badge to edit via dropdown (single row).
-- **The `K` shortcut is your friend** — after triaging removes/modifies, filter to blank, Ctrl+A, K. Done.
+- **The `S` shortcut is your friend** — after triaging skips/modifies, filter to blank, Ctrl+A, S. Done.
 - **TinyId columns** collapse to 3 IDs + count badge. Click to expand.
 - **`tinyid_count`** — read-only column auto-computed from `tinyIds`. Displayed as column 2.
 - **`tree`** — virtual column showing containment hierarchy. Displayed as column 3 when containment exists. Not saved to TSV.

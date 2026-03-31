@@ -305,7 +305,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <tr><td><code>foo|bar</code></td><td>&ldquo;foo&rdquo; OR &ldquo;bar&rdquo;</td></tr>
         </table>
         <p class="small mt">The <strong>decision column</strong> uses a dropdown filter:<br>
-        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>keep</code> | <code>remove</code> | <code>modify</code> | <code>substitute</code> | <code>followup</code></p>
+        <code>(all)</code> | <code>blank</code> | <code>filled</code> | <code>strip</code> | <code>skip</code> | <code>modify</code> | <code>substitute</code> | <code>followup</code></p>
       </div>
 
       <div class="section">
@@ -316,8 +316,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
             <span class="mock-btn">Save</span>
             <span class="mock-btn">Save As</span>
             <span class="mock-sep"></span>
-            <span class="mock-btn keep">&check; Keep</span>
-            <span class="mock-btn remove">&cross; Remove</span>
+            <span class="mock-btn keep">&check; Strip</span>
+            <span class="mock-btn remove">&cross; Skip</span>
             <span class="mock-btn modify">&#10038; Modify</span>
             <span class="mock-btn substitute">&#8644; Subst</span>
             <span class="mock-sep"></span>
@@ -348,7 +348,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
             <tr class="fp-both">
               <td class="mock-cb">&#9744;</td>
               <td class="mock-rn">1</td>
-              <td><span class="mock-badge keep">keep</span></td>
+              <td><span class="mock-badge keep">strip</span></td>
               <td></td>
               <td>SF-12 Health Survey</td>
               <td>aB3k | xP7m&hellip;</td>
@@ -356,7 +356,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
             <tr class="fp-def selected">
               <td class="mock-cb">&#9745;</td>
               <td class="mock-rn">2</td>
-              <td><span class="mock-badge remove">remove</span></td>
+              <td><span class="mock-badge remove">skip</span></td>
               <td></td>
               <td>I felt</td>
               <td>cD9n | hJ2q&hellip;</td>
@@ -394,7 +394,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         </div>
         <h3>Visual Cues</h3>
         <table>
-          <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span> <span class="swatch" style="background:#f3e5f5;border:1px solid #7b1fa2;"></span></td><td>Decision badges: keep / remove / modify / substitute / followup</td></tr>
+          <tr><td><span class="swatch" style="background:#c6f6d5;border:1px solid #48bb78;"></span> <span class="swatch" style="background:#fed7d7;border:1px solid #fc8181;"></span> <span class="swatch" style="background:#fff3e0;border:1px solid #ed8936;"></span> <span class="swatch" style="background:#e0f7fa;border:1px solid #00838f;"></span> <span class="swatch" style="background:#f3e5f5;border:1px solid #7b1fa2;"></span></td><td>Decision badges: strip / skip / modify / substitute / followup</td></tr>
           <tr><td><span class="swatch" style="background:#fff;border-left:3px solid #4299e1;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #ed8936;"></span> <span class="swatch" style="background:#fff;border-left:3px solid #48bb78;"></span></td><td>Left border: def-only / desig-only / both</td></tr>
           <tr><td><span class="swatch" style="background:#fff;border-right:3px solid #e91e63;"></span> <span class="swatch" style="background:#fff;border-right:3px solid #2196f3;"></span></td><td>Right border + badge: merge group (G1, G2&hellip;)</td></tr>
         </table>
@@ -434,10 +434,10 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <h2>Keyboard Shortcuts</h2>
         <h3>Decision Assignment</h3>
         <table>
-          <tr><td><span class="key">K</span></td><td>Set selected &rarr; <code>keep</code></td></tr>
-          <tr><td><span class="key">R</span></td><td>Set selected &rarr; <code>remove</code></td></tr>
+          <tr><td><span class="key">S</span></td><td>Set selected &rarr; <code>strip</code></td></tr>
+          <tr><td><span class="key">K</span></td><td>Set selected &rarr; <code>skip</code></td></tr>
           <tr><td><span class="key">M</span></td><td>Set selected &rarr; <code>modify</code></td></tr>
-          <tr><td><span class="key">S</span></td><td>Set selected &rarr; <code>substitute</code></td></tr>
+          <tr><td><span class="key">U</span></td><td>Set selected &rarr; <code>substitute</code></td></tr>
           <tr><td><span class="key">F</span></td><td>Set selected &rarr; <code>followup</code></td></tr>
           <tr><td><span class="key">T</span></td><td>Toggle tree sort (no selection)</td></tr>
         </table>
@@ -467,8 +467,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <p>Each row is a detected <strong>pattern</strong>. Decide what happens to it:</p>
         <table>
           <tr><th>Decision</th><th>When to use</th><th>Effect</th></tr>
-          <tr><td><span class="mock-badge keep">keep</span></td><td>Real instrument/scale</td><td>Stripped (deleted)</td></tr>
-          <tr><td><span class="mock-badge remove">remove</span></td><td>False positive</td><td>Excluded entirely</td></tr>
+          <tr><td><span class="mock-badge keep">strip</span></td><td>Real instrument/scale</td><td>Stripped (deleted)</td></tr>
+          <tr><td><span class="mock-badge remove">skip</span></td><td>False positive</td><td>Excluded entirely</td></tr>
           <tr><td><span class="mock-badge modify">modify</span></td><td>Partially correct</td><td>Modification text <em>replaces</em> pattern, then stripped</td></tr>
           <tr><td><span class="mock-badge substitute">substitute</span></td><td>Replace, don&rsquo;t delete</td><td>Modification text <em>appears in output</em></td></tr>
           <tr><td><span class="mock-badge followup">followup</span></td><td>Needs more evaluation</td><td>Flagged; counts as undecided</td></tr>
@@ -476,7 +476,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <h3>Modify vs Substitute</h3>
         <p><strong>Modify</strong> changes <em>what gets stripped</em> (corrects the pattern text before deletion).
         <strong>Substitute</strong> changes <em>what appears in the output</em> (matched text is replaced, not deleted).</p>
-        <p class="small">Blank decision = treated as <code>keep</code> (safe default).</p>
+        <p class="small">Blank decision = treated as <code>strip</code> (safe default).</p>
       </div>
 
       <div class="section orange">
@@ -484,15 +484,15 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <ol class="num-list orange">
           <li><strong>Sort by tinyId count (descending)</strong><br>
           Click <code>tinyid_count</code> header twice &mdash; highest-impact patterns first</li>
-          <li><strong>Evaluate top patterns &rarr; keep</strong><br>
-          Select real instruments/phrases, press <span class="key">K</span></li>
+          <li><strong>Evaluate top patterns &rarr; strip</strong><br>
+          Select real instruments/phrases, press <span class="key">S</span></li>
           <li><strong>Filter by group keyword</strong><br>
-          For each &ldquo;keep&rdquo; pattern, filter the <code>group_key</code> column by a keyword from its tinyIds.
-          This shows all related patterns &mdash; most will be extensions that remove semantic context &rarr; <span class="key">R</span></li>
+          For each &ldquo;strip&rdquo; pattern, filter the <code>group_key</code> column by a keyword from its tinyIds.
+          This shows all related patterns &mdash; most will be extensions that remove semantic context &rarr; <span class="key">K</span></li>
           <li><strong>Handle modify/substitute cases</strong><br>
-          Press <span class="key">M</span> or <span class="key">S</span>, dbl-click modification, type correction</li>
-          <li><strong>Mass keep remaining</strong><br>
-          Filter decision to <code>blank</code>, <span class="key">Ctrl</span>+<span class="key">A</span>, <span class="key">K</span></li>
+          Press <span class="key">M</span> or <span class="key">U</span>, dbl-click modification, type correction</li>
+          <li><strong>Mass strip remaining</strong><br>
+          Filter decision to <code>blank</code>, <span class="key">Ctrl</span>+<span class="key">A</span>, <span class="key">S</span></li>
           <li><strong>Save</strong><br>
           <span class="key">Ctrl</span>+<span class="key">S</span> (server) or Save As (standalone)</li>
         </ol>
@@ -531,28 +531,28 @@ python cde_editor.pyz needs_review.tsv</code></pre>
             </tr>
             <tr>
               <td class="mock-rn">1</td>
-              <td><span class="mock-badge keep">keep</span></td>
+              <td><span class="mock-badge keep">strip</span></td>
               <td>409</td>
               <td><span class="mock-tree-toggle">&#9660;</span> <span class="mock-tree-badge">5</span></td>
               <td>Scale of</td>
             </tr>
             <tr>
               <td class="mock-rn">2</td>
-              <td><span class="mock-badge remove">remove</span></td>
+              <td><span class="mock-badge remove">skip</span></td>
               <td>352</td>
               <td><span class="mock-tree-dot">&middot;</span> <span class="mock-tree-toggle">&#9654;</span> <span class="mock-tree-badge">2</span></td>
               <td>Scale of the</td>
             </tr>
             <tr>
               <td class="mock-rn">3</td>
-              <td><span class="mock-badge remove">remove</span></td>
+              <td><span class="mock-badge remove">skip</span></td>
               <td>133</td>
               <td><span class="mock-tree-dot">&middot;&middot;</span> <span class="mock-tree-ref">&sup3; Scale of the</span></td>
               <td>Scale of the difficulty&hellip;</td>
             </tr>
             <tr>
               <td class="mock-rn">4</td>
-              <td><span class="mock-badge remove">remove</span></td>
+              <td><span class="mock-badge remove">skip</span></td>
               <td>89</td>
               <td><span class="mock-tree-dot">&middot;</span> <span class="mock-tree-ref">&sup3; Scale of</span></td>
               <td>Scale of the ability&hellip;</td>
@@ -576,8 +576,8 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <h3>Tree-Assisted Workflow</h3>
         <ol class="num-list blue">
           <li>Press <span class="key">T</span> for tree sort</li>
-          <li>Set <span class="key">K</span> on parent pattern</li>
-          <li>Select children &rarr; <span class="key">R</span> to remove</li>
+          <li>Set <span class="key">S</span> on parent pattern</li>
+          <li>Select children &rarr; <span class="key">K</span> to skip</li>
           <li>Or click <strong>[&sup3; Propagate]</strong> for bulk copy</li>
         </ol>
         <p class="small">Tree column is virtual &mdash; <strong>not saved</strong> to TSV. Computed on load.</p>
@@ -665,7 +665,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
           <li><strong>Undo is generous</strong> &mdash; 50 levels. Don&rsquo;t fear mistakes.</li>
           <li><strong>Shift+click</strong> checkboxes for range selection &mdash; much faster.</li>
           <li><strong>Dbl-click</strong> a decision badge to edit via dropdown (single row).</li>
-          <li><strong>The <span class="key">K</span> shortcut is your friend</strong> &mdash; after triaging removes and modifies, filter to <code>blank</code>, Ctrl+A, K. Done.</li>
+          <li><strong>The <span class="key">S</span> shortcut is your friend</strong> &mdash; after triaging skips and modifies, filter to <code>blank</code>, Ctrl+A, S. Done.</li>
           <li><strong>TinyId columns</strong> collapse to 3 IDs + count badge. Click to expand.</li>
           <li><strong>Drag row numbers</strong> to reorder by drag-and-drop.</li>
           <li><strong>Column sorting</strong> &mdash; click any header.</li>
@@ -677,7 +677,7 @@ python cde_editor.pyz needs_review.tsv</code></pre>
         <p>Return your curated TSV. The pipeline will:</p>
         <ol class="num-list orange">
           <li><strong>Merge</strong> your edits with auto-resolved patterns</li>
-          <li><strong>Apply decisions</strong>: keep &rarr; strip, modify &rarr; rewrite+strip, substitute &rarr; replace, remove &rarr; exclude</li>
+          <li><strong>Apply decisions</strong>: strip &rarr; strip, modify &rarr; rewrite+strip, substitute &rarr; replace, skip &rarr; exclude</li>
           <li><strong>Update ledger</strong> for future incremental runs</li>
           <li><strong>Strip/substitute</strong> from CDE text fields</li>
         </ol>

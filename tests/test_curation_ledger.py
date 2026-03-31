@@ -40,53 +40,53 @@ class TestClassifyPatterns(unittest.TestCase):
         self.assertEqual(review[0]["pattern"], "New Pattern")
         self.assertEqual(summary["new_pattern"], 1)
 
-    def test_keep_same_tinyids(self):
-        """Prior keep + same tinyIds → auto_keep."""
+    def test_strip_same_tinyids(self):
+        """Prior strip + same tinyIds → auto_strip."""
         current = [self._make_row("PHQ-9", "tid1 tid2")]
-        prior = {"PHQ-9": self._make_decision("PHQ-9", "keep", {"tid1", "tid2"})}
+        prior = {"PHQ-9": self._make_decision("PHQ-9", "strip", {"tid1", "tid2"})}
         auto, review, summary = classify_patterns(current, prior)
         self.assertEqual(len(auto), 1)
         self.assertEqual(len(review), 0)
-        self.assertEqual(auto[0]["prior_decision"], "keep")
-        self.assertEqual(summary["auto_keep"], 1)
+        self.assertEqual(auto[0]["prior_decision"], "strip")
+        self.assertEqual(summary["auto_strip"], 1)
 
-    def test_keep_new_tinyids(self):
-        """Prior keep + new tinyIds → auto_keep (validity is inherent)."""
+    def test_strip_new_tinyids(self):
+        """Prior strip + new tinyIds → auto_strip (validity is inherent)."""
         current = [self._make_row("PHQ-9", "tid1 tid2 tid3")]
-        prior = {"PHQ-9": self._make_decision("PHQ-9", "keep", {"tid1", "tid2"})}
+        prior = {"PHQ-9": self._make_decision("PHQ-9", "strip", {"tid1", "tid2"})}
         auto, review, summary = classify_patterns(current, prior)
         self.assertEqual(len(auto), 1)
         self.assertEqual(len(review), 0)
-        self.assertEqual(summary["auto_keep"], 1)
+        self.assertEqual(summary["auto_strip"], 1)
 
-    def test_remove_same_tinyids(self):
-        """Prior remove + same tinyIds → auto_remove."""
+    def test_skip_same_tinyids(self):
+        """Prior skip + same tinyIds → auto_skip."""
         current = [self._make_row("False Positive", "tid1 tid2")]
-        prior = {"False Positive": self._make_decision("False Positive", "remove", {"tid1", "tid2"})}
+        prior = {"False Positive": self._make_decision("False Positive", "skip", {"tid1", "tid2"})}
         auto, review, summary = classify_patterns(current, prior)
         self.assertEqual(len(auto), 1)
         self.assertEqual(len(review), 0)
-        self.assertEqual(auto[0]["prior_decision"], "remove")
-        self.assertEqual(summary["auto_remove"], 1)
+        self.assertEqual(auto[0]["prior_decision"], "skip")
+        self.assertEqual(summary["auto_skip"], 1)
 
-    def test_remove_subset_tinyids(self):
-        """Prior remove + subset tinyIds → auto_remove."""
+    def test_skip_subset_tinyids(self):
+        """Prior skip + subset tinyIds → auto_skip."""
         current = [self._make_row("False Positive", "tid1")]
-        prior = {"False Positive": self._make_decision("False Positive", "remove", {"tid1", "tid2"})}
+        prior = {"False Positive": self._make_decision("False Positive", "skip", {"tid1", "tid2"})}
         auto, review, summary = classify_patterns(current, prior)
         self.assertEqual(len(auto), 1)
         self.assertEqual(len(review), 0)
-        self.assertEqual(summary["auto_remove"], 1)
+        self.assertEqual(summary["auto_skip"], 1)
 
-    def test_remove_new_tinyids(self):
-        """Prior remove + new tinyIds → needs_review."""
+    def test_skip_new_tinyids(self):
+        """Prior skip + new tinyIds → needs_review."""
         current = [self._make_row("False Positive", "tid1 tid2 tid3")]
-        prior = {"False Positive": self._make_decision("False Positive", "remove", {"tid1", "tid2"})}
+        prior = {"False Positive": self._make_decision("False Positive", "skip", {"tid1", "tid2"})}
         auto, review, summary = classify_patterns(current, prior)
         self.assertEqual(len(auto), 0)
         self.assertEqual(len(review), 1)
         self.assertIn("new tinyIds", review[0]["notes"])
-        self.assertEqual(summary["changed_tinyids_remove"], 1)
+        self.assertEqual(summary["changed_tinyids_skip"], 1)
 
     def test_modify_same_tinyids(self):
         """Prior modify + same tinyIds → auto_modify."""
@@ -122,15 +122,15 @@ class TestClassifyPatterns(unittest.TestCase):
             self._make_row("Changed Remove", "tid1 tid2 tid9"),
         ]
         prior = {
-            "Keep Me": self._make_decision("Keep Me", "keep", {"tid1", "tid2"}),
-            "Remove Me": self._make_decision("Remove Me", "remove", {"tid1", "tid2"}),
-            "Changed Remove": self._make_decision("Changed Remove", "remove", {"tid1", "tid2"}),
+            "Keep Me": self._make_decision("Keep Me", "strip", {"tid1", "tid2"}),
+            "Remove Me": self._make_decision("Remove Me", "skip", {"tid1", "tid2"}),
+            "Changed Remove": self._make_decision("Changed Remove", "skip", {"tid1", "tid2"}),
         }
         auto, review, summary = classify_patterns(current, prior)
-        self.assertEqual(summary["auto_keep"], 1)
-        self.assertEqual(summary["auto_remove"], 1)
+        self.assertEqual(summary["auto_strip"], 1)
+        self.assertEqual(summary["auto_skip"], 1)
         self.assertEqual(summary["new_pattern"], 1)
-        self.assertEqual(summary["changed_tinyids_remove"], 1)
+        self.assertEqual(summary["changed_tinyids_skip"], 1)
         self.assertEqual(len(auto), 2)  # Keep Me + Remove Me
         self.assertEqual(len(review), 2)  # Brand New + Changed Remove
 
@@ -147,7 +147,7 @@ class TestClassifyPatterns(unittest.TestCase):
 
     def test_empty_current(self):
         """No current patterns → nothing to classify."""
-        prior = {"PHQ-9": self._make_decision("PHQ-9", "keep")}
+        prior = {"PHQ-9": self._make_decision("PHQ-9", "strip")}
         auto, review, summary = classify_patterns([], prior)
         self.assertEqual(len(auto), 0)
         self.assertEqual(len(review), 0)
@@ -186,7 +186,7 @@ class TestLedgerRoundTrip(unittest.TestCase):
             decisions = [
                 CurationDecision(
                     pattern="PHQ-9",
-                    decision="keep",
+                    decision="strip",
                     modification="",
                     tinyIds={"tid1", "tid2", "tid3"},
                     n_tinyIds=3,
@@ -196,7 +196,7 @@ class TestLedgerRoundTrip(unittest.TestCase):
                 ),
                 CurationDecision(
                     pattern="False Pos",
-                    decision="remove",
+                    decision="skip",
                     modification="",
                     tinyIds={"tid4"},
                     n_tinyIds=1,
@@ -235,9 +235,9 @@ class TestLedgerRoundTrip(unittest.TestCase):
 
             loaded = ledger2.get_decisions("phase1")
             self.assertEqual(len(loaded), 3)
-            self.assertEqual(loaded["PHQ-9"].decision, "keep")
+            self.assertEqual(loaded["PHQ-9"].decision, "strip")
             self.assertEqual(loaded["PHQ-9"].tinyIds, {"tid1", "tid2", "tid3"})
-            self.assertEqual(loaded["False Pos"].decision, "remove")
+            self.assertEqual(loaded["False Pos"].decision, "skip")
             self.assertEqual(loaded["Typo Scale"].decision, "modify")
             self.assertEqual(loaded["Typo Scale"].modification, "Corrected Scale")
 
@@ -265,18 +265,18 @@ class TestLedgerRoundTrip(unittest.TestCase):
             ledger = CurationLedger(tmpdir)
             ledger.update_decisions("phase1", [
                 CurationDecision(
-                    pattern="PHQ-9", decision="remove",
+                    pattern="PHQ-9", decision="skip",
                     tinyIds={"tid1"}, n_tinyIds=1,
                 ),
             ])
             ledger.update_decisions("phase1", [
                 CurationDecision(
-                    pattern="PHQ-9", decision="keep",
+                    pattern="PHQ-9", decision="strip",
                     tinyIds={"tid1", "tid2"}, n_tinyIds=2,
                 ),
             ])
             loaded = ledger.get_decisions("phase1")
-            self.assertEqual(loaded["PHQ-9"].decision, "keep")
+            self.assertEqual(loaded["PHQ-9"].decision, "strip")
             self.assertEqual(loaded["PHQ-9"].tinyIds, {"tid1", "tid2"})
 
     def test_no_ledger_returns_false(self):
@@ -290,11 +290,11 @@ class TestLedgerRoundTrip(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             ledger = CurationLedger(tmpdir)
             ledger.update_decisions("phase1", [
-                CurationDecision(pattern="Inst A", decision="keep",
+                CurationDecision(pattern="Inst A", decision="strip",
                                  tinyIds={"t1"}, n_tinyIds=1),
             ])
             ledger.update_decisions("phase2", [
-                CurationDecision(pattern="Phrase B", decision="remove",
+                CurationDecision(pattern="Phrase B", decision="skip",
                                  tinyIds={"t2"}, n_tinyIds=1),
             ])
             ledger.save()

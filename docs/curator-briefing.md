@@ -1,6 +1,6 @@
 # Curator Briefing — Efficient Pattern Curation
 
-> **Version**: v1.0.0 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
+> **Version**: v1.0.1 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
 
 This document explains *how to curate efficiently*, not just which buttons to press. It assumes you have the editor open and a `needs_review.tsv` loaded.
 
@@ -18,13 +18,13 @@ Each row is a **text pattern** that the pipeline detected as repeated across mul
 
 | Decision | Shortcut | Rationale |
 |----------|:--------:|-----------|
-| **keep** | `K` | This pattern is a real instrument name, scale name, or boilerplate phrase. Stripping it improves clustering. *This is the safe default — blank rows are treated as keep.* |
-| **remove** | `R` | This is a false positive — not actually an instrument or boilerplate phrase. It's meaningful clinical/scientific text that should remain in the CDE. Removing it from the pattern set means it will **not** be stripped. |
+| **strip** | `S` | This pattern is a real instrument name, scale name, or boilerplate phrase. Stripping it improves clustering. *This is the safe default — blank rows are treated as strip.* |
+| **skip** | `K` | This is a false positive — not actually an instrument or boilerplate phrase. It's meaningful clinical/scientific text that should remain in the CDE. Skipping it means it will **not** be stripped. |
 | **modify** | `M` | The detected text is partially correct but the boundaries are wrong. You'll type the corrected pattern text in the `modification` column. The corrected text gets stripped instead. |
-| **substitute** | `S` | The matched text should be *replaced* with something else, not deleted. Type the replacement in `modification`. Use this when deletion would leave broken grammar but a shorter phrase would be clean. |
+| **substitute** | `U` | The matched text should be *replaced* with something else, not deleted. Type the replacement in `modification`. Use this when deletion would leave broken grammar but a shorter phrase would be clean. |
 | **followup** | `F` | You're unsure. Flag it for later discussion. Counts as undecided — the status bar tracks these. |
 
-**The key distinction**: `keep` = "yes, strip this from CDEs." `remove` = "no, leave CDE text alone — this pattern shouldn't be in our strip list."
+**The key distinction**: `strip` = "yes, strip this from CDEs." `skip` = "no, leave CDE text alone — this pattern shouldn't be in our strip list."
 
 ---
 
@@ -37,7 +37,7 @@ Efficient curation means working in *batches*, not row by row.
 1. Click the checkbox on the **first** row of interest
 2. **Shift+click** the checkbox on the **last** row of interest
 3. All rows between are now selected
-4. Press `K`, `R`, `M`, `S`, or `F` to assign the decision to all selected rows at once
+4. Press `S`, `K`, `M`, `U`, or `F` to assign the decision to all selected rows at once
 
 ### Select-all visible rows
 
@@ -52,7 +52,7 @@ After triaging the patterns you recognize:
 
 1. Set the **decision filter** dropdown to `blank` — shows only undecided rows
 2. **Ctrl+A** to select all remaining
-3. Press `K` to mark them all as keep (the safe default — these patterns will be stripped)
+3. Press `S` to mark them all as strip (the safe default — these patterns will be stripped)
 4. Reset filter to `(all)` to verify — the status bar should show `?0` (zero undecided)
 
 ---
@@ -63,9 +63,9 @@ The containment tree is the most powerful tool for efficient curation. It reveal
 
 ### Why this matters
 
-If you decide to **keep** (strip) the pattern `Scale of` (which appears in 409 CDEs), then every CDE that contains `Scale of the difficulty of regulating emotions` (133 CDEs) will *already* have that longer text stripped — because removing `Scale of` from the beginning also removes it from longer phrases that start with those words.
+If you decide to **strip** the pattern `Scale of` (which appears in 409 CDEs), then every CDE that contains `Scale of the difficulty of regulating emotions` (133 CDEs) will *already* have that longer text stripped — because removing `Scale of` from the beginning also removes it from longer phrases that start with those words.
 
-This means: **if you keep a parent, you can safely remove all its children from the pattern set** — they're redundant.
+This means: **if you strip a parent, you can safely skip all its children** — they're redundant.
 
 ### Reading the tree column
 
@@ -87,36 +87,36 @@ Press `T` to activate tree sort. This groups children directly below their paren
 **Step 2: Evaluate the root pattern.**
 Look at the root (e.g., `Scale of` — 409 tinyIds, ▶ 12 descendants). Ask: *"If I strip 'Scale of' from every CDE where it appears, does that cause semantic loss?"*
 
-- If **no** (it's a real instrument/scale prefix): Mark it `keep`. Then its children are redundant — you'll remove them in step 4.
-- If **yes** (stripping it would destroy meaning): Mark it `remove`. Then move to step 3.
+- If **no** (it's a real instrument/scale prefix): Mark it `strip`. Then its children are redundant — you'll skip them in step 4.
+- If **yes** (stripping it would destroy meaning): Mark it `skip`. Then move to step 3.
 
 **Step 3: Evaluate sub-roots (the next level down).**
-When you remove a root, its children are *not* automatically handled — they're independent patterns that still need decisions. Expand the tree (click ▶) and look at the next level:
+When you skip a root, its children are *not* automatically handled — they're independent patterns that still need decisions. Expand the tree (click ▶) and look at the next level:
 
 - `Scale of the difficulty of regulating emotions` (133 tinyIds)
 - `Scale of Prodromal Symptoms` (87 tinyIds)
 - `Scale of Independent Behavior` (45 tinyIds)
 
-Each sub-root is a longer, more specific phrase. Ask the same question: *"Does stripping this cause semantic loss?"* Often the longer phrase *is* a real instrument name and should be kept, even though the shorter prefix was too generic.
+Each sub-root is a longer, more specific phrase. Ask the same question: *"Does stripping this cause semantic loss?"* Often the longer phrase *is* a real instrument name and should be stripped, even though the shorter prefix was too generic.
 
 **Rinse and repeat** at each depth level. In practice, most trees are 2-3 levels deep and this takes seconds per tree.
 
-**Step 4: Bulk-remove redundant children.**
+**Step 4: Bulk-skip redundant children.**
 After deciding on the root and sub-roots:
 
 1. Click the ▶ on the root to expand its subtree
 2. Select the root row's checkbox, then **Shift+click** the last child's checkbox — the entire subtree is now selected
 3. Set the decision filter to `blank` — now only the *undecided* rows within your selection are visible
 4. **Ctrl+A** to select all visible (undecided children)
-5. Press `R` to remove them all — they're redundant because their parent is being kept
+5. Press `K` to skip them all — they're redundant because their parent is being stripped
 
 Alternatively, use the **⊃ Propagate** button: if a parent has a decision, clicking ⊃ Propagate copies that decision to all its descendants. This is fastest when you want all children to inherit the parent's decision.
 
 ### When children should NOT inherit the parent's decision
 
-- **Parent is `remove` but a child is a real instrument name**: The child needs its own `keep` decision. Set the parent to `remove`, then individually mark the meaningful children as `keep`.
-- **Parent is `keep` but a child has wrong boundaries**: The child might need `modify` to correct the pattern text before stripping.
-- **Mixed semantics**: `Scale of` might be too generic (remove), but `Scale of Independent Behavior` is a real instrument (keep). Evaluate each level independently.
+- **Parent is `skip` but a child is a real instrument name**: The child needs its own `strip` decision. Set the parent to `skip`, then individually mark the meaningful children as `strip`.
+- **Parent is `strip` but a child has wrong boundaries**: The child might need `modify` to correct the pattern text before stripping.
+- **Mixed semantics**: `Scale of` might be too generic (skip), but `Scale of Independent Behavior` is a real instrument (strip). Evaluate each level independently.
 
 ### Tree filter for focused review
 
@@ -128,7 +128,7 @@ Use the **tree filter dropdown** to focus:
 | `child` | Only contained patterns | After roots are decided — clean up descendants |
 | `none` | Singletons (no tree relationships) | Independent patterns that need individual review |
 
-**Efficient sequence**: Filter to `root` → decide all roots → filter to `child` → bulk-remove redundant children → filter to `none` → handle singletons → blank sweep.
+**Efficient sequence**: Filter to `root` → decide all roots → filter to `child` → bulk-skip redundant children → filter to `none` → handle singletons → blank sweep.
 
 ---
 
@@ -136,14 +136,14 @@ Use the **tree filter dropdown** to focus:
 
 Knowing what you're looking at speeds up decisions:
 
-### Keep (strip these) — high confidence
+### Strip (strip these) — high confidence
 
 - **Full instrument names**: "Patient Health Questionnaire", "Brief Pain Inventory", "Neuro-QOL"
 - **Scale/subscale names**: "Scale of Independent Behavior", "SF-12 Health Survey"
 - **Instructional boilerplate**: "Please respond to each item", "Check all that apply", "For each of the following"
 - **Response anchors in definitions**: "Not at all / Extremely", "0 = Never, 4 = Always"
 
-### Remove (false positives) — these are NOT patterns to strip
+### Skip (false positives) — these are NOT patterns to strip
 
 - **Generic English phrases**: "I felt", "Return to", "How often" — too common, not instrument-specific
 - **Clinical content**: Disease names, symptoms, procedures that carry semantic meaning
@@ -205,11 +205,11 @@ the meaningful portion.
 1. **Sort by tinyid_count** (click header twice for descending) — highest-impact patterns first
 2. **Enable tree sort** (`T`) — see containment hierarchy
 3. **Filter to `root`** — decide on parent patterns first
-4. **Evaluate each root**: keep (real instrument/boilerplate) or remove (false positive / too generic)
-5. **Propagate or bulk-remove** children of decided roots
+4. **Evaluate each root**: strip (real instrument/boilerplate) or skip (false positive / too generic)
+5. **Propagate or bulk-skip** children of decided roots
 6. **Filter to `child`** — handle any children that need different decisions than their parents
 7. **Filter to `none`** — handle singleton patterns (no tree relationships)
-8. **Blank sweep**: filter decision to `blank`, Ctrl+A, `K`
+8. **Blank sweep**: filter decision to `blank`, Ctrl+A, `S`
 9. **Verify**: status bar shows `?0` and `tinyIds: N/N` (full coverage)
 10. **Save**: Ctrl+S (server mode) or Save As (standalone)
 
@@ -218,9 +218,9 @@ the meaningful portion.
 For a typical `needs_review.tsv` with ~1,300 high-priority patterns:
 
 - Tree roots: ~100-150 decisions (many are obvious instrument families)
-- Tree children: mostly bulk-removed after root decisions
+- Tree children: mostly bulk-skipped after root decisions
 - Singletons: ~400-600 individual decisions (but many fall into recognizable categories)
-- Blank sweep: covers the remaining obvious keeps
+- Blank sweep: covers the remaining obvious strips
 
 An experienced curator can process a high-priority file in 1-2 hours using this workflow.
 
@@ -232,7 +232,7 @@ The **status bar** at the bottom shows real-time progress:
 
 ```
 needs_review.tsv — 1320 rows (5 selected) | ✓800  ✗120  ✎4  ⇄2  ⚑10  ?384  | tinyIds: 14,200/18,502  server
-                                             keep  rem   mod sub  flup undecided   decided/total
+                                             strip skip  mod sub  flup undecided   decided/total
 ```
 
 - **`?384`** = 384 rows still undecided — this is your countdown

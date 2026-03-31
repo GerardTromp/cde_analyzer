@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v1.0.0)
+# CDE Analyzer — Context (v1.0.1)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -49,7 +49,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (10 steps)
 - **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
 
-## Current State (v1.0.0)
+## Current State (v1.0.1)
 
 ### v1.0.0: Production Release
 
@@ -115,7 +115,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 
 #### Phrase Miner Enhancements
 - **Prefix consolidation**: Post-loop token-ID prefix trie recovers fragmented prefixes masked across multiple k-levels
-- **Ledger pre-masking** (`--ledger-dir`): Prior "remove" decisions pre-masked during mining
+- **Ledger pre-masking** (`--ledger-dir`): Prior "skip" decisions pre-masked during mining
 
 #### Verbatim Strip Patterns
 - Executive Order disclaimer extended with trailing "repository."
@@ -166,7 +166,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 #### Zipf-Based Curation Triage (`--split-priority`)
 - **`--split-priority FILE`**: Splits `needs_review.tsv` into high-priority and low-priority files using wordfreq Zipf frequency scores
 - **Classification**: If ALL word tokens in a pattern have Zipf >= threshold (default 4.0), pattern is low-priority (common English); otherwise high-priority (domain-specific)
-- **`--split-auto-remove`**: Pre-fills `decision=remove` in low-priority patterns for fast single-reviewer triage
+- **`--split-auto-skip`**: Pre-fills `decision=skip` in low-priority patterns for fast single-reviewer triage
 - **Outputs**: `{stem}_high.tsv` (multi-reviewer) + `{stem}_low.tsv` (fast triage)
 - **allcde03 empirical results**: 1,480 patterns → 582 high-priority + 898 low-priority
 - **Zipf reference**: 3=uncommon, 4=common (~top 6K words), 5=very common
@@ -191,7 +191,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 ### v0.8.1: Substitute Decision Type
 
 #### 4th Curation Decision
-- **`substitute`**: Replaces matched text with `modification` column content (vs `keep`=delete, `modify`=change pattern then delete)
+- **`substitute`**: Replaces matched text with `modification` column content (vs `strip`=delete, `modify`=change pattern then delete)
 - Semantics: pattern matched → replaced with modification text in output (not deleted)
 - Runs as separate pass **before** stripping via `apply_substitutions` pipeline step
 
@@ -207,17 +207,17 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - `record_run()`: logs `n_auto_substituted`
 
 #### TSV Editor
-- Cyan badge, `S` keyboard shortcut, toolbar button, filter dropdown, `⇄N` status counter
+- Cyan badge, `U` keyboard shortcut, toolbar button, filter dropdown, `⇄N` status counter
 - `propagateGroups()` supports substitute source rows (copies actual decision, not hardcoded `modify`)
 
 ### v0.8.0: Incremental Curation (Curation Ledger & Gate)
 
 #### Curation Ledger (`logic/curation_ledger.py`)
-- **`CurationLedger`**: Persistent record of keep/remove/modify/substitute decisions across pipeline runs
+- **`CurationLedger`**: Persistent record of strip/skip/modify/substitute decisions across pipeline runs
 - **Storage**: `{ledger_dir}/ledger_meta.yaml` (run history) + `instrument_decisions.tsv` / `phrase_decisions.tsv`
 - **`classify_patterns()`**: Compares current patterns against prior decisions
-  - keep + any tinyIds → auto_keep (validity is inherent)
-  - remove + same tinyIds → auto_remove; remove + new tinyIds → needs_review
+  - strip + any tinyIds → auto_strip (validity is inherent)
+  - skip + same tinyIds → auto_skip; skip + new tinyIds → needs_review
   - modify + same tinyIds → auto_modify; modify + new tinyIds → needs_review
   - substitute + same tinyIds → auto_substitute; substitute + new tinyIds → needs_review
   - new pattern (not in ledger) → needs_review
@@ -366,7 +366,7 @@ cde-analyzer pattern_util --merge-patterns FILE FILE -o OUT       # deduplicate/
 cde-analyzer pattern_util --field-analysis FILE --input JSON -o OUT  # add field counts
 cde-analyzer pattern_util --validate-subsumption FILE --input JSON -o OUT  # empirical validation
 cde-analyzer pattern_util --expand-temporal-seeds -o OUT          # temporal seed expansion
-cde-analyzer pattern_util --split-priority FILE [--split-auto-remove]  # Zipf-based priority split
+cde-analyzer pattern_util --split-priority FILE [--split-auto-skip]  # Zipf-based priority split
 ```
 
 ### `curation` — Curation lifecycle

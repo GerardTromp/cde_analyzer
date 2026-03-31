@@ -149,7 +149,7 @@ parameters (which risks false negatives), use permissive settings and
 split the curation queue by word commonality:
 
 ```bash
-cde-analyzer pattern_util --split-priority needs_review.tsv --split-auto-remove
+cde-analyzer pattern_util --split-priority needs_review.tsv --split-auto-skip
 ```
 
 This uses wordfreq Zipf scores to separate patterns into:
@@ -157,7 +157,7 @@ This uses wordfreq Zipf scores to separate patterns into:
 - **High-priority** (582 patterns): at least one domain-specific or
   uncommon word — assign to multiple reviewers
 - **Low-priority** (898 patterns): all words are common English — one
-  reviewer fast-triages, pre-filled as `remove`
+  reviewer fast-triages, pre-filled as `skip`
 
 The Zipf threshold (default 4.0 ≈ top ~6K English words) cleanly separates
 domain terms ("Chiari malformation", "EEG ictal", "Polysomnography") from

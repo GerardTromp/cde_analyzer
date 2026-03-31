@@ -24,7 +24,7 @@ def _run_init_curation(args, init_path: str) -> int:
     Create per-curator copies of a patterns TSV with curation columns.
 
     For each curator name, copies the source TSV and adds four columns:
-        decision      — empty (curator fills: keep/remove/modify)
+        decision      — empty (curator fills: strip/skip/modify)
         modification  — empty (free-text when decision=modify)
         notes         — empty (optional commentary)
         curator       — pre-filled with curator name
@@ -398,13 +398,13 @@ def _generate_inter_rater_report(
         lines.append("")
         lines.append("| Decision | Count | % |")
         lines.append("|----------|------:|--:|")
-        for cat in ["keep", "remove", "modify"]:
+        for cat in ["strip", "skip", "modify"]:
             cnt = dist.get(cat, 0)
             pct = round(cnt / total * 100, 1) if total > 0 else 0
             lines.append(f"| {cat} | {cnt} | {pct}% |")
         # Any other categories
         for cat, cnt in sorted(dist.items()):
-            if cat not in ("keep", "remove", "modify"):
+            if cat not in ("strip", "skip", "modify"):
                 pct = round(cnt / total * 100, 1) if total > 0 else 0
                 lines.append(f"| {cat} | {cnt} | {pct}% |")
         lines.append("")
@@ -538,7 +538,7 @@ def _generate_discrepancy_html(
 
     payload = {
         "curators": curators,
-        "categories": ["keep", "remove", "modify"],
+        "categories": ["strip", "skip", "modify"],
         "stats": {
             "n_patterns": stats.n_patterns,
             "n_reviewed": stats.n_reviewed,
@@ -588,8 +588,8 @@ def _generate_inline_discrepancy_html(payload: dict) -> str:
 body {{ font-family: 'Segoe UI', sans-serif; margin: 2em; color: #2d3748; }}
 .card {{ border: 1px solid #e2e8f0; border-radius: 6px; padding: 1em; margin-bottom: 1em; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.85em; font-weight: 600; margin-right: 0.5em; }}
-.badge-keep {{ background: #c6f6d5; color: #22543d; }}
-.badge-remove {{ background: #fed7d7; color: #9b2c2c; }}
+.badge-strip {{ background: #c6f6d5; color: #22543d; }}
+.badge-skip {{ background: #fed7d7; color: #9b2c2c; }}
 .badge-modify {{ background: #feebc8; color: #7b341e; }}
 </style>
 </head>
@@ -748,7 +748,7 @@ def _write_gate_tsv(path, rows, extra_cols):
 
 
 def _build_curated_from_auto(auto_resolved):
-    """Filter auto_resolved to kept + modified patterns for curated.tsv.
+    """Filter auto_resolved to stripped + modified patterns for curated.tsv.
 
     Returns (curated_rows, substitute_rows).
     Substitute patterns go to a separate file with ``replace_with`` column.
@@ -756,8 +756,8 @@ def _build_curated_from_auto(auto_resolved):
     curated = []
     substitute = []
     for row in auto_resolved:
-        decision = row.get("prior_decision", "keep")
-        if decision == "keep":
+        decision = row.get("prior_decision", "strip")
+        if decision in ("strip", "keep"):  # accept legacy "keep"
             curated.append(row)
         elif decision == "modify":
             modified = dict(row)
@@ -769,7 +769,7 @@ def _build_curated_from_auto(auto_resolved):
             sub = dict(row)
             sub["replace_with"] = sub.get("modification", "")
             substitute.append(sub)
-        # decision == "remove" -> excluded
+        # decision == "skip" (or legacy "remove") -> excluded
     return curated, substitute
 
 
@@ -846,7 +846,7 @@ def _extract_decisions_from_auto(path):
             pattern = row.get("pattern", "")
             if not pattern:
                 continue
-            prior = row.get("prior_decision", "keep")
+            prior = row.get("prior_decision", "strip")
             modification = row.get("modification", "")
             tinyids_str = row.get("tinyIds", "")
             tinyids = set(t for t in _re.split(r"[\s|]+", tinyids_str) if t)
@@ -870,6 +870,9 @@ def _extract_decisions_from_review(path):
     from datetime import datetime
     from logic.curation_ledger import CurationDecision
 
+    # Normalize legacy decision values
+    _compat = {"keep": "strip", "remove": "skip"}
+
     decisions = []
     with open(path, encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
@@ -879,7 +882,8 @@ def _extract_decisions_from_review(path):
                 continue
             decision = row.get("decision", "").strip().lower()
             if not decision:
-                decision = "keep"
+                decision = "strip"
+            decision = _compat.get(decision, decision)
             modification = row.get("modification", "")
             tinyids_str = row.get("tinyIds", "")
             tinyids = set(t for t in _re.split(r"[\s|]+", tinyids_str) if t)
@@ -1004,13 +1008,13 @@ def _run_curation_gate(args, enriched_tsv_path: str) -> int:
     print(f"\n  Curation gate ({phase}):")
     print(f"    Total patterns:      {total}")
     if ledger_exists:
-        print(f"    Auto-keep:           {summary['auto_keep']}")
-        print(f"    Auto-remove:         {summary['auto_remove']}")
+        print(f"    Auto-strip:          {summary['auto_strip']}")
+        print(f"    Auto-skip:           {summary['auto_skip']}")
         print(f"    Auto-modify:         {summary['auto_modify']}")
         if summary.get('auto_substitute', 0):
             print(f"    Auto-substitute:     {summary['auto_substitute']}")
         print(f"    New patterns:        {summary['new_pattern']}")
-        n_changed = (summary['changed_tinyids_remove']
+        n_changed = (summary['changed_tinyids_skip']
                      + summary['changed_tinyids_modify']
                      + summary.get('changed_tinyids_substitute', 0))
         if n_changed:
@@ -1085,11 +1089,15 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
         # Build curated.tsv + substitute from auto-resolved
         curated_rows, substitute_rows = _build_curated_from_auto(auto_rows)
 
+        # Normalize legacy decision values
+        _compat = {"keep": "strip", "remove": "skip"}
+
         for row in review_rows:
             decision = row.get("decision", "").strip().lower()
             if not decision:
-                decision = "keep"
-            if decision == "keep":
+                decision = "strip"
+            decision = _compat.get(decision, decision)
+            if decision == "strip":
                 curated_rows.append(row)
             elif decision == "modify":
                 modified = dict(row)
@@ -1102,7 +1110,7 @@ def _run_finalize_curation(args, gate_dir: str) -> int:
                 mod_text = row.get("modification", "").strip()
                 sub_row["replace_with"] = mod_text if mod_text else ""
                 substitute_rows.append(sub_row)
-            # decision == "remove" -> excluded
+            # decision == "skip" (or legacy "remove") -> excluded
 
         _write_curated_tsv(curated_path, curated_rows)
         _write_substitute_tsv(substitute_path, substitute_rows)
@@ -1339,7 +1347,7 @@ def _run_split_priority(args, input_path: str) -> int:
         if mz >= threshold:
             # All tokens are common English
             if auto_remove and 'decision' in row:
-                row['decision'] = 'remove'
+                row['decision'] = 'skip'
             low_rows.append(row)
         else:
             high_rows.append(row)
@@ -1363,7 +1371,7 @@ def _run_split_priority(args, input_path: str) -> int:
     print(f"  High-priority: {len(high_rows):>6,d}  {high_path.name}  (domain-specific, multi-reviewer)")
     print(f"  Low-priority:  {len(low_rows):>6,d}  {low_path.name}  (common English, fast triage)")
     if auto_remove:
-        print(f"  Low-priority patterns pre-filled with decision='remove'")
+        print(f"  Low-priority patterns pre-filled with decision='skip'")
     print(f"\n  Zipf threshold: {threshold} (words with Zipf >= {threshold} are 'common')")
     print(f"  Zipf reference: 3=uncommon, 4=common (~top 6K words), 5=very common")
 

@@ -53,7 +53,7 @@ cde-analyzer phrase_miner --input <file.json> [options]
 | `--prefix-min-tinyids N` | `20` | Minimum tinyId coverage to attempt text extension |
 | `--extension-min-pct F` | `0.5` | Minimum fraction of occurrences sharing a right-context extension |
 | `--extension-max-words N` | `5` | Maximum words of right context to check for extensions |
-| `--ledger-dir DIR` | - | Curation ledger directory. If provided, prior "remove" decisions are pre-masked during mining |
+| `--ledger-dir DIR` | - | Curation ledger directory. If provided, prior "skip" decisions are pre-masked during mining |
 | `--histograms` | `False` | Generate k-mer frequency histograms |
 
 ## Examples
@@ -321,7 +321,7 @@ Where:
 
 - ✅ **Whole-Text Dedup** - Pre-pass detects field texts shared across CDEs, emits as phrases, then masks
 - ✅ **Prefix Consolidation** - Post-loop token-ID prefix trie recovers fragmented prefixes masked across k-levels
-- ✅ **Ledger Pre-masking** - Prior "remove" decisions pre-masked during mining to reduce search space
+- ✅ **Ledger Pre-masking** - Prior "skip" decisions pre-masked during mining to reduce search space
 - ✅ **Phrase Family Analysis** - Prefix/suffix-based family grouping
 - ✅ **Verbatim Coalescing** - Case-insensitive grouping of verbatim forms
 - ✅ **Verbatim Templates** - Regex pattern extraction from multi-form phrases

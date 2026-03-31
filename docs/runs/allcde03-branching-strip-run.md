@@ -94,8 +94,8 @@ From 4,006 patterns in `needs_review.tsv`:
 
 | Decision | Count |
 |----------|------:|
-| remove | 3,743 |
-| keep | 171 |
+| skip | 3,743 |
+| strip | 171 |
 | modify | 102 |
 | substitute | 7 |
 | **Total** | **4,023** |

@@ -250,8 +250,8 @@ body {
     font-weight: 600;
     line-height: 16px;
 }
-.decision-keep { background: var(--success-light); color: var(--success); }
-.decision-remove { background: var(--danger-light); color: var(--danger); }
+.decision-strip { background: var(--success-light); color: var(--success); }
+.decision-skip { background: var(--danger-light); color: var(--danger); }
 .decision-modify { background: #fff3e0; color: var(--warning); }
 .decision-substitute { background: #e0f7fa; color: #00838f; }
 .decision-followup { background: #f3e5f5; color: #7b1fa2; }
@@ -269,10 +269,10 @@ body {
     transition: opacity 0.1s;
 }
 .decision-quick-btn:disabled { opacity: 0.3; cursor: default; }
-.decision-quick-btn.dq-keep { background: var(--success-light); color: var(--success); border-color: var(--success); }
-.decision-quick-btn.dq-keep:hover:not(:disabled) { background: #a5d6a7; }
-.decision-quick-btn.dq-remove { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
-.decision-quick-btn.dq-remove:hover:not(:disabled) { background: #ef9a9a; }
+.decision-quick-btn.dq-strip { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.decision-quick-btn.dq-strip:hover:not(:disabled) { background: #a5d6a7; }
+.decision-quick-btn.dq-skip { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.decision-quick-btn.dq-skip:hover:not(:disabled) { background: #ef9a9a; }
 .decision-quick-btn.dq-modify { background: #fff3e0; color: var(--warning); border-color: var(--warning); }
 .decision-quick-btn.dq-modify:hover:not(:disabled) { background: #ffe0b2; }
 .decision-quick-btn.dq-substitute { background: #e0f7fa; color: #00838f; border-color: #00838f; }
@@ -570,10 +570,10 @@ function cdeUrl(path) {
     <!-- Decision quick-assign (hidden when no decision column) -->
     <div id="decision-buttons" style="display:none; align-items:center; gap:2px;">
         <div class="sep"></div>
-        <button class="decision-quick-btn dq-keep" id="btn-dq-keep" title="Set selected to 'keep' (K)" disabled>&#10003; Keep</button>
-        <button class="decision-quick-btn dq-remove" id="btn-dq-remove" title="Set selected to 'remove' (R)" disabled>&#10007; Remove</button>
+        <button class="decision-quick-btn dq-strip" id="btn-dq-strip" title="Set selected to 'strip' (S)" disabled>&#10003; Strip</button>
+        <button class="decision-quick-btn dq-skip" id="btn-dq-skip" title="Set selected to 'skip' (K)" disabled>&#10007; Skip</button>
         <button class="decision-quick-btn dq-modify" id="btn-dq-modify" title="Set selected to 'modify' (M)" disabled>&#10038; Modify</button>
-        <button class="decision-quick-btn dq-substitute" id="btn-dq-substitute" title="Set selected to 'substitute' (S)" disabled>&#8644; Subst</button>
+        <button class="decision-quick-btn dq-substitute" id="btn-dq-substitute" title="Set selected to 'substitute' (U)" disabled>&#8644; Subst</button>
         <button class="decision-quick-btn dq-followup" id="btn-dq-followup" title="Set selected to 'followup' (F)" disabled>&#9873; Follow</button>
     </div>
 
@@ -700,8 +700,8 @@ function cdeUrl(path) {
 
     // Decision + Group buttons
     const decisionButtons = $('decision-buttons');
-    const btnDqKeep = $('btn-dq-keep');
-    const btnDqRemove = $('btn-dq-remove');
+    const btnDqStrip = $('btn-dq-strip');
+    const btnDqSkip = $('btn-dq-skip');
     const btnDqModify = $('btn-dq-modify');
     const btnDqSubstitute = $('btn-dq-substitute');
     const btnDqFollowup = $('btn-dq-followup');
@@ -790,6 +790,17 @@ function cdeUrl(path) {
     }
 
     // ===== INJECT TINYID COUNT =====
+    function _normalizeLegacyDecisions() {
+        // Backwards compat: map old "keep"→"strip", "remove"→"skip" in decision column
+        const dIdx = S.headers.findIndex(h => h.toLowerCase() === 'decision');
+        if (dIdx < 0) return;
+        const compat = { 'keep': 'strip', 'remove': 'skip' };
+        for (const r of S.rows) {
+            const v = (r.cells[dIdx] || '').trim().toLowerCase();
+            if (compat[v]) r.cells[dIdx] = compat[v];
+        }
+    }
+
     function _injectTinyidCount() {
         const tcIdx = S.headers.findIndex(h => h.toLowerCase() === 'tinyid_count');
         if (tcIdx >= 0) return; // already present
@@ -957,6 +968,9 @@ function cdeUrl(path) {
         // Inject tinyid_count column if missing (backward compat with older TSVs)
         _injectTinyidCount();
 
+        // Normalize legacy decision values (keep→strip, remove→skip)
+        _normalizeLegacyDecisions();
+
         detectColumns();
         _buildContainmentTree();
 
@@ -1092,8 +1106,8 @@ function cdeUrl(path) {
                     ['', '(all)'],
                     ['=blank', 'blank'],
                     ['!blank', 'filled'],
-                    ['keep', 'keep'],
-                    ['remove', 'remove'],
+                    ['strip', 'strip'],
+                    ['skip', 'skip'],
                     ['modify', 'modify'],
                     ['substitute', 'substitute'],
                     ['followup', 'followup'],
@@ -1632,7 +1646,7 @@ function cdeUrl(path) {
         // Decision column: use <select> dropdown
         if (col === S.decisionCol && S.decisionCol >= 0) {
             const select = document.createElement('select');
-            const options = ['', 'keep', 'remove', 'modify', 'substitute', 'followup'];
+            const options = ['', 'strip', 'skip', 'modify', 'substitute', 'followup'];
             for (const opt of options) {
                 const o = document.createElement('option');
                 o.value = opt;
@@ -2518,21 +2532,21 @@ function cdeUrl(path) {
 
         // Decision column stats + tinyId count summary
         if (S.decisionCol >= 0) {
-            let keep = 0, remove = 0, modify = 0, substitute = 0, followup = 0, empty = 0;
+            let strip = 0, skip = 0, modify = 0, substitute = 0, followup = 0, empty = 0;
             let tidTotal = 0, tidDecided = 0;
             const hasTidCount = S.tinyidCountCol >= 0;
             for (const r of S.rows) {
                 const d = (r.cells[S.decisionCol] || '').trim().toLowerCase();
                 const tc = hasTidCount ? parseInt(r.cells[S.tinyidCountCol], 10) || 0 : 0;
                 tidTotal += tc;
-                if (d === 'keep') { keep++; tidDecided += tc; }
-                else if (d === 'remove') { remove++; tidDecided += tc; }
+                if (d === 'strip') { strip++; tidDecided += tc; }
+                else if (d === 'skip') { skip++; tidDecided += tc; }
                 else if (d === 'modify') { modify++; tidDecided += tc; }
                 else if (d === 'substitute') { substitute++; tidDecided += tc; }
                 else if (d === 'followup') { followup++; }
                 else empty++;
             }
-            text += ' | \u2713' + keep + ' \u2717' + remove + ' \u270E' + modify;
+            text += ' | \u2713' + strip + ' \u2717' + skip + ' \u270E' + modify;
             if (substitute > 0) text += ' \u21C4' + substitute;
             if (followup > 0) text += ' \u2691' + followup;
             if (empty > 0) text += ' ?' + empty;
@@ -2579,8 +2593,8 @@ function cdeUrl(path) {
         // Decision quick-buttons: show only when decision column exists
         if (S.decisionCol >= 0) {
             decisionButtons.style.display = 'flex';
-            btnDqKeep.disabled = sel === 0;
-            btnDqRemove.disabled = sel === 0;
+            btnDqStrip.disabled = sel === 0;
+            btnDqSkip.disabled = sel === 0;
             btnDqModify.disabled = sel === 0;
             btnDqSubstitute.disabled = sel === 0;
             btnDqFollowup.disabled = sel === 0;
@@ -2663,19 +2677,19 @@ function cdeUrl(path) {
             }
         }
 
-        // Decision shortcuts: K=keep, R=remove, M=modify (plain keys, no modifiers)
+        // Decision shortcuts: S=strip, K=skip, M=modify, U=substitute, F=followup
         if (!isInput && !inModal && !S.editingCell && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (S.decisionCol >= 0 && getSelectedRows().length > 0) {
-                if (e.key === 'k' || e.key === 'K') {
-                    setDecisionForSelected('keep');
+                if (e.key === 's' || e.key === 'S') {
+                    setDecisionForSelected('strip');
                     e.preventDefault();
-                } else if (e.key === 'r' || e.key === 'R') {
-                    setDecisionForSelected('remove');
+                } else if (e.key === 'k' || e.key === 'K') {
+                    setDecisionForSelected('skip');
                     e.preventDefault();
                 } else if (e.key === 'm' || e.key === 'M') {
                     setDecisionForSelected('modify');
                     e.preventDefault();
-                } else if (e.key === 's' || e.key === 'S') {
+                } else if (e.key === 'u' || e.key === 'U') {
                     setDecisionForSelected('substitute');
                     e.preventDefault();
                 } else if (e.key === 'f' || e.key === 'F') {
@@ -2725,8 +2739,8 @@ function cdeUrl(path) {
     btnRedo.addEventListener('click', redo);
 
     // Decision + Group button handlers
-    btnDqKeep.addEventListener('click', () => setDecisionForSelected('keep'));
-    btnDqRemove.addEventListener('click', () => setDecisionForSelected('remove'));
+    btnDqStrip.addEventListener('click', () => setDecisionForSelected('strip'));
+    btnDqSkip.addEventListener('click', () => setDecisionForSelected('skip'));
     btnDqModify.addEventListener('click', () => setDecisionForSelected('modify'));
     btnDqSubstitute.addEventListener('click', () => setDecisionForSelected('substitute'));
     btnDqFollowup.addEventListener('click', () => setDecisionForSelected('followup'));

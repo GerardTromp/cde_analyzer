@@ -4,9 +4,9 @@
 
 **Focus**: Production release — config-driven scaffold, action refactoring, reference ledger
 
-**Version**: 1.0.0 (2026-03-12)
+**Version**: 1.0.1 (2026-03-31)
 
-## Current State (v1.0.0)
+## Current State (v1.0.1)
 
 ### Production Release
 
@@ -20,12 +20,12 @@
 ### All Pipeline Phases — Complete
 
 **Phase 1: Instrument Pipeline** — 1,342 raw → 591 coalesced → 458 validated patterns → field-aware splits (383 full + 252 sub)
-**Phase 2: Phrase Pipeline** — 4,023 patterns curated (171 keep, 3,743 remove, 102 modify, 7 substitute)
+**Phase 2: Phrase Pipeline** — 4,023 patterns curated (171 strip, 3,743 skip, 102 modify, 7 substitute)
 **Phase 3: Branching Strip** — 7 variant outputs; N-way 3-step single-pass with field-aware splits (all 7 distinct)
 
 ### Curation Infrastructure — Complete
 
-- **5 decision types**: keep, remove, modify, substitute, followup
+- **5 decision types**: strip, skip, modify, substitute, followup
 - **Containment tree** (v0.9.5): prefix+tinyId hierarchy for curation efficiency
 - **Multi-curator workflow** (v0.6.0): init/merge with inter-rater stats
 - **Standalone TSV editor** (v0.7.0): zipapp distribution (`cde_editor.pyz`, ~59 KB)
@@ -62,7 +62,7 @@
 
 ### Inter-Rater Agreement Analysis (4 curators)
 - **4-curator merge**: GT, MD, MLEACH, BP2 — 1,331 patterns, Krippendorff's α = 0.039
-- **Collapsed agreement** (modify/substitute → keep): 405 unanimous (30.7%), 510 majority
+- **Collapsed agreement** (modify/substitute → strip): 405 unanimous (30.7%), 510 majority
 - **Stratified analysis**: High-frequency patterns (201+ CDEs) have best agreement; mid-range (11-200) concentrates disagreement
 - **Containment tree analysis**: 37.4% of disagreements involve framing/functional language ("whether", "participant/subject")
 - **Cluster consequence study**: GT achieves 86% cluster stability (best); MD matches baseline at 57% (over-stripping = no stripping)
