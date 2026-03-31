@@ -128,8 +128,10 @@ FAMILY_PATTERNS: List[FamilyPattern] = [
         display_name="NIHSS",
         patterns=[
             re.compile(r'\bnihss\b', re.IGNORECASE),
+            re.compile(r'\bpednihss\b', re.IGNORECASE),
             re.compile(r'\bnih\s+stroke\s+scale\b', re.IGNORECASE),
             re.compile(r'\bnational\s+institutes?\s+of\s+health\s+stroke\s+scale\b', re.IGNORECASE),
+            re.compile(r'\bpediatric\s+nih\s+stroke\s+scale\b', re.IGNORECASE),
         ],
         confidence=1.0,
     ),

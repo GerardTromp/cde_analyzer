@@ -144,6 +144,21 @@ bare_instrument_abbrevs:
   - pattern: "REGEX: PROMIS\\s+.*?v\\d+[\\d.]*\\s+\\S+"
     note: "PROMIS instrument prefix with form/version/item code (e.g. 'PROMIS  8a Pain Interference v1.0 PAININ31') - 31 CDEs"
 
+  - pattern: "REGEX: ^PROMIS\\b"
+    note: "Bare PROMIS at start of field - strips instrument name prefix from undelimited designations (e.g. 'PROMIS Positve consequences...', 'PROMIS 6b Pain...'). Sub-instrument text preserved."
+
+  - pattern: "(NIHSS)"
+    note: "Bare parenthetical NIH Stroke Scale abbreviation left after full name stripped - 6 occurrences"
+
+  - pattern: "(PedNIHSS)"
+    note: "Bare parenthetical Pediatric NIH Stroke Scale abbreviation left after full name stripped - 30 occurrences"
+
+  - pattern: "NIHSS"
+    note: "NIH Stroke Scale bare abbreviation in designations"
+
+  - pattern: "PedNIHSS"
+    note: "Pediatric NIH Stroke Scale bare abbreviation"
+
   - pattern: "NHANES"
     note: "National Health and Nutrition Examination Survey bare abbreviation"
 
@@ -200,6 +215,24 @@ repository_typos:
 
   - pattern: "Outcome Information Measurement System (PROMIS)"
     note: "Transposed PROMIS suffix without Patient-Reported prefix - catches anchor-stripped variants"
+
+# =============================================================================
+# Sub-instrument residuals (delimiter-free variants)
+# When CDEs use "PROMIS Anxiety" instead of "PROMIS - Anxiety", inst_full
+# strips "PROMIS" but inst_sub misses " - Anxiety" (no dash).
+#
+# QC diagnostic: qc_sub_instrument_residuals.py scans stripped output for
+# ^sub_name at start of field, tinyId-scoped to parent instrument set:
+#   HIT = true residual (tinyId in parent set) → action needed
+#   MISS = coincidence (tinyId not in parent set) → expected
+#
+# Round 2 results: 4 HITs (3x "test" from Grip Strength, 1x "Perceived"
+# from NIH Toolbox) vs 349 MISSes. All multi-word sub-names ("Alcohol use",
+# "Life Satisfaction", "Emotional support") were MISSes — the CDEs with
+# those start-of-field phrases are NOT instrument CDEs.
+# =============================================================================
+# No verbatim patterns needed currently — only 4 single-word true residuals.
+# Future: if residuals grow, add tinyId-scoped patterns here.
 
 boilerplate_eyegene:
   - pattern: "This term was developed in collaboration with the National Institute of Health's National Eye Institute (NEI) as part of an effort to standardize the data elements collected by the National Ophthalmic Disease Genotyping and Phenotyping Network (eyeGENE)."
