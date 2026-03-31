@@ -5,9 +5,10 @@
 Strip Report - Generate markdown quality reports for stripped JSON outputs.
 
 Scans output directory for stripped JSON files, runs remnant detection on each,
-optionally scans for remaining temporal phrases, and produces a per-branch
-quality matrix with version history.
+optionally scans for remaining temporal phrases and instrument name leakage,
+and produces a per-branch quality matrix with version history.
 """
+import csv
 import json
 import logging
 import os
@@ -16,7 +17,7 @@ from argparse import Namespace
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from utils.file_utils import graceful_interrupt
 
@@ -83,6 +84,100 @@ def _extract_texts(obj: Any, parts: List[str]) -> List[str]:
         return _extract_texts(obj[key], rest)
 
     return []
+
+
+# ---------------------------------------------------------------------------
+# Instrument leakage scanning
+# ---------------------------------------------------------------------------
+
+def _build_instrument_names() -> List[Tuple[str, re.Pattern]]:
+    """
+    Build regex patterns for known instrument family names.
+
+    Uses FAMILY_PATTERNS from instrument_family_patterns.py to detect
+    instrument names that should have been stripped but remain in text.
+
+    Returns list of (display_name, compiled_regex) tuples.
+    """
+    from utils.instrument_family_patterns import FAMILY_PATTERNS
+
+    names: List[Tuple[str, re.Pattern]] = []
+    for fp in FAMILY_PATTERNS:
+        # Use each family's detection patterns directly
+        for pat in fp.patterns:
+            names.append((fp.display_name, pat))
+        for pat in fp.acronym_patterns:
+            names.append((fp.display_name, pat))
+    return names
+
+
+def _load_instrument_patterns_from_tsv(
+    tsv_path: str,
+) -> List[Tuple[str, re.Pattern]]:
+    """
+    Load instrument pattern texts from a curated TSV file.
+
+    Reads the 'pattern' column and builds word-boundary regexes for each.
+    Returns list of (pattern_text, compiled_regex) tuples.
+    """
+    patterns: List[Tuple[str, re.Pattern]] = []
+    path = Path(tsv_path)
+    if not path.exists():
+        logger.warning(f"Instrument pattern TSV not found: {tsv_path}")
+        return patterns
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            for row in reader:
+                text = row.get("pattern", "").strip()
+                if not text:
+                    continue
+                # Skip regex patterns (start with common regex metacharacters)
+                if text.startswith(("REGEX:", "(?", "^", "\\b")):
+                    continue
+                try:
+                    escaped = re.escape(text)
+                    pat = re.compile(r'\b' + escaped + r'\b', re.IGNORECASE)
+                    patterns.append((text, pat))
+                except re.error:
+                    continue
+    except Exception as e:
+        logger.warning(f"Failed to load instrument patterns from {tsv_path}: {e}")
+
+    return patterns
+
+
+def _scan_instrument_leakage(
+    data: List[dict],
+    instrument_patterns: List[Tuple[str, re.Pattern]],
+    field_paths: Optional[List[str]] = None,
+) -> Dict[str, List[str]]:
+    """
+    Scan JSON records for instrument names that should have been stripped.
+
+    Returns dict mapping instrument_name -> list of tinyIds where it was found.
+    """
+    if field_paths is None:
+        field_paths = [
+            "definitions.*.definition",
+            "designations.*.designation",
+        ]
+
+    hits: Dict[str, List[str]] = {}
+
+    for record in data:
+        tiny_id = record.get("tinyId", "?")
+        for field_path in field_paths:
+            for text in _extract_texts(record, field_path.split(".")):
+                for name, pattern in instrument_patterns:
+                    if pattern.search(text):
+                        if name not in hits:
+                            hits[name] = []
+                        if tiny_id not in hits[name]:
+                            hits[name].append(tiny_id)
+
+    return hits
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +298,8 @@ def _generate_report(
     embed_dir: Optional[str],
     temporal_scan: bool,
     output_path: str,
+    instrument_scan: bool = True,
+    inst_pattern_tsvs: Optional[List[str]] = None,
 ) -> str:
     """Generate the full markdown report."""
     from logic.remnant_detector import (
@@ -363,6 +460,78 @@ def _generate_report(
 
                 lines.append("")
 
+    # -- Instrument leakage --
+    if instrument_scan and branch_data:
+        lines.append("## Instrument Name Leakage")
+        lines.append("")
+
+        # Build instrument name patterns: known families + curated TSVs
+        inst_patterns = _build_instrument_names()
+        if inst_pattern_tsvs:
+            for tsv_path in inst_pattern_tsvs:
+                tsv_pats = _load_instrument_patterns_from_tsv(tsv_path)
+                inst_patterns.extend(tsv_pats)
+                logger.info(
+                    f"Loaded {len(tsv_pats)} patterns from {Path(tsv_path).name}"
+                )
+
+        # Only scan branches that include instrument stripping (M=T or S=T)
+        # Branches like MFSFPT (phrase-only) are expected to still contain instruments
+        inst_stripped_branches = []
+        for branch, json_path, data in branch_data:
+            # Parse branch code: positions 0-1=M, 2-3=S
+            code = branch.upper()
+            m_stripped = len(code) >= 2 and code[1] == "T"
+            s_stripped = len(code) >= 4 and code[3] == "T"
+            if m_stripped or s_stripped:
+                inst_stripped_branches.append((branch, json_path, data))
+
+        if not inst_stripped_branches:
+            lines.append(
+                "*No instrument-stripped branches found — skipping leakage scan.*"
+            )
+            lines.append("")
+        else:
+            all_leaks: Dict[str, Dict[str, List[str]]] = {}
+            for branch, json_path, data in inst_stripped_branches:
+                logger.info(f"Scanning {branch} for instrument leakage...")
+                leaks = _scan_instrument_leakage(data, inst_patterns)
+                if leaks:
+                    all_leaks[branch] = leaks
+
+            if not all_leaks:
+                lines.append(
+                    "*No instrument name leakage detected in stripped branches.*"
+                )
+                lines.append("")
+            else:
+                for branch, leaks in all_leaks.items():
+                    total_hits = sum(len(tids) for tids in leaks.values())
+                    unique_tids: Set[str] = set()
+                    for tids in leaks.values():
+                        unique_tids.update(tids)
+
+                    lines.append(f"### {branch}")
+                    lines.append("")
+                    lines.append(
+                        f"*{len(leaks)} instrument names "
+                        f"across {len(unique_tids)} tinyIds "
+                        f"({total_hits} total occurrences)*"
+                    )
+                    lines.append("")
+                    lines.append("| Instrument | Count | Sample tinyIds |")
+                    lines.append("|------------|------:|----------------|")
+
+                    for name, tids in sorted(
+                        leaks.items(), key=lambda x: -len(x[1])
+                    ):
+                        sample = ", ".join(tids[:3])
+                        if len(tids) > 3:
+                            sample += f", ... (+{len(tids) - 3})"
+                        lines.append(f"| {name} | {len(tids)} | {sample} |")
+
+                    lines.append("")
+
     # -- Embed data manifest --
     if embed_dir and os.path.isdir(embed_dir):
         lines.append("## Embed Data Manifest")
@@ -427,7 +596,17 @@ def run_action(args: Namespace):
     input_json = getattr(args, "input_json", None)
     embed_dir = getattr(args, "embed_dir", None)
     temporal_scan = getattr(args, "temporal_scan", True)
+    instrument_scan = getattr(args, "instrument_scan", True)
     json_pattern = getattr(args, "json_pattern", "*_stripped.json")
+
+    # Collect instrument pattern TSV paths
+    inst_pattern_tsvs: List[str] = []
+    for attr in ("inst_patterns_full", "inst_patterns_sub"):
+        val = getattr(args, attr, None)
+        if val:
+            resolved = str(Path(val).resolve())
+            if Path(resolved).exists():
+                inst_pattern_tsvs.append(resolved)
 
     if input_json:
         input_json = str(Path(input_json).resolve())
@@ -444,6 +623,8 @@ def run_action(args: Namespace):
         embed_dir=embed_dir,
         temporal_scan=temporal_scan,
         output_path=output_path,
+        instrument_scan=instrument_scan,
+        inst_pattern_tsvs=inst_pattern_tsvs or None,
     )
 
     with open(output_path, "w", encoding="utf-8") as f:

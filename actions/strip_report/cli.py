@@ -71,6 +71,21 @@ def register_subparser(subparser: ArgumentParser):
         help="Skip scanning for remaining temporal phrases.",
     )
     subparser.add_argument(
+        "--no-instrument-scan",
+        dest="instrument_scan",
+        action="store_false",
+        default=True,
+        help="Skip scanning for instrument name leakage in stripped output.",
+    )
+    subparser.add_argument(
+        "--inst-patterns-full",
+        help="Instrument full-pattern TSV (for leakage scan against curated patterns).",
+    )
+    subparser.add_argument(
+        "--inst-patterns-sub",
+        help="Instrument sub-pattern TSV (for leakage scan against curated patterns).",
+    )
+    subparser.add_argument(
         "--json-pattern",
         default="*_stripped.json",
         help="Glob pattern to match stripped JSON files in output-dir.",

@@ -210,6 +210,31 @@ FAMILY_PATTERNS: List[FamilyPattern] = [
         ],
         confidence=1.0,
     ),
+    # PhenX toolkit
+    FamilyPattern(
+        family_id="phenx",
+        display_name="PhenX",
+        patterns=[
+            re.compile(r'\bphenx\b', re.IGNORECASE),
+        ],
+        acronym_patterns=[
+            re.compile(r'^PhenX$', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
+    # Substance use screening
+    FamilyPattern(
+        family_id="assist",
+        display_name="ASSIST",
+        patterns=[
+            re.compile(r'\bassist\b', re.IGNORECASE),
+            re.compile(r'\balcohol\s+smoking\s+and\s+substance\s+use\s+involvement\s+screening\s+test\b', re.IGNORECASE),
+        ],
+        acronym_patterns=[
+            re.compile(r'^ASSIST$', re.IGNORECASE),
+        ],
+        confidence=1.0,
+    ),
     # Visual functioning
     FamilyPattern(
         family_id="nei-vfq",

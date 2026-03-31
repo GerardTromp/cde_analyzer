@@ -1,0 +1,31 @@
+tinyId	domain	domain_full	sub_domain	verbosity	expected_cluster	name	dup_type	source_tinyid
+synDUP001	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	PM2.5 concentration	exact	synAIR001
+synCPY001	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Copy of PM2.5 concentration	labelled_copy	synAIR001
+synNDU001	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Fine particulate matter concentration	near_duplicate	synAIR001
+synDUP002	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Air Quality Index	exact	synAIR007
+synCPY002	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Copy of Air Quality Index	labelled_copy	synAIR007
+synNDU002	air_quality	Air Quality Monitoring	Core Pollutants	terse	air	Overall Air Quality Index score	near_duplicate	synAIR007
+synDUP003	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Acidity of precipitation	exact	synAIR019
+synCPY003	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Copy of Acidity of precipitation	labelled_copy	synAIR019
+synNDU003	air_quality	Air Quality Monitoring	pH Measurement	terse	xd:pH	Precipitation pH	near_duplicate	synAIR019
+synDUP004	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Ambient temperature	exact	synAIR011
+synCPY004	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Copy of Ambient temperature	labelled_copy	synAIR011
+synNDU004	air_quality	Air Quality Monitoring	Meteorological	terse	xd:temperature	Air temperature at monitoring site	near_duplicate	synAIR011
+synDUP005	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen concentration	exact	synWAT001
+synCPY005	water_quality	Water Quality Assessment	Core Parameters	informational	water	Copy of Dissolved oxygen concentration	labelled_copy	synWAT001
+synNDU005	water_quality	Water Quality Assessment	Core Parameters	informational	water	Dissolved oxygen in water	near_duplicate	synWAT001
+synDUP006	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Water pH measurement	exact	synWAT002
+synCPY006	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	Copy of Water pH measurement	labelled_copy	synWAT002
+synNDU006	water_quality	Water Quality Assessment	pH Measurement	informational	xd:pH	pH of water sample	near_duplicate	synWAT002
+synDUP007	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Lead concentration in water	exact	synWAT012
+synCPY007	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Copy of Lead concentration in water	labelled_copy	synWAT012
+synNDU007	water_quality	Water Quality Assessment	Heavy Metals	informational	xd:heavy_metals	Dissolved lead in water sample	near_duplicate	synWAT012
+synDUP008	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Soil organic matter content by weight	exact	synSOL001
+synCPY008	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Copy of Soil organic matter content by weight	labelled_copy	synSOL001
+synNDU008	soil_composition	Soil Composition Analysis	Core Composition	expansive	soil	Organic matter percentage in soil	near_duplicate	synSOL001
+synDUP009	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH measured in aqueous suspension	exact	synSOL005
+synCPY009	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Copy of Soil pH measured in aqueous suspension	labelled_copy	synSOL005
+synNDU009	soil_composition	Soil Composition Analysis	pH Measurement	expansive	xd:pH	Soil pH in water suspension	near_duplicate	synSOL005
+synDUP010	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Lead concentration in the soil sample	exact	synSOL010
+synCPY010	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Copy of Lead concentration in the soil sample	labelled_copy	synSOL010
+synNDU010	soil_composition	Soil Composition Analysis	Heavy Metals	expansive	xd:heavy_metals	Total lead content in soil	near_duplicate	synSOL010

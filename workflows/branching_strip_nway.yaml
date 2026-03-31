@@ -87,7 +87,8 @@ steps:
       workers: "${workers}"
       clean_remnants: true
 
-  # [3] Quality report — scans all stripped outputs for detritus and remnants
+  # [3] Quality report — scans all stripped outputs for detritus, remnants,
+  #     and instrument name leakage
   - name: quality_report
     action: strip_report
     args:
@@ -96,3 +97,5 @@ steps:
       output: "${output_dir}/strip_report.md"
       version: "${version}"
       json_pattern: "stripped_*.json"
+      inst_patterns_full: "${inst_patterns_full}"
+      inst_patterns_sub: "${inst_patterns_sub}"

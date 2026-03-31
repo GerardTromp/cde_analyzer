@@ -1,0 +1,1322 @@
+[
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP001",
+    "designations": [
+      {
+        "designation": "PM2.5 concentration",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Measured PM2.5 level",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Mass of fine particulate matter per cubic meter of air.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY001",
+    "designations": [
+      {
+        "designation": "Copy of PM2.5 concentration",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Measured PM2.5 level",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Mass of fine particulate matter per cubic meter of air.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU001",
+    "designations": [
+      {
+        "designation": "Fine particulate matter concentration",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "PM2.5 measurement value",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Concentration of fine particles (diameter <= 2.5 um) per cubic meter of air.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP002",
+    "designations": [
+      {
+        "designation": "Air Quality Index",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Composite AQI score",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Aggregate index summarizing overall air quality.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY002",
+    "designations": [
+      {
+        "designation": "Copy of Air Quality Index",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Composite AQI score",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Aggregate index summarizing overall air quality.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU002",
+    "designations": [
+      {
+        "designation": "Overall Air Quality Index score",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "AQI composite value",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Composite score summarizing overall quality of ambient air.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP003",
+    "designations": [
+      {
+        "designation": "Acidity of precipitation",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Rainwater pH value",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "pH of collected precipitation samples.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY003",
+    "designations": [
+      {
+        "designation": "Copy of Acidity of precipitation",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Rainwater pH value",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "pH of collected precipitation samples.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU003",
+    "designations": [
+      {
+        "designation": "Precipitation pH",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "pH of collected rainwater",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Hydrogen ion concentration in precipitation samples.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP004",
+    "designations": [
+      {
+        "designation": "Ambient temperature",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Air temperature at site",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Temperature recorded at the monitoring station.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY004",
+    "designations": [
+      {
+        "designation": "Copy of Ambient temperature",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Air temperature at site",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Temperature recorded at the monitoring station.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU004",
+    "designations": [
+      {
+        "designation": "Air temperature at monitoring site",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      },
+      {
+        "designation": "Temperature of ambient air",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Temperature of the air recorded at the monitoring location.",
+        "sources": null,
+        "tags": [
+          "Air Quality Monitoring"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP005",
+    "designations": [
+      {
+        "designation": "Dissolved oxygen concentration",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Amount of oxygen dissolved in the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of molecular oxygen present in the water column, measured in milligrams per liter. Dissolved oxygen is essential for aquatic organism respiration and serves as an indicator of ecosystem health.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY005",
+    "designations": [
+      {
+        "designation": "Copy of Dissolved oxygen concentration",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Amount of oxygen dissolved in the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The concentration of molecular oxygen present in the water column, measured in milligrams per liter. Dissolved oxygen is essential for aquatic organism respiration and serves as an indicator of ecosystem health.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU005",
+    "designations": [
+      {
+        "designation": "Dissolved oxygen in water",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Oxygen concentration dissolved in the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The amount of molecular oxygen dissolved in the water, measured in milligrams per liter. Dissolved oxygen supports aquatic life and indicates the health of the aquatic ecosystem.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP006",
+    "designations": [
+      {
+        "designation": "Water pH measurement",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The hydrogen ion activity in the water expressed on a logarithmic scale from 0 to 14. Values below 7 indicate acidic conditions, values above 7 indicate alkaline conditions.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY006",
+    "designations": [
+      {
+        "designation": "Copy of Water pH measurement",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The hydrogen ion activity in the water expressed on a logarithmic scale from 0 to 14. Values below 7 indicate acidic conditions, values above 7 indicate alkaline conditions.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU006",
+    "designations": [
+      {
+        "designation": "pH of water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Water acidity or alkalinity measurement",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The measure of hydrogen ion activity in a water sample on a logarithmic scale ranging from 0 to 14. A pH below 7 denotes acidic conditions; above 7 denotes alkaline conditions.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP007",
+    "designations": [
+      {
+        "designation": "Lead concentration in water",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Dissolved lead level in the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The mass of dissolved lead per unit volume of water, typically reported in micrograms per liter. Lead is a regulated heavy metal due to its neurotoxic effects at low concentrations.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY007",
+    "designations": [
+      {
+        "designation": "Copy of Lead concentration in water",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Dissolved lead level in the water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The mass of dissolved lead per unit volume of water, typically reported in micrograms per liter. Lead is a regulated heavy metal due to its neurotoxic effects at low concentrations.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU007",
+    "designations": [
+      {
+        "designation": "Dissolved lead in water sample",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      },
+      {
+        "designation": "Lead concentration in the water",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The amount of dissolved lead per unit volume of water, typically expressed in micrograms per liter. Lead is a regulated heavy metal because of its neurotoxic properties at low concentrations.",
+        "sources": null,
+        "tags": [
+          "Water Quality Assessment"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP008",
+    "designations": [
+      {
+        "designation": "Soil organic matter content by weight",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Proportion of organic material present in the soil sample expressed as a percentage of total dry weight",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil organic matter encompasses all living and dead biological material within the soil matrix, including decomposed plant residues, animal remains, microbial biomass, and humic substances. The organic matter fraction is determined by loss-on-ignition or wet oxidation methods and reported as a percentage of oven-dried soil mass. Organic matter content governs nutrient cycling, water retention capacity, and soil structure.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY008",
+    "designations": [
+      {
+        "designation": "Copy of Soil organic matter content by weight",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Proportion of organic material present in the soil sample expressed as a percentage of total dry weight",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil organic matter encompasses all living and dead biological material within the soil matrix, including decomposed plant residues, animal remains, microbial biomass, and humic substances. The organic matter fraction is determined by loss-on-ignition or wet oxidation methods and reported as a percentage of oven-dried soil mass. Organic matter content governs nutrient cycling, water retention capacity, and soil structure.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU008",
+    "designations": [
+      {
+        "designation": "Organic matter percentage in soil",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Proportion of organic material in the soil expressed as a percentage of total dry mass",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil organic matter comprises all living and dead biological material in the soil, including decomposed plant material, animal remains, microbial biomass, and humic compounds. It is determined by loss-on-ignition or wet oxidation and reported as a percentage of oven-dried soil weight. Organic matter content controls nutrient cycling, water-holding capacity, and soil structure.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP009",
+    "designations": [
+      {
+        "designation": "Soil pH measured in aqueous suspension",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the soil determined by measuring the hydrogen ion activity in a standardized soil-water mixture",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil pH is measured by suspending a known mass of air-dried soil in deionized water at a standard ratio, typically one part soil to two parts water, and recording the hydrogen ion activity with a calibrated glass electrode. The pH value influences nutrient solubility, microbial activity, and the bioavailability of both essential elements and potentially toxic metals. Soil pH ranges from strongly acidic values below 4.5 to strongly alkaline values above 8.5.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY009",
+    "designations": [
+      {
+        "designation": "Copy of Soil pH measured in aqueous suspension",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Acidity or alkalinity of the soil determined by measuring the hydrogen ion activity in a standardized soil-water mixture",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Soil pH is measured by suspending a known mass of air-dried soil in deionized water at a standard ratio, typically one part soil to two parts water, and recording the hydrogen ion activity with a calibrated glass electrode. The pH value influences nutrient solubility, microbial activity, and the bioavailability of both essential elements and potentially toxic metals. Soil pH ranges from strongly acidic values below 4.5 to strongly alkaline values above 8.5.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU009",
+    "designations": [
+      {
+        "designation": "Soil pH in water suspension",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Hydrogen ion activity of the soil measured in a standardized soil-water slurry",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "The pH of a soil is measured by suspending a known mass of air-dried soil in deionized water at a standard ratio, commonly one part soil to two parts water, and reading the hydrogen ion activity with a glass electrode. Soil pH affects nutrient availability, microbial processes, and the mobility of essential elements and potentially toxic metals. Values range from strongly acidic (below 4.5) to strongly alkaline (above 8.5).",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synDUP010",
+    "designations": [
+      {
+        "designation": "Lead concentration in the soil sample",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Total mass of lead present per unit dry weight of soil as determined by acid digestion and instrumental analysis",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total lead concentration is measured by digesting a dried and ground soil sample in concentrated acid, filtering the digest, and analyzing the filtrate by inductively coupled plasma mass spectrometry or atomic absorption spectroscopy. The concentration is reported in milligrams per kilogram. Lead is a persistent heavy metal contaminant whose accumulation in soil poses risks to human health through direct contact, dust inhalation, and uptake into food crops.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synCPY010",
+    "designations": [
+      {
+        "designation": "Copy of Lead concentration in the soil sample",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Total mass of lead present per unit dry weight of soil as determined by acid digestion and instrumental analysis",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total lead concentration is measured by digesting a dried and ground soil sample in concentrated acid, filtering the digest, and analyzing the filtrate by inductively coupled plasma mass spectrometry or atomic absorption spectroscopy. The concentration is reported in milligrams per kilogram. Lead is a persistent heavy metal contaminant whose accumulation in soil poses risks to human health through direct contact, dust inhalation, and uptake into food crops.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  },
+  {
+    "nihEndorsed": null,
+    "elementType": "cde",
+    "archived": false,
+    "sources": [],
+    "createdBy": null,
+    "stewardOrg": {
+      "name": "Synthetic QC"
+    },
+    "registrationState": {
+      "registrationStatus": "Qualified"
+    },
+    "classification": [],
+    "referenceDocuments": [],
+    "properties": [],
+    "ids": [],
+    "attachments": [],
+    "tinyId": "synNDU010",
+    "designations": [
+      {
+        "designation": "Total lead content in soil",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      },
+      {
+        "designation": "Lead mass per unit dry weight of soil determined by acid digestion and instrumental measurement",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ],
+    "definitions": [
+      {
+        "definition": "Total lead in soil is quantified by digesting a dried, ground sample in concentrated acid, filtering the digest, and analyzing the filtrate using inductively coupled plasma mass spectrometry or atomic absorption spectroscopy. The result is reported in milligrams per kilogram. Lead is a persistent heavy metal contaminant that accumulates in soil and poses health risks through direct contact, dust inhalation, and crop uptake.",
+        "sources": null,
+        "tags": [
+          "Soil Composition Analysis"
+        ]
+      }
+    ]
+  }
+]
