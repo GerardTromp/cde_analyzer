@@ -255,6 +255,14 @@ body {
 .decision-modify { background: #fff3e0; color: var(--warning); }
 .decision-substitute { background: #e0f7fa; color: #00838f; }
 .decision-followup { background: #f3e5f5; color: #7b1fa2; }
+/* Tentative (auto-populated) decisions — lighter/pastel versions */
+.decision-tentative_strip { background: #f1f8e9; color: #9ccc65; border: 1px dashed #9ccc65; }
+.decision-tentative_skip { background: #fce4ec; color: #ef9a9a; border: 1px dashed #ef9a9a; }
+.decision-tentative_modify { background: #fff8e1; color: #ffcc80; border: 1px dashed #ffcc80; }
+.decision-tentative_substitute { background: #e0f7fa; color: #80deea; border: 1px dashed #80deea; }
+.decision-tentative_instrument { background: #f1f8e9; color: #9ccc65; border: 1px dashed #9ccc65; }
+.decision-tentative_study { background: #e8eaf6; color: #9fa8da; border: 1px dashed #9fa8da; }
+.decision-tentative_medical_term { background: #efebe9; color: #bcaaa4; border: 1px dashed #bcaaa4; }
 
 /* Decision quick-buttons in toolbar */
 .decision-quick-btn {
@@ -575,6 +583,8 @@ function cdeUrl(path) {
         <button class="decision-quick-btn dq-modify" id="btn-dq-modify" title="Set selected to 'modify' (M)" disabled>&#10038; Modify</button>
         <button class="decision-quick-btn dq-substitute" id="btn-dq-substitute" title="Set selected to 'substitute' (U)" disabled>&#8644; Subst</button>
         <button class="decision-quick-btn dq-followup" id="btn-dq-followup" title="Set selected to 'followup' (F)" disabled>&#9873; Follow</button>
+        <span class="tb-sep"></span>
+        <button class="decision-quick-btn" id="btn-confirm" title="Confirm tentative decisions on selected rows (Enter)" disabled style="background:#e8f5e9; color:#2e7d32; border-color:#66bb6a;">&#10004; Confirm</button>
     </div>
 
     <!-- Group ops (hidden when no notes column) -->
@@ -705,6 +715,7 @@ function cdeUrl(path) {
     const btnDqModify = $('btn-dq-modify');
     const btnDqSubstitute = $('btn-dq-substitute');
     const btnDqFollowup = $('btn-dq-followup');
+    const btnConfirm = $('btn-confirm');
     const groupButtons = $('group-buttons');
     const btnGroup = $('btn-group');
     const btnPropagate = $('btn-propagate');
@@ -2125,6 +2136,33 @@ function cdeUrl(path) {
         setAction('Set ' + sel.length + ' row(s) to \'' + decision + '\'');
     }
 
+    // ===== CONFIRM TENTATIVE DECISIONS =====
+    function confirmTentativeDecisions() {
+        if (S.decisionCol < 0) return;
+        const sel = getSelectedRows();
+        const targets = sel.length > 0 ? sel : S.rows;
+        let confirmed = 0;
+
+        pushUndo('Confirm tentative decisions');
+
+        for (const r of targets) {
+            const v = (r.cells[S.decisionCol] || '').trim();
+            if (v.startsWith('tentative_')) {
+                r.cells[S.decisionCol] = v.replace('tentative_', '');
+                confirmed++;
+            }
+        }
+
+        if (confirmed > 0) {
+            renderBody();
+            updateToolbarButtons();
+            updateStatus();
+            setAction('Confirmed ' + confirmed + ' tentative decision(s)');
+        } else {
+            setAction('No tentative decisions to confirm');
+        }
+    }
+
     // ===== GROUP MANAGEMENT =====
     function _hasAnyGroups() {
         if (S.notesCol < 0) return false;
@@ -2532,14 +2570,15 @@ function cdeUrl(path) {
 
         // Decision column stats + tinyId count summary
         if (S.decisionCol >= 0) {
-            let strip = 0, skip = 0, modify = 0, substitute = 0, followup = 0, empty = 0;
+            let strip = 0, skip = 0, modify = 0, substitute = 0, followup = 0, empty = 0, tentative = 0;
             let tidTotal = 0, tidDecided = 0;
             const hasTidCount = S.tinyidCountCol >= 0;
             for (const r of S.rows) {
                 const d = (r.cells[S.decisionCol] || '').trim().toLowerCase();
                 const tc = hasTidCount ? parseInt(r.cells[S.tinyidCountCol], 10) || 0 : 0;
                 tidTotal += tc;
-                if (d === 'strip') { strip++; tidDecided += tc; }
+                if (d.startsWith('tentative_')) { tentative++; tidDecided += tc; }
+                else if (d === 'strip') { strip++; tidDecided += tc; }
                 else if (d === 'skip') { skip++; tidDecided += tc; }
                 else if (d === 'modify') { modify++; tidDecided += tc; }
                 else if (d === 'substitute') { substitute++; tidDecided += tc; }
@@ -2549,6 +2588,7 @@ function cdeUrl(path) {
             text += ' | \u2713' + strip + ' \u2717' + skip + ' \u270E' + modify;
             if (substitute > 0) text += ' \u21C4' + substitute;
             if (followup > 0) text += ' \u2691' + followup;
+            if (tentative > 0) text += ' \u2248' + tentative;
             if (empty > 0) text += ' ?' + empty;
             if (hasTidCount && tidTotal > 0) {
                 text += ' | tinyIds: ' + tidDecided.toLocaleString() + '/' + tidTotal.toLocaleString();
@@ -2598,6 +2638,11 @@ function cdeUrl(path) {
             btnDqModify.disabled = sel === 0;
             btnDqSubstitute.disabled = sel === 0;
             btnDqFollowup.disabled = sel === 0;
+            // Confirm button: enabled if any selected row (or any row) has tentative_ decision
+            const hasTentative = (sel > 0 ? getSelectedRows() : S.rows).some(
+                r => (r.cells[S.decisionCol] || '').startsWith('tentative_')
+            );
+            btnConfirm.disabled = !hasTentative;
         } else {
             decisionButtons.style.display = 'none';
         }
@@ -2677,7 +2722,7 @@ function cdeUrl(path) {
             }
         }
 
-        // Decision shortcuts: S=strip, K=skip, M=modify, U=substitute, F=followup
+        // Decision shortcuts: S=strip, K=skip, M=modify, U=substitute, F=followup, Enter=confirm tentative
         if (!isInput && !inModal && !S.editingCell && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (S.decisionCol >= 0 && getSelectedRows().length > 0) {
                 if (e.key === 's' || e.key === 'S') {
@@ -2694,6 +2739,9 @@ function cdeUrl(path) {
                     e.preventDefault();
                 } else if (e.key === 'f' || e.key === 'F') {
                     setDecisionForSelected('followup');
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    confirmTentativeDecisions();
                     e.preventDefault();
                 }
             }
@@ -2744,6 +2792,7 @@ function cdeUrl(path) {
     btnDqModify.addEventListener('click', () => setDecisionForSelected('modify'));
     btnDqSubstitute.addEventListener('click', () => setDecisionForSelected('substitute'));
     btnDqFollowup.addEventListener('click', () => setDecisionForSelected('followup'));
+    btnConfirm.addEventListener('click', () => confirmTentativeDecisions());
     btnGroup.addEventListener('click', assignGroup);
     btnPropagate.addEventListener('click', propagateGroups);
     btnTreeSort.addEventListener('click', toggleTreeSort);

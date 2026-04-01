@@ -60,12 +60,29 @@ INSTRUMENT_WORDS = {
     "questionnaire", "scale", "inventory", "index", "checklist",
     "assessment", "survey", "test", "battery", "measure", "screening",
     "rating", "schedule", "interview", "examination",
+    # Extended instrument signals
+    "score", "scoring", "evaluation", "screen", "disorders",
+    "diagnostic", "symptom", "behavior", "functioning",
+    "impairment", "disability", "quality of life",
 }
 
 # Words that signal study/trial classification
 STUDY_WORDS = {
     "study", "trial", "project", "cohort", "consortium", "initiative",
-    "program", "registry", "network",
+    "program", "registry", "network", "longitudinal",
+}
+
+# Words that signal medical technique / procedure (not a scored instrument)
+MEDICAL_TECHNIQUE_WORDS = {
+    "electroencephalography", "tomography", "spectroscopy", "imaging",
+    "resonance", "ultrasound", "biopsy", "stimulation", "infusion",
+    "catheter", "microscopy", "angiography", "echocardiography",
+}
+
+# Category for external lookup result
+EXTERNAL_LOOKUP_CATEGORIES = {
+    "instrument", "study", "medical_technique", "medical_term",
+    "english", "organization",
 }
 
 # Regex for parenthetical abbreviation: "Full Name (ABBREV)"
@@ -395,11 +412,21 @@ class AbbreviationDictionary:
             if not entry.expansion:
                 continue
 
-            words = set(entry.expansion.lower().split())
-            is_instrument = bool(words & INSTRUMENT_WORDS)
-            is_study = bool(words & STUDY_WORDS)
+            exp_lower = entry.expansion.lower()
+            words = set(exp_lower.split())
 
-            if is_instrument and not is_study:
+            # Check multi-word phrases too
+            is_instrument = bool(words & INSTRUMENT_WORDS)
+            if not is_instrument:
+                is_instrument = "quality of life" in exp_lower
+            is_study = bool(words & STUDY_WORDS)
+            is_medical_tech = bool(words & MEDICAL_TECHNIQUE_WORDS)
+
+            if is_medical_tech and not is_instrument:
+                entry.category = "medical_technique"
+                entry.confidence = max(entry.confidence, 0.85)
+                classified += 1
+            elif is_instrument and not is_study:
                 entry.category = "instrument"
                 entry.confidence = max(entry.confidence, 0.9)
                 classified += 1
@@ -412,6 +439,46 @@ class AbbreviationDictionary:
                 entry.category = "instrument"
                 entry.confidence = max(entry.confidence, 0.8)
                 classified += 1
+
+        return classified
+
+    def classify_by_external_results(
+        self, lookup_results: Dict[str, Dict[str, Any]],
+    ) -> int:
+        """Apply external lookup results to classify entries.
+
+        Parameters
+        ----------
+        lookup_results : dict
+            Mapping: abbreviation → {"category": str, "confidence": float,
+            "expansion": str (optional), "notes": str (optional)}
+
+        Returns count of entries classified.
+        """
+        classified = 0
+        for abbrev, result in lookup_results.items():
+            # Match both bare and bracketed forms
+            entry = self.entries.get(abbrev)
+            if not entry:
+                entry = self.entries.get(f"[{abbrev}]")
+            if not entry:
+                continue
+            if entry.category != "unknown":
+                continue
+
+            category = result.get("category", "")
+            if category not in VALID_CATEGORIES:
+                continue
+
+            entry.category = category
+            confidence = result.get("confidence", 0.75)
+            entry.confidence = max(entry.confidence, confidence)
+            if result.get("expansion") and not entry.expansion:
+                entry.expansion = result["expansion"]
+            if result.get("notes"):
+                entry.notes = (entry.notes + "; " if entry.notes else "") + result["notes"]
+            entry.source = entry.source or "external_lookup"
+            classified += 1
 
         return classified
 
