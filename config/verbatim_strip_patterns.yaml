@@ -141,11 +141,17 @@ bare_instrument_abbrevs:
   - pattern: "REGEX: AQ$"
     note: "Bare trailing ' AQ' at end of designations (e.g. 'Anxious new situations AQ') - 50 occurrences"
 
-  - pattern: "REGEX: PROMIS\\s+.*?v\\d+[\\d.]*\\s+\\S+"
-    note: "PROMIS instrument prefix with form/version/item code (e.g. 'PROMIS  8a Pain Interference v1.0 PAININ31') - 31 CDEs"
+  - pattern: "REGEX: PROMIS\\s+.*?v\\d+[\\d.]*\\s+\\S+\\s*(?:\\d+\\s)?"
+    note: "PROMIS instrument prefix with form/version/item code and optional ordering number (e.g. 'PROMIS 8a Pain Interference v1.0 PAININ31 3 '). Strips up to the question text."
+
+  - pattern: "REGEX: Score\\s+\\d+\\s+Point\\s+Scale$"
+    note: "Trailing 'Score N Point Scale' on PROMIS LOINC designations - 31 CDEs"
+
+  - pattern: "REGEX: \\bscale$"
+    note: "Trailing bare 'scale' on PROMIS short designations (e.g. 'PROMIS Dsypnea severity dress yourself scale')"
 
   - pattern: "REGEX: ^PROMIS\\b"
-    note: "Bare PROMIS at start of field - strips instrument name prefix from undelimited designations (e.g. 'PROMIS Positve consequences...', 'PROMIS 6b Pain...'). Sub-instrument text preserved."
+    note: "Bare PROMIS at start of field - strips instrument name prefix from non-versioned designations (e.g. 'PROMIS Positve consequences...'). Applied after versioned regex."
 
   - pattern: "(NIHSS)"
     note: "Bare parenthetical NIH Stroke Scale abbreviation left after full name stripped - 6 occurrences"
