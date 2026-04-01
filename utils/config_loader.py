@@ -268,6 +268,50 @@ def load_verbatim_strip_patterns() -> List[Tuple[str, str]]:
     return patterns
 
 
+def load_abbreviation_dictionary(
+    dict_path: Optional[str] = None,
+) -> Optional[Any]:
+    """
+    Load an abbreviation dictionary from TSV.
+
+    Loading priority:
+      1. Explicit path (if provided)
+      2. Local override: ./abbreviation_dictionary.tsv (in working directory)
+      3. Global config: config/abbreviation_dictionary.tsv (in project root)
+
+    Returns:
+        AbbreviationDictionary instance, or None if no dictionary found.
+    """
+    from logic.abbreviation_dictionary import AbbreviationDictionary
+
+    # Try explicit path
+    if dict_path:
+        p = Path(dict_path)
+        if p.exists():
+            d = AbbreviationDictionary(str(p))
+            d.load()
+            logger.info(f"Loaded abbreviation dictionary: {p} ({len(d.entries)} entries)")
+            return d
+
+    # Try local override
+    local_path = Path.cwd() / "abbreviation_dictionary.tsv"
+    if local_path.exists():
+        d = AbbreviationDictionary(str(local_path))
+        d.load()
+        logger.info(f"Loaded local abbreviation dictionary: {local_path} ({len(d.entries)} entries)")
+        return d
+
+    # Try global config
+    global_path = get_config_dir() / "abbreviation_dictionary.tsv"
+    if global_path.exists():
+        d = AbbreviationDictionary(str(global_path))
+        d.load()
+        logger.info(f"Loaded global abbreviation dictionary: {global_path} ({len(d.entries)} entries)")
+        return d
+
+    return None
+
+
 def clear_config_cache():
     """Clear the configuration cache to force reload on next access."""
     global _config_cache

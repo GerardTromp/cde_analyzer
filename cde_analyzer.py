@@ -129,6 +129,11 @@ ACTION_REGISTRY = {
         "help": "YAML-based workflow orchestrator for CDE analysis pipelines",
         "description": "Execute sequential workflows with checkpoints and resume capability",
     },
+    "abbreviation": {
+        "module": "actions.abbreviation.cli",
+        "help": "Abbreviation discovery, expansion, classification, and dictionary management",
+        "description": "Discover abbreviations in CDE corpus, expand, classify, and generate strip patterns",
+    },
     "batch_expand_abbreviations": {
         "module": "actions.batch_expand_abbreviations.cli",
         "help": "Batch expand abbreviations to discover full instrument phrases",
