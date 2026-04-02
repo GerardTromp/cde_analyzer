@@ -92,7 +92,6 @@ steps:
       pattern_list: "${mined_patterns_tsv}"
       additional_patterns:
         - "${abbrev_patterns}"
-        - "${abbrev_verbatim}"
       expand_variants: true
       discover_bare_names: true
       workers: "${workers}"
