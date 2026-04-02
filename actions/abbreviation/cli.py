@@ -103,6 +103,13 @@ def register_subparser(subparser: ArgumentParser):
         metavar=("BASE_TSV", "UPDATE_TSV"),
         help="Merge two dictionaries. UPDATE overwrites BASE on conflict.",
     )
+    group.add_argument(
+        "--pipeline",
+        action="store_true",
+        help="Run full pipeline: discover → expand → classify → seed from "
+             "reference dictionary → export strip + scoped patterns. "
+             "Requires --input and --output (directory).",
+    )
 
     # Options
     subparser.add_argument(

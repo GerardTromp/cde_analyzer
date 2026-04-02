@@ -2,6 +2,7 @@
 #
 # Executes the full instrument detection and stripping pipeline:
 # 1. Mine instrument patterns from CDE JSON
+# 1b. Abbreviation pipeline (discover → expand → classify → seed → export)
 # 2. Discover abbreviation-based patterns
 # 3. Discover verbatim occurrences with variants
 # 4. Coalesce redundant patterns
@@ -37,6 +38,10 @@ variables:
   # Used as input to discover_verbatim, before human curation
   mined_patterns_tsv: "${output_dir}/mined_patterns.tsv"
   abbrev_patterns: "${output_dir}/abbrev_patterns.tsv"
+  # Abbreviation dictionary pipeline outputs
+  abbrev_dir: "${output_dir}/abbreviation"
+  abbrev_verbatim: "${output_dir}/abbreviation/abbreviation_verbatim.yaml"
+  abbrev_scoped: "${output_dir}/abbreviation/abbreviation_scoped.tsv"
   discovered_tsv: "${output_dir}/discovered.tsv"
   coalesced_tsv: "${output_dir}/coalesced.tsv"
   coalesce_report: "${output_dir}/coalesce_report.tsv"
@@ -61,6 +66,14 @@ steps:
       family_summary: true
       extract_supplementary: true
 
+  - name: abbreviation_pipeline
+    action: abbreviation
+    args:
+      pipeline: true
+      input: "${input_json}"
+      output: "${abbrev_dir}"
+      categories: "instrument,study"
+
   - name: discover_abbreviations
     action: strip_discover
     args:
@@ -79,6 +92,7 @@ steps:
       pattern_list: "${mined_patterns_tsv}"
       additional_patterns:
         - "${abbrev_patterns}"
+        - "${abbrev_verbatim}"
       expand_variants: true
       discover_bare_names: true
       workers: "${workers}"

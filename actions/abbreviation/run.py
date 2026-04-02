@@ -33,6 +33,8 @@ def run_action(args: Namespace):
         return _run_stats(args, args.stats)
     elif args.merge:
         return _run_merge(args, args.merge)
+    elif getattr(args, "pipeline", False):
+        return _run_pipeline(args)
 
     logger.error("No mode specified")
     return 1
@@ -265,6 +267,122 @@ def _run_stats(args, dict_path: str) -> int:
     print(f"    High (>=0.8): {high}")
     print(f"    Medium (0.5-0.8): {med}")
     print(f"    Low (<0.5): {low}")
+
+    return 0
+
+
+def _run_pipeline(args) -> int:
+    """Run full abbreviation pipeline: discover → expand → classify → seed → export."""
+    from logic.abbreviation_dictionary import AbbreviationDictionary
+
+    data = _load_json(args)
+    output_dir = getattr(args, "output", None)
+    if not output_dir:
+        logger.error("--output (directory) is required for --pipeline")
+        raise SystemExit(1)
+
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+
+    dict_path = out / "abbreviation_dictionary.tsv"
+    verbatim_path = out / "abbreviation_verbatim.yaml"
+    scoped_path = out / "abbreviation_scoped.tsv"
+    review_path = out / "abbreviation_needs_review.tsv"
+
+    # Step 1: Discover
+    print("\n=== Step 1: Discover abbreviations ===")
+    dictionary = AbbreviationDictionary(str(dict_path))
+
+    english_words = None
+    try:
+        from utils.instrument_extractor import _load_english_words
+        english_words = _load_english_words()
+    except ImportError:
+        pass
+
+    n_paren = dictionary.discover_parenthetical(data)
+    print(f"  Parenthetical: {n_paren}")
+    n_bracket = dictionary.discover_bracketed(data)
+    print(f"  Bracketed: {n_bracket}")
+    n_caps = dictionary.discover_bare_caps(data, english_words=english_words)
+    print(f"  Bare CAPS: {n_caps}")
+    if not getattr(args, "no_intercaps", False):
+        n_intercaps = dictionary.discover_intercaps(data)
+        print(f"  InterCaps: {n_intercaps}")
+
+    # Step 2: Expand
+    print("\n=== Step 2: Expand from context ===")
+    n_context = dictionary.expand_from_context(data)
+    print(f"  Expanded: {n_context}")
+
+    # Step 3: Seed from reference dictionary
+    print("\n=== Step 3: Seed from reference dictionary ===")
+    try:
+        from utils.config_loader import load_abbreviation_dictionary
+        ref_dict = load_abbreviation_dictionary()
+        if ref_dict:
+            seeded = 0
+            for abbrev, ref_entry in ref_dict.entries.items():
+                if abbrev in dictionary.entries:
+                    entry = dictionary.entries[abbrev]
+                    # Apply reference classification + decision if entry is unknown
+                    if entry.category == "unknown" and ref_entry.category != "unknown":
+                        entry.category = ref_entry.category
+                        entry.confidence = max(entry.confidence, ref_entry.confidence)
+                        entry.decision = ref_entry.decision
+                        if ref_entry.expansion and not entry.expansion:
+                            entry.expansion = ref_entry.expansion
+                        seeded += 1
+                    elif not entry.decision and ref_entry.decision:
+                        entry.decision = ref_entry.decision
+                        seeded += 1
+            print(f"  Seeded from reference: {seeded}")
+        else:
+            print("  No reference dictionary found")
+    except Exception as e:
+        print(f"  Reference seeding skipped: {e}")
+
+    # Step 4: Classify
+    print("\n=== Step 4: Classify by heuristic + family detector ===")
+    n_heuristic = dictionary.classify_by_heuristic()
+    print(f"  By heuristic: {n_heuristic}")
+
+    n_family = 0
+    try:
+        from utils.instrument_family_patterns import FAMILY_PATTERNS
+        n_family = dictionary.classify_by_family_detector(FAMILY_PATTERNS)
+        print(f"  By family detector: {n_family}")
+    except ImportError:
+        pass
+
+    # Summary
+    summary = dictionary.summary()
+    print(f"\n  Classification:")
+    for cat, count in sorted(summary.items(), key=lambda x: -x[1]):
+        print(f"    {cat}: {count}")
+
+    decisions = {}
+    for e in dictionary.entries.values():
+        d = e.decision or "(none)"
+        decisions[d] = decisions.get(d, 0) + 1
+    print(f"  Decisions:")
+    for d, n in sorted(decisions.items(), key=lambda x: -x[1]):
+        print(f"    {d}: {n}")
+
+    # Step 5: Save + Export
+    print("\n=== Step 5: Save + Export ===")
+    dictionary.save()
+    print(f"  Dictionary: {len(dictionary.entries)} entries → {dict_path}")
+
+    categories = [c.strip() for c in args.categories.split(",")]
+    n_verb = dictionary.export_strip_patterns(str(verbatim_path), categories)
+    print(f"  Verbatim patterns: {n_verb} → {verbatim_path}")
+
+    n_scoped = dictionary.export_scoped_patterns(str(scoped_path), categories)
+    print(f"  Scoped patterns: {n_scoped} → {scoped_path}")
+
+    n_review = dictionary.export_needs_review(str(review_path))
+    print(f"  Needs review: {n_review} → {review_path}")
 
     return 0
 

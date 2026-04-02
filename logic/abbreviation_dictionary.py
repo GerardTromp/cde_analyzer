@@ -43,12 +43,23 @@ class AbbreviationEntry:
     aliases: str = ""              # Pipe-separated: "PHQ-9|PHQ-15"
     decided_at: str = ""
     notes: str = ""
+    decision: str = ""             # strip|skip|tentative_strip|tentative_skip|"" (empty=undecided)
 
 
 DICTIONARY_TSV_HEADERS = [
     "abbreviation", "expansion", "category", "confidence", "source",
-    "tinyIds", "n_tinyIds", "aliases", "decided_at", "notes",
+    "tinyIds", "n_tinyIds", "aliases", "decided_at", "notes", "decision",
 ]
+
+# Category → tentative decision mapping for auto-populated entries
+_TENTATIVE_DECISION = {
+    "instrument": "tentative_strip",
+    "study": "tentative_strip",
+    "medical_technique": "tentative_skip",
+    "medical_term": "tentative_skip",
+    "english": "tentative_skip",
+    "unknown": "",
+}
 
 VALID_CATEGORIES = {
     "instrument", "study", "medical_technique",
@@ -156,6 +167,7 @@ class AbbreviationDictionary:
                     aliases=row.get("aliases", ""),
                     decided_at=row.get("decided_at", ""),
                     notes=row.get("notes", ""),
+                    decision=row.get("decision", ""),
                 )
         return True
 
@@ -171,6 +183,10 @@ class AbbreviationDictionary:
             writer.writeheader()
             for abbrev in sorted(self.entries):
                 e = self.entries[abbrev]
+                # Firm decisions are preserved; empty decisions get tentative auto-fill
+                decision = e.decision
+                if not decision:
+                    decision = _TENTATIVE_DECISION.get(e.category, "")
                 writer.writerow({
                     "abbreviation": e.abbreviation,
                     "expansion": e.expansion,
@@ -182,6 +198,7 @@ class AbbreviationDictionary:
                     "aliases": e.aliases,
                     "decided_at": e.decided_at,
                     "notes": e.notes,
+                    "decision": decision,
                 })
 
     def merge(self, other: "AbbreviationDictionary") -> Dict[str, int]:
@@ -514,6 +531,21 @@ class AbbreviationDictionary:
 
     # -- export -------------------------------------------------------------
 
+    def _should_strip(self, entry: AbbreviationEntry,
+                      categories: List[str]) -> bool:
+        """Check if entry should produce strip patterns.
+
+        If the entry has a firm decision, use it. Otherwise fall back to
+        category membership.
+        """
+        dec = (entry.decision or "").replace("tentative_", "")
+        if dec == "strip":
+            return True
+        if dec == "skip":
+            return False
+        # No decision — fall back to category
+        return entry.category in categories
+
     def export_strip_patterns(
         self, output_path: str,
         categories: Optional[List[str]] = None,
@@ -522,7 +554,8 @@ class AbbreviationDictionary:
         if categories is None:
             categories = ["instrument", "study"]
 
-        entries = [e for e in self.entries.values() if e.category in categories]
+        entries = [e for e in self.entries.values()
+                   if self._should_strip(e, categories)]
         entries.sort(key=lambda e: (-e.n_tinyIds, e.abbreviation))
 
         lines = [
@@ -561,7 +594,7 @@ class AbbreviationDictionary:
 
         entries = [
             e for e in self.entries.values()
-            if e.category in categories
+            if self._should_strip(e, categories)
             and not e.abbreviation.startswith("[")
             and e.tinyIds
         ]
@@ -585,22 +618,30 @@ class AbbreviationDictionary:
         return len(entries)
 
     def export_needs_review(self, output_path: str, threshold: float = 0.8) -> int:
-        """Export entries below confidence threshold for human review."""
+        """Export entries below confidence threshold for human review.
+
+        Excludes zero-tinyId entries (already-resolved manual/seeded entries).
+        Pre-fills tentative decisions based on category classification.
+        """
         entries = [
             e for e in self.entries.values()
-            if e.confidence < threshold or e.category == "unknown"
+            if (e.confidence < threshold or e.category == "unknown")
+            and len(e.tinyIds) > 0  # exclude already-resolved manual entries
+            and e.decision not in ("strip", "skip")  # firm decisions don't need review
         ]
         entries.sort(key=lambda e: (-e.n_tinyIds, e.abbreviation))
 
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        cols = DICTIONARY_TSV_HEADERS + ["decision"]
         with open(output_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(
-                f, fieldnames=cols, delimiter="\t",
+                f, fieldnames=DICTIONARY_TSV_HEADERS, delimiter="\t",
                 lineterminator="\n", extrasaction="ignore",
             )
             writer.writeheader()
             for e in entries:
+                decision = e.decision
+                if not decision:
+                    decision = _TENTATIVE_DECISION.get(e.category, "")
                 writer.writerow({
                     "abbreviation": e.abbreviation,
                     "expansion": e.expansion,
@@ -612,7 +653,7 @@ class AbbreviationDictionary:
                     "aliases": e.aliases,
                     "decided_at": e.decided_at,
                     "notes": e.notes,
-                    "decision": "",
+                    "decision": decision,
                 })
         return len(entries)
 

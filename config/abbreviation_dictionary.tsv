@@ -1,1 +1,514 @@
-abbreviation	expansion	category	confidence	source	tinyIds	n_tinyIds	aliases	decided_at	notes
+abbreviation	expansion	category	confidence	source	tinyIds	n_tinyIds	aliases	decided_at	notes	decision
+(NIHSS)		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
+(PHQ-9)		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
+AA		unknown	0.50	bare_caps		0				skip
+ACC	American College of Cardiology	unknown	0.95	parenthetical		0				skip
+ACCP	risk of a periprocedural thromboembolic event as stratified using adapted American College of Chest Physicians	unknown	0.95	parenthetical		0				skip
+ACE	Acute Concussion Evaluation	instrument	0.95	parenthetical		0			Concussion assessment	strip
+ACSCP-II		unknown	0.50	bare_caps		0				strip
+ADD	Attention Deficit Disorder	unknown	0.95	parenthetical		0				skip
+ADHD	Attention Deficit Hyperactivity Disorder	unknown	0.95	parenthetical		0				skip
+AE	reason for modification of original parameters or original electrode configuration of implanted device due to intolerable stimulation related Adverse Event	medical_technique	0.95	parenthetical		0				skip
+AF		unknown	0.50	bare_caps		0				skip
+AGE		unknown	0.50	bare_caps		0				skip
+AHA	American Heart Association	unknown	0.95	parenthetical		0				skip
+AHI	Hypopnea Index	instrument	0.95	parenthetical		0				strip
+AHRQ	Agency for Healthcare Research and Quality	unknown	0.95	parenthetical		0				skip
+ALSPAC	Avon Longitudinal Study of Parents and Children	study	0.90	bare_caps		0			Longitudinal cohort study	strip
+ALT		unknown	0.50	bare_caps		0				skip
+ANAM	Automated Neuropsychological Assessment Metrics	instrument	0.95	parenthetical		0				strip
+AQ	Autism Quotient	instrument	0.95	bare_caps		0			Autism spectrum screening	strip
+ASA	Type of standard American Society of Anesthesiologists	unknown	0.95	parenthetical		0				skip
+ASIA	American Spinal Injury Association	unknown	0.95	parenthetical		0				skip
+ASL	Duration in milliseconds of the labeling pulse in imaging acquisition for the Axial Arterial Spin Labeling	medical_technique	0.95	parenthetical		0				skip
+ASQ-3	Third Edition	unknown	0.95	parenthetical		0				strip
+ASR	Acoustic Startle Response	unknown	0.95	parenthetical		0				skip
+ASRS	Report Scale	instrument	0.95	parenthetical		0				strip
+ASSIST		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: assist	strip
+AST	Shifting Test	instrument	0.95	parenthetical		0				strip
+ATG	anti-thymocyte globulin	unknown	0.50	bare_caps		0				skip
+AUDADIS-IV		unknown	0.50	bare_caps		0				strip
+AUDIT	Alcohol Use Disorders Identification Test	instrument	0.95	parenthetical		0				strip
+ActiGraph		medical_term	0.70	intercaps		0				skip
+ActiWeb		medical_term	0.70	intercaps		0				skip
+AndOr		medical_term	0.70	intercaps		0				skip
+BAER		unknown	0.50	bare_caps		0				skip
+BD		unknown	0.50	bare_caps		0				skip
+BESS	Balance Error Scoring System	instrument	0.95	parenthetical		0			Balance/concussion assessment	strip
+BFI	Big Five Inventory	instrument	0.95	bare_caps		0			Personality assessment	strip
+BFMF	Type of fine motor function as indicated by the Bimanual Fine Motor Function	unknown	0.95	parenthetical		0				skip
+BMCA	Duration of Achilles clonus as part of the Brain Motor Control Assessment	instrument	0.95	parenthetical		0				strip
+BMI	Body Mass Index	instrument	0.95	parenthetical		0				skip
+BMR	Basal Metabolic Rate	unknown	0.95	parenthetical		0				skip
+BMTCTN	Code indicating whether the protocol deviation or violation was reviewed by the Bone Marrow Transplant Clinical Trials Network	study	0.95	parenthetical		0				strip
+BOP	Bleeding on probing	unknown	0.50	bare_caps		0				skip
+BP		unknown	0.50	bare_caps		0				skip
+BPRS	Brief Psychiatric Rating Scale	instrument	0.95	parenthetical		0				strip
+BSSS	Brief Sensation Seeking Scale	instrument	0.95	parenthetical		0				strip
+BTACT	Brief Test of Adult Cognition by Telephone	instrument	0.95	parenthetical		0				strip
+BW	Beam Walk	instrument	0.95	parenthetical		0			Behavioral neuroscience test (animal)	strip
+BWCYSS	Washington Cooperative Young Stroke Study	study	0.95	parenthetical		0				strip
+Beck Inventory		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: beck	strip
+BldA		medical_term	0.70	intercaps		0				skip
+BrIC		medical_term	0.70	intercaps		0				skip
+BrokBone		medical_term	0.70	intercaps		0				skip
+CAG	type of provider who repeated the Cytosine Adenine Guanine	unknown	0.95	parenthetical		0				skip
+CAPA	Corrective Action Preventive Action	unknown	0.95	parenthetical		0				skip
+CARDIA	following protocol was taken from the Coronary Artery Risk Development in Young Adults	unknown	0.95	parenthetical		0				skip
+CARF	Indicates if the discharge destination is a rehabilitation center accredited by the Commission on Accreditation of Rehabilitation Facilities	unknown	0.95	parenthetical		0				skip
+CASCADE	Childhood AIS Standardized Classification and Diagnostic Evaluation	instrument	0.95	parenthetical		0				strip
+CASE	Child Adolescent Scale of Environment	instrument	0.95	parenthetical		0				strip
+CASP	Child and Adolescent Scale of Participation	instrument	0.95	parenthetical		0				strip
+CAST	Chinese Ages and Stages Questionnaire	instrument	0.95	bare_caps		0			Child development screening	strip
+CBCL	Child Behavior Checklist	instrument	0.95	parenthetical		0				strip
+CBLC	Child Behavior Checklist	instrument	0.95	parenthetical		0				strip
+CBQ	Children's Behavior Questionnaire	instrument	0.95	parenthetical		0				strip
+CCB	Calcium Channel Blockers	medical_term	0.95	parenthetical		0			Drug class	skip
+CCS	Causative Classification System	unknown	0.95	parenthetical		0				skip
+CD	Childhood Disease	unknown	0.50	bare_caps		0				skip
+CDC	unique identifier for reporting information about ethnicity based on the Centers for Disease Control and Prevention	unknown	0.95	parenthetical		0				skip
+CEJ	Cementoenamel Junction	unknown	0.50	bare_caps		0				skip
+CES	Combat Exposure Scale	instrument	0.95	parenthetical		0				strip
+CES-D	Depression Scale	instrument	0.95	parenthetical		0				strip
+CFCS	Communication Function Classification System	unknown	0.95	parenthetical		0				skip
+CFU	Value of colony forming associated with a bacterial species measured in Colony Forming Units	unknown	0.95	parenthetical		0				skip
+CGAS	Score on the Children's Global Assessment Scale	instrument	0.95	parenthetical		0				strip
+CHAT	number of bricks that child can use to build a tower as specified from the Checklist for Autism in Toddlers	instrument	0.95	parenthetical		0				strip
+CHD		unknown	0.50	bare_caps		0				skip
+CMAP	Compound muscle action potential	unknown	0.50	bare_caps		0				skip
+CMV	Element related to the sample type used to test for Cytomegalovirus	instrument	0.95	parenthetical		0				skip
+CNS-LS	Lability Scale	instrument	0.95	parenthetical		0				strip
+COVID-19		unknown	0.50	bare_caps		0				skip
+COWAT	Controlled Oral Word Association Test	instrument	0.95	parenthetical		0				strip
+CT		unknown	0.50	bare_caps		0				skip
+CTCAE	Text that represents the Common Terminology Criteria for Adverse Events	unknown	0.95	parenthetical		0				skip
+CTQ	Childhood Trauma Questionnaire	instrument	0.95	parenthetical		0				strip
+CTS	Carpal Tunnel Syndrome	medical_term	0.80	bare_caps		0			Medical condition, not instrument	skip
+CoD		medical_term	0.70	intercaps		0				skip
+CoV		medical_term	0.70	intercaps		0				skip
+DALY	Adjusted Life Year	unknown	0.95	parenthetical		0				skip
+DASH	Dietary Approaches to Stop Hypertension	unknown	0.95	parenthetical		0				skip
+DAST-10	Drug Abuse Screening Test	instrument	0.95	parenthetical		0				strip
+DBS	Dried Blood Spot	medical_technique	0.75	bare_caps		0			Specimen type in LOINC designations	skip
+DEQAS	Vitamin D External Quality Assessment Scheme	instrument	0.95	parenthetical		0				strip
+DGI	Dynamic Gait Index	instrument	0.95	parenthetical		0				strip
+DKEFS-TMT	Kaplan Executive Function System Trail Making Test	instrument	0.95	parenthetical		0				strip
+DLCO	Diffusion capacity of the lung for carbon monoxide	unknown	0.50	bare_caps		0				skip
+DOB		unknown	0.50	bare_caps		0				skip
+DSMB	Code indicating whether the protocol deviation or violation was reported to the Data Safety Monitoring Board	unknown	0.95	parenthetical		0				skip
+DSQ		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: dsq	strip
+DTI	Value in points of the base resolution used in imaging acquisition as part of Diffusion Tensor Imaging	medical_technique	0.95	parenthetical		0				skip
+DVT		unknown	0.50	bare_caps		0				skip
+DYS	Dysarthria	medical_term	0.75	bare_caps		0			LOINC speech disorder code — not a scored instrument	skip
+DateOfBirth		medical_term	0.70	intercaps		0				skip
+DateRange		medical_term	0.70	intercaps		0				skip
+DePaul		medical_term	0.70	intercaps		0				skip
+EBV	Barr Virus	unknown	0.95	parenthetical		0				skip
+ECBQ	Early Childhood Behavior Questionnaire	instrument	0.95	parenthetical		0				strip
+ECOG	Eastern Cooperative Oncology Group	unknown	0.95	parenthetical		0				skip
+EDACS	Type of eating and drinking as indicated by the Eating and Drinking Classification System	unknown	0.95	parenthetical		0				skip
+EDDS	Eating Disorder Diagnostic Scale	instrument	0.95	bare_caps		0			Eating disorder screening	strip
+EDSS	Using the Expanded Disability Status Scale	instrument	0.95	parenthetical		0				strip
+EEG	data type of the Electroencephalography	medical_technique	0.95	parenthetical		0			Brain electrical activity recording	skip
+EHI	Edinburgh Handedness Inventory	instrument	0.95	bare_caps		0			Handedness assessment	strip
+ELGAN	Extremely Low Gestational Age Newborns	unknown	0.95	parenthetical		0				skip
+EMS	Date and time first call was received by the Emergency Medical Services	unknown	0.95	parenthetical		0				skip
+ERG	Electroretinogram	medical_technique	0.80	bare_caps		0			Retinal function test	skip
+ESAS	Edmonton Symptom Assessment System	instrument	0.95	parenthetical		0				strip
+ESUS	descriptive identification criteria categories used to identify Embolic Stroke of Undetermined Source	unknown	0.95	parenthetical		0				skip
+EvaluationDate		medical_term	0.70	intercaps		0				skip
+ExaminationCondition		medical_term	0.70	intercaps		0				skip
+FBI-ALS	ALS Version	unknown	0.95	parenthetical		0				strip
+FCASS	Focal Cerebral Arteriopathy Severity Score	instrument	0.95	parenthetical		0			Stroke severity score	strip
+FEAS	Functional Emotional Assessment Scale	instrument	0.95	bare_caps		0			Emotional development assessment	strip
+FEV1	Forced Expired Volume in One Second	unknown	0.95	parenthetical		0				skip
+FEV6		unknown	0.50	bare_caps		0				skip
+FGA	Functional Gait Assessment	instrument	0.95	parenthetical		0				strip
+FH-RDC	Research Diagnostic Criteria	instrument	0.95	parenthetical		0				strip
+FPAR	Family Planning Annual Report	unknown	0.95	parenthetical		0				skip
+FSS	Fatigue Severity Scale	instrument	0.95	parenthetical		0				strip
+FTND	Fagerstrom Test for Nicotine Dependence	instrument	0.95	bare_caps		0			Nicotine dependence assessment	strip
+FVC	Forced Vital Capacity	unknown	0.95	parenthetical		0				skip
+G20210A		unknown	0.50	bare_caps		0				skip
+GA	Gestational age	unknown	0.50	bare_caps		0				skip
+GAD		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: gad	strip
+GAD-7	Generalized Anxiety Disorder	instrument	0.95	parenthetical		0			Anxiety screening	strip
+GCS	Type of Glasgow Coma Scale	instrument	0.95	parenthetical		0				strip
+GFTA-2	Second Edition	unknown	0.95	parenthetical		0				skip
+GMFC	Type of gross motor function as indicated by the Gross Motor Function Classification System	unknown	0.95	parenthetical		0				skip
+GMFCS	scale level as reference to the Gross Motor Function Classification System	instrument	0.95	parenthetical		0				strip
+GNWCH	Global Network for Women's and Children's Health Research	study	0.95	parenthetical		0				strip
+GOAT	Galveston Orientation and Amnesia Test	instrument	0.95	parenthetical		0				strip
+GOS	Glasgow Outcome Scale	instrument	0.95	parenthetical		0				strip
+GSE	General Self-Efficacy Scale	instrument	0.95	bare_caps		0			Self-efficacy measure	strip
+GU		unknown	0.50	bare_caps		0				skip
+GUID	Global Unique ID	unknown	0.95	parenthetical		0				skip
+GVHD		unknown	0.50	bare_caps		0				skip
+GWB	total score for the General Well Being Schedule	instrument	0.95	parenthetical		0				strip
+HAM-A	Hamilton Anxiety Rating Scale	instrument	0.95	parenthetical		0				strip
+HDCT	Hereditary Disorder of Connective Tissue	unknown	0.95	parenthetical		0				skip
+HDRS	Hamilton Depression Rating Scale	instrument	0.95	parenthetical		0				strip
+HERF	Healthcare Event Reporting Form	unknown	0.95	parenthetical		0				strip
+HHS	Department of Health and Human Services	unknown	0.95	parenthetical		0				skip
+HIC	calculated average value of the Head Injury Criterion	unknown	0.95	parenthetical		0				skip
+HIP	value of Head Impact Power	unknown	0.95	parenthetical		0				skip
+HR	Also called Heart Rate	unknown	0.95	parenthetical		0				skip
+HUGO	Human Genome Organisation	unknown	0.95	parenthetical		0				skip
+HbS		medical_term	0.70	intercaps		0				skip
+HbSS		medical_term	0.70	intercaps		0				skip
+HbSbeta		medical_term	0.70	intercaps		0				skip
+HealthCare		medical_term	0.70	intercaps		0				skip
+IA		unknown	0.50	bare_caps		0				skip
+IB		unknown	0.50	bare_caps		0				skip
+IBD	Inflammatory Bowel Disease	unknown	0.95	parenthetical		0				skip
+ICAS	Inner-City Asthma Study	unknown	0.50	bare_caps		0				skip
+ICD	Number of the International Classification of Diseases	unknown	0.95	parenthetical		0				skip
+ICD-10	International Statistical Classification of Diseases and Related Health Problems	unknown	0.95	parenthetical		0				skip
+ICD-10-CM	Clinical Modification	medical_term	0.95	parenthetical		0			Coding system	skip
+ICP	Intracranial Pressure	unknown	0.95	parenthetical		0				skip
+ID	Identifier	english	0.90	bare_caps		0			Common abbreviation, not instrument	skip
+IEP	Individualized Education Program	study	0.95	parenthetical		0				skip
+IFPS-II	Infant Feeding Practices Study II	study	0.90	bare_caps		0			Infant nutrition study	strip
+IHS	Indian Health Service	unknown	0.95	parenthetical		0				skip
+II	Roman numeral two	english	0.90	bare_caps		0			Version/phase suffix, not instrument	skip
+IPPB	Status of current Intermittent Positive Pressure Breathing	unknown	0.95	parenthetical		0				skip
+IPS	Subtype based on the Ischemic Perinatal Stroke	unknown	0.95	parenthetical		0				skip
+IPSS	International Pediatric Stroke Study	study	0.95	parenthetical		0				strip
+IRB	Indicator of whether the Institutional Review Board	unknown	0.95	parenthetical		0				skip
+ISO	Select the country code from the International Organization for Standardization	unknown	0.95	parenthetical		0				skip
+IgG	Immunoglobulin Level	medical_term	0.90	intercaps		0				skip
+IgM		medical_term	0.70	intercaps		0				skip
+ImPACT	Concussion Assessment Testing	medical_term	0.90	intercaps		0				skip
+JCIH	Joint committee on Infant Hearing	unknown	0.95	parenthetical		0				skip
+K6	[Kessler 6 Distress]	unknown	0.50	bare_caps		0				strip
+KOSCHI	category that best describes the child's prognosis by the King's Outcome Scale for Childhood Head Injury	instrument	0.95	parenthetical		0				strip
+LAMS	Type of abnormal arm strength observed during administration of the Los Angeles Motor Scale	instrument	0.95	parenthetical		0				strip
+LASIK		unknown	0.50	bare_caps		0				skip
+LE-L		unknown	0.50	bare_caps		0				skip
+LE-R		unknown	0.50	bare_caps		0				skip
+LIBCSP	Long Island Breast Cancer Study Project	study	0.90	bare_caps		0			Epidemiological study	strip
+LLE		unknown	0.50	bare_caps		0				skip
+LLT	Lower Level Term	unknown	0.95	parenthetical		0				skip
+LOINC	Logical Observation Identifiers Names and Codes	unknown	0.95	parenthetical		0				skip
+LTVH	Lifetime Trauma and Victimization History	instrument	0.95	bare_caps		0			Trauma screening interview	strip
+LUE		unknown	0.50	bare_caps		0				skip
+LVO	Indicates if the patient has detected positive for suspected Large Vessel Occlusion	unknown	0.95	parenthetical		0				skip
+LogInvPct		medical_term	0.70	intercaps		0				skip
+LysoPC		medical_term	0.70	intercaps		0				skip
+MACE	Military Acute Concussion Evaluation	instrument	0.95	parenthetical		0			Concussion screening	strip
+MACS	Type of upper limb function as indicated by the Manual Ability Classification System	unknown	0.95	parenthetical		0				skip
+MAP	Lowest value of the difference between the Mean Arterial Pressure	unknown	0.95	parenthetical		0				skip
+MAR	Minimum Angle of Resolution	unknown	0.50	bare_caps		0				skip
+MDS	Minimum Data Set	unknown	0.95	parenthetical		0				skip
+MDS-UPDRS		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: mds-updrs	strip
+MEP	Maximal Expiratory Pressure	unknown	0.95	parenthetical		0				skip
+MESA	Multi-Ethnic Study of Atherosclerosis	unknown	0.50	bare_caps		0				skip
+MFrDiff		medical_term	0.70	intercaps		0				skip
+MG	Subject's Myasthenia Gravis	unknown	0.95	parenthetical		0				skip
+MG-ADL	Subject's Myasthenia Gravis Activities of Daily Living	unknown	0.95	parenthetical		0				skip
+MG-QOL15	Life Scale	instrument	0.95	parenthetical		0				strip
+MGFA	Myasthenia Gravis Foundation of America	unknown	0.95	parenthetical		0				skip
+MI	Myocardial infarction	unknown	0.50	bare_caps		0				skip
+MIDAS	Migraine Disability Assessment	instrument	0.95	parenthetical		0				strip
+MIP	Maximal Inspiratory Pressure	unknown	0.95	parenthetical		0				skip
+MMF	Mycophenolate mofetil	unknown	0.50	bare_caps		0				skip
+MMSE		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: mmse	strip
+MMT	Manual Muscle Testing	unknown	0.95	parenthetical		0				skip
+MNI	Montreal Neurological Institute	unknown	0.95	parenthetical		0				skip
+MOS	Medical Outcomes Study	study	0.95	parenthetical		0				strip
+MPAI-4	Portland Adaptability Inventory	instrument	0.95	parenthetical		0				strip
+MRI	Magnetic Resonance Imaging	medical_technique	0.95	parenthetical		0				skip
+MRN	Medical Record Number	unknown	0.50	bare_caps		0				skip
+MRS	Magnetic Resonance Spectroscopy	unknown	0.50	bare_caps		0				skip
+MS	current Multiple Sclerosis	unknown	0.95	parenthetical		0				skip
+MS-QOL		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: ms-qol	strip
+MSQOL-54	scale related to attention based on Multiple Sclerosis Quality of Life Scale	instrument	1.00	parenthetical		0			Family: MS-QOL	strip
+MWMA	Morris Water Maze Acquisition	unknown	0.95	parenthetical		0				skip
+MWMP	Morris Water Maze Probe	unknown	0.95	parenthetical		0				skip
+MeButyrylcarn		medical_term	0.70	intercaps		0				skip
+MeGlutarylcarn		medical_term	0.70	intercaps		0				skip
+MedDRA	Regulatory Activities	medical_term	0.90	intercaps		0				skip
+MetaNeb		medical_term	0.70	intercaps		0				skip
+MoCA		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: moca	strip
+MoreThan		medical_term	0.70	intercaps		0				skip
+NART	National Adult Rading Test	instrument	0.95	parenthetical		0				strip
+NB		unknown	0.50	bare_caps		0				skip
+NCFS	Neck Circumference Fetal Sonography	unknown	0.50	bare_caps		0				skip
+NCS	National Children's Study	study	0.95	parenthetical		0				strip
+NECESSARY		unknown	0.50	bare_caps		0				skip
+NEI	This term was developed in collaboration with the National Institute of Health's National Eye Institute	unknown	0.95	parenthetical		0				skip
+NEI-VFQ		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: nei-vfq	strip
+NEI-VFQ-25	scale for needing help from others based on the National Eye Institute Visual Functioning Questionnaire	instrument	1.00	parenthetical		0			Family: NEI-VFQ	strip
+NESARC	National Epidemiologic Survey on Alcohol and Related Conditions	instrument	0.95	parenthetical		0				strip
+NHANES		instrument	0.85	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
+NHANES-PAQ	Physical Activity and Physical Fitness Questionnaire	instrument	0.95	parenthetical		0				strip
+NHEXAS	National Human Exposure Assessment Survey	study	0.90	bare_caps		0			EPA exposure study	strip
+NHIS	National Health Interview Survey	unknown	0.50	bare_caps		0				strip
+NHL	Non-Hodgkin Lymphoma Study	study	0.85	bare_caps		0			Cancer study, not scored instrument	strip
+NIA	National Institute on Aging	unknown	0.95	parenthetical		0				skip
+NICHD	National Institute of Child Health and Human Development	unknown	0.95	parenthetical		0				skip
+NICU	Neonatal Intensive Care Unit	unknown	0.95	parenthetical		0				skip
+NIDDK	National Institute of Diabetes and Digestive and Kidney Diseases	unknown	0.95	parenthetical		0				skip
+NIH Toolbox		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: nih-toolbox	strip
+NIHSS		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
+NIST	Any methodology that uses the appropriate National Institute of Standards and Technology	unknown	0.95	parenthetical		0				skip
+NLAAS	National Latino and Asian American Study	study	0.90	bare_caps		0			Epidemiological study	skip
+NMO	Neuromyelitis Optica	unknown	0.95	parenthetical		0				skip
+NMSS	Motor Symptom assessment scale for Parkinson's Disease	instrument	0.95	parenthetical		0				strip
+NOMAS	Assess frontal lobe function using the scale from the Northern Manhattan Study	instrument	0.95	parenthetical		0				strip
+NOR	Novel Object Recognition	instrument	0.95	parenthetical		0			Behavioral neuroscience test (animal)	strip
+NOS-TBI	Neurological Outcome Scale for Traumatic Brain Injury	instrument	0.95	parenthetical		0				strip
+NRN	Neonatal Research Network	study	0.95	parenthetical		0				skip
+NSAIDS	Inflammatory Drugs	medical_term	0.95	parenthetical		0			Drug class (expansion is partial in CDE)	skip
+NSI	Neurobehavioral Symptom Inventory	instrument	0.95	parenthetical		0				strip
+NSLAH	National Survey of Lead & Allergens in Housing	unknown	0.50	bare_caps		0				strip
+NSS	Composite score for Neurological Severity Score	instrument	0.95	parenthetical		0			Neurological assessment	strip
+NTG	Nitroglycerine	unknown	0.50	bare_caps		0				skip
+NVSS	source is the National Vital Statistics System	unknown	0.95	parenthetical		0				skip
+Neuro-QOL		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: neuro-qol	strip
+NoGo		medical_term	0.70	intercaps		0				skip
+NuPDQ		medical_term	0.70	intercaps		0				skip
+OCD	Obsessive Compulsive Disorder	unknown	0.95	parenthetical		0				skip
+OCSP	Oxfordshire Community Stroke Project	study	0.95	parenthetical		0				strip
+OFC	Occipitofrontal Circumference	unknown	0.50	bare_caps		0				skip
+OLD		unknown	0.50	bare_caps		0				skip
+OMB	ethnicity of a person based on the Office of Management and Budget	unknown	0.95	parenthetical		0				skip
+OSUTBIMS	Ohio State TBI Method Short Form	instrument	0.95	parenthetical		0			TBI screening	strip
+PAD	Peripheral Arterial Disease	unknown	0.50	bare_caps		0				skip
+PAF	Paroxysmal Atrial Fibrillation	unknown	0.50	bare_caps		0				skip
+PANAS-X	Expanded Form	unknown	0.95	parenthetical		0				strip
+PCL-C	PTSD Checklist Civilian	instrument	0.95	parenthetical		0				strip
+PCLM	Indicator how often the subject feels irritable or has angry outbursts as part of PTSD Checklist Military	instrument	0.95	parenthetical		0				strip
+PCLS	Indicator how often the subject feels irritable or has angry outbursts as part of PTSD Checklist Stressor	instrument	0.95	parenthetical		0				strip
+PCR		unknown	0.50	bare_caps		0				skip
+PCSI	Concussion Symptom Inventory	instrument	0.95	parenthetical		0				strip
+PCSI-C	Concussion Symptom Inventory for Children	instrument	0.95	parenthetical		0				strip
+PCSS	score for balance problems symptoms as part of the Post Concussion Symptom Scale	instrument	0.95	parenthetical		0				strip
+PCT	Indicates perfusion CT	unknown	0.95	parenthetical		0				skip
+PD-DOC-MERQ	Mini Environmental Risk Questionnaire	instrument	0.95	parenthetical		0				strip
+PDQUALIF		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: pdqualif	strip
+PE	Borg Perception of Exertion	unknown	0.95	parenthetical		0				skip
+PEF	Value representing the Peak Expiratory Flow	unknown	0.95	parenthetical		0				skip
+PEG	Pain, Enjoyment of life, General activity	instrument	0.90	bare_caps		0			3-item pain screening scale	strip
+PET	Positron Emission Tomography	medical_technique	0.95	parenthetical		0				skip
+PGCS	Score for the participant's eye response according to the Pediatric Glasgow Coma Scale	instrument	0.95	parenthetical		0				strip
+PGIC	Patient Global Impression of Change	instrument	0.95	parenthetical		0			Patient outcome measure	strip
+PGOSE	Pediatric Glasgow Coma Scale Extended	instrument	0.95	parenthetical		0				strip
+PHQ		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: phq	strip
+PHQ-9	Patient Health Questionnaire Depression	instrument	1.00	parenthetical		0			Family: PHQ	strip
+PLCO	Prostate, Lung, Colorectal and Ovarian Cancer Screening Trial	study	0.90	bare_caps		0			Cancer screening trial	strip
+PPS	Prospective Payment System	unknown	0.95	parenthetical		0				skip
+PPVT-4	Fourth Edition	unknown	0.95	parenthetical		0				skip
+PRHIC	calculated value of the Power Rotational Head Injury Criterion	unknown	0.95	parenthetical		0				skip
+PROBE		unknown	0.50	bare_caps		0				skip
+PROMIS		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: promis	strip
+PSC	Pediatric Stroke Classification	unknown	0.95	parenthetical		0				skip
+PSQI	Pittsburgh Sleep Quality Index	instrument	0.95	parenthetical		0				strip
+PSS-10	Perceived Stress Scale - 10 item	instrument	0.95	bare_caps		0			Stress assessment	strip
+PedNIHSS	Pediatric NIH Stroke Scale	instrument	1.00	intercaps		0			Family: NIHSS	strip
+PhenX		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: phenx	strip
+PulseOx		medical_term	0.70	intercaps		0				skip
+QIDS	Quick Inventory of Depressive Symptomatology	instrument	0.95	bare_caps		0			Depression assessment	strip
+QMG	Subject's Quantitative Myasthenia Gravis	unknown	0.95	parenthetical		0				skip
+QOLIBRI-OS	Quality of Life after Brain Injury Overall Scale	instrument	0.95	parenthetical		0				strip
+QPGS	Questionnaire on Pediatric Gastrointestinal Symptoms	instrument	0.95	parenthetical		0				strip
+QPGS-RIII	Rome III Version	instrument	1.00	parenthetical		0			Family: Rome Criteria	strip
+QoL		medical_term	0.70	intercaps		0				skip
+RAM	Radial Arm Maze	instrument	0.95	parenthetical		0			Behavioral neuroscience test (animal)	strip
+RAMRM	Radial Arm Maze Reference Memory	unknown	0.95	parenthetical		0				skip
+RAMWM	Radial Arm Maze Working Memory	unknown	0.95	parenthetical		0				skip
+RASS	Sedation Scale	instrument	0.95	parenthetical		0				strip
+RCM3	Rome III Constipation Module	instrument	1.00	parenthetical		0			Family: Rome Criteria	strip
+RDW-SD		unknown	0.50	bare_caps		0				skip
+REE	Resting Energy Expenditure	unknown	0.95	parenthetical		0				skip
+RFQ	Risk Factor Questionnaire	instrument	0.95	parenthetical		0				strip
+RFQ-U	Risk Factor Questionnaire	instrument	0.95	parenthetical		0				strip
+RI	Indicates vasospasm resistive Index	instrument	0.95	parenthetical		0				strip
+RIC	calculated value of the Rotational Injury Criterion	unknown	0.95	parenthetical		0				skip
+RIOPA	Relationships of Indoor, Outdoor, and Personal Air	study	0.90	bare_caps		0			EPA air quality study	strip
+RLE		unknown	0.50	bare_caps		0				skip
+RPQ	Concusion Symptoms Questionnaire	instrument	0.95	parenthetical		0				strip
+RRT	New Renal Replacement Therapy	unknown	0.95	parenthetical		0				skip
+RUE		unknown	0.50	bare_caps		0				skip
+RUG	PPS payments are per diem rates based on the patient's condition as determined by classification into a specific Resource Utilization Group	unknown	0.95	parenthetical		0				skip
+Rome Criteria		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: rome	strip
+RxNorm		medical_term	0.70	intercaps		0				skip
+SAC	total score the subject received on the Standardized Assessment of Coordination	instrument	0.95	parenthetical		0				strip
+SAE	Indicator of whether the Serious Adverse Event	unknown	0.95	parenthetical		0				skip
+SAH	Subarachnoid Hemorrhage	unknown	0.95	parenthetical		0				skip
+SAPS	Scale For The Assessment of Positive Symptoms	instrument	0.95	parenthetical		0				strip
+SAQTBIMSD	Substance Abuse Questions from the TBI Model Systems Database	instrument	0.95	parenthetical		0			Substance abuse screening (TBI)	strip
+SARA		unknown	0.50	bare_caps		0				skip
+SB	Sulcus base	unknown	0.50	bare_caps		0				skip
+SCARED	Screen for Child Anxiety Related Disorders	instrument	0.95	parenthetical		0			Child anxiety screening	strip
+SCAT	Sport Concussion Assessment Tool	instrument	0.95	parenthetical		0				strip
+SCAT3	Sport Concussion Assessment Tool	instrument	0.95	parenthetical		0				strip
+SCD		unknown	0.50	bare_caps		0				skip
+SCS	Sexual Compulsivity Scale	instrument	0.95	parenthetical		0				strip
+SCW	Stroop Color and Word Test	instrument	0.95	parenthetical		0				strip
+SDQ	Strengths and Difficulties Questionnaire	instrument	0.95	parenthetical		0				strip
+SEQ-C	Self-Efficacy Questionnaire for Children	instrument	0.95	bare_caps		0			Child self-efficacy measure	strip
+SF Health Survey		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: sf-health	strip
+SF-12	Short Form Health Survey	instrument	1.00	parenthetical		0			Family: SF Health Survey	strip
+SF-36	Short Form Health Survey	instrument	1.00	parenthetical		0			Family: SF Health Survey	strip
+SI	value of the Gadd Severity Index	instrument	0.95	parenthetical		0				strip
+SIBDQ	Short Inflammatory Bowel Disease Questionnaire	instrument	0.95	parenthetical		0				strip
+SLDC	Type of psychiatric illness from the Summary Lifetime Diagnoses Checklist	instrument	0.95	parenthetical		0				strip
+SMFQ	Short Mood and Feelings Questionnaire	instrument	0.95	parenthetical		0				strip
+SMS	Short Message System	unknown	0.50	bare_caps		0				skip
+SNAP		unknown	0.50	bare_caps		0				skip
+SNIP	Sniff Nasal Inspiratory Pressure	unknown	0.95	parenthetical		0				skip
+SOGS		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: sogs	strip
+SPMSQ	Short Portable Mental Status Questionnaire	instrument	0.95	parenthetical		0				strip
+SS-QOL		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: ss-qol	strip
+SSI-4	Fourth Edition	unknown	0.95	parenthetical		0				skip
+STBIMP	Screening for TBI in Military Personnel	instrument	0.95	parenthetical		0				strip
+STOP	Participant's age as part of STOP Questionnaire	instrument	0.95	parenthetical		0				strip
+SVC	Vital Capacity	unknown	0.95	parenthetical		0				skip
+SWAL-QOL		instrument	1.00	instrument_catalog		0		2026-04-01T10:03:41.458666	Family: swal-qol	strip
+SWAN	Strengths and Weaknesses of ADHD and Normal Behavior	instrument	0.95	bare_caps		0			ADHD behavioral assessment	strip
+SWLS	Satisfaction with Life Scale	instrument	0.95	parenthetical		0				strip
+SerPl		medical_term	0.70	intercaps		0				skip
+SerPlBld		medical_term	0.70	intercaps		0				skip
+SwDQ		medical_term	0.70	intercaps		0				skip
+T25FW	Foot Walk	unknown	0.95	parenthetical		0				skip
+TBI	Type of injury model used to model the mechanism and outcomes of injury in Traumatic Brain Injury	unknown	0.95	parenthetical		0				skip
+TBIL	WET CHEMISTRY or DRY SLIDE	unknown	0.95	parenthetical		0				skip
+TCCS	Coded Sonography	unknown	0.95	parenthetical		0				skip
+TCD	Indicates Transcranial Doppler	unknown	0.95	parenthetical		0				skip
+TEGI	Wexler Test of Early Grammatical Impairment	instrument	0.95	parenthetical		0				strip
+TIA	This is especially important if the diagnosis is Transient Ischemic Attack	unknown	0.95	parenthetical		0				skip
+TICI	Indicates Thrombolysis in Cerebral Infarction	unknown	0.95	parenthetical		0				skip
+TIMI	score related to the Thrombolysis In Myocardial Infarction	instrument	0.95	parenthetical		0				strip
+TLC	Examples of possible diets the patient may be put on include the Therapeutic Lifestyle Changes	unknown	0.95	parenthetical		0				skip
+TLEQ	Traumatic Life Events Questionnaire	instrument	0.95	parenthetical		0				strip
+TMS	Transcranial Magnetic Stimulation	medical_technique	0.95	parenthetical		0			Non-invasive brain stimulation	skip
+TMT	Making Test	instrument	0.95	parenthetical		0				strip
+TOAST	Acute Stroke Treatment	unknown	0.95	parenthetical		0				skip
+TPN	Total Parenteral Nutrition	unknown	0.95	parenthetical		0				skip
+TSH	Stimulating Hormone	unknown	0.95	parenthetical		0				skip
+TST	Thermoregulatory Sweat Test	instrument	0.95	parenthetical		0				strip
+TUS-CPS		unknown	0.50	bare_caps		0				strip
+TargetAnimalTyp		medical_term	0.70	intercaps		0				skip
+UCUM	Unified Code for Units of Measure	instrument	0.95	parenthetical		0				strip
+UE-L		unknown	0.50	bare_caps		0				skip
+UE-R		unknown	0.50	bare_caps		0				skip
+UHDDS	principal diagnosis is defined in the Uniform Hospital Discharge Data Set	unknown	0.95	parenthetical		0				skip
+UPDRS	Subject's ability to arise from chair as part of Unified Parkinsons Disease Rating Scale	instrument	1.00	parenthetical		0			Family: MDS-UPDRS	strip
+UPPS-P	UPPS-P Impulsive Behavior Scale	instrument	0.95	bare_caps		0			Impulsivity measure	strip
+UPPS-R-C	UPPS-R Child Version	instrument	0.95	bare_caps		0			Child impulsivity measure	strip
+US		unknown	0.50	bare_caps		0				skip
+USA		unknown	0.50	bare_caps		0				skip
+VEP		unknown	0.50	bare_caps		0				skip
+VER	Visual Evoked Response	unknown	0.50	bare_caps		0				skip
+VFSS	Dysphagia severity rating scale of the Videofluoroscopic Swallowing Study	instrument	0.95	parenthetical		0				strip
+VIPS	Vascular effects of Infection in Pediatric Stroke	unknown	0.95	parenthetical		0				skip
+VOD	Veno-occlusive Disease	unknown	0.50	bare_caps		0				skip
+VOMS	Ocular Motor Screening	instrument	0.95	parenthetical		0				strip
+WFNS	World Federation of Neurological Surgeons	unknown	0.95	parenthetical		0				skip
+WG	PhenX Anthropometrics Working Group	instrument	1.00	parenthetical		0			Family: PhenX	strip
+WHI	Women's Health Initiative	unknown	0.50	bare_caps		0				skip
+WHO	World Health Organization	unknown	0.95	parenthetical		0				skip
+WHOQOL-BREF	World Health Organization Quality of Life	instrument	0.95	parenthetical		0				strip
+WHQOL-BREF	World Health Organization Quality of Life	instrument	0.95	parenthetical		0			WHO QOL measure	strip
+WJ-III	Status level of test subject's level of activity as part of the Woodcock Johnson III	instrument	0.95	parenthetical		0				strip
+WRAT	Wide Range Achievement Test	instrument	0.95	parenthetical		0				strip
+WTAR	Wechsler Test of Adult Reading	instrument	0.95	parenthetical		0				strip
+YR		unknown	0.50	bare_caps		0				skip
+YRBS	Youth Risk Behavior Survey	instrument	0.95	parenthetical		0				strip
+YRBSS	Youth Risk Behavior Surveillance System	instrument	0.95	parenthetical		0				strip
+ZIP	Zone Improvement Plan	unknown	0.95	parenthetical		0				skip
+[ACSCP-II]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[ADAPTABLE]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[AHRQ]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[ALSPAC]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[AQ Adolescent]	Autism Quotient - Adolescent Version	instrument	0.95	bracketed		0			Autism screening (adolescent)	strip
+[AQ]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[ASRS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[AUASI]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[AUDADIS-IV]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[AUDIT-C]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[BFI]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[CA Teachers]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[CARDIA]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[CAST]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[Date and time]		unknown	0.85	bracketed		0				strip
+[Denver Youth Survey]	Denver Youth Survey	study	0.90	bracketed		0			Longitudinal delinquency study	strip
+[EDDS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[EHI]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[EPDS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[FACIT]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[FEAS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[FTND]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[Fitzpatrick Classification Scale]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[GSE]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[HARK]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[HL7v3.0]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[ICAS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[IFPS-II]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[Include milk or non-dairy creamers.]		unknown	0.85	bracketed		0				skip
+[Include multivitamins and single nutrient supplements.]		unknown	0.85	bracketed		0				skip
+[Kessler 6 Distress]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[LIBCSP]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[LTVH]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[MESA]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[MIDUS II]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[MOS Social Support Survey]	Medical Outcomes Study Social Support Survey	instrument	0.95	bracketed		0			Social support assessment	strip
+[Manually-curated]		unknown	0.85	bracketed		0				strip
+[NHANES III]		unknown	0.85	bracketed		0				skip
+[NHANES]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NHEXAS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NHL]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NLAAS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NSLAH]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NTDS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NuMoM2b]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[NuPDQ]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[OASIS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[OSQ]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PCL-C]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PEG]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PLCO]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PROMIS.PEDS]		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PROMIS]		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PSS-10]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[PhenX]		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[QIDS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[R2 MRI]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[RIOPA]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[Rose Dyspnea Scale]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[Rosenberg]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[SAMHSA]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[SEQ-C]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[SWAN]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[TUS-CPS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[The Position Generator]		unknown	0.85	bracketed		0				skip
+[UCLA Loneliness v3]	UCLA Loneliness Scale Version 3	instrument	0.95	bracketed		0			Loneliness assessment	strip
+[UPDRS]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[UPPS-P]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[UPPS-R-Child]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+[USSG-FHT]		instrument	0.90	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml	strip
+aCL		medical_term	0.70	intercaps		0				skip
+aCnc		medical_term	0.70	intercaps		0				skip
+aPTT		medical_term	0.70	intercaps		0				skip
+actiGraph		medical_term	0.70	intercaps		0				skip
+cCnc		medical_term	0.70	intercaps		0				skip
+cDNA		medical_term	0.70	intercaps		0				skip
+dBs		medical_term	0.70	intercaps		0				skip
+eGFR		medical_term	0.70	intercaps		0				skip
+eTICI	Cerebral Infarction	medical_term	0.90	intercaps		0				skip
+hGH		medical_term	0.70	intercaps		0				skip
+hscTnT		medical_term	0.70	intercaps		0				skip
+kiloOhms		medical_term	0.70	intercaps		0				skip
+mCnc		medical_term	0.70	intercaps		0				skip
+mCnt		medical_term	0.70	intercaps		0				skip
+mEq		medical_term	0.70	intercaps		0				skip
+mRNA		medical_term	0.70	intercaps		0				skip
+mRS	Rankin Scale	medical_term	0.90	intercaps		0				skip
+nRate		medical_term	0.70	intercaps		0				skip
+proBNP		medical_term	0.70	intercaps		0				skip
+rRNA		medical_term	0.70	intercaps		0				skip
+sCnc		medical_term	0.70	intercaps		0				skip
+sRto		medical_term	0.70	intercaps		0				skip
+sVC		medical_term	0.70	intercaps		0				skip
+tPA		medical_term	0.70	intercaps		0				skip
