@@ -1,4 +1,4 @@
-# CDE Analyzer — Context (v1.0.1)
+# CDE Analyzer — Context (v1.5.0)
 
 > **Full context**: Read `CLAUDE_full.md` for complete project documentation.
 > **Restore**: Copy `CLAUDE_full.md` back to `CLAUDE.md` when switching tasks.
@@ -49,7 +49,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - **Legacy** (`branching_strip.yaml`): strip_inst_full/sub → expand_temporal → strip_temporal (case-insensitive) → strip_phrases (case-sensitive) → quality_report (10 steps)
 - **N-way** (`branching_strip_nway.yaml`): expand_temporal → strip_branching (single-pass, all 7 variants) → quality_report (3 steps)
 
-## Current State (v1.0.1)
+## Current State (v1.5.0)
 
 ### v1.0.0: Production Release
 

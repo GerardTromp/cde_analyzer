@@ -2,9 +2,9 @@
 
 ## Current Branch: main
 
-**Focus**: Production release — config-driven scaffold, action refactoring, reference ledger
+**Focus**: Scoped stripping, boilerplate substitution, abbreviation disambiguation
 
-**Version**: 1.0.1 (2026-03-31)
+**Version**: 1.5.0 (2026-04-02)
 
 ## Current State (v1.0.1)
 

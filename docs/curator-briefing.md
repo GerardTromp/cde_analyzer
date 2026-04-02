@@ -1,6 +1,6 @@
 # Curator Briefing — Efficient Pattern Curation
 
-> **Version**: v1.0.1 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
+> **Version**: v1.5.0 &nbsp;|&nbsp; **Quick reference**: [TSV Editor Cheatsheet](tsv-editor-cheatsheet.md) &nbsp;|&nbsp; **Print version**: [`cheatsheets/tsv-editor.html`](cheatsheets/tsv-editor.html)
 
 This document explains *how to curate efficiently*, not just which buttons to press. It assumes you have the editor open and a `needs_review.tsv` loaded.
 
