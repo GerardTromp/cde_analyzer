@@ -1,0 +1,211 @@
+# Permanent skip abbreviations — domain constants that should never trigger
+# re-evaluation regardless of corpus frequency changes.
+#
+# These are well-known medico-scientific abbreviations that are NOT instruments
+# and never will be. They are exempt from k-fold tinyId growth re-evaluation
+# during dictionary merge.
+#
+# Categories:
+#   gene_protein    — HGNC/HUGO gene/protein nomenclature
+#   anatomical      — Standard anatomical abbreviations
+#   organization    — Government agencies, research institutes
+#   study           — Major epidemiological studies/initiatives
+#   coding_system   — Medical coding/classification systems
+#   medical_term    — Standard medical terms/techniques/conditions
+#   measurement     — Units and measurement abbreviations
+
+permanent_skips:
+
+  # Gene/protein nomenclature (HGNC conventions)
+  - abbreviation: G20210A
+    category: gene_protein
+    note: "Factor V Leiden variant — amino acid change notation"
+  - abbreviation: BRCA1
+    category: gene_protein
+    note: "Breast cancer gene 1"
+  - abbreviation: BRCA2
+    category: gene_protein
+    note: "Breast cancer gene 2"
+  - abbreviation: HLA-B27
+    category: gene_protein
+    note: "Human leukocyte antigen B27"
+
+  # Anatomical abbreviations
+  - abbreviation: LE-L
+    category: anatomical
+    note: "Lower extremity, left"
+  - abbreviation: LE-R
+    category: anatomical
+    note: "Lower extremity, right"
+  - abbreviation: UE-L
+    category: anatomical
+    note: "Upper extremity, left"
+  - abbreviation: UE-R
+    category: anatomical
+    note: "Upper extremity, right"
+  - abbreviation: LLE
+    category: anatomical
+    note: "Left lower extremity"
+  - abbreviation: RLE
+    category: anatomical
+    note: "Right lower extremity"
+  - abbreviation: LUE
+    category: anatomical
+    note: "Left upper extremity"
+  - abbreviation: RUE
+    category: anatomical
+    note: "Right upper extremity"
+
+  # Organizations / agencies
+  - abbreviation: NIH
+    category: organization
+    note: "National Institutes of Health"
+  - abbreviation: NEI
+    category: organization
+    note: "National Eye Institute"
+  - abbreviation: NIA
+    category: organization
+    note: "National Institute on Aging"
+  - abbreviation: NICHD
+    category: organization
+    note: "National Institute of Child Health and Human Development"
+  - abbreviation: NIDDK
+    category: organization
+    note: "National Institute of Diabetes and Digestive and Kidney Diseases"
+  - abbreviation: CDC
+    category: organization
+    note: "Centers for Disease Control and Prevention"
+  - abbreviation: FDA
+    category: organization
+    note: "Food and Drug Administration"
+  - abbreviation: WHO
+    category: organization
+    note: "World Health Organization"
+  - abbreviation: AHRQ
+    category: organization
+    note: "Agency for Healthcare Research and Quality"
+  - abbreviation: MNI
+    category: organization
+    note: "Montreal Neurological Institute"
+  - abbreviation: HUGO
+    category: organization
+    note: "Human Genome Organisation"
+
+  # Studies / initiatives
+  - abbreviation: WHI
+    category: study
+    note: "Women's Health Initiative"
+  - abbreviation: NHANES
+    category: study
+    note: "National Health and Nutrition Examination Survey"
+  - abbreviation: NHIS
+    category: study
+    note: "National Health Interview Survey"
+
+  # Coding systems
+  - abbreviation: ICD
+    category: coding_system
+    note: "International Classification of Diseases"
+  - abbreviation: ICD-10
+    category: coding_system
+    note: "ICD 10th Revision"
+  - abbreviation: ICD-10-CM
+    category: coding_system
+    note: "ICD 10th Revision, Clinical Modification"
+  - abbreviation: LOINC
+    category: coding_system
+    note: "Logical Observation Identifiers Names and Codes"
+  - abbreviation: SNOMED
+    category: coding_system
+    note: "Systematized Nomenclature of Medicine"
+  - abbreviation: CPT
+    category: coding_system
+    note: "Current Procedural Terminology"
+  - abbreviation: OMB
+    category: coding_system
+    note: "Office of Management and Budget (race/ethnicity categories)"
+
+  # Medical terms / techniques / conditions
+  - abbreviation: EEG
+    category: medical_term
+    note: "Electroencephalography"
+  - abbreviation: MRI
+    category: medical_term
+    note: "Magnetic Resonance Imaging"
+  - abbreviation: CT
+    category: medical_term
+    note: "Computed Tomography"
+  - abbreviation: BMI
+    category: medical_term
+    note: "Body Mass Index"
+  - abbreviation: DVT
+    category: medical_term
+    note: "Deep Vein Thrombosis"
+  - abbreviation: PE
+    category: medical_term
+    note: "Pulmonary Embolism"
+  - abbreviation: TMS
+    category: medical_term
+    note: "Transcranial Magnetic Stimulation"
+  - abbreviation: ERG
+    category: medical_term
+    note: "Electroretinogram"
+  - abbreviation: DBS
+    category: medical_term
+    note: "Dried Blood Spot"
+  - abbreviation: PCR
+    category: medical_term
+    note: "Polymerase Chain Reaction"
+  - abbreviation: EBV
+    category: medical_term
+    note: "Epstein-Barr Virus"
+  - abbreviation: CMV
+    category: medical_term
+    note: "Cytomegalovirus"
+  - abbreviation: ADHD
+    category: medical_term
+    note: "Attention Deficit Hyperactivity Disorder"
+  - abbreviation: OCD
+    category: medical_term
+    note: "Obsessive-Compulsive Disorder"
+  - abbreviation: IBD
+    category: medical_term
+    note: "Inflammatory Bowel Disease"
+  - abbreviation: MI
+    category: medical_term
+    note: "Myocardial Infarction"
+  - abbreviation: TBI
+    category: medical_term
+    note: "Traumatic Brain Injury"
+  - abbreviation: COVID-19
+    category: medical_term
+    note: "Coronavirus Disease 2019"
+  - abbreviation: GVHD
+    category: medical_term
+    note: "Graft-versus-Host Disease"
+
+  # Common English / identifiers
+  - abbreviation: ID
+    category: english
+    note: "Identifier"
+  - abbreviation: II
+    category: english
+    note: "Roman numeral two (version/phase suffix)"
+  - abbreviation: US
+    category: english
+    note: "United States"
+  - abbreviation: USA
+    category: english
+    note: "United States of America"
+  - abbreviation: MRN
+    category: english
+    note: "Medical Record Number"
+  - abbreviation: GUID
+    category: english
+    note: "Globally Unique Identifier"
+  - abbreviation: IRB
+    category: english
+    note: "Institutional Review Board"
+  - abbreviation: DOB
+    category: english
+    note: "Date of Birth"

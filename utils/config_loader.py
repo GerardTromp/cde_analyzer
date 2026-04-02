@@ -8,7 +8,7 @@ Used for externalized pattern lists and other configurable data.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -310,6 +310,49 @@ def load_abbreviation_dictionary(
         return d
 
     return None
+
+
+def load_permanent_skip_abbreviations() -> Set[str]:
+    """
+    Load permanent skip abbreviations from YAML config.
+
+    Returns a set of abbreviation strings that should never be re-evaluated
+    regardless of corpus frequency changes.
+    """
+    import yaml
+
+    skips: Set[str] = set()
+
+    # Global config
+    global_path = get_config_dir() / "permanent_skip_abbreviations.yaml"
+    if global_path.exists():
+        try:
+            with open(global_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            for entry in data.get("permanent_skips", []):
+                abbrev = entry.get("abbreviation", "").strip()
+                if abbrev:
+                    skips.add(abbrev)
+            logger.info(f"Loaded {len(skips)} permanent skip abbreviations from {global_path}")
+        except Exception as e:
+            logger.warning(f"Error loading permanent skips: {e}")
+
+    # Local override (additive)
+    local_path = Path.cwd() / "permanent_skip_abbreviations.yaml"
+    if local_path.exists() and local_path != global_path:
+        try:
+            with open(local_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            before = len(skips)
+            for entry in data.get("permanent_skips", []):
+                abbrev = entry.get("abbreviation", "").strip()
+                if abbrev:
+                    skips.add(abbrev)
+            logger.info(f"Added {len(skips) - before} permanent skips from local {local_path}")
+        except Exception as e:
+            logger.warning(f"Error loading local permanent skips: {e}")
+
+    return skips
 
 
 def clear_config_cache():

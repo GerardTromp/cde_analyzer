@@ -97,13 +97,21 @@ EXTERNAL_LOOKUP_CATEGORIES = {
 }
 
 # Regex for parenthetical abbreviation: "Full Name (ABBREV)"
+# Broad capture: grabs text before (ABBREV), then acronym_align() trims to
+# the correct expansion boundary using initial-letter matching.
 _PAREN_RE = re.compile(
-    r'((?:[A-Z][a-zA-Z\']+(?:\s+(?:of|the|and|in|for|on|to|or|a|an|with|by)\s+)?'
-    r'(?:[A-Z]?[a-zA-Z\']+\s+)*)'       # title-case expansion words
-    r'(?:[A-Z][a-zA-Z\']+))'             # last word
+    r'((?:[A-Z][a-zA-Z\'\-/]+[\s,]*){1,}'   # title-case words (hyphens, slashes OK)
+    r'(?:(?:of|the|and|in|for|on|to|or|a|an|with|by|de|des|du|von)\s+)*'
+    r'(?:[A-Za-z][a-zA-Z\'\-/]*\s*)*)'       # continuation words
     r'\s*'
     r'\(([A-Z][A-Z0-9](?:[A-Z0-9\-]*[A-Z0-9])?)\)'  # (ABBREV)
 )
+
+# Filler words typically skipped in acronyms
+_FILLER_WORDS = frozenset({
+    "of", "the", "and", "in", "for", "on", "to", "or", "a", "an",
+    "with", "by", "de", "des", "du", "von",
+})
 
 # Regex for bracketed tag at end of field
 _BRACKET_RE = re.compile(r'\[([A-Z][A-Za-z0-9 .\-/]+)\]\s*$')
@@ -201,9 +209,26 @@ class AbbreviationDictionary:
                     "decision": decision,
                 })
 
-    def merge(self, other: "AbbreviationDictionary") -> Dict[str, int]:
-        """Merge other into self. Other overwrites on conflict. Returns counts."""
-        added = updated = unchanged = 0
+    def merge(
+        self, other: "AbbreviationDictionary",
+        growth_factor: float = 3.0,
+        permanent_skips: Optional[Set[str]] = None,
+    ) -> Dict[str, int]:
+        """Merge other into self. Other overwrites on conflict.
+
+        Args:
+            growth_factor: When a "skip" entry's tinyId count grows by this
+                factor or more, demote it to "tentative_skip" for re-review.
+                Set to 0 to disable. Default: 3.0.
+            permanent_skips: Set of abbreviation strings exempt from k-fold
+                re-evaluation (domain constants that should never be reviewed).
+
+        Returns:
+            Dict with counts: added, updated, unchanged, flagged_for_review.
+        """
+        added = updated = unchanged = flagged = 0
+        if permanent_skips is None:
+            permanent_skips = set()
         for abbrev, entry in other.entries.items():
             if abbrev not in self.entries:
                 self.entries[abbrev] = entry
@@ -212,8 +237,32 @@ class AbbreviationDictionary:
                 self.entries[abbrev] = entry
                 updated += 1
             else:
-                unchanged += 1
-        return {"added": added, "updated": updated, "unchanged": unchanged}
+                existing = self.entries[abbrev]
+                # k-fold re-evaluation: if skip decision + significant growth
+                if (growth_factor > 0
+                        and existing.decision == "skip"
+                        and abbrev not in permanent_skips
+                        and existing.n_tinyIds > 0
+                        and len(entry.tinyIds) >= growth_factor * existing.n_tinyIds):
+                    existing.decision = "tentative_skip"
+                    existing.tinyIds = entry.tinyIds
+                    existing.n_tinyIds = len(entry.tinyIds)
+                    existing.notes = (
+                        f"{existing.notes}; "
+                        f"FLAGGED: tinyId growth {existing.n_tinyIds}→"
+                        f"{len(entry.tinyIds)} (>={growth_factor}x)"
+                    ).lstrip("; ")
+                    flagged += 1
+                else:
+                    # Update tinyIds from new corpus without changing decision
+                    if entry.tinyIds:
+                        existing.tinyIds = entry.tinyIds
+                        existing.n_tinyIds = len(entry.tinyIds)
+                    unchanged += 1
+        return {
+            "added": added, "updated": updated,
+            "unchanged": unchanged, "flagged_for_review": flagged,
+        }
 
     # -- discovery ----------------------------------------------------------
 
@@ -230,12 +279,14 @@ class AbbreviationDictionary:
             for fp in field_paths:
                 for text in _extract_texts(record, fp.split(".")):
                     for m in _PAREN_RE.finditer(text):
-                        expansion = m.group(1).strip()
+                        raw_expansion = m.group(1).strip()
+                        abbrev = m.group(2).strip()
+                        # Acronym-align: trim to the correct boundary
+                        expansion = acronym_align(raw_expansion, abbrev)
                         # Strip leading articles
                         expansion = re.sub(
                             r'^(?:The|the|A|a|An|an)\s+', '', expansion,
                         )
-                        abbrev = m.group(2).strip()
                         if len(abbrev) < 2:
                             continue
                         if abbrev not in self.entries:
@@ -291,7 +342,12 @@ class AbbreviationDictionary:
         self, data: List[dict], field_paths: Optional[List[str]] = None,
         english_words: Optional[Set[str]] = None,
     ) -> int:
-        """Find trailing ALL-CAPS tokens in designations. Returns count."""
+        """Find trailing ALL-CAPS tokens in designations. Returns count.
+
+        Skips fields where all tokens are uppercase (the field is "shouting",
+        not using abbreviation conventions). A single all-caps token as the
+        entire field IS treated as a legitimate abbreviation.
+        """
         if field_paths is None:
             field_paths = ["designations.*.designation"]
 
@@ -300,7 +356,14 @@ class AbbreviationDictionary:
             tinyid = record.get("tinyId", "")
             for fp in field_paths:
                 for text in _extract_texts(record, fp.split(".")):
-                    m = _BARE_CAPS_RE.search(text.strip())
+                    stripped = text.strip()
+                    # Skip all-caps fields with 2+ tokens (shouting)
+                    tokens = stripped.split()
+                    if len(tokens) >= 2 and all(
+                        t.isupper() for t in tokens if t.isalpha()
+                    ):
+                        continue
+                    m = _BARE_CAPS_RE.search(stripped)
                     if not m:
                         continue
                     token = m.group(1).strip()
@@ -674,6 +737,86 @@ class AbbreviationDictionary:
         for e in self.entries.values():
             counts[e.category] = counts.get(e.category, 0) + 1
         return counts
+
+
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Acronym-alignment heuristic
+# ---------------------------------------------------------------------------
+
+def acronym_align(text: str, abbreviation: str) -> str:
+    """Trim captured expansion text to the acronym-aligned boundary.
+
+    Each letter in the abbreviation should map to the initial letter(s) of
+    a token in the expansion. Filler words (of, the, and, ...) are skipped.
+    Hyphenated compounds contribute initials per segment (Epstein-Barr → EB).
+
+    Strategy: try every possible starting token, scan left-to-right consuming
+    abbreviation letters. Pick the rightmost (latest) start that aligns all
+    letters — this trims the most preamble.
+
+    Args:
+        text: Broadly captured expansion text (may include preamble).
+        abbreviation: The acronym, e.g. "CARDIA", "EBV", "SSI".
+
+    Returns:
+        Trimmed expansion aligned to the abbreviation letters.
+        Falls back to original text if alignment fails.
+    """
+    # Strip digits and hyphens from abbreviation to get the letters to match
+    abbrev_letters = [c.upper() for c in abbreviation if c.isalpha()]
+    if not abbrev_letters:
+        return text.strip()
+
+    # Tokenize: split on whitespace, then split hyphenated parts
+    raw_tokens = text.strip().split()
+    # Build list of (token_text, [initial_letters], is_filler) tuples
+    # Filler words (of, the, in, ...) CAN contribute initials when the
+    # abbreviation includes them (e.g., CARDIA: ...Development In...)
+    # but are not required to match.
+    token_info: list = []  # [(original_token, [initials], is_filler)]
+    for tok in raw_tokens:
+        clean = tok.strip(" ,;:")
+        if not clean:
+            continue
+        is_filler = clean.lower() in _FILLER_WORDS
+        # Split on hyphens and slashes for multi-segment initials
+        segments = re.split(r'[-/]', clean)
+        initials = [s[0].upper() for s in segments if s and s[0].isalpha()]
+        token_info.append((tok, initials, is_filler))
+
+    def _try_align_from(start: int) -> bool:
+        """Try to consume all abbrev_letters starting from token index start."""
+        ai = 0
+        for ti in range(start, len(token_info)):
+            _tok_text, initials, _is_filler = token_info[ti]
+            for ini in initials:
+                if ai < len(abbrev_letters) and ini == abbrev_letters[ai]:
+                    ai += 1
+            if ai >= len(abbrev_letters):
+                return True
+        return ai >= len(abbrev_letters)
+
+    # Try each starting position, prefer the rightmost (most trimmed) success
+    best_start = None
+    for start in range(len(token_info)):
+        if _try_align_from(start):
+            best_start = start
+
+    if best_start is None:
+        return text.strip()
+
+    # Reconstruct from best_start onward, but skip leading filler words
+    # (e.g., if the rightmost alignment starts at "the Coronary...",
+    # we want "Coronary..." not "the Coronary...")
+    actual_start = best_start
+    while actual_start < len(token_info) and token_info[actual_start][2]:
+        actual_start += 1
+    if actual_start >= len(token_info):
+        actual_start = best_start  # safety: don't skip everything
+    aligned_tokens = [info[0] for info in token_info[actual_start:]]
+    result = " ".join(aligned_tokens).strip(" ,;:")
+    return result if result else text.strip()
 
 
 # ---------------------------------------------------------------------------
