@@ -434,6 +434,61 @@ def load_permanent_skip_abbreviations() -> Set[str]:
     return skips
 
 
+def load_llm_prompts(task_type: str) -> Optional[Dict[str, Any]]:
+    """
+    Load LLM prompt templates for a specific task type.
+
+    Loads from config/llm_prompts.yaml (global) with optional local override.
+    Local files extend/override global prompts for the same task type.
+
+    Args:
+        task_type: Task identifier (e.g., "boilerplate_substitution", "semantic_proxy")
+
+    Returns:
+        Dict with keys: system_prompt, user_prompt_template, description,
+        output_format, max_output_tokens. None if task type not found.
+    """
+    prompts = None
+
+    # Global config
+    global_config = load_yaml_config("llm_prompts")
+    if global_config and task_type in global_config:
+        prompts = dict(global_config[task_type])
+
+    # Local override (extends/overrides global)
+    local_path = Path.cwd() / "llm_prompts.yaml"
+    if local_path.exists():
+        try:
+            import yaml
+            with open(local_path, encoding="utf-8") as f:
+                local_config = yaml.safe_load(f) or {}
+            if task_type in local_config:
+                if prompts is None:
+                    prompts = dict(local_config[task_type])
+                else:
+                    prompts.update(local_config[task_type])
+                logger.info(f"Loaded local LLM prompts for '{task_type}' from {local_path}")
+        except Exception as e:
+            logger.warning(f"Error loading local LLM prompts: {e}")
+
+    if prompts:
+        logger.debug(f"LLM prompts for '{task_type}': system_prompt={len(prompts.get('system_prompt',''))} chars, "
+                     f"user_template={len(prompts.get('user_prompt_template',''))} chars")
+    else:
+        logger.warning(f"No LLM prompts found for task type '{task_type}'")
+
+    return prompts
+
+
+def list_llm_prompt_tasks() -> List[str]:
+    """List available LLM prompt task types from config."""
+    tasks = []
+    global_config = load_yaml_config("llm_prompts")
+    if global_config:
+        tasks = [k for k in global_config if isinstance(global_config[k], dict)]
+    return sorted(tasks)
+
+
 def clear_config_cache():
     """Clear the configuration cache to force reload on next access."""
     global _config_cache

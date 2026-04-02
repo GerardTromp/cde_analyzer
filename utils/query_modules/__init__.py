@@ -88,8 +88,12 @@ def get_module(
     """
     Get an instance of a query module.
 
+    First checks the hardcoded registry, then falls back to YAML-driven
+    modules from config/llm_prompts.yaml for task types not in the registry.
+
     Args:
-        module_name: Module identifier (e.g., "instrument", "temporal")
+        module_name: Module identifier (e.g., "instrument", "temporal",
+                     "boilerplate_substitution")
         reference_file: Optional path to reference data file
         config: Optional module configuration
 
@@ -97,15 +101,26 @@ def get_module(
         Configured QueryModule instance
 
     Raises:
-        ValueError: If module not found
+        ValueError: If module not found in registry or YAML
     """
-    cls = _import_module_class(module_name)
+    if module_name in _MODULE_REGISTRY:
+        cls = _import_module_class(module_name)
+        instance = cls(config=config, reference_file=reference_file)
+        logger.info(f"Created query module: {module_name}")
+        return instance
 
-    # Create instance
-    instance = cls(config=config, reference_file=reference_file)
-
-    logger.info(f"Created query module: {module_name}")
-    return instance
+    # Fall back to YAML-driven module
+    try:
+        from .yaml_prompt_module import YamlPromptModule
+        instance = YamlPromptModule(module_name, config=config, reference_file=reference_file)
+        logger.info(f"Created YAML-driven query module: {module_name}")
+        return instance
+    except ValueError:
+        raise ValueError(
+            f"Unknown query module: {module_name}. "
+            f"Available modules: {list(_MODULE_REGISTRY.keys())}. "
+            f"Or add a '{module_name}' section to config/llm_prompts.yaml."
+        )
 
 
 def list_modules() -> List[str]:

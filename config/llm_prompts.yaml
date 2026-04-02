@@ -1,0 +1,106 @@
+# LLM Prompt Templates
+#
+# Each task type defines a system_prompt and user_prompt_template.
+# Templates use {placeholder} substitution for runtime values.
+#
+# Task types:
+#   - boilerplate_substitution: Summarize verbose CDE definitions
+#   - semantic_proxy: Generate 1-3 word semantic proxies (existing)
+#   - instrument_classification: Classify phrases as instruments (existing)
+#
+# New tasks can be added by creating a new top-level key with
+# system_prompt and user_prompt_template fields.
+#
+# Placeholders available in user_prompt_template:
+#   {text}          - The input text to process
+#   {designation}   - CDE designation (name) for context
+#   {tinyId}        - CDE tinyId
+#   {max_length}    - Target max length for output (if applicable)
+#
+# For classification tasks (existing modules), these are also available:
+#   {phrase_text}, {verbatim_forms}, {contexts}, {frequency}, {n_tinyids}
+
+# ─────────────────────────────────────────────────────────────────────
+# Boilerplate Substitution
+#
+# Summarize verbose CDE definitions to their medical essence.
+# Removes: item counts, response formats, subscale enumeration,
+# scoring details, licensing info, developer credits, Working Group
+# recommendations, cross-references, and publisher information.
+# ─────────────────────────────────────────────────────────────────────
+boilerplate_substitution:
+  description: >
+    Summarize verbose CDE definitions to plain medical English,
+    retaining only what the instrument measures and who it is for.
+
+  system_prompt: |
+    You are a medical terminology specialist. Your task is to summarize
+    verbose clinical instrument definitions into concise plain-language
+    descriptions.
+
+    INCLUDE:
+    - What the instrument measures (the medical domain or construct)
+    - Who it is administered to (age group, patient population) if specific
+    - Method of administration if distinctive (self-report, interviewer-administered, parent-completed)
+
+    EXCLUDE:
+    - Number of items (do not say "28-item" or "60-item")
+    - Response format (do not say "true/false", "5-point scale", "Likert scale")
+    - Subscale names or enumeration (do not list subscales)
+    - Scoring methodology or score ranges
+    - Licensing, purchase, or copyright information
+    - Publisher names (PAR, Pearson, Western Psychological Services, Mind Garden)
+    - Developer credits and citations
+    - Working Group recommendations or caveats
+    - Cross-references to other versions or supplemental information
+    - Validation history or development provenance
+
+    OUTPUT FORMAT:
+    - 1-2 sentences maximum
+    - Plain medical English, no jargon unnecessary for identifying the domain
+    - Start with the administration method or "Questionnaire" / "Assessment"
+    - Do not start with "This" or "The [full instrument name]"
+
+  user_prompt_template: |
+    Summarize this CDE definition to its medical essence.
+
+    CDE designation: {designation}
+
+    Definition to summarize:
+    {text}
+
+  output_format: text
+  max_output_tokens: 256
+
+# ─────────────────────────────────────────────────────────────────────
+# Semantic Proxy Generation
+#
+# Generate 1-3 word proxies that capture the semantic essence of a
+# pattern for use as substitute text during stripping.
+# ─────────────────────────────────────────────────────────────────────
+semantic_proxy:
+  description: >
+    Generate a 1-3 word semantic proxy that captures the core meaning
+    of a text pattern, for use as replacement text during stripping.
+
+  system_prompt: |
+    You are a medical terminology specialist. Given a text pattern from
+    clinical data elements, generate a 1-3 word proxy that captures the
+    core semantic meaning.
+
+    The proxy should:
+    - Be plain medical English
+    - Capture the essential concept, not the specific instrument
+    - Be suitable as replacement text in a clinical data element
+
+    Respond with ONLY the proxy words, nothing else.
+
+  user_prompt_template: |
+    Pattern: {text}
+
+    Context: {contexts}
+
+    What 1-3 word proxy captures the semantic essence?
+
+  output_format: text
+  max_output_tokens: 32
