@@ -151,21 +151,8 @@ def set_verbosity(level: int):
 
 **Rationale**: Simplicity over thread safety (appropriate for CLI)
 
-### 8. No Dependency Specification
-**Issue**: No requirements.txt, setup.py, or pyproject.toml
-
-**Impact**:
-- Users don't know what to install
-- Version incompatibilities possible
-- Deployment unclear
-- Can't use pip install
-
-**Mitigation**:
-- Document dependencies in README
-- Create requirements.txt
-- Consider setup.py for installable package
-
-**Status**: See 06-dependencies.md for recommendations
+### 8. ~~No Dependency Specification~~ (RESOLVED)
+**Resolved**: `pyproject.toml` has full dependency specs. See `06-dependencies.md`.
 
 ## Code Organization Gotchas
 
@@ -281,27 +268,8 @@ designations.*.designation: "Name1, Name2"
 
 **Status**: Accepted trade-off for spreadsheet compatibility
 
-### 14. Lemmatization Dependencies
-**Issue**: NLP library required but not specified
-
-**Actions Affected**:
-- phrase action (--lemmatize flag)
-- lemma_fasta action
-
-**Unknown**:
-- Which library used? (spacy? nltk?)
-- Version requirements?
-- Model download needed?
-
-**Impact**:
-- Setup unclear for users
-- May fail if library not installed
-- Language model may need download (spacy)
-
-**Recommendation**:
-- Document NLP library in dependencies
-- Add setup instructions for models
-- Consider graceful fallback if unavailable
+### 14. ~~Lemmatization Dependencies~~ (RESOLVED)
+**Resolved**: spaCy + NLTK documented in `pyproject.toml` and `06-dependencies.md`. Model: `en_core_web_sm`.
 
 ## Performance Gotchas
 
@@ -342,37 +310,11 @@ def recursive_descent(item, path, visitor, *, context=None, depth=0):
 
 ## Testing Gotchas
 
-### 17. Minimal Test Coverage
-**Issue**: Only tests/test_helpers.py exists
+### 17. ~~Minimal Test Coverage~~ (RESOLVED)
+**Resolved**: 297 tests as of v1.0.1. Test-to-code ratio 1:15. Covers phrase_miner, flexible_pattern_matcher, workflow_engine, and more.
 
-**Impact**:
-- Refactoring risky
-- Bugs may go undetected
-- No regression testing
-- No CI/CD validation
-
-**Recommendation**:
-- Expand test suite
-- Test core/recursor.py (critical component)
-- Test each action's logic layer
-- Add integration tests
-
-**Status**: Acknowledged in README as needing work
-
-### 18. No Type Checking
-**Issue**: Type hints present but not enforced
-
-**Impact**:
-- Type errors only caught at runtime
-- IDEs provide hints but no CI validation
-- Potential for type-related bugs
-
-**Recommendation**:
-- Consider adding mypy or pyright
-- Run in CI pipeline
-- Fix type errors incrementally
-
-**Status**: Optional - depends on project priorities
+### 18. ~~No Type Checking~~ (PARTIALLY RESOLVED)
+**Status**: mypy configured in `pyproject.toml` (`disallow_untyped_defs = false`, gradual adoption). ruff linting active.
 
 ## Deployment Gotchas
 

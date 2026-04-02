@@ -92,6 +92,12 @@ def register_subparser(subparser: ArgumentParser):
         help="Export tinyId-scoped patterns (TSV) for bare abbreviation stripping.",
     )
     group.add_argument(
+        "--export-scoped-yaml",
+        type=str,
+        metavar="DICT_TSV",
+        help="Export tinyId-scoped verbatim patterns (YAML) for pipeline integration.",
+    )
+    group.add_argument(
         "--stats",
         type=str,
         metavar="DICT_TSV",

@@ -121,10 +121,14 @@ def run_action(args: Namespace):
         from utils.config_loader import load_verbatim_strip_patterns
         verbatim = load_verbatim_strip_patterns()
         if verbatim:
-            for pattern_text, replace_with in verbatim:
+            n_scoped = 0
+            for pattern_text, replace_with, tinyids in verbatim:
                 for fp in field_paths:
-                    verbatim_phrase_map.append((fp, pattern_text, replace_with, None))
-            logger.info(f"Loaded {len(verbatim)} verbatim patterns from config "
+                    verbatim_phrase_map.append((fp, pattern_text, replace_with, tinyids))
+                if tinyids is not None:
+                    n_scoped += 1
+            scoped_msg = f" ({n_scoped} scoped)" if n_scoped else ""
+            logger.info(f"Loaded {len(verbatim)} verbatim patterns{scoped_msg} from config "
                         f"({len(verbatim_phrase_map)} phrase_map entries)")
 
     if "inst_full" in needed_stages:

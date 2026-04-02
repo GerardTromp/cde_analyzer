@@ -241,30 +241,5 @@ Based on import analysis:
 
 ## Current State
 
-- **Active branch**: main (phrase-curator merged at v0.5.14)
-- **Version**: 0.5.14
-- **Recent focus**:
-  - Temporal/curated split strip pipeline (Feb 2026)
-  - Universal temporal stripping with case-insensitive matching
-  - Whole-text dedup pre-pass in phrase miner
-  - 5-way branching strip pipeline
-
-**Latest Development** (2026-02-12):
-- Split temporal/curated stripping in branching_strip.yaml (v0.5.14)
-- Universal temporal stripping, dedup pre-pass, 3 bug fixes (v0.5.13)
-- Empirical subsumption validation (v0.5.12)
-- Features:
-  - Async LLM provider implementations (Claude, OpenAI, Gemini)
-  - Modular query framework (instrument detection, temporal detection, instrument_family)
-  - Four aggregation methods (unanimous, majority, weighted, confidence-weighted)
-  - Confidence quintile system (highly_likely → highly_unlikely)
-  - API key resolution: config file → env vars → CLI
-- Published to GitHub: 2026-01-24
-
-**Enhanced Instrument Detection** (2026-01-24):
-- Added two-tier identification system (family_id + instrument_id)
-- Pattern-based family detection for 13 known instrument families
-- LLM adjudication module for uncertain cases (instrument_family_detector)
-- Extended output with family columns (instruments.tsv, instrument_families.tsv)
-- CLI flags: `--detect-families`, `--family-confidence-threshold`, `--family-summary`
-- Adjudication mode: `llm_classify --adjudicate-instruments`
+See `08-progress.md` for current version and status. See `02-codebase-map.md` for
+the full directory/action listing.

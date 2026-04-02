@@ -167,10 +167,25 @@ def load_supplementary_patterns() -> List[Tuple[str, str, Optional[str]]]:
     return patterns
 
 
+def _parse_tinyid_field(raw: str) -> Optional[Set[str]]:
+    """Parse a tinyIds string (comma, space, or pipe delimited) into a set.
+
+    Returns None if the string is empty or absent (meaning universal/all CDEs).
+    """
+    if not raw:
+        return None
+    ids = set()
+    for part in raw.replace(",", " ").replace("|", " ").split():
+        stripped = part.strip()
+        if stripped:
+            ids.add(stripped)
+    return ids if ids else None
+
+
 def _extract_verbatim_patterns_from_config(
     config: Dict,
     source: str = "unknown"
-) -> List[Tuple[str, str]]:
+) -> List[Tuple[str, str, Optional[Set[str]]]]:
     """
     Extract verbatim strip patterns from a parsed YAML config dict.
 
@@ -179,8 +194,9 @@ def _extract_verbatim_patterns_from_config(
         source: Source name for logging (e.g., "global", "local")
 
     Returns:
-        List of (pattern_text, replace_with) tuples.
+        List of (pattern_text, replace_with, tinyIds) tuples.
         replace_with defaults to empty string if not specified.
+        tinyIds is None when absent (pattern applies to all CDEs).
     """
     patterns = []
 
@@ -195,16 +211,71 @@ def _extract_verbatim_patterns_from_config(
 
             pattern = item.get('pattern')
             replace_with = item.get('replace_with', '')  # Default to empty string
+            tinyids = _parse_tinyid_field(item.get('tinyIds', ''))
 
             if pattern:
-                patterns.append((pattern, replace_with))
+                patterns.append((pattern, replace_with, tinyids))
             else:
                 logger.warning(f"Skipping entry without pattern in {category} ({source}): {item}")
 
     return patterns
 
 
-def load_verbatim_strip_patterns() -> List[Tuple[str, str]]:
+def _auto_propagate_bare_patterns(
+    patterns: List[Tuple[str, str, Optional[Set[str]]]]
+) -> List[Tuple[str, str, Optional[Set[str]]]]:
+    """Auto-propagate bracketed [TAG] patterns to bare TAG with same tinyId scope.
+
+    Rules:
+    - Bracketed [TAG] with tinyIds -> creates bare TAG with same tinyIds (if bare
+      TAG doesn't already exist, or unions tinyIds if it does)
+    - Bracketed [TAG] without tinyIds (universal) -> no propagation needed
+      (bracketed form disambiguates already)
+    - Existing bare TAG with tinyIds=None (universal) -> not downgraded
+
+    Returns:
+        Extended pattern list with auto-propagated bare forms appended.
+    """
+    import re
+    bracket_re = re.compile(r'^\[(.+)\]$')
+
+    # Index existing bare patterns
+    bare_index: Dict[str, int] = {}  # bare_text -> index in patterns list
+    for i, (pat, _, _) in enumerate(patterns):
+        if not bracket_re.match(pat):
+            bare_index[pat] = i
+
+    # Collect bracketed patterns with tinyIds
+    propagated = []
+    for pat, replace_with, tinyids in patterns:
+        if tinyids is None:
+            continue  # Universal bracketed -> no propagation needed
+        m = bracket_re.match(pat)
+        if not m:
+            continue
+        bare = m.group(1)
+        if bare in bare_index:
+            # Bare exists -> check if we should union tinyIds
+            idx = bare_index[bare]
+            existing_tinyids = patterns[idx][2]
+            if existing_tinyids is None:
+                pass  # Already universal, don't downgrade
+            else:
+                # Union the tinyId sets
+                merged = existing_tinyids | tinyids
+                patterns[idx] = (patterns[idx][0], patterns[idx][1], merged)
+        else:
+            # Create new bare entry with same scope
+            propagated.append((bare, replace_with, tinyids))
+            bare_index[bare] = len(patterns) + len(propagated) - 1
+
+    if propagated:
+        logger.info(f"Auto-propagated {len(propagated)} bare patterns from bracketed forms")
+
+    return patterns + propagated
+
+
+def load_verbatim_strip_patterns() -> List[Tuple[str, str, Optional[Set[str]]]]:
     """
     Load verbatim strip patterns from config files.
 
@@ -215,14 +286,18 @@ def load_verbatim_strip_patterns() -> List[Tuple[str, str]]:
       1. Global config: config/verbatim_strip_patterns.yaml (in project root)
       2. Local override: ./verbatim_strip_patterns.yaml (in working directory)
 
+    Auto-propagation: Bracketed [TAG] patterns with tinyIds automatically
+    generate bare TAG patterns with the same tinyId scope.
+
     Local files extend (add to) the global list rather than replacing it.
     This allows rapid iteration during curation without modifying installed code.
 
     Returns:
-        List of (pattern_text, replace_with) tuples.
+        List of (pattern_text, replace_with, tinyIds) tuples.
         replace_with is typically empty string for removal.
+        tinyIds is None when pattern applies to all CDEs (universal).
     """
-    patterns = []
+    patterns: List[Tuple[str, str, Optional[Set[str]]]] = []
     seen_patterns = set()  # Track pattern text to avoid exact duplicates
     configs_loaded = []
 
@@ -259,10 +334,14 @@ def load_verbatim_strip_patterns() -> List[Tuple[str, str]]:
         except Exception as e:
             logger.warning(f"Error loading local {local_path}: {e}")
 
+    # 3. Auto-propagate bracketed [TAG] -> bare TAG with same tinyId scope
+    patterns = _auto_propagate_bare_patterns(patterns)
+
     if configs_loaded:
-        logger.info(f"Loaded {len(patterns)} verbatim strip patterns from: {', '.join(configs_loaded)}")
+        n_scoped = sum(1 for _, _, t in patterns if t is not None)
+        logger.info(f"Loaded {len(patterns)} verbatim strip patterns "
+                    f"({n_scoped} scoped) from: {', '.join(configs_loaded)}")
     elif patterns:
-        # Patterns loaded but no configs tracked (shouldn't happen)
         logger.info(f"Loaded {len(patterns)} verbatim strip patterns")
 
     return patterns

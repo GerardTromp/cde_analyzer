@@ -29,6 +29,8 @@ def run_action(args: Namespace):
         return _run_export_strip(args, args.export_strip)
     elif args.export_scoped:
         return _run_export_scoped(args, args.export_scoped)
+    elif getattr(args, "export_scoped_yaml", None):
+        return _run_export_scoped_yaml(args, args.export_scoped_yaml)
     elif args.stats:
         return _run_stats(args, args.stats)
     elif args.merge:
@@ -230,6 +232,26 @@ def _run_export_scoped(args, dict_path: str) -> int:
     return 0
 
 
+def _run_export_scoped_yaml(args, dict_path: str) -> int:
+    """Export tinyId-scoped verbatim patterns YAML."""
+    from logic.abbreviation_dictionary import AbbreviationDictionary
+
+    output = getattr(args, "output", None)
+    if not output:
+        logger.error("--output is required for --export-scoped-yaml")
+        raise SystemExit(1)
+
+    dictionary = AbbreviationDictionary(dict_path)
+    if not dictionary.load():
+        logger.error(f"Dictionary not found: {dict_path}")
+        raise SystemExit(1)
+
+    categories = [c.strip() for c in args.categories.split(",")]
+    n = dictionary.export_scoped_verbatim_yaml(output, categories)
+    print(f"\nExported {n} scoped verbatim YAML patterns -> {output}")
+    return 0
+
+
 def _run_stats(args, dict_path: str) -> int:
     """Print dictionary statistics."""
     from logic.abbreviation_dictionary import AbbreviationDictionary
@@ -380,6 +402,11 @@ def _run_pipeline(args) -> int:
 
     n_scoped = dictionary.export_scoped_patterns(str(scoped_path), categories)
     print(f"  Scoped patterns: {n_scoped} → {scoped_path}")
+
+    scoped_yaml_path = out / "abbreviation_scoped_verbatim.yaml"
+    n_scoped_yaml = dictionary.export_scoped_verbatim_yaml(
+        str(scoped_yaml_path), categories)
+    print(f"  Scoped YAML patterns: {n_scoped_yaml} → {scoped_yaml_path}")
 
     n_review = dictionary.export_needs_review(str(review_path))
     print(f"  Needs review: {n_review} → {review_path}")

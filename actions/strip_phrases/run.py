@@ -375,7 +375,7 @@ def load_verbatim_strip_patterns() -> List[Tuple[str, Optional[Set[str]], str]]:
 
     Returns:
         List of (pattern, tinyIds, replace_with) tuples.
-        tinyIds is always None (applies to all records).
+        tinyIds is None for universal patterns, Set[str] for scoped patterns.
     """
     try:
         from utils.config_loader import load_verbatim_strip_patterns as load_from_config
@@ -387,10 +387,14 @@ def load_verbatim_strip_patterns() -> List[Tuple[str, Optional[Set[str]], str]]:
     if not raw_patterns:
         return []
 
-    # Convert (pattern, replace_with) to (pattern, tinyIds, replace_with) format
-    # tinyIds is None = applies to all records
-    patterns = [(pattern, None, replace_with) for pattern, replace_with in raw_patterns]
-    logger.info(f"Loaded {len(patterns)} verbatim strip patterns from config")
+    # Convert (pattern, replace_with, tinyIds) to (pattern, tinyIds, replace_with)
+    # to match the internal 3-tuple convention used by strip pipeline
+    patterns = [(pattern, tinyids, replace_with)
+                for pattern, replace_with, tinyids in raw_patterns]
+    n_scoped = sum(1 for _, t, _ in patterns if t is not None)
+    logger.info(f"Loaded {len(patterns)} verbatim strip patterns from config"
+                f" ({n_scoped} scoped)" if n_scoped else
+                f"Loaded {len(patterns)} verbatim strip patterns from config")
     return patterns
 
 

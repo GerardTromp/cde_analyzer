@@ -678,6 +678,67 @@ class AbbreviationDictionary:
                 })
         return len(entries)
 
+    def export_scoped_verbatim_yaml(
+        self, output_path: str,
+        categories: Optional[List[str]] = None,
+    ) -> int:
+        """Generate verbatim strip YAML with tinyId scoping for bare abbreviations.
+
+        Bracketed [TAG] patterns are emitted without tinyIds (brackets disambiguate).
+        Bare abbreviation patterns are emitted WITH tinyIds to prevent false positives
+        when the abbreviation could collide with common English words or unrelated terms.
+
+        The output can be used directly as a local verbatim_strip_patterns.yaml or
+        merged into the global config. The auto-propagation in config_loader will
+        also generate bare forms from bracketed patterns at load time.
+
+        Returns:
+            Number of patterns written.
+        """
+        if categories is None:
+            categories = ["instrument", "study"]
+
+        entries = [e for e in self.entries.values()
+                   if self._should_strip(e, categories) and e.tinyIds]
+        entries.sort(key=lambda e: (-e.n_tinyIds, e.abbreviation))
+
+        lines = [
+            "# Auto-generated scoped verbatim patterns from abbreviation dictionary",
+            f"# Generated: {datetime.now().isoformat()}",
+            f"# Entries: {len(entries)}",
+            "#",
+            "# Bracketed [TAG] patterns: universal (brackets disambiguate)",
+            "# Bare abbreviations: tinyId-scoped (prevents false positives)",
+            "",
+            "abbreviation_scoped:",
+        ]
+
+        count = 0
+        for entry in entries:
+            abbrev = entry.abbreviation
+            note = f"{entry.expansion or abbrev} - {entry.n_tinyIds} CDEs ({entry.category})"
+            tinyid_str = " ".join(sorted(entry.tinyIds))
+
+            if abbrev.startswith("[") and abbrev.endswith("]"):
+                # Bracketed: universal (brackets are already unambiguous)
+                lines.append(f'  - pattern: "{abbrev}"')
+                lines.append(f'    note: "{note}"')
+                # Also emit tinyIds so auto-propagation can create scoped bare form
+                lines.append(f'    tinyIds: "{tinyid_str}"')
+                lines.append("")
+            else:
+                # Bare: always scoped
+                lines.append(f'  - pattern: "{abbrev}"')
+                lines.append(f'    tinyIds: "{tinyid_str}"')
+                lines.append(f'    note: "{note}"')
+                lines.append("")
+            count += 1
+
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+        return count
+
     def export_needs_review(self, output_path: str, threshold: float = 0.8) -> int:
         """Export entries below confidence threshold for human review.
 

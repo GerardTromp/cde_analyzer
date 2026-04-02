@@ -81,7 +81,7 @@ The primary interchange format for curation patterns. Tab-separated with header 
 
 | Column | Description |
 |--------|-------------|
-| `decision` | `keep`, `remove`, `modify`, `substitute`, `followup` |
+| `decision` | `strip`, `skip`, `modify`, `substitute`, `followup` |
 | `modification` | Replacement text (for `modify`/`substitute` decisions) |
 | `group` | Instrument group name (for instrument patterns) |
 
@@ -143,7 +143,7 @@ runs:
 | Column | Description |
 |--------|-------------|
 | `pattern` | Pattern text |
-| `decision` | `keep`, `remove`, `modify`, `substitute` |
+| `decision` | `strip`, `skip`, `modify`, `substitute` |
 | `modification` | Replacement text (if modify/substitute) |
 | `tinyIds` | TinyIds at time of decision |
 | `run_id` | When decision was recorded |
