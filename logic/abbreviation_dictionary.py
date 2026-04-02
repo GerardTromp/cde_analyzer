@@ -97,13 +97,11 @@ EXTERNAL_LOOKUP_CATEGORIES = {
 }
 
 # Regex for parenthetical abbreviation: "Full Name (ABBREV)"
-# Broad capture: grabs text before (ABBREV), then acronym_align() trims to
-# the correct expansion boundary using initial-letter matching.
+# Captures text before (ABBREV) using a possessive-style approach:
+# [^(] ensures no nested quantifier backtracking (linear time).
+# acronym_align() then trims to the correct expansion boundary.
 _PAREN_RE = re.compile(
-    r'((?:[A-Z][a-zA-Z\'\-/]+[\s,]*){1,}'   # title-case words (hyphens, slashes OK)
-    r'(?:(?:of|the|and|in|for|on|to|or|a|an|with|by|de|des|du|von)\s+)*'
-    r'(?:[A-Za-z][a-zA-Z\'\-/]*\s*)*)'       # continuation words
-    r'\s*'
+    r'([^(]{3,200})'                          # text before ( — no backtracking risk
     r'\(([A-Z][A-Z0-9](?:[A-Z0-9\-]*[A-Z0-9])?)\)'  # (ABBREV)
 )
 
