@@ -31,7 +31,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Version**: 1.5.0 (2026-04-02) — scoped stripping, boilerplate substitution, abbreviation disambiguation v1.1–v1.4
+**Version**: 1.5.1 (2026-04-03) — REGEX fix, ? cleanup, new verbatim patterns (STOP, CAMPHOR, FFQ, Likert, etc.)
 
 **Recent Work**:
 - **v1.0.0**: Config-driven pipeline scaffold, action refactoring, reference ledger, Production/Stable

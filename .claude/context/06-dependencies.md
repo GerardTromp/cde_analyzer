@@ -1,6 +1,6 @@
 # Dependencies
 
-> **Updated**: v1.0.0 (2026-03-12). Source of truth: `pyproject.toml`.
+> **Updated**: v1.5.0 (2026-04-02). Source of truth: `pyproject.toml`.
 
 ## Runtime Dependencies
 

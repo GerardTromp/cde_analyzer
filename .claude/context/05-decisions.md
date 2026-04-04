@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-> **Updated**: v1.0.0 (2026-03-12)
+> **Updated**: v1.5.0 (2026-04-02)
 
 ## ADR-1: Flat Layout (Not Nested Package)
 
@@ -97,3 +97,19 @@
 **Rationale**: `pattern_util` had grown to handle 15+ distinct operations. Splitting improves discoverability, reduces per-action import cost, and aligns with the principle that each action should have a clear, bounded responsibility.
 
 **Migration**: All workflow YAMLs and pipeline scripts updated to reference new action names.
+
+## ADR-14: tinyId-Scoped Verbatim Patterns (v1.5.0)
+
+**Decision**: Verbatim strip patterns support an optional `tinyIds` field that restricts matching to CDEs within the pattern's instrument scope. Bracketed `[TAG]` patterns with tinyIds automatically generate bare `TAG` patterns with the same scope at load time.
+
+**Rationale**: Bare instrument abbreviations (UPPS-P, BFI, CAST, etc.) cause false positives when stripped globally — some are English words or general medical terms. Scoping each pattern to its instrument's CDE set eliminates false positives while still stripping instrument tags from their own CDEs.
+
+**Implementation**: `config_loader.py` returns 3-tuple `(pattern, replace_with, tinyIds)`. Auto-propagation in `_auto_propagate_bare_patterns()`. Both strip engines already supported tinyId matching — only the data loading layer needed updating. 106 patterns scoped, 16 universal, 58 auto-propagated.
+
+## ADR-15: YAML-Driven LLM Prompt Registry (v1.5.0)
+
+**Decision**: LLM prompt templates are stored in `config/llm_prompts.yaml` keyed by task type. New LLM tasks can be added by editing YAML — no Python query module class needed.
+
+**Rationale**: The existing query module system (instrument, temporal, etc.) requires a Python class per task type. For tasks like boilerplate summarization where the prompt is the entire specification, a YAML-driven approach is simpler and more maintainable. The `YamlPromptModule` class bridges the two systems.
+
+**Compatibility**: `get_module()` tries the hardcoded registry first, falls back to YAML. Existing modules unchanged.

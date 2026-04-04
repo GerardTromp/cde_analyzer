@@ -130,7 +130,7 @@ _REMNANT_PATTERNS = [
     ),
     (
         "leading_punct",
-        re.compile(r'^\s*[,;:\-]'),
+        re.compile(r'^\s*[,;:\-?]'),
         "Leading punctuation",
     ),
     (
@@ -176,8 +176,8 @@ def _clean_text_once(text: str) -> str:
     s = re.sub(r'\(\s*\)', '', s)
     s = re.sub(r'\[\s*\]', '', s)
 
-    # Remove leading punctuation: ", foo" -> "foo"
-    s = re.sub(r'^\s*[,;:\-]+\s*', '', s)
+    # Remove leading punctuation: ", foo" -> "foo", "? foo" -> "foo"
+    s = re.sub(r'^\s*[,;:\-?]+\s*', '', s)
 
     # Remove trailing punctuation preceded by space: "foo ," -> "foo"
     s = re.sub(r'\s+[,;:.]+\s*$', '', s)

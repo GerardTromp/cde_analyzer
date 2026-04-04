@@ -93,7 +93,7 @@ def _compile_pattern_cache(
         if phrase in cache:
             continue
         if phrase.startswith("REGEX:"):
-            raw = phrase[6:]
+            raw = phrase[6:].lstrip()
             cache[phrase] = re.compile(raw, regex_flags)
         elif word_boundary or case_insensitive:
             escaped = re.escape(phrase)
@@ -150,7 +150,7 @@ def _replace_in_text(
         return compiled.sub(replace_with, text)
 
     if phrase.startswith("REGEX:"):
-        raw = phrase[6:]
+        raw = phrase[6:].lstrip()
         return re.sub(raw, replace_with, text)
 
     # Plain substring

@@ -1,6 +1,6 @@
 # Codebase Map
 
-> **Updated**: v1.0.0 (2026-03-12)
+> **Updated**: v1.5.0 (2026-04-02)
 
 ## Project Root
 
@@ -137,7 +137,7 @@ utils/
 ├── tinyid_utils.py             # TinyID manipulation
 ├── unicode.py                  # Unicode handling
 ├── llm/                        # Async LLM providers (Claude, OpenAI, Gemini)
-├── query_modules/              # Pluggable classification modules
+├── query_modules/              # Pluggable classification modules + YamlPromptModule
 ├── legacy_kmer/                # Archived legacy kmer code
 ├── kmer_extend_phrases1.py     # Legacy kmer (retained)
 ├── kmer_legacy_algorithms.py   # Legacy kmer (retained)
@@ -158,11 +158,13 @@ core/
 └── recursor.py                 # Recursive descent engine
 
 config/
-├── temporal_seed_patterns.yaml # 25 temporal seeds (~2100 expanded)
-├── verbatim_strip_patterns.yaml # Verbatim patterns for stripping
-├── supplementary_patterns.yaml # Supplementary pattern registry
-├── anchor_expansions.yaml      # Anchor expansion rules
-└── rare_word_whitelist.yaml    # Rare word whitelist
+├── temporal_seed_patterns.yaml     # 25 temporal seeds (~2100 expanded)
+├── verbatim_strip_patterns.yaml    # Verbatim patterns (106 with tinyIds, 16 universal)
+├── supplementary_patterns.yaml     # Supplementary pattern registry
+├── anchor_expansions.yaml          # Anchor expansion rules
+├── rare_word_whitelist.yaml        # Rare word whitelist
+├── llm_prompts.yaml                # LLM prompt templates (boilerplate_substitution, semantic_proxy)
+└── permanent_skip_abbreviations.yaml # Abbreviations exempt from k-fold re-evaluation
 
 workflows/
 ├── instrument_pipeline.yaml    # Phase 1

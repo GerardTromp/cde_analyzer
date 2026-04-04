@@ -45,7 +45,7 @@ def _compile_pattern_cache(
         if phrase in cache:
             continue
         if phrase.startswith('REGEX:'):
-            raw = phrase[6:]
+            raw = phrase[6:].lstrip()
             cache[phrase] = re.compile(raw, regex_flags)
         elif word_boundary or case_insensitive:
             escaped = re.escape(phrase)
@@ -384,7 +384,7 @@ def _replace_if_match(
                 use_regex = True
             elif is_raw_regex:
                 # Raw regex pattern — use as-is (no re.escape)
-                pattern_str = phrase[6:]
+                pattern_str = phrase[6:].lstrip()
                 regex_flags = re.IGNORECASE if _case_insensitive_global else 0
                 match_obj = re.search(pattern_str, value, flags=regex_flags)
                 found = match_obj is not None

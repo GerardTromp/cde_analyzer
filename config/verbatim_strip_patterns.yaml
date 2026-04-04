@@ -526,3 +526,70 @@ boilerplate_nlm:
 #   - pattern: "the individual's reproductive organs and functions assigned by chromosomal complement"
 #     note: "Sex/gender definition boilerplate - evaluate if this is content-bearing"
 
+# =============================================================================
+# Round 6 additions (2026-04-03)
+# Patterns identified in post-convergence QC scan
+# =============================================================================
+
+spacing_variants:
+  - pattern: "(NOS - TBI)"
+    tinyIds: "718cyuZZ2Ol 71HtyObb3ug 71Tdku__2dl 71_tku_Z2_g 7JPFJubWn_x 7JS9JdZ_2de 7knYyO__ndl 7yaYyu_b2de 7ywqkuZb3Og Q1A_J_Wb2ug Q1F5JOWW3Ol QJCFJubWn_x QkYYJdWWhdg X13qyuZ_hde X199y_b_2dl XJ75JOb_2Oe XJZ5kdW_3_g XJxtJOWb2Ol XyE5ydbW3ul m1dc1u_W2de m1qYJObbnOe mJ6q1uZ_h_e mJNFkdZZhux mJPxmceolcZ mJ_tkdWZ3dx mkLtJO_Z3_l mkM9Jd_bn_l mkfYydb_ndx mkkY1uWWnOg mkmt1uWZhdl mksFJOZW2_x mky91u_b3Ol mygqkuZZnug myscJ_ZW3ul"
+    note: "NOS-TBI with spaces around hyphen — original data has (NOS - TBI) but curated pattern has (NOS-TBI). 34 CDEs."
+
+  - pattern: "NOS - TBI"
+    tinyIds: "718cyuZZ2Ol 71HtyObb3ug 71Tdku__2dl 71_tku_Z2_g 7JPFJubWn_x 7JS9JdZ_2de 7knYyO__ndl 7yaYyu_b2de 7ywqkuZb3Og Q1A_J_Wb2ug Q1F5JOWW3Ol QJCFJubWn_x QkYYJdWWhdg X13qyuZ_hde X199y_b_2dl XJ75JOb_2Oe XJZ5kdW_3_g XJxtJOWb2Ol XyE5ydbW3ul m1dc1u_W2de m1qYJObbnOe mJ6q1uZ_h_e mJNFkdZZhux mJPxmceolcZ mJ_tkdWZ3dx mkLtJO_Z3_l mkM9Jd_bn_l mkfYydb_ndx mkkY1uWWnOg mkmt1uWZhdl mksFJOZW2_x mky91u_b3Ol mygqkuZZnug myscJ_ZW3ul"
+    note: "Bare NOS - TBI (without parens) for cases where parens are separately stripped"
+
+abbreviation_remnants:
+  - pattern: "(GOS-E Peds)"
+    tinyIds: "7k7WU4qjrA 7kZbLV9orC 7yGWLEqoB0 AFJ9UmRtgSj Q1axLNciHR Qk4_LNcoBA Qklb8V5jr0 X1jxUNqjB0 XkCgUEqiHC XkcgL45sHC XknxIN5iB0 XkwxUVciS0 m17He8V9jHA mJ1_LV5iSA mkLKxzNqjHR myLgIV5jHA sqTzwkbJCEb"
+    note: "Pediatric Glasgow Outcome Scale Extended abbreviation — 17 CDEs. Full name stripped but parenthesized abbreviation remains."
+
+  - pattern: "GOS-E Peds"
+    tinyIds: "7k7WU4qjrA 7kZbLV9orC 7yGWLEqoB0 AFJ9UmRtgSj Q1axLNciHR Qk4_LNcoBA Qklb8V5jr0 X1jxUNqjB0 XkCgUEqiHC XkcgL45sHC XknxIN5iB0 XkwxUVciS0 m17He8V9jHA mJ1_LV5iSA mkLKxzNqjHR myLgIV5jHA sqTzwkbJCEb"
+    note: "Bare form for auto-propagation parity"
+
+  - pattern: "(QOLIBRI-OS)"
+    tinyIds: "71Axzs8cAcX 71deMiI9CcX 7J2eGi8q0qX 7JbmoUcCq7 7Jm7j8cA9Q 7kUxMjIcC57 QkHezjUc05X QkPgMjU5Cqm XJxQjI9C5Q Xy7jLqR9X XyqeMiI9RqX XytlGs8905X m1k_Mi8qC5X myalGi8905m myfXjUqR5X myixMoU90cX"
+    note: "Quality of Life after Brain Injury Overall Scale abbreviation — 16 CDEs."
+
+  - pattern: "QOLIBRI-OS"
+    tinyIds: "71Axzs8cAcX 71deMiI9CcX 7J2eGi8q0qX 7JbmoUcCq7 7Jm7j8cA9Q 7kUxMjIcC57 QkHezjUc05X QkPgMjU5Cqm XJxQjI9C5Q Xy7jLqR9X XyqeMiI9RqX XytlGs8905X m1k_Mi8qC5X myalGi8905m myfXjUqR5X myixMoU90cX"
+    note: "Bare form for auto-propagation parity"
+
+  - pattern: "ADAPTABLE"
+    tinyIds: "7JxoYYmIQU XJP5Ft787I XJV0YtXIXL XJb0YtX8Q8 m1bl9F78m8 m1jYt7ImU mJV1qKmI7L mkm0tF7ImU mkrCFFQLQ8"
+    note: "ADAPTABLE study name as bare word in designation text — 9 CDEs. Bracketed [ADAPTABLE] already covered above."
+
+instrument_prefixes_r6:
+  - pattern: "(STOP)"
+    tinyIds: "0A02oYHOtYj 1TVXCJN9Hna AOQBxScN5aW EJYVg6CMpHW GGNqmq_8r4B J9neM6a9CCt VqnKBvo1GAw WMROGHkx7QO sshuvUbJHYg y6fea_86YMr ydxbBZ2zz8e"
+    note: "STOP-Bang sleep apnea screening questionnaire prefix — 11 CDEs."
+
+  - pattern: "STOP"
+    tinyIds: "0A02oYHOtYj 1TVXCJN9Hna AOQBxScN5aW EJYVg6CMpHW GGNqmq_8r4B J9neM6a9CCt VqnKBvo1GAw WMROGHkx7QO sshuvUbJHYg y6fea_86YMr ydxbBZ2zz8e"
+    note: "Bare form for auto-propagation parity"
+
+  - pattern: "CAMPHOR"
+    tinyIds: "KI4PcgU2qt WyajY7Vg4 f8ss6xcLPe fqDVsSHHnj j17GLplQVm jcr3C_ZZrT zyxm2ygfWd"
+    note: "Cambridge Pulmonary Hypertension Outcome Review — 7 CDEs."
+
+  - pattern: "(FFQ)"
+    tinyIds: "2WySNrXOU 2tOSri4to 3HwQedULl 5WrriIeXl 9SNVumNbr BDX_J_1pj BcehlT1Dl DdPqptPBe FGE0XvGSs G8AegT9Fw IL52z5Y7E NidG7WDc43 QzkbNZoD_ VYTkybpvx YEhCFRygq YYU_RIdY56 aT2aUnIG9 fL3U9kUCU k6nPp8TOI mRo1XoAA0O n_hjMdCsG urJzyXn6R zEH64veUj zOzNGcuZY"
+    note: "Food Frequency Questionnaire tag — 24 CDEs. Appears as trailing (FFQ) and prefix (FFQ)-."
+
+  - pattern: "FFQ"
+    tinyIds: "2WySNrXOU 2tOSri4to 3HwQedULl 5WrriIeXl 9SNVumNbr BDX_J_1pj BcehlT1Dl DdPqptPBe FGE0XvGSs G8AegT9Fw IL52z5Y7E NidG7WDc43 QzkbNZoD_ VYTkybpvx YEhCFRygq YYU_RIdY56 aT2aUnIG9 fL3U9kUCU k6nPp8TOI mRo1XoAA0O n_hjMdCsG urJzyXn6R zEH64veUj zOzNGcuZY"
+    note: "Bare form for auto-propagation parity"
+
+  - pattern: "(FFQ)-"
+    tinyIds: "2WySNrXOU 2tOSri4to 3HwQedULl 5WrriIeXl 9SNVumNbr BDX_J_1pj BcehlT1Dl DdPqptPBe FGE0XvGSs G8AegT9Fw IL52z5Y7E NidG7WDc43 QzkbNZoD_ VYTkybpvx YEhCFRygq YYU_RIdY56 aT2aUnIG9 fL3U9kUCU k6nPp8TOI mRo1XoAA0O n_hjMdCsG urJzyXn6R zEH64veUj zOzNGcuZY"
+    note: "FFQ with trailing hyphen used as designation prefix — strips '(FFQ)-' from names like '(FFQ)-apple juice indicator'."
+
+boilerplate_definitions:
+  - pattern: "REGEX: ,* (?:using|scored on|on|from) an? (three|four|five|six|seven|eight|nine|ten|eleven|\\d{1,2})[ -]point [Ll]ikert scale"
+    note: "Likert scale measurement method clause in definitions — 45 CDEs. Response format belongs in metadata, not definition text."
+
+  - pattern: "REGEX: ,?\\s*which is a screening instrument (which |to )identif(y|ies) children aged \\d+ months who are at risk of having social.communication disorders\\.?"
+    note: "CHAT screening instrument boilerplate suffix in definitions — 15 CDEs. Describes the instrument, not what the CDE measures."
+

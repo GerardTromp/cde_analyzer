@@ -2,20 +2,66 @@
 
 ## Current Branch: main
 
-**Focus**: Scoped stripping, boilerplate substitution, abbreviation disambiguation
+**Focus**: Post-convergence QC fixes, CDE construction recommendations
 
-**Version**: 1.5.0 (2026-04-02)
+**Version**: 1.5.1 (2026-04-03)
 
-## Current State (v1.0.1)
+## Current State (v1.5.1)
 
-### Production Release
+### v1.5.1: REGEX Fix + ? Cleanup + New Verbatim Patterns (2026-04-03)
 
-**v1.0.0 changes**:
+**Bug Fixes**:
+- REGEX prefix parsing: `phrase[6:]` → `phrase[6:].lstrip()` in branching_stripper + phrase_stripper (PROMIS 35→2)
+- `?` separator remnant cleanup: added `?` to leading punctuation in remnant_detector (201→0)
+- NOS-TBI spacing variant: `(NOS - TBI)` added to verbatim patterns (34→0)
+
+**New Verbatim Patterns** (192→199):
+- GOS-E Peds (17→0), QOLIBRI-OS (16→0), ADAPTABLE (7→0)
+- Likert scale regex in definitions (45→0)
+- (STOP) prefix (11 CDEs), CAMPHOR (7), (FFQ)/(FFQ)- (24), CHAT screening suffix (15)
+
+**R7 Pipeline Verified**: 22,743 CDEs × 7 variants, 199 verbatim patterns, leakage 335→~257
+
+**CDE Construction Recommendations** expanded to 19 items:
+- §12: Undefined abbreviations in Names (162 abbrevs, 899 CDEs)
+- §13: References/URLs in definitions (37 CDEs)
+- §14: Noise phrases (Question N, 30D shorthand, CDE bundling opportunities)
+- Scope-variant near-duplicate analysis: 288 groups / 798 CDEs (3.5%)
+- Verbose definition LLM candidates: 210 remaining >300 chars
+
+### v1.5.0: Scoped Stripping + Boilerplate Substitution + LLM Prompts (2026-04-02)
+
+**tinyId-Scoped Verbatim Stripping**:
+- `verbatim_strip_patterns.yaml` gains optional `tinyIds` field; 106 patterns scoped
+- Auto-propagation: bracketed `[TAG]` → bare `TAG` with same tinyId scope
+- 127 YAML entries → 185 loaded (58 auto-propagated bare forms)
+- Validation: 536 CDEs additionally stripped, 0 regressions, 0 false positives
+
+**Boilerplate Definition Substitution**:
+- 30 verbose definitions (300–3,851 chars) replaced by LLM-generated plain-language summaries
+- 29,933 → 3,727 chars (88% reduction); regex-only achieved 24%
+- Substitute TSV applied as pre-pass before branching strip
+
+**YAML-Driven LLM Prompt Registry**:
+- `config/llm_prompts.yaml`: per-task prompt templates (system + user)
+- `YamlPromptModule`: loads from YAML, no Python module needed for new tasks
+- `get_module()` falls back to YAML for tasks not in hardcoded registry
+- `boilerplate_substitution` task: instructs LLM to keep what is measured, exclude how/licensing/scoring
+
+**Abbreviation Disambiguation** (v1.1–v1.4 feature iterations):
+- Three-tier resolution: internal expansion, external lookup, adjudication dictionary
+- Acronym-alignment heuristic, permanent skip list, k-fold re-evaluation
+- `--export-scoped-yaml`: generates scoped YAML from abbreviation dictionary
+
+**v1.0.1 changes** (2026-03-13):
+- Decision terminology: keep→strip, remove→skip (backwards compat)
+- Instrument leakage scan in `strip_report`; 297 tests (+132%)
+
+**v1.0.0 changes** (2026-03-12):
 - `pattern_util` split into focused actions: `curation`, `instrument_util`, `pattern_diag`, `supplementary`
 - Config-driven pipeline scaffold (`workflow scaffold --from-config`)
 - Reference curation ledger shipped at `data/reference_ledger/`
 - Development Status upgraded to Production/Stable
-- All workflow YAMLs and pipeline scripts updated to new action names
 
 ### All Pipeline Phases — Complete
 
@@ -46,6 +92,9 @@
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 1.5.1 | 2026-04-03 | REGEX fix, ? cleanup, 7 new verbatim patterns, CDE construction recommendations (19 items) |
+| 1.5.0 | 2026-04-02 | Scoped stripping, boilerplate substitution, LLM prompt registry, abbreviation v1.1–v1.4 |
+| 1.0.1 | 2026-03-13 | Decision rename (keep→strip, remove→skip), leakage scan, 297 tests |
 | 1.0.0 | 2026-03-12 | Production release: action split, config scaffold, reference ledger |
 | 0.9.8 | 2026-03-11 | Field-aware splits, 7-way branching strip, group-scoped re-matching |
 | 0.9.6 | 2026-03-09 | 5-way branching strip, allcde03 production run (104s), curator briefing |
@@ -98,8 +147,11 @@
 
 ## What Remains
 
-- **LLM-assisted classification** — implemented (`llm_classify` action), not yet integrated into pipeline
+- **Rerun pipeline** — with scoped verbatim patterns + boilerplate substitutes
+- **Embedding clustering evaluation** — re-extract embed CSVs from scoped/substituted output
+- **Choose production curator** — GT vs consensus3m vs ML vs MD
+- **Production run + reference ledger update**
+- **API key setup** — for automated LLM-driven boilerplate substitution on new corpora
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
-- **Script refactoring** — 6 generators → use `synthetic_common.py` (tag structure variations need care)
 - **tinyId parsing migration** — 27 call sites → `parse_tinyid_set()` (gradual)
 - **Complexity reduction** — top 5 files, ~40-50 helper extractions possible (gradual)
