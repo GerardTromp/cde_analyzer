@@ -147,11 +147,16 @@
 
 ## What Remains
 
-- **Rerun pipeline** — with scoped verbatim patterns + boilerplate substitutes
-- **Embedding clustering evaluation** — re-extract embed CSVs from scoped/substituted output
-- **Choose production curator** — GT vs consensus3m vs ML vs MD
-- **Production run + reference ledger update**
+### Immediate (pipeline complete, evaluation pending)
+- **Embedding clustering evaluation** — generate embeddings from R7 embed CSVs (70 files ready), compare 5 curators × 7 variants
+- **Choose production curator** — GT vs consensus3m vs ML vs MD based on cluster quality
+- **Production run + reference ledger update** — winning curator → update `data/reference_ledger/`
+
+### Near-Term
+- **LLM substitution pass 2** — 210 verbose definition candidates >300 chars identified (`reports/verbose_definition_candidates.tsv`)
 - **API key setup** — for automated LLM-driven boilerplate substitution on new corpora
+
+### Lower Priority
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
 - **tinyId parsing migration** — 27 call sites → `parse_tinyid_set()` (gradual)
 - **Complexity reduction** — top 5 files, ~40-50 helper extractions possible (gradual)
