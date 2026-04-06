@@ -75,4 +75,9 @@ site/
 # One-off scripts and presentations
 trial_boundary_llm.py
 docs/slides/*.html
+docs/presentations/*.html
+docs/presentations/**/*.html
 case_insensitive.patch
+font.map
+allcde.json
+phase1_output/
