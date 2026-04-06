@@ -87,6 +87,135 @@ def _extract_texts(obj: Any, parts: List[str]) -> List[str]:
 
 
 # ---------------------------------------------------------------------------
+# Boilerplate leakage scanning (substring-based)
+# ---------------------------------------------------------------------------
+
+# Boilerplate signature phrases — distinctive substrings indicating
+# licensing, publisher, scoring, or Working Group content in definitions.
+_BOILERPLATE_SIGNATURES = [
+    # Licensing / purchase
+    ("licensing", "licensing agreement"),
+    ("licensing", "requires a licensing agreement"),
+    ("licensing", "proprietary instrument"),
+    ("licensing", "may be purchased from"),
+    ("licensing", "not sold separately"),
+    ("licensing", "permission to use"),
+    ("licensing", "copyright"),
+    # Publishers
+    ("publisher", "western psychological services"),
+    ("publisher", "mind garden"),
+    ("publisher", "psychological assessment resources"),
+    ("publisher", "multi-health systems"),
+    ("publisher", "pearson assessments"),
+    # Working Group
+    ("working_group", "working group recommends"),
+    ("working_group", "working group notes"),
+    ("working_group", "working group recognizes"),
+    ("working_group", "working group defines"),
+    # Item count
+    ("item_count", r"is a \d+-item"),
+    ("item_count", r"is an \d+-item"),
+    ("item_count", r"consists of \d+ items"),
+    ("item_count", r"contains \d+ items"),
+    # Response format
+    ("response_format", "likert scale"),
+    ("response_format", "point ordinal response"),
+    ("response_format", "point response scale"),
+    # Scoring
+    ("scoring", "total score is calculated"),
+    ("scoring", "scores range from"),
+    ("scoring", "scored by summing"),
+    ("scoring", "higher scores indicate"),
+    ("scoring", "lower scores indicate"),
+    ("scoring", "scoring key"),
+    ("scoring", "reverse scored"),
+    # Developer citation
+    ("citation", "developed by"),
+    ("citation", "adapted from"),
+    # URLs / references
+    ("url_reference", "http://"),
+    ("url_reference", "https://"),
+    ("url_reference", "available at:"),
+]
+
+_BOILERPLATE_REGEXES: Optional[List[Tuple[str, str, re.Pattern]]] = None
+
+
+def _get_boilerplate_regexes() -> List[Tuple[str, str, re.Pattern]]:
+    """Compile boilerplate signature regexes (lazy, cached)."""
+    global _BOILERPLATE_REGEXES
+    if _BOILERPLATE_REGEXES is None:
+        _BOILERPLATE_REGEXES = []
+        for category, sig in _BOILERPLATE_SIGNATURES:
+            try:
+                rx = re.compile(sig, re.IGNORECASE)
+            except re.error:
+                rx = re.compile(re.escape(sig), re.IGNORECASE)
+            _BOILERPLATE_REGEXES.append((category, sig, rx))
+    return _BOILERPLATE_REGEXES
+
+
+def _scan_boilerplate_leakage(
+    data: List[dict],
+    substitute_tids: Optional[Set[str]] = None,
+    field_paths: Optional[List[str]] = None,
+    min_def_length: int = 50,
+) -> Dict[str, List[Tuple[str, int, str]]]:
+    """
+    Scan definitions for boilerplate signature phrases.
+
+    Returns dict mapping tinyId -> list of (category, def_length, signature).
+    Only reports CDEs NOT in substitute_tids (novel leakage).
+    """
+    if field_paths is None:
+        field_paths = ["definitions.*.definition"]
+    if substitute_tids is None:
+        substitute_tids = set()
+
+    regexes = _get_boilerplate_regexes()
+    hits: Dict[str, List[Tuple[str, int, str]]] = {}
+
+    for record in data:
+        tiny_id = record.get("tinyId", "?")
+        if tiny_id in substitute_tids:
+            continue
+        for field_path in field_paths:
+            for text in _extract_texts(record, field_path.split(".")):
+                if len(text) < min_def_length:
+                    continue
+                for category, sig_text, regex in regexes:
+                    if regex.search(text):
+                        if tiny_id not in hits:
+                            hits[tiny_id] = []
+                        hits[tiny_id].append((category, len(text), sig_text))
+
+    return hits
+
+
+def _load_substitute_tids(
+    substitute_tsv_paths: Optional[List[str]] = None,
+) -> Set[str]:
+    """Load tinyIds from boilerplate substitute TSV files."""
+    tids: Set[str] = set()
+    if not substitute_tsv_paths:
+        return tids
+    for path in substitute_tsv_paths:
+        if not Path(path).exists():
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f, delimiter="\t")
+                for row in reader:
+                    for t in row.get("tinyIds", "").split(";"):
+                        t = t.strip()
+                        if t:
+                            tids.add(t)
+        except Exception as e:
+            logger.warning(f"Failed to load substitute TSV {path}: {e}")
+    return tids
+
+
+# ---------------------------------------------------------------------------
 # Instrument leakage scanning
 # ---------------------------------------------------------------------------
 
@@ -300,6 +429,8 @@ def _generate_report(
     output_path: str,
     instrument_scan: bool = True,
     inst_pattern_tsvs: Optional[List[str]] = None,
+    boilerplate_scan: bool = True,
+    substitute_tsvs: Optional[List[str]] = None,
 ) -> str:
     """Generate the full markdown report."""
     from logic.remnant_detector import (
@@ -555,6 +686,95 @@ def _generate_report(
 
         lines.append("")
 
+    # -- Boilerplate leakage --
+    if boilerplate_scan and branch_data:
+        lines.append("## Boilerplate Leakage (Substring Scan)")
+        lines.append("")
+
+        sub_tids = _load_substitute_tids(substitute_tsvs)
+        if sub_tids:
+            lines.append(
+                f"*Excluded {len(sub_tids)} already-substituted tinyIds from scan.*"
+            )
+            lines.append("")
+
+        # Scan the most-stripped branch (MTSTPT preferred)
+        scan_branch = None
+        for branch, json_path, data in branch_data:
+            if "MTSTPT" in branch.upper():
+                scan_branch = (branch, data)
+                break
+        if scan_branch is None:
+            scan_branch = (branch_data[-1][0], branch_data[-1][2])
+
+        bp_branch, bp_data = scan_branch
+        bp_hits = _scan_boilerplate_leakage(bp_data, substitute_tids=sub_tids)
+
+        if not bp_hits:
+            lines.append(
+                f"**No boilerplate leakage detected** in {bp_branch} "
+                f"({len(_get_boilerplate_regexes())} signatures checked)."
+            )
+        else:
+            # Summarize by category
+            cat_counter: Dict[str, int] = {}
+            for tid, sig_list in bp_hits.items():
+                for cat, dlen, sig in sig_list:
+                    cat_counter[cat] = cat_counter.get(cat, 0) + 1
+
+            lines.append(f"Scanned {bp_branch}: **{len(bp_hits)} CDEs** with "
+                         f"boilerplate signatures ({len(_get_boilerplate_regexes())} "
+                         f"signatures checked).")
+            lines.append("")
+            lines.append("| Category | Hits | Example Signature |")
+            lines.append("|----------|-----:|-------------------|")
+            for cat in sorted(cat_counter.keys(), key=lambda c: -cat_counter[c]):
+                # Find an example signature for this category
+                example = ""
+                for tid, sig_list in bp_hits.items():
+                    for c, _, sig in sig_list:
+                        if c == cat:
+                            example = sig
+                            break
+                    if example:
+                        break
+                lines.append(f"| {cat} | {cat_counter[cat]} | `{example}` |")
+
+            lines.append("")
+
+            # High-priority: 2+ signatures AND >300 chars
+            high_pri = [
+                (tid, sigs) for tid, sigs in bp_hits.items()
+                if len(sigs) >= 2 and any(dlen > 300 for _, dlen, _ in sigs)
+            ]
+            if high_pri:
+                lines.append(f"### High-Priority ({len(high_pri)} CDEs: 2+ signatures, >300 chars)")
+                lines.append("")
+                lines.append("| tinyId | Def Length | Signatures |")
+                lines.append("|--------|----------:|------------|")
+                for tid, sigs in sorted(high_pri, key=lambda x: -max(d for _, d, _ in x[1])):
+                    dlen = max(d for _, d, _ in sigs)
+                    sig_names = ", ".join(sorted(set(s for _, _, s in sigs)))
+                    lines.append(f"| {tid} | {dlen} | {sig_names[:60]} |")
+                lines.append("")
+
+            # Detail: top 20 by number of signatures
+            ranked = sorted(bp_hits.items(),
+                            key=lambda x: (-len(x[1]), -max(d for _, d, _ in x[1])))
+            lines.append(f"### All Leakage ({len(bp_hits)} CDEs)")
+            lines.append("")
+            lines.append("| tinyId | Def Length | # Sigs | Categories |")
+            lines.append("|--------|----------:|-------:|------------|")
+            for tid, sigs in ranked[:30]:
+                dlen = max(d for _, d, _ in sigs)
+                cats = ", ".join(sorted(set(c for c, _, _ in sigs)))
+                lines.append(f"| {tid} | {dlen} | {len(sigs)} | {cats} |")
+            if len(ranked) > 30:
+                lines.append(f"| *...{len(ranked)-30} more* | | | |")
+            lines.append("")
+
+        lines.append("")
+
     # -- Version history --
     lines.append("---")
     lines.append("")
@@ -597,6 +817,7 @@ def run_action(args: Namespace):
     embed_dir = getattr(args, "embed_dir", None)
     temporal_scan = getattr(args, "temporal_scan", True)
     instrument_scan = getattr(args, "instrument_scan", True)
+    boilerplate_scan = getattr(args, "boilerplate_scan", True)
     json_pattern = getattr(args, "json_pattern", "*_stripped.json")
 
     # Collect instrument pattern TSV paths
@@ -607,6 +828,15 @@ def run_action(args: Namespace):
             resolved = str(Path(val).resolve())
             if Path(resolved).exists():
                 inst_pattern_tsvs.append(resolved)
+
+    # Collect substitute TSV paths
+    substitute_tsvs: List[str] = []
+    raw_sub = getattr(args, "substitute_tsv", None)
+    if raw_sub:
+        for val in raw_sub:
+            resolved = str(Path(val).resolve())
+            if Path(resolved).exists():
+                substitute_tsvs.append(resolved)
 
     if input_json:
         input_json = str(Path(input_json).resolve())
@@ -625,6 +855,8 @@ def run_action(args: Namespace):
         output_path=output_path,
         instrument_scan=instrument_scan,
         inst_pattern_tsvs=inst_pattern_tsvs or None,
+        boilerplate_scan=boilerplate_scan,
+        substitute_tsvs=substitute_tsvs or None,
     )
 
     with open(output_path, "w", encoding="utf-8") as f:

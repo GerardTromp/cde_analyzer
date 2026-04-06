@@ -90,6 +90,19 @@ def register_subparser(subparser: ArgumentParser):
         default="*_stripped.json",
         help="Glob pattern to match stripped JSON files in output-dir.",
     )
+    subparser.add_argument(
+        "--no-boilerplate-scan",
+        dest="boilerplate_scan",
+        action="store_false",
+        default=True,
+        help="Skip scanning for boilerplate signature phrases in definitions.",
+    )
+    subparser.add_argument(
+        "--substitute-tsv",
+        nargs="*",
+        help="Boilerplate substitute TSV file(s) — CDEs already substituted "
+             "are excluded from leakage scan.",
+    )
 
     def _lazy_run_action(args):
         """Wrapper for lazy import of run_action."""

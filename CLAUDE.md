@@ -414,3 +414,12 @@ cde-analyzer strip_branching -i JSON -d OUTPUT_DIR \
     --temporal-patterns TSV --phrase-patterns TSV \
     [--variants CODES] [--workers N] [--clean-remnants]
 ```
+
+## Shell Execution (inherited from parent CLAUDE.md)
+
+All Claude sessions MUST follow the shell execution mandates defined in
+`../../CLAUDE.md` § "Shell Execution Mandates":
+
+1. **Strip PATH**: `export PATH="/c/Windows/system32:/c/Windows"`
+2. **Always use WSL**: `MSYS_NO_PATHCONV=1 wsl --distribution Ubuntu-22.04 -- <cmd>`
+3. **Write scripts to files** for anything beyond simple one-liners

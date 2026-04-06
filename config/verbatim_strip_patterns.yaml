@@ -586,6 +586,24 @@ instrument_prefixes_r6:
     tinyIds: "2WySNrXOU 2tOSri4to 3HwQedULl 5WrriIeXl 9SNVumNbr BDX_J_1pj BcehlT1Dl DdPqptPBe FGE0XvGSs G8AegT9Fw IL52z5Y7E NidG7WDc43 QzkbNZoD_ VYTkybpvx YEhCFRygq YYU_RIdY56 aT2aUnIG9 fL3U9kUCU k6nPp8TOI mRo1XoAA0O n_hjMdCsG urJzyXn6R zEH64veUj zOzNGcuZY"
     note: "FFQ with trailing hyphen used as designation prefix — strips '(FFQ)-' from names like '(FFQ)-apple juice indicator'."
 
+instrument_full_names_r7:
+  - pattern: "Quality of Life after Brain Injury Overall Scale"
+    tinyIds: "71Axzs8cAcX 71deMiI9CcX 7J2eGi8q0qX 7JbmoUcCq7 7Jm7j8cA9Q 7kUxMjIcC57 QkHezjUc05X QkPgMjU5Cqm XJxQjI9C5Q Xy7jLqR9X XyqeMiI9RqX XytlGs8905X m1k_Mi8qC5X myalGi8905m myfXjUqR5X myixMoU90cX"
+    note: "Full instrument name for QOLIBRI-OS — 16 CDEs. Abbreviation already stripped; this catches the unabbreviated form in designations and definitions."
+
+trailing_temporal_remnants_r7:
+  - pattern: "12 months"
+    tinyIds: "4pjhjr5eGQJ 7179B79or0 71B9S79orA 71IKHQ5iSC 71Jmlu4qoHC 71pflOV9srA 7Jk9r79oS0 7JwmKX9orA 7kYFrm5jSA Q13Fr7qirC Q1WmeON5irC Q1b9B75jH0 QJ1ir79oBR QJs0t9jhsl Qk_GYm5sB0 QkuXYXqirR Qmn01b4q48 QyC5rQ9jrA X1rYrX5iHA X1xcH7cjrC XJIXYmcorC XJeQl_E9sB0 XkN9Hm9jH0 eEwWSpRNeN m1MqHQ5irA m1vKB7qsHC mJBXYX9iBC mJCMl_EcsSC mJMXeO4cir0 mJODLVqir0 mJRtr79srR mJqYS79iHR mkVFrQqjB0 mkZoH7qiB0 mkaKrQciH0 my9D8EqiSA myKmF75sSC myoFrm9sHA myxoBX5irC nrgkhc8MYK nwY1PvMprV oHakpj1O_b qVZYZCTZtrd s0XOQgGb4 sTkZJuIMKX uZpvAndaQB wUjuRgOMT z6fJdpu4tv"
+    note: "Bare trailing '12 months' after temporal preposition stripping — 48 CDEs."
+
+  - pattern: "2 weeks"
+    tinyIds: "m1Xlg_qjhil mJ1luL5s2je myxxuI5o3se"
+    note: "Bare trailing '2 weeks' after temporal preposition stripping — 3 CDEs."
+
+  - pattern: "4 weeks"
+    tinyIds: "7keZ0Lqi3se 7yDlC85ohoe"
+    note: "Bare trailing '4 weeks' after temporal preposition stripping — 2 CDEs. ejt5LRQKZ excluded (handled by LLM substitution)."
+
 boilerplate_definitions:
   - pattern: "REGEX: ,* (?:using|scored on|on|from) an? (three|four|five|six|seven|eight|nine|ten|eleven|\\d{1,2})[ -]point [Ll]ikert scale"
     note: "Likert scale measurement method clause in definitions — 45 CDEs. Response format belongs in metadata, not definition text."
