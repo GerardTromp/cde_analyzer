@@ -1,12 +1,67 @@
 # Progress and Current State
 
+## Per-Session Audit Reminder
+
+**At the start of each session**, review whether any functions in this
+project should be extracted to a shared library (`cde_lib`, `cluster_ops`,
+`cluster_stats`). See [meta-project extraction protocol](../../../.claude/context/10-extraction-protocol.md)
+for the full procedure.
+
+### Pending migrations
+- `webbrowser.open()` calls in `actions/curation/run.py`,
+  `actions/pattern_util/centralized_server.py`, and
+  `tools/editor_standalone/__main__.py` — already use guarded
+  `cde_lib.browser.open_browser_quietly` import (2026-04-10).
+  Optional dep declared in pyproject.toml `[quiet-browser]`.
+  No deprecation needed; the wrapper falls back gracefully.
+
+### Migration policy
+- New code touching extraction candidates: import from shared library directly
+- Existing call sites: update opportunistically when files are touched for other reasons
+- Removal of any deprecated wrappers: only at next major version increment (2.0.0)
+
 ## Current Branch: main
 
-**Focus**: Post-convergence QC fixes, CDE construction recommendations
+**Focus**: v7 production complete, embedding evaluation pending
 
-**Version**: 1.5.1 (2026-04-03)
+**Version**: 1.5.1 R7 (2026-04-06)
 
-## Current State (v1.5.1)
+## Current State (v1.5.1 R7)
+
+### R7: Expanded LLM Substitution + K-mer Analysis + Collapsible CDEs (2026-04-05)
+
+**LLM Boilerplate Substitution v2**:
+- 201 additional verbose definitions summarized (v1: 30, v2: 201, total: 231)
+- 142,933 → 39,364 chars (72% reduction); definitions >300 chars: 210→5
+- 64 v2 + 1 v1 patterns fixed (upstream text mutation mismatches)
+- 1 ordering conflict resolved (ejt5LRQKZ: verbatim vs substitution)
+
+**New Verbatim Patterns** (199→203):
+- Quality of Life after Brain Injury Overall Scale (16 CDEs)
+- Trailing temporal remnants: `12 months` (48), `2 weeks` (3), `4 weeks` (2)
+
+**Boilerplate Leakage Scanner** (integrated into `strip_report`):
+- 35 substring signatures across 8 categories (licensing, publisher, scoring, etc.)
+- `--substitute-tsv` excludes known substitutions; `--no-boilerplate-scan` to disable
+- v7 result: 7 novel hits (all low-severity), 0 substitute failures
+
+**Token K-mer Analysis**:
+- GT: 424K tokens, ML: 409K, MD: 395K (MTSTPT v7)
+- GT retains assessment-framing phrases stripped by ML/MD (22× ratio on some 6-mers)
+- Reports: kmer_report.txt, kmer_curator_comparison.txt + TSVs
+
+**Collapsible CDE Analysis**:
+- 2,156 CDEs in 836 groups (5.8% reduction potential)
+- 714 diff-by-one-token patterns; domain concept sets identified
+- 664 CDEs share identical definitions with different names
+
+**CDE Construction Recommendations**: 21 items (was 19)
+- §15: Permissible values as definitions
+- §16: Collapsible CDE groups (domain parameter model)
+
+**v7 Production Output**: 3 curators × 7 variants = 21 stripped JSONs + 42 embed pairs
+
+**Codebase Cleanup**: Presentations archived to sibling dir, stray files deleted, .gitignore updated
 
 ### v1.5.1: REGEX Fix + ? Cleanup + New Verbatim Patterns (2026-04-03)
 
@@ -19,15 +74,6 @@
 - GOS-E Peds (17→0), QOLIBRI-OS (16→0), ADAPTABLE (7→0)
 - Likert scale regex in definitions (45→0)
 - (STOP) prefix (11 CDEs), CAMPHOR (7), (FFQ)/(FFQ)- (24), CHAT screening suffix (15)
-
-**R7 Pipeline Verified**: 22,743 CDEs × 7 variants, 199 verbatim patterns, leakage 335→~257
-
-**CDE Construction Recommendations** expanded to 19 items:
-- §12: Undefined abbreviations in Names (162 abbrevs, 899 CDEs)
-- §13: References/URLs in definitions (37 CDEs)
-- §14: Noise phrases (Question N, 30D shorthand, CDE bundling opportunities)
-- Scope-variant near-duplicate analysis: 288 groups / 798 CDEs (3.5%)
-- Verbose definition LLM candidates: 210 remaining >300 chars
 
 ### v1.5.0: Scoped Stripping + Boilerplate Substitution + LLM Prompts (2026-04-02)
 
@@ -147,14 +193,14 @@
 
 ## What Remains
 
-### Immediate (pipeline complete, evaluation pending)
-- **Embedding clustering evaluation** — generate embeddings from R7 embed CSVs (70 files ready), compare 5 curators × 7 variants
-- **Choose production curator** — GT vs consensus3m vs ML vs MD based on cluster quality
-- **Production run + reference ledger update** — winning curator → update `data/reference_ledger/`
+### Immediate (v7 production complete, evaluation pending)
+- **Embedding generation** — run embeddings on v7 embed CSVs (3 curators × 7 variants = 21 runs)
+- **Clustering evaluation** — compare cluster quality across curators and variants
+- **Choose production curator** — GT vs ML vs MD based on cluster quality + k-mer profile
 
 ### Near-Term
-- **LLM substitution pass 2** — 210 verbose definition candidates >300 chars identified (`reports/verbose_definition_candidates.tsv`)
-- **API key setup** — for automated LLM-driven boilerplate substitution on new corpora
+- **Production run + reference ledger update** — winning curator → update `data/reference_ledger/`
+- **API key setup** — for automated LLM substitution on new corpora
 
 ### Lower Priority
 - **Position-specific field-aware stripping** — architecture ready in branching_stripper
