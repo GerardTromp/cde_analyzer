@@ -86,10 +86,64 @@ Agreement zones (1,320 patterns in 2+ curators):
 
 ## Pipeline State
 
-Unchanged since v1.5.1 R7 checkpoint (2026-04-06). No code changes in this
-session — analysis and documentation only. Report lives under
+Pipeline functionality unchanged since v1.5.1 R7 (2026-04-06). The
+strategy analysis itself is documentation only — the report lives under
 `phrase_curation3/reports/` in the analysis workspace, not in the
 cde_analyzer repo (data separation principle).
+
+## Concurrent Code Changes (cde_lib browser integration)
+
+A parallel Claude context delivered a sibling-library helper that this
+session committed and pushed alongside the strategy report. Summary
+recorded here so this checkpoint reflects the full repo state on
+2026-04-10.
+
+### cde_lib (commit 408e744 — pushed)
+- New `src/cde_lib/browser.py` — `open_browser_quietly()` launches
+  Chromium-family browsers with flags suppressing GCM/dbus/UPower/
+  InterestFeedV2 noise common in WSL and headless environments. Falls
+  back to stdlib `webbrowser` (with stderr redirection) if no
+  Chrome/Chromium binary is on PATH.
+- `__init__.py` docstring lists the new submodule
+- `.gitignore` adds `.claude/settings.local.json`
+- `CLAUDE.md` documents the wrap-don't-refactor extraction rule and
+  per-session audit reminder
+- `.claude/context/07-gotchas.md` adds the `MSYS_NO_PATHCONV=1`
+  requirement for WSL commands invoked from Git Bash
+- `.claude/context/08-progress.md` updated with browser.py entry under
+  "Recent additions" (cde_lib at 0.1.0)
+
+### cde_analyzer (commit 607f54e — pushed)
+- `actions/curation/run.py`, `actions/pattern_util/centralized_server.py`,
+  `tools/editor_standalone/__main__.py` — replace `webbrowser.open()`
+  with guarded `from cde_lib.browser import open_browser_quietly` plus
+  stdlib fallback shim. Wrap-don't-refactor: each call site retains a
+  working stdlib path so cde_lib remains an optional dependency.
+- `pyproject.toml` — adds `[project.optional-dependencies].quiet-browser`
+  extra (`cde-lib>=0.1.0`)
+
+### cde_analyzer (commit de0d4f9 — pushed)
+- `.claude/context/08-progress.md` refresh:
+  - Adds "Per-Session Audit Reminder" section instructing each new
+    session to scan for extraction candidates (mirrors the same
+    reminder in sibling projects — intentional cross-project
+    duplication)
+  - Documents the `cde_lib.browser.open_browser_quietly` migration as
+    a pending consumer-side note (not a version-bumping change for
+    cde_analyzer)
+  - Refreshes "Current State" to v1.5.1 R7 with LLM substitution v2,
+    k-mer analysis, collapsible CDE analysis, leakage scanner, v7
+    production output
+  - Refreshes "What Remains" to reflect v7 production complete, with
+    embedding generation + clustering evaluation as the next blocker
+
+### Version invariants
+- cde_lib version: `0.1.0` (its own, unchanged by browser.py addition
+  in source — version bump deferred)
+- cde_analyzer version: `1.5.1 R7` (unchanged — browser wrapper
+  integration is consumer-side glue, not a feature release)
+- The `0.1.0` reference appears only in cde_lib's own progress file,
+  never in cde_analyzer documentation
 
 ## File Locations Referenced
 
