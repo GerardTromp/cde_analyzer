@@ -1169,10 +1169,16 @@ def _run_edit(args, edit_path: str) -> int:
     """
     import json
     import threading
-    import webbrowser
     from http.server import HTTPServer, BaseHTTPRequestHandler
     from pathlib import Path
     from urllib.parse import urlparse
+
+    try:
+        from cde_lib.browser import open_browser_quietly
+    except ImportError:  # graceful fallback if cde_lib not installed
+        import webbrowser
+        def open_browser_quietly(u):  # type: ignore
+            return webbrowser.open(u)
 
     # Validate input file exists (if specified)
     tsv_path = None
@@ -1268,7 +1274,7 @@ def _run_edit(args, edit_path: str) -> int:
     print(f"  Press Ctrl-C to stop.\n")
 
     if not no_browser:
-        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+        threading.Timer(0.5, lambda: open_browser_quietly(url)).start()
 
     try:
         server.serve_forever()

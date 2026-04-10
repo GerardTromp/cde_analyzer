@@ -20,11 +20,17 @@ import argparse
 import json
 import sys
 import threading
-import webbrowser
 import zipfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
+
+try:
+    from cde_lib.browser import open_browser_quietly
+except ImportError:  # zipapp distribution: cde_lib may not be present
+    import webbrowser
+    def open_browser_quietly(u):  # type: ignore
+        return webbrowser.open(u)
 
 _FALLBACK_VERSION = "1.5.1"  # updated by build_editor_zipapp.py
 
@@ -172,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
     print("  Press Ctrl-C to stop.\n")
 
     if not args.no_browser:
-        threading.Timer(0.5, lambda: webbrowser.open(url)).start()
+        threading.Timer(0.5, lambda: open_browser_quietly(url)).start()
 
     try:
         server.serve_forever()

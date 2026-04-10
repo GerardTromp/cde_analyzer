@@ -69,6 +69,12 @@ docs = [
     "sphinx>=7.2.0",
     "sphinx-rtd-theme>=2.0.0",
 ]
+# Optional integration with sibling cde_lib for browser launch noise
+# suppression (WSL/headless environments).  All call sites use guarded
+# try-import so this is genuinely optional.
+quiet-browser = [
+    "cde-lib>=0.1.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/gtromp/cde-analyzer"

@@ -605,9 +605,18 @@ def serve_curation(
     print()
     print("  Press Ctrl-C to stop.\n")
 
+    # Browser launch: prefer cde_lib.browser.open_browser_quietly when
+    # available (suppresses GCM/dbus noise on headless WSL).  Falls back
+    # to stdlib webbrowser if cde_lib not installed.  See cde_analyzer
+    # pyproject.toml [project.optional-dependencies].quiet-browser.
     if not no_browser:
-        import webbrowser
-        threading.Timer(0.5, lambda: webbrowser.open(f"{base_url}/admin/")).start()
+        try:
+            from cde_lib.browser import open_browser_quietly
+        except ImportError:
+            import webbrowser
+            def open_browser_quietly(u):  # type: ignore
+                return webbrowser.open(u)
+        threading.Timer(0.5, lambda: open_browser_quietly(f"{base_url}/admin/")).start()
 
     # --- Expiry watchdog ------------------------------------------------------
     def _expiry_watchdog():
