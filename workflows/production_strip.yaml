@@ -1,0 +1,149 @@
+# Workflow: Production Strip Pipeline
+#
+# End-to-end pipeline from raw CDE JSON to embed-ready artifacts using
+# the Curator B curation baseline (pre-curated patterns from the reference ledger).
+#
+# Produces for each variant:
+#   - stripped_{VARIANT}.json    — CDE JSON with text normalized
+#   - embed_{VARIANT}.tsv        — concatenated embed text (tinyId + embed_text)
+#   - embed_{VARIANT}.csv        — separate columns (tinyId, Name, Question, Definition)
+#
+# TSV files are the substrate for text embedding models.
+# CSV files provide annotation text for cluster visualization.
+#
+# Default variants: MTSFPT (main instrument + phrase stripped) and
+#                   MTSTPT (main + sub instrument + phrase stripped)
+#
+# Minimal invocation (2 arguments):
+#   cde-analyzer workflow run workflows/production_strip.yaml \
+#       --set input_json=/path/to/allcde.json \
+#       --set output_dir=/path/to/output
+#
+# Override variants:
+#   --set variants=MTSFPT                    # single variant
+#   --set variants=MTSFPF,MFSTPF,MTSTPF,MFSFPT,MTSFPT,MFSTPT,MTSTPT  # all 7
+#
+# Override path schema:
+#   --set embed_path_schema=/path/to/custom_paths.csv
+#
+# Use local patterns instead of reference ledger:
+#   --set patterns_dir=/path/to/my_patterns
+
+name: production_strip
+description: "Production pipeline: pre-curated strip + embed extraction (Curator B baseline)"
+
+variables:
+  # ── Required inputs ──────────────────────────────────────────────
+  input_json: "${INPUT_JSON}"
+  output_dir: "${OUTPUT_DIR}"
+
+  # ── Pattern files (from reference ledger by default) ─────────────
+  # Override: --set patterns_dir=/path/to/custom_patterns
+  patterns_dir: "${PATTERNS_DIR:-${_package_root}/data/reference_ledger/production_patterns}"
+  inst_patterns_full: "${patterns_dir}/inst_patterns_full.tsv"
+  inst_patterns_sub: "${patterns_dir}/inst_patterns_sub.tsv"
+  phrase_patterns: "${patterns_dir}/phrase_patterns.tsv"
+  phrase_substitutes: "${patterns_dir}/substitute_patterns.tsv"
+  boilerplate_substitutes: "${patterns_dir}/boilerplate_substitutes.tsv"
+
+  # ── Embed extraction ─────────────────────────────────────────────
+  # Override: --set embed_path_schema=/path/to/custom_paths.csv
+  embed_path_schema: "${EMBED_PATH_SCHEMA:-${_package_root}/config/embed_path_schemas/NQD.csv}"
+  embed_separator: " :--: "
+
+  # ── Variant selection ────────────────────────────────────────────
+  variants: "${VARIANTS:-MTSFPT,MTSTPT}"
+
+  # ── Processing ───────────────────────────────────────────────────
+  model: "${MODEL:-CDE}"
+  workers: 0
+
+  # ── Auto-generated intermediates ─────────────────────────────────
+  temporal_expanded_tsv: "${output_dir}/temporal_expanded.tsv"
+
+  # Hidden intermediates (prefixed with . to reduce clutter)
+  _phrase_sub_json: "${output_dir}/.phrase_sub.json"
+  _branching_input_json: "${output_dir}/branching_input.json"
+
+steps:
+  # [1] Apply Phrase substitutions (5 text replacements)
+  - name: apply_phrase_substitutions
+    action: strip_phrases
+    args:
+      input: "${input_json}"
+      model: "${model}"
+      output: "${_phrase_sub_json}"
+      patterns: "${phrase_substitutes},pattern"
+      no_expand_anchors: true
+      workers: "${workers}"
+
+  # [2] Apply boilerplate substitutions (231 text replacements)
+  - name: apply_boilerplate_substitutions
+    action: strip_phrases
+    args:
+      input: "${_phrase_sub_json}"
+      model: "${model}"
+      output: "${_branching_input_json}"
+      patterns: "${boilerplate_substitutes},pattern"
+      no_expand_anchors: true
+      workers: "${workers}"
+
+  # [3] Expand temporal seed patterns from config
+  - name: expand_temporal
+    action: pattern_util
+    args:
+      expand_temporal_seeds: true
+      output: "${temporal_expanded_tsv}"
+
+  # [4] N-way branching strip (default: MTSFPT + MTSTPT)
+  - name: branching_strip
+    action: strip_branching
+    args:
+      input: "${_branching_input_json}"
+      output_dir: "${output_dir}"
+      inst_full_patterns: "${inst_patterns_full},pattern"
+      inst_sub_patterns: "${inst_patterns_sub},pattern"
+      temporal_patterns: "${temporal_expanded_tsv},pattern"
+      phrase_patterns: "${phrase_patterns},pattern"
+      variants: "${variants}"
+      model: "${model}"
+      workers: "${workers}"
+      clean_remnants: true
+
+  # [5] Quality report
+  - name: quality_report
+    action: strip_report
+    args:
+      output_dir: "${output_dir}"
+      input_json: "${input_json}"
+      output: "${output_dir}/strip_report.md"
+      json_pattern: "stripped_*.json"
+      inst_patterns_full: "${inst_patterns_full}"
+      inst_patterns_sub: "${inst_patterns_sub}"
+
+  # [6] Extract embed files (TSV + CSV per variant)
+  - name: extract_embed
+    action: extract_embed
+    args:
+      batch_dir: "${output_dir}"
+      batch_variants: "${variants}"
+      path_file: "${embed_path_schema}"
+      model: "${model}"
+      embed_separator: "${embed_separator}"
+
+  # [7] Pipeline summary
+  - checkpoint: true
+    name: pipeline_complete
+    message: |
+      Production strip pipeline complete!
+
+      Output directory: ${output_dir}
+      Variants: ${variants}
+      Path schema: ${embed_path_schema}
+
+      Artifacts per variant:
+        - stripped_{VARIANT}.json   — normalized CDE JSON
+        - embed_{VARIANT}.tsv       — embedding substrate (tinyId + embed_text)
+        - embed_{VARIANT}.csv       — annotation columns (tinyId, Name, Question, Definition)
+
+      Quality report: ${output_dir}/strip_report.md

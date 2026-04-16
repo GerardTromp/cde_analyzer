@@ -21,7 +21,26 @@ The subset of fields is specified in a file (--path-file) as a set of
 """
 
 def register_subparser(subparser: ArgumentParser):
-    subparser.add_argument("--input", "-i", required=True, help="Input JSON file.")
+    subparser.add_argument("--input", "-i", help="Input JSON file.")
+    # Batch mode: extract embed files for multiple stripped variants at once
+    subparser.add_argument(
+        "--batch-dir", "-d",
+        default=None,
+        help="Batch mode: directory containing stripped_*.json files. "
+             "Produces both TSV (concatenated embed_text) and CSV (separate columns) "
+             "for each variant found. Requires --path-file and -m.",
+    )
+    subparser.add_argument(
+        "--batch-variants",
+        default=None,
+        help="Comma-separated variant codes to extract in batch mode "
+             "(e.g., MTSFPT,MTSTPT). Default: all stripped_*.json found.",
+    )
+    subparser.add_argument(
+        "--embed-separator",
+        default=" :--: ",
+        help="Separator for TSV concatenation in batch mode (default: ' :--: ').",
+    )
 #    ids = subparser.add_mutually_exclusive_group()
     subparser.add_argument(
         "--id-list",

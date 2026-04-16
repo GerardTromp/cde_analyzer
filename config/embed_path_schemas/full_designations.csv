@@ -1,0 +1,9 @@
+tag,path
+Name,designations.0.designation
+Question,designations.1.designation
+Des2,designations.2.designation
+Des3,designations.3.designation
+Des4,designations.4.designation
+Des5,designations.5.designation
+Definition,definitions.0.definition
+PermissibleValues,valueDomain.permissibleValues

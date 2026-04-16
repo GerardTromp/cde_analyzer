@@ -22,11 +22,46 @@ for the full procedure.
 
 ## Current Branch: main
 
-**Focus**: v7 production complete, embedding evaluation pending
+**Focus**: Production pipeline formalized, embedding evaluation pending
 
-**Version**: 1.5.1 R7 (2026-04-06)
+**Version**: 1.5.1 R8 (2026-04-16)
 
-## Current State (v1.5.1 R7)
+## Current State (v1.5.1 R8)
+
+### R8: Production Pipeline Formalization + ERD Diagrams (2026-04-16)
+
+**Production Strip Pipeline** (`workflows/production_strip.yaml`):
+- End-to-end pipeline: raw CDE JSON → embed-ready TSV/CSV
+- 7 steps: phrase subs → boilerplate subs → temporal expansion → branching strip → quality report → batch extract → summary
+- Minimal configuration: only `input_json` + `output_dir` required
+- Default variants: MTSFPT + MTSTPT
+- Validated: 0 diff against test_v7 reference (22,743 CDEs)
+
+**Reference Ledger Update** (Curator B baseline):
+- `data/reference_ledger/production_patterns/` — 5 ready-to-use pattern files
+- `phrase_decisions.tsv` rebuilt with Curator B decisions (395 keep, 3,658 skip, 5 substitute)
+- Curator A decisions backed up to `phrase_decisions_curator_a.tsv`
+- Anonymized: GT→A, ML→B, MD→C for publication
+
+**Embed Path Schemas** (`config/embed_path_schemas/`):
+- `NQD.csv` — production default (Name, Question, Definition)
+- `NQDP.csv`, `full_designations.csv` — extended variants
+
+**Batch Extract Mode** (`extract_embed --batch-dir`):
+- Produces TSV + CSV for each `stripped_*.json` variant in one call
+- `--batch-variants` to select specific variants
+
+**Workflow Engine Enhancements**:
+- `_package_root` system variable for codebase-resident file references
+- Nested `${VAR:-${OTHER}/path}` variable resolution (balanced-brace parser)
+
+**ERD Diagrams** (`docs/diagrams/`):
+- `cde_core_erd.drawio` — focused 6-model ERD for publication (CDEItem→Designation/Definition/ValueDomain→PermissibleValue)
+- `cde_full_erd.drawio` — complete 50-model ERD for supplement
+- SVG renders via erdantic (`py313_erd` venv) and custom Graphviz DOT generation
+
+**Abbreviation Dictionary**:
+- Added ALSFRS-R (Amyotrophic Lateral Sclerosis Functional Rating Scale-Revised) — both parenthetical and bare forms
 
 ### R7: Expanded LLM Substitution + K-mer Analysis + Collapsible CDEs (2026-04-05)
 

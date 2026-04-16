@@ -46,16 +46,22 @@ def get_system_variables() -> Dict[str, Any]:
     Returns variables like:
     - cpu_count: Total logical CPUs
     - workers: Recommended worker count (cpu_count - 1, min 1)
+    - _package_root: Absolute path to the cde_analyzer package root
     """
     import multiprocessing
+    from pathlib import Path
 
     cpu_count = multiprocessing.cpu_count()
     # Leave one CPU free for OS/other tasks, minimum 1 worker
     workers = max(1, cpu_count - 1)
 
+    # Package root: actions/workflow/run.py → actions/workflow/ → actions/ → cde_analyzer/
+    package_root = str(Path(__file__).resolve().parents[2])
+
     return {
         "cpu_count": cpu_count,
         "workers": workers,
+        "_package_root": package_root,
     }
 
 
@@ -124,42 +130,74 @@ class WorkflowState:
         self.current_step_index += 1
 
 
+def _find_var_expression(text: str, start: int) -> tuple:
+    """Find balanced ${...} expression handling nested braces.
+
+    Returns (end_index, inner_content) or (-1, None) if unbalanced.
+    start should point to the '$' of '${'.
+    """
+    if start + 1 >= len(text) or text[start + 1] != '{':
+        return -1, None
+    depth = 1
+    i = start + 2
+    while i < len(text) and depth > 0:
+        if text[i] == '{' and i > 0 and text[i - 1] == '$':
+            depth += 1
+        elif text[i] == '}':
+            depth -= 1
+        i += 1
+    if depth == 0:
+        return i, text[start + 2:i - 1]
+    return -1, None
+
+
 def resolve_variables(text: str, variables: Dict[str, Any]) -> str:
     """
     Resolve variable references in text.
 
     Supports:
     - ${VAR} - simple variable reference
-    - ${VAR:-default} - variable with default value
+    - ${VAR:-default} - variable with default value (default may contain ${...})
     - Environment variable fallback
     """
     if not isinstance(text, str):
         return text
 
-    def replace_var(match):
-        var_expr = match.group(1)
+    result = []
+    i = 0
+    while i < len(text):
+        if text[i] == '$' and i + 1 < len(text) and text[i + 1] == '{':
+            end, inner = _find_var_expression(text, i)
+            if end == -1:
+                result.append(text[i])
+                i += 1
+                continue
 
-        # Check for default value syntax: ${VAR:-default}
-        if ":-" in var_expr:
-            var_name, default = var_expr.split(":-", 1)
+            # Check for default value syntax: ${VAR:-default}
+            if ":-" in inner:
+                var_name, default = inner.split(":-", 1)
+            else:
+                var_name = inner
+                default = None
+
+            # Resolution order: variables dict → environment → default
+            if var_name in variables:
+                result.append(str(variables[var_name]))
+            elif var_name in os.environ:
+                result.append(os.environ[var_name])
+            elif default is not None:
+                # Recursively resolve the default value (may contain ${...})
+                result.append(resolve_variables(default, variables))
+            else:
+                logger.warning(f"Unresolved variable: ${{{var_name}}}")
+                result.append(text[i:end])  # Keep original if unresolved
+
+            i = end
         else:
-            var_name = var_expr
-            default = None
+            result.append(text[i])
+            i += 1
 
-        # Resolution order: variables dict → environment → default
-        if var_name in variables:
-            return str(variables[var_name])
-        elif var_name in os.environ:
-            return os.environ[var_name]
-        elif default is not None:
-            return default
-        else:
-            logger.warning(f"Unresolved variable: ${{{var_name}}}")
-            return match.group(0)  # Keep original if unresolved
-
-    # Match ${...} patterns
-    pattern = r'\$\{([^}]+)\}'
-    return re.sub(pattern, replace_var, text)
+    return "".join(result)
 
 
 def resolve_args(args: Dict[str, Any], variables: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,4 +1,5 @@
 abbreviation	expansion	category	confidence	source	tinyIds	n_tinyIds	aliases	decided_at	notes	decision
+(ALSFRS-R)	Amyotrophic Lateral Sclerosis Functional Rating Scale-Revised	instrument	1.00	manual		0		2026-04-16T00:00:00.000000	Bare abbreviation for ALS Functional Rating Scale-Revised	strip
 (NIHSS)		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
 (PHQ-9)		instrument	1.00	manual		0		2026-04-01T10:03:41.458666	Seeded from verbatim_strip_patterns.yaml (bare abbreviation)	strip
 AA		unknown	0.50	bare_caps		0				skip
@@ -14,6 +15,7 @@ AGE		unknown	0.50	bare_caps		0				skip
 AHA	American Heart Association	unknown	0.95	parenthetical		0				skip
 AHI	Hypopnea Index	instrument	0.95	parenthetical		0				strip
 AHRQ	Agency for Healthcare Research and Quality	unknown	0.95	parenthetical		0				skip
+ALSFRS-R	Amyotrophic Lateral Sclerosis Functional Rating Scale-Revised	instrument	1.00	manual		0		2026-04-16T00:00:00.000000	ALS Functional Rating Scale-Revised	strip
 ALSPAC	Avon Longitudinal Study of Parents and Children	study	0.90	bare_caps		0			Longitudinal cohort study	strip
 ALT		unknown	0.50	bare_caps		0				skip
 ANAM	Automated Neuropsychological Assessment Metrics	instrument	0.95	parenthetical		0				strip

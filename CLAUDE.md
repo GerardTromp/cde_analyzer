@@ -332,6 +332,7 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 - `scripts/build_editor_zipapp.py` — build script for `dist/cde_editor.pyz`
 
 ### Workflows
+- `workflows/production_strip.yaml` — **Production default**: pre-curated strip + embed extraction (ML baseline, 7 steps)
 - `workflows/instrument_pipeline.yaml` — Phase 1
 - `workflows/phrase_pipeline.yaml` — Phase 2
 - `workflows/branching_strip.yaml` — Phase 3 (5-way branch, 10-step legacy)
@@ -339,13 +340,17 @@ mine_phrases → discover_verbatim → coalesce → field_analysis → curation_
 
 ### Documentation
 - `docs/vignettes/` — 8 vignettes (index, quickstart, instrument-detection, pipeline-orchestration, parameter-tuning, phrase-stripping, distributed-curation, synthetic-data)
-- `docs/help/` — 28 per-command reference pages
+- `docs/help/` — 29 per-command reference pages
 - `docs/workflow-architecture.md` — pipeline diagrams + design rationale
 
 ### Data
-- `data/reference_ledger/` — Official starting-point curation ledger (allcde03: 458 instrument + 4,023 phrase decisions)
+- `data/reference_ledger/` — Official curation ledger (allcde03: 458 instrument + 4,058 phrase decisions, Curator B baseline)
+  - `production_patterns/` — Ready-to-use pattern files for `production_strip.yaml`
   - Copy to `.curation_ledger/` to bootstrap incremental curation for new projects
   - `MANIFEST.yaml` — provenance, checksums, decision counts
+- `config/embed_path_schemas/` — Pydantic path schemas for `extract_embed`
+  - `NQD.csv` (production default: Name, Question, Definition)
+  - `NQDP.csv`, `full_designations.csv` (extended variants)
 - `examples/pipeline_config.yaml` — Example YAML config for `workflow scaffold --from-config`
 
 ## Architecture Reminders

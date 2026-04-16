@@ -1,0 +1,127 @@
+digraph CDE_Core_Schema {
+    graph [
+        rankdir=TB
+        fontname="Helvetica"
+        fontsize=11
+        label="CDE Core Data Model"
+        labelloc=t
+        pad=0.4
+        nodesep=0.6
+        ranksep=1.0
+        bgcolor=white
+    ];
+    node [
+        shape=none
+        fontname="Helvetica"
+        fontsize=10
+    ];
+    edge [
+        fontname="Helvetica"
+        fontsize=9
+        color="#555555"
+        arrowsize=0.8
+    ];
+
+ValueDomain [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#1e8e3e"><B><FONT COLOR="white" POINT-SIZE="12">ValueDomain</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">datatype</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeDate</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeDate?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeDynamicCodeList</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeDynamicCodeList?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeExternallyDefined</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeExternallyDefined?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeNumber</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeNumber?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeText</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeText?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeTime</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeTime?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">datatypeValueList</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">DatatypeValueList?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">definition</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="identifiers"><B><FONT COLOR="#1e8e3e">identifiers</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1e8e3e">List[Identifier]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="ids"><B><FONT COLOR="#1e8e3e">ids</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1e8e3e">List[Identifier]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="permissibleValues"><B><FONT COLOR="#1e8e3e">permissibleValues</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1e8e3e">List[PermissibleValue]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">uom</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">vsacOid</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+</TABLE>>];
+
+CDEItem [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#1a73e8"><B><FONT COLOR="white" POINT-SIZE="12">CDEItem</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">x_id</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">nihEndorsed</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">bool?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">tinyId</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">x__v</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">int?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">elementType</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">archived</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">bool?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">views</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">int?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">sources</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[Source]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">origin</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">imported</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">created</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">createdBy</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">CreatedBy?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">updated</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">updatedBy</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">UpdatedBy?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">stewardOrg</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">StewardOrg?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">usedByOrgs</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">formElements</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[FormElement]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">registrationState</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">RegistrationState?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">lastMigrationScript</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="designations"><B><FONT COLOR="#1a73e8">designations</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1a73e8">List[Designation]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="definitions"><B><FONT COLOR="#1a73e8">definitions</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1a73e8">List[Definition]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="valueDomain"><B><FONT COLOR="#1a73e8">valueDomain</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1a73e8">ValueDomain?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">classification</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[Classification]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">referenceDocuments</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[ReferenceDocument]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">properties</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[Property]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT" PORT="ids"><B><FONT COLOR="#1a73e8">ids</FONT></B></TD><TD ALIGN="LEFT"><FONT COLOR="#1a73e8">List[Identifier]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">attachments</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[Attachment]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">comments</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[Comment]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">dataSets</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[DataSet]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">history</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">derivationRules</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[DerivationRule]?</FONT></TD></TR>
+</TABLE>>];
+
+PermissibleValue [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#c5221f"><B><FONT COLOR="white" POINT-SIZE="12">PermissibleValue</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">codeSystemName</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">codeSystemVersion</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">permissibleValue</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">valueMeaningCode</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">valueMeaningDefinition</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">valueMeaningName</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">conceptId</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">conceptSource</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+</TABLE>>];
+
+Identifier [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#7627bb"><B><FONT COLOR="white" POINT-SIZE="12">Identifier</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">id</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">source</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">version</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+</TABLE>>];
+
+Designation [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#e8a817"><B><FONT COLOR="white" POINT-SIZE="12">Designation</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">designation</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">sources</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">tags</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+</TABLE>>];
+
+Definition [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6">
+    <TR><TD COLSPAN="2" BGCOLOR="#e8a817"><B><FONT COLOR="white" POINT-SIZE="12">Definition</FONT></B></TD></TR>
+    <TR><TD ALIGN="LEFT">definition</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">definitionFormat</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">str?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">sources</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">tags</TD><TD ALIGN="LEFT"><FONT COLOR="#888888">List[str]?</FONT></TD></TR>
+</TABLE>>];
+
+    // Relationships
+    ValueDomain:identifiers -> Identifier [arrowhead=crowodot  label="  1..*  "];
+    ValueDomain:ids -> Identifier [arrowhead=crowodot  label="  1..*  "];
+    ValueDomain:permissibleValues -> PermissibleValue [arrowhead=crowodot  label="  1..*  "];
+    CDEItem:designations -> Designation [arrowhead=crowodot  label="  1..*  "];
+    CDEItem:definitions -> Definition [arrowhead=crowodot  label="  1..*  "];
+    CDEItem:valueDomain -> ValueDomain [arrowhead=vee style=dashed label="  1  "];
+    CDEItem:ids -> Identifier [arrowhead=crowodot  label="  1..*  "];
+}
