@@ -1,5 +1,22 @@
 # Progress and Current State
 
+## Deferred Decision — ADR-E004 (set 2026-04-25, deferred 2026-06-08)
+
+**ADR-E004 (Proposed): Move Pydantic CDE schema from `cde_analyzer/CDE_Schema/`
+to `cde_lib`.** Read [ecosystem ADR-E004](../../../.claude/context/05-decisions.md)
+before resuming work that touches `CDE_Schema/` or its 22 internal importers.
+
+**Status (2026-06-08): deliberately deferred — no longer the resume-first item.**
+The move makes most sense only once the open production/evaluation work
+(embedding evaluation → curator selection → reference-ledger update) is
+settled. It is a cross-repo change: the migration commits **cannot be pushed
+until the move is complete and functionality has been tested** end-to-end
+across the affected sibling repos, so it must be executed as one coordinated,
+tested change rather than mid-flight.
+
+When it is taken up: the pre-migration audit (sibling repos for parallel CDE
+dataclasses) remains the required first step — do not start the move without it.
+
 ## Per-Session Audit Reminder
 
 **At the start of each session**, review whether any functions in this

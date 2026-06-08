@@ -467,6 +467,49 @@ for future in as_completed(futures):
 
 **Location**: `actions/diagnose_strip/run.py`, `actions/pattern_util/run.py` (harvest functions)
 
+## Source Data QC Gotchas
+
+### 30. Orphan `tinyId='?'` in 2026-02-10 NIH dump
+**Issue**: One CDE record in the 2026-02-10 NIH catalogue dump has a literal `'?'` as its `tinyId` field rather than the expected 8–12 char alphanumeric token. Every other tinyId in the dump is well-formed.
+
+**Provenance** (verified 2026-04-18 from `cluster_substruct` while auditing a downstream LLM-subclustering review xlsx):
+
+```
+cde_query/20260210/cde_all.json                     ← NIH source dump (1/22,743 has tinyId='?')
+        ↓
+cde_query/20260210/cde_all_2_nounderscore.json
+        ↓
+cde_query/20260210/cde_all_3_nounderscore_nohtml.json
+        ↓
+nlp_mbd/data/cde_all_v7/{GT,MD,ML}_MTSTPT_v7.tsv      (row index 7849 in every variant)
+        ↓
+nlp_mbd/tmp/text/{GT,MD,ML}_MTSTPT_display_v7.csv
+        ↓
+work_202604/embed_cluster/output/{GT,MD,ML}/cluster_membership/cluster_membership.csv
+```
+
+**The orphan record**:
+- `tinyId`: `'?'`
+- designation: `"Head circumference at time of neurologic exam"`
+- steward / tag: `"NBSTRN Krabbe disease"`
+- `Question` and `Definition` are NaN
+- record keys (`cde_all.json`): `stewardOrg, createdBy, property, dataElementConcept, objectClass, valueDomain, partOfBundles, nihEndorsed, elementType, sourcesNew, history, archived` — every field except a real `tinyId`
+
+**Impact**:
+- Every downstream consumer that joins on `tinyId` either drops the row silently or carries it forward with `'?'` as the join key (which then fails to match anything else).
+- Affects all three text variants (GT/MD/ML) and all three embedding models (MiniLM/medcpt/mpnet) at the same row index 7849.
+- Rate is low (1/22,743 = 0.004%) but the failure mode is silent.
+
+**Recommendation** (for the cde_analyzer agent — this is the kind of QC issue this project should enumerate and quarantine):
+- Add a tinyId-shape sanity check to the analyzer's QC pass: length ∈ [8, 12], characters in `[A-Za-z0-9_]`, no whitespace.
+- Surface offenders in a `--qc-tinyid-shape` action that emits a small CSV (tinyId, designation, steward, source bundle).
+- Decide policy: drop, quarantine, or attempt recovery via a public-catalogue lookup on (designation + steward) at <https://cde.nlm.nih.gov/>.
+- Re-run on every fresh NIH dump — the rate may rise.
+
+**Status**: Notarised; no fix applied here. Sibling `cluster_substruct` and `llm_subcluster` projects only inherit the issue and have no authority to repair the source.
+
+---
+
 ## Future Gotchas
 
 ### 26. API Schema Evolution
