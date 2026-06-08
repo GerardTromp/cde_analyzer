@@ -74,6 +74,8 @@ site/
 
 # One-off scripts and presentations
 trial_boundary_llm.py
+# Scratch scripts (underscore-prefixed) under scripts/ — e.g. _select_toy_set.py
+scripts/_*.py
 docs/slides/*.html
 docs/presentations/*.html
 docs/presentations/**/*.html
