@@ -58,9 +58,9 @@ files:
 
   phrase_decisions.tsv:
     lines: 4059
-    size_bytes: 1425638
-    md5: "97f16ebb9d7e9e303e24695d2a329e10"
-    sha1: "53d4b60fd2d87f170099b328c75c5186648dfdec"
+    size_bytes: 1450476
+    md5: "5bbb4aacf7bf5644e9f1cc8629e90ed8"
+    sha1: "4fa9bb54cded60a0e8aff098122d9f959776ef00"
 
   phrase_decisions_curator_a.tsv:
     description: "Backup of original Curator A decisions (pre-production rebuild)"
