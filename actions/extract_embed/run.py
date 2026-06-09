@@ -79,6 +79,7 @@ def _run_batch(args):
         sys.exit(1)
 
     print(f"\nBatch complete: {extracted} variant(s), {extracted * 2} files written")
+    return 0
 
 
 @graceful_interrupt
@@ -138,3 +139,4 @@ def run_action(args):
         args.simplify_permissible,
         concatenate=concatenate,
     )
+    return 0
