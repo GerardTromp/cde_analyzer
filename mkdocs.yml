@@ -76,6 +76,9 @@ nav:
     - Architecture: architecture.md
     - Data Models: data-models.md
     - Contributing: contributing.md
+  - Runs & Benchmarks:
+    - allcde03 Branching Strip Run: runs/allcde03-branching-strip-run.md
+    - Strip Core-Scaling Benchmark: runs/strip-core-scaling-benchmark.md
   - Appendix:
     - Extensions v0.5.x: appendix/extensions_v0.5.x.md
     - Lessons Learned (2026-01-29): appendix/lessons_learned_20260129.md
