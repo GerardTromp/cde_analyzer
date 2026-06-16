@@ -31,7 +31,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Version**: 1.5.1 (2026-04-03) — REGEX fix, ? cleanup, new verbatim patterns (STOP, CAMPHOR, FFQ, Likert, etc.)
+**Version**: 1.6.0 (2026-06-15) — CDE Pydantic schema relocated to cde_lib.schema (ADR-E004); CDE_Schema/ is now a re-export shim, cde-lib a required dep
 
 **Recent Work**:
 - **v1.0.0**: Config-driven pipeline scaffold, action refactoring, reference ledger, Production/Stable

@@ -1,25 +1,7 @@
-#
-# File: CDE_Schema/EmbedText.py
-#
-# Simplified model for embedding text extraction workflows
-#
+"""DEPRECATED shim — relocated to ``cde_lib.schema.EmbedText`` (ADR-E004).
 
-from typing import Optional
-from pydantic import BaseModel
+Re-exports preserved for existing ``from CDE_Schema.EmbedText import ...`` call
+sites. Removed at cde_analyzer 2.0.0.
+"""
 
-
-class EmbedText(BaseModel):
-    """
-    Simplified model for embedding text extraction.
-
-    Used by the subset command to filter and validate records
-    with a minimal field set suitable for text embedding workflows.
-
-    Mandatory fields: tinyId, Name
-    Optional fields: Question, Definition, PermissibleValues
-    """
-    tinyId: str
-    Name: str
-    Question: Optional[str] = None
-    Definition: Optional[str] = None
-    PermissibleValues: Optional[str] = None
+from cde_lib.schema.EmbedText import *  # noqa: F401,F403

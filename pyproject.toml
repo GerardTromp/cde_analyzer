@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cde-analyzer"
-version = "1.5.1"
+version = "1.6.0"
 description = "A Python framework for analyzing and extracting data from the NLM Common Data Elements Repository"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -45,6 +45,10 @@ classifiers = [
 
 dependencies = [
     "pydantic>=2.0.0,<3.0.0",
+    # CDE Pydantic schema now lives in cde_lib.schema (ADR-E004); the
+    # CDE_Schema/ package is a thin re-export shim. Now a required dependency
+    # (previously optional, for browser-noise suppression only).
+    "cde-lib>=0.2.0",
     "spacy>=3.7.0,<4.0.0",
     "nltk>=3.8.0,<4.0.0",
     "pandas>=2.0.0,<3.0.0",

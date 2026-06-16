@@ -41,9 +41,19 @@ for the full procedure.
 
 **Focus**: Production pipeline formalized, embedding evaluation pending
 
-**Version**: 1.5.1 R8 (2026-04-16)
+**Version**: 1.6.0 (2026-06-15)
 
-## Current State (v1.5.1 R8)
+## Current State (v1.6.0)
+
+### v1.6.0: CDE schema relocated to cde_lib (2026-06-15)
+
+- The CDE Pydantic schema (`CDE_Schema/`, ~50 models) moved to
+  `cde_lib.schema` (ADR-E004; cde_lib 0.2.0). `CDE_Schema/` is now a thin
+  re-export shim, so all 21 internal import sites are unchanged. The shim is
+  removed at cde_analyzer 2.0.0.
+- `cde-lib>=0.2.0` is now a **required** dependency (was optional).
+- Verified: `tests/test_phrase_miner.py` (41 tests) passes through the shim;
+  cde_lib ships 5 schema tests.
 
 ### R8: Production Pipeline Formalization + ERD Diagrams (2026-04-16)
 
@@ -190,6 +200,7 @@ for the full procedure.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 1.6.0 | 2026-06-15 | CDE Pydantic schema relocated to cde_lib.schema (ADR-E004); CDE_Schema/ now a re-export shim; cde-lib a required dep |
 | 1.5.1 | 2026-04-03 | REGEX fix, ? cleanup, 7 new verbatim patterns, CDE construction recommendations (19 items) |
 | 1.5.0 | 2026-04-02 | Scoped stripping, boilerplate substitution, LLM prompt registry, abbreviation v1.1–v1.4 |
 | 1.0.1 | 2026-03-13 | Decision rename (keep→strip, remove→skip), leakage scan, 297 tests |
