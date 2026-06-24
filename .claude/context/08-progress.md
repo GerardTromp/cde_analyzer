@@ -41,9 +41,23 @@ for the full procedure.
 
 **Focus**: Production pipeline formalized, embedding evaluation pending
 
-**Version**: 1.6.0 (2026-06-15)
+**Version**: 1.6.1 (2026-06-24)
 
-## Current State (v1.6.0)
+## Current State (v1.6.1)
+
+### v1.6.1: Dependency-metadata correctness (2026-06-24)
+
+- `requires-python` raised **3.9 → 3.10**: the committed 1.6.0 already made
+  `cde-lib>=0.2.0` a required dep (which itself requires Python >=3.10), so the
+  old `>=3.9` claim could never actually resolve. Fixed in `pyproject.toml`
+  (classifiers + black/ruff/mypy `target-version`), `requirements.txt`.
+- Constraint policy rationalized + documented (mirrored in `pyproject.toml` and
+  `requirements.txt`): floors set to the oldest version providing a used API or
+  a security floor (`nltk>=3.9.0` = CVE-2024-39705); speculative upper caps
+  dropped (`nltk`, `PyYAML`, `wordfreq`); caps retained only for known-breaking
+  majors (`pydantic<3`, `pandas<3`, `spacy<4`). `pydantic` floor relaxed
+  2.11→2.0 (no 2.11-only API used).
+- Metadata/packaging only — no source `.py` changes.
 
 ### v1.6.0: CDE schema relocated to cde_lib (2026-06-15)
 
@@ -200,6 +214,7 @@ for the full procedure.
 
 | Version | Date | Summary |
 |---------|------|---------|
+| 1.6.1 | 2026-06-24 | Dependency-metadata correctness: requires-python 3.9→3.10 (forced by cde-lib); constraints rationalized + documented; pydantic floor 2.11→2.0; no source changes |
 | 1.6.0 | 2026-06-15 | CDE Pydantic schema relocated to cde_lib.schema (ADR-E004); CDE_Schema/ now a re-export shim; cde-lib a required dep |
 | 1.5.1 | 2026-04-03 | REGEX fix, ? cleanup, 7 new verbatim patterns, CDE construction recommendations (19 items) |
 | 1.5.0 | 2026-04-02 | Scoped stripping, boilerplate substitution, LLM prompt registry, abbreviation v1.1–v1.4 |

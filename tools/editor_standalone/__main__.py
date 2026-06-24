@@ -32,7 +32,7 @@ except ImportError:  # zipapp distribution: cde_lib may not be present
     def open_browser_quietly(u):  # type: ignore
         return webbrowser.open(u)
 
-_FALLBACK_VERSION = "1.6.0"  # updated by build_editor_zipapp.py
+_FALLBACK_VERSION = "1.6.1"  # updated by build_editor_zipapp.py
 
 def _resolve_version() -> str:
     """Return the cde_analyzer version if importable, else the fallback."""

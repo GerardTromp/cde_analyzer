@@ -1,37 +1,115 @@
-# CDE Analyzer - Required Dependencies
-# Python 3.9+ required
+# CDE Analyzer - Required (runtime) Dependencies
+#
+# Python >= 3.10 required.
+#   Reason: the hard dependency cde-lib (below) declares requires-python
+#   ">=3.10". Claiming 3.9 here would be false — pip cannot resolve cde-lib
+#   on 3.9. (pyproject.toml [project].requires-python is the authoritative
+#   copy; keep them in sync.)
+#
+# Constraint policy (see per-line reasons):
+#   - LOWER bounds are set to the OLDEST version that provides an API/feature
+#     actually used, or a security floor — never higher "just because".
+#   - UPPER caps are added ONLY for majors with a known/expected breaking
+#     change (pydantic 3, pandas 3, spacy 4). Speculative caps are omitted so
+#     this package does not needlessly constrain a larger consuming venv.
+#   - pyproject.toml carries the same constraints; this file mirrors them.
 
-# Core Data Modeling and Validation
-pydantic>=2.11.0,<3.0.0
+# ---------------------------------------------------------------------------
+# Internal sibling library
+# ---------------------------------------------------------------------------
+# cde-lib (>=0.2.0) is a REQUIRED runtime dependency: it provides the canonical
+# CDE Pydantic schema (cde_lib.schema), which the local CDE_Schema/ package is a
+# thin re-export shim over (ADR-E004). Floor 0.2.0 = the release where the
+# schema was relocated into cde_lib.
+#
+# It is intentionally NOT an active line here because it is a private sibling
+# package (not on PyPI); listing it would break `pip install -r requirements.txt`.
+# The authoritative constraint lives in pyproject.toml [project].dependencies.
+# Install it editable from the sibling checkout, e.g.:
+#   pip install -e ../cde_lib
+# (cde-lib also raises the effective requires-python to >=3.10.)
 
+# ---------------------------------------------------------------------------
+# Core data modeling / validation
+# ---------------------------------------------------------------------------
+# Code uses pydantic v2 API exclusively: model_validate(), model_dump(mode=...),
+# BaseModel, ValidationError. All present since 2.0.0, so 2.0.0 is the honest
+# floor (the previous 2.11.0 floor was over-restrictive — no 2.11-only API is
+# used, and it would needlessly conflict with cde-lib's own >=2.0.0).
+# Cap <3.0.0 RETAINED: pydantic majors break (v1->v2 precedent); revisit/test
+# when v3 ships rather than assuming compatibility.
+pydantic>=2.0.0,<3.0.0
+
+# ---------------------------------------------------------------------------
 # Natural Language Processing
-# Used for lemmatization in phrase extraction and FASTA generation
-spacy>=3.8.0,<4.0.0
-nltk>=3.9.0,<4.0.0
+# ---------------------------------------------------------------------------
+# Lemmatization / semantic grouping. Only basic API used: spacy.load(),
+# standard Doc/token/POS pipeline. Floor 3.7.0 is comfortably old enough.
+# Cap <4.0.0 REQUIRED: en_core_web_sm models are version-locked to the spaCy
+# minor series and the v4 pipeline API is not backward compatible.
+spacy>=3.7.0,<4.0.0
 
-# Data Processing
-# Used in phrase_builder for data manipulation
+# Tokenizers / lemmatizers / wordnet / stopwords (stable, decade-old API).
+# Floor 3.9.0 is a SECURITY floor, not a feature floor: 3.9 fixes
+# CVE-2024-39705 (arbitrary code execution via unsafe unpickling). No upper
+# cap: nltk 3.x is extremely stable and there is no announced 4.0.
+nltk>=3.9.0
+
+# ---------------------------------------------------------------------------
+# Data processing
+# ---------------------------------------------------------------------------
+# Basic DataFrame construction/manipulation in the phrase k-mer builder.
+# Floor 2.0.0 aligns with cde-lib and the numpy-2 era (numpy 2.x installed and
+# working). Cap <3.0.0 RETAINED (soft): pandas 3.0 changes defaults
+# (copy-on-write, PyArrow-backed strings) which can alter behavior.
 pandas>=2.0.0,<3.0.0
 
-# YAML Support
-# Used in html_stripper for YAML output format
-PyYAML>=6.0.0,<7.0.0
+# ---------------------------------------------------------------------------
+# YAML support (workflow configs, pattern/ledger I/O)
+# ---------------------------------------------------------------------------
+# Only safe_load/safe_dump used. Floor 6.0.0 = the release that made the
+# Loader argument explicit (and is the current ABI era). No upper cap: a
+# breaking PyYAML 7 is not on the horizon, so a cap would only create
+# resolution friction for consumers.
+PyYAML>=6.0.0
 
-# Optional: Visualization
-# Used for k-mer frequency histogram generation (--histograms flag)
-# Install with: pip install matplotlib
-# matplotlib>=3.7.0,<4.0.0
+# ---------------------------------------------------------------------------
+# HTML handling
+# ---------------------------------------------------------------------------
+# utils/html.py imports MarkupResemblesLocatorWarning, which requires
+# bs4 >= 4.11. Floor pinned to 4.12.0 (safe, well within that era; 4.14
+# installed and working). No upper cap: bs4 4.x is API-stable.
+beautifulsoup4>=4.12.0
 
-# Note: Standard library dependencies (not listed):
-# - argparse (CLI argument parsing)
-# - json (JSON serialization/deserialization)
-# - csv (CSV/TSV output generation)
-# - re (regular expressions)
-# - collections (defaultdict, Counter)
-# - logging (application logging)
-# - pathlib (path handling)
-# - typing (type hints)
-# - importlib (dynamic module loading)
-# - unicodedata (text normalization)
-# - warnings (warning management)
-# - multiprocessing (parallel processing in phrase_builder)
+# Parser backend for beautifulsoup4. Only used via bs4, no direct lxml API.
+# Floor 4.9.0 is conservative; lxml 6.x is installed and working, so no upper
+# cap — any modern lxml is fine.
+lxml>=4.9.0
+
+# ---------------------------------------------------------------------------
+# Console output
+# ---------------------------------------------------------------------------
+# Only rich.console.Console and rich.syntax.Syntax — long-stable API.
+# Floor 13.0.0 is generous; rich 14.x installed and working. No upper cap.
+rich>=13.0.0
+
+# ---------------------------------------------------------------------------
+# Word frequency (Zipf-based curation triage)
+# ---------------------------------------------------------------------------
+# Only wordfreq.zipf_frequency. Floor 3.0.0 = current data/API era. No upper
+# cap: there is no wordfreq 4.0, so a speculative cap would only constrain
+# downstream venvs.
+wordfreq>=3.0.0
+
+# ---------------------------------------------------------------------------
+# Optional (NOT installed by default)
+# ---------------------------------------------------------------------------
+# Visualization for k-mer frequency histograms (--histograms flag). Imported
+# lazily inside utils/histogram_generator.py; the feature is skipped if absent.
+#   pip install "matplotlib>=3.7.0"
+# matplotlib>=3.7.0
+
+# Note: standard-library deps (argparse, json, csv, re, collections, logging,
+# pathlib, typing, importlib, unicodedata, warnings, multiprocessing) are not
+# listed. numpy is pulled in transitively via pandas/cde-lib (numpy 2.x works;
+# no direct constraint needed).

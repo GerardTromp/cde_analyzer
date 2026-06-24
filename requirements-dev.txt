@@ -1,9 +1,15 @@
 # CDE Analyzer - Development Dependencies
+#
+# These are tooling-only and are NOT install_requires, so their floors do not
+# propagate to venvs that consume cde-analyzer. They are minimum-feature floors
+# (oldest version that works), none are capped — dev tooling should track latest.
 
 # Include all runtime dependencies
 -r requirements.txt
 
 # Testing
+# pytest floor is REQUIRED to be >=8.0: pyproject [tool.pytest.ini_options]
+# sets minversion = "8.0", so pytest itself refuses to run on <8.0.
 pytest>=8.0.0
 pytest-cov>=4.1.0
 pytest-mock>=3.12.0

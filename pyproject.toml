@@ -4,10 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cde-analyzer"
-version = "1.6.0"
+version = "1.6.1"
 description = "A Python framework for analyzing and extracting data from the NLM Common Data Elements Repository"
 readme = "README.md"
-requires-python = ">=3.9"
+# >=3.10 is forced by the hard cde-lib dependency (requires-python ">=3.10").
+# Do NOT lower to 3.9: pip cannot resolve cde-lib on 3.9.
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Gerard Tromp", email = "gerard.tromp@example.com"}
@@ -32,7 +34,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -43,20 +44,33 @@ classifiers = [
     "Typing :: Typed",
 ]
 
+# Constraint rationale lives in requirements.txt (kept in sync with this list).
+# Policy: lower bounds = oldest version providing a used API / a security floor;
+# upper caps ONLY for majors with known/expected breaks (pydantic 3, pandas 3,
+# spacy 4). Speculative caps are omitted so consuming venvs are not constrained.
 dependencies = [
+    # v2 API only (model_validate/model_dump). Floor 2.0.0 (not 2.11); cap = v3.
     "pydantic>=2.0.0,<3.0.0",
     # CDE Pydantic schema now lives in cde_lib.schema (ADR-E004); the
-    # CDE_Schema/ package is a thin re-export shim. Now a required dependency
-    # (previously optional, for browser-noise suppression only).
+    # CDE_Schema/ package is a thin re-export shim. Required (was optional).
+    # Also raises the effective requires-python to >=3.10 (see above).
     "cde-lib>=0.2.0",
+    # Cap required: en_core_web_sm models are locked to the spaCy minor series.
     "spacy>=3.7.0,<4.0.0",
-    "nltk>=3.8.0,<4.0.0",
+    # Floor 3.9.0 is a SECURITY floor (CVE-2024-39705). No cap: 3.x is stable.
+    "nltk>=3.9.0",
+    # Cap (soft): pandas 3.0 changes defaults (copy-on-write, PyArrow strings).
     "pandas>=2.0.0,<3.0.0",
-    "PyYAML>=6.0.0,<7.0.0",
+    # safe_load/safe_dump only; no <7 cap (no breaking PyYAML 7 on the horizon).
+    "PyYAML>=6.0.0",
+    # Floor justified by MarkupResemblesLocatorWarning import (>=4.11).
     "beautifulsoup4>=4.12.0",
+    # bs4 parser backend only; lxml 6.x works, so no cap.
     "lxml>=4.9.0",
+    # Console/Syntax only; rich 14.x works, so no cap.
     "rich>=13.0.0",
-    "wordfreq>=3.0.0,<4.0.0",
+    # zipf_frequency only; no <4 cap (no wordfreq 4.0 exists).
+    "wordfreq>=3.0.0",
 ]
 
 [project.optional-dependencies]
@@ -73,11 +87,13 @@ docs = [
     "sphinx>=7.2.0",
     "sphinx-rtd-theme>=2.0.0",
 ]
-# Optional integration with sibling cde_lib for browser launch noise
-# suppression (WSL/headless environments).  All call sites use guarded
-# try-import so this is genuinely optional.
+# Retained for backward compatibility only. cde-lib is now a *required*
+# dependency (>=0.2.0, see [project].dependencies), so the browser-noise
+# suppression it also provides is always available — installing this extra is
+# now a no-op. Kept so existing `pip install cde-analyzer[quiet-browser]`
+# invocations don't error.
 quiet-browser = [
-    "cde-lib>=0.1.0",
+    "cde-lib>=0.2.0",
 ]
 
 [project.urls]
@@ -115,7 +131,7 @@ exclude = [
 # Black configuration
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312", "py313"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -128,7 +144,7 @@ extend-exclude = '''
 # Ruff configuration
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -162,7 +178,7 @@ exclude = [
 
 # MyPy configuration
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false  # Gradually enable

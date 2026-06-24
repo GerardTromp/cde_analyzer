@@ -31,7 +31,7 @@ Project aims to parse and analyze Common Data Elements (CDEs) hosted by the Nati
 
 ## Current Status
 
-**Version**: 1.6.0 (2026-06-15) — CDE Pydantic schema relocated to cde_lib.schema (ADR-E004); CDE_Schema/ is now a re-export shim, cde-lib a required dep
+**Version**: 1.6.1 (2026-06-24) — dependency-metadata correctness: requires-python raised to >=3.10 (forced by cde-lib), constraint floors/caps rationalized + documented. (1.6.0: CDE Pydantic schema relocated to cde_lib.schema, ADR-E004; CDE_Schema/ a re-export shim, cde-lib a required dep.)
 
 **Recent Work**:
 - **v1.0.0**: Config-driven pipeline scaffold, action refactoring, reference ledger, Production/Stable
